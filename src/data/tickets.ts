@@ -17,7 +17,32 @@ export const tickets: Ticket[] = [
     data: "17/02/2026 08:30",
     progressoSla: 72,
     progressoTarefa: 15,
-    status: "todo"
+    status: "todo",
+    descricao: "Cliente reportou oscilação e indisponibilidade desde a madrugada.",
+    contato: "joao@netmitt.com",
+    tipoTicket: "Incidente",
+    categoria: "Conectividade",
+    mesaTrabalho: "NOC",
+    operador: "Marciano",
+    dataCriacao: "17/02/2026 06:30",
+    slaResposta: "17/02/2026 07:00",
+    slaSolucao: "17/02/2026 12:00",
+    interacoes: [
+      {
+        id: "2391-1",
+        autor: "Marciano",
+        tempo: "há 2 dias",
+        mensagem: "Validação inicial concluída. Estamos verificando enlace principal.",
+        corBorda: "azul"
+      },
+      {
+        id: "2391-2",
+        autor: "NOC",
+        tempo: "há 1 dia",
+        mensagem: "Detectada degradação em interface upstream. Escalado para campo.",
+        corBorda: "verde"
+      }
+    ]
   },
   {
     id: 2389,
@@ -28,7 +53,16 @@ export const tickets: Ticket[] = [
     data: "16/02/2026 17:44",
     progressoSla: 45,
     progressoTarefa: 25,
-    status: "todo"
+    status: "todo",
+    contato: "lucas@lpinternet.com",
+    tipoTicket: "Suporte",
+    categoria: "PPPoE",
+    mesaTrabalho: "Incidentes",
+    operador: "Cynthia",
+    dataCriacao: "16/02/2026 17:10",
+    slaResposta: "16/02/2026 18:00",
+    slaSolucao: "17/02/2026 13:00",
+    interacoes: []
   },
   {
     id: 2388,
@@ -39,7 +73,13 @@ export const tickets: Ticket[] = [
     data: "16/02/2026 16:10",
     progressoSla: 20,
     progressoTarefa: 10,
-    status: "todo"
+    status: "todo",
+    contato: "cynthia@acem.com",
+    tipoTicket: "Ativação",
+    categoria: "Projeto",
+    mesaTrabalho: "Implantação",
+    operador: "Marciano",
+    interacoes: []
   },
   {
     id: 2384,
@@ -72,7 +112,39 @@ export const tickets: Ticket[] = [
     data: "14/02/2026 15:59",
     progressoSla: 50,
     progressoTarefa: 50,
-    status: "paused"
+    status: "paused",
+    descricao: "Boa tarde será liberado um link IP para parceiro SUL CONNECT.",
+    contato: "noc@lpinternet.com.br",
+    tipoTicket: "Incidente",
+    categoria: "Roteamento",
+    mesaTrabalho: "Incidentes",
+    operador: "Marciano",
+    dataCriacao: "14/02/2026 15:59",
+    slaResposta: "16/02/2026 08:30",
+    slaSolucao: "20/02/2026 16:00",
+    interacoes: [
+      {
+        id: "2381-1",
+        autor: "Marciano",
+        tempo: "há 2 dias",
+        mensagem: "ASN validado. Aguardando retorno do cliente para janela de mudança.",
+        corBorda: "azul"
+      },
+      {
+        id: "2381-2",
+        autor: "Marciano",
+        tempo: "há 2 dias",
+        mensagem: "Atendimento interno: revisar prefixos e rota preferencial.",
+        corBorda: "verde"
+      },
+      {
+        id: "2381-3",
+        autor: "Fabrício LP Internet",
+        tempo: "há 3 dias",
+        mensagem: "Solicitação inicial enviada para subir link em mesma porta com rede neutra.",
+        corBorda: "vermelho"
+      }
+    ]
   },
   {
     id: 2334,

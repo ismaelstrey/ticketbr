@@ -21,10 +21,12 @@ import {
   FiWifi,
   FiZap
 } from "@/components/icons";
+import TicketDetailsView from "@/components/TicketDetailsView";
 import { columns, tickets as initialTickets } from "@/data/tickets";
 import { useTicketDragDrop } from "@/hooks/useTicketDragDrop";
+import { useTicketEditor } from "@/hooks/useTicketEditor";
 import { useTicketFilters } from "@/hooks/useTicketFilters";
-import { Ticket, TicketPriority, TicketStatus } from "@/types/ticket";
+import { Ticket, TicketPriority } from "@/types/ticket";
 
 function PriorityBadge({ priority }: { priority: TicketPriority }) {
   const cssClass =
@@ -36,11 +38,13 @@ function PriorityBadge({ priority }: { priority: TicketPriority }) {
 function TicketCard({
   ticket,
   onDragStart,
-  onDragEnd
+  onDragEnd,
+  onOpen
 }: {
   ticket: Ticket;
   onDragStart: (event: DragEvent<HTMLElement>, ticketId: number) => void;
   onDragEnd: () => void;
+  onOpen: (ticketId: number) => void;
 }) {
   return (
     <article
@@ -49,6 +53,7 @@ function TicketCard({
       onDragStart={(event) => onDragStart(event, ticket.id)}
       onDragEnd={onDragEnd}
       role="button"
+      onClick={() => onOpen(ticket.id)}
       aria-label={`Ticket ${ticket.id}`}
     >
       <p className="ticket-id">
@@ -107,6 +112,7 @@ const columnIcons = {
 export default function KanbanBoard() {
   const {
     tickets,
+    setTickets,
     dragOverColumn,
     onTicketDragStart,
     onTicketDragEnd,
@@ -114,6 +120,8 @@ export default function KanbanBoard() {
     onColumnDrop,
     setDragOverColumn
   } = useTicketDragDrop(initialTickets);
+
+  const { selectedTicket, openTicket, closeTicket, updateSelectedTicket } = useTicketEditor(tickets, setTickets);
 
   const {
     filteredTickets,
@@ -139,105 +147,117 @@ export default function KanbanBoard() {
       </aside>
 
       <section className="content">
-        <header className="topbar">
-          <div className="search-wrap">
-            <FiSearch aria-hidden="true" />
-            <input
-              className="search"
-              placeholder="Buscar ticket, empresa ou assunto"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-            />
-          </div>
-          <div className="actions">
-            {actionButtons.map(({ label, icon: Icon }) => (
-              <button key={label} className="pill-button" type="button">
-                <Icon aria-hidden="true" />
-                {label}
-              </button>
-            ))}
-          </div>
-        </header>
+        {selectedTicket ? (
+          <TicketDetailsView
+            ticket={selectedTicket}
+            onBack={closeTicket}
+            onChange={updateSelectedTicket}
+            onSave={closeTicket}
+          />
+        ) : (
+          <>
+            <header className="topbar">
+              <div className="search-wrap">
+                <FiSearch aria-hidden="true" />
+                <input
+                  className="search"
+                  placeholder="Buscar ticket, empresa ou assunto"
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                />
+              </div>
+              <div className="actions">
+                {actionButtons.map(({ label, icon: Icon }) => (
+                  <button key={label} className="pill-button" type="button">
+                    <Icon aria-hidden="true" />
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </header>
 
-        <section className="kpis">
-          <article>
-            <p>Tickets visíveis</p>
-            <strong>{filteredTickets.length}</strong>
-          </article>
-          <article>
-            <p>Em aberto</p>
-            <strong>{totalOpen}</strong>
-          </article>
-          <article>
-            <p>Média SLA</p>
-            <strong>{avgSla}%</strong>
-          </article>
-        </section>
-
-        <div className="filters-line">
-          <h1>Tickets • Listagem de Tickets</h1>
-          <div className="filter-group">
-            <select value={priority} onChange={(event) => setPriority(event.target.value as typeof priority)}>
-              <option value="all">Prioridade: Todas</option>
-              <option value="Alta">Alta</option>
-              <option value="Média">Média</option>
-              <option value="Sem prioridade">Sem prioridade</option>
-            </select>
-            <select value={status} onChange={(event) => setStatus(event.target.value as typeof status)}>
-              <option value="all">Status: Todos</option>
-              <option value="todo">A fazer</option>
-              <option value="doing">Atendendo</option>
-              <option value="paused">Pausado</option>
-              <option value="done">Finalizado</option>
-            </select>
-          </div>
-        </div>
-
-        <section className="kanban-grid">
-          {columns.map((column) => {
-            const columnTickets = filteredTickets.filter((ticket) => ticket.status === column.key);
-            const ColumnIcon = columnIcons[column.key];
-
-            return (
-              <article
-                key={column.key}
-                className={`kanban-column${dragOverColumn === column.key ? " drag-over" : ""}`}
-                onDragOver={(event) => onColumnDragOver(event, column.key)}
-                onDragLeave={(event) => {
-                  if (event.currentTarget === event.target) {
-                    setDragOverColumn(null);
-                  }
-                }}
-                onDrop={(event) => onColumnDrop(event, column.key)}
-              >
-                <header className="column-header" style={{ backgroundColor: column.color }}>
-                  <div>
-                    <h2>{column.title}</h2>
-                    <p>{columnTickets.length}</p>
-                  </div>
-                  <span className="column-icon">
-                    <ColumnIcon aria-hidden="true" />
-                  </span>
-                </header>
-
-                <div className="column-cards">
-                  {columnTickets.length > 0 ? (
-                    columnTickets.map((ticket) => (
-                      <TicketCard
-                        key={ticket.id}
-                        ticket={ticket}
-                        onDragStart={onTicketDragStart}
-                        onDragEnd={onTicketDragEnd}
-                      />
-                    ))
-                  ) : (
-                    <p className="empty-column">Sem tickets para os filtros selecionados.</p>
-                  )}
-                </div>
+            <section className="kpis">
+              <article>
+                <p>Tickets visíveis</p>
+                <strong>{filteredTickets.length}</strong>
               </article>
-            );
-          })}
-        </section>
+              <article>
+                <p>Em aberto</p>
+                <strong>{totalOpen}</strong>
+              </article>
+              <article>
+                <p>Média SLA</p>
+                <strong>{avgSla}%</strong>
+              </article>
+            </section>
+
+            <div className="filters-line">
+              <h1>Tickets • Listagem de Tickets</h1>
+              <div className="filter-group">
+                <select value={priority} onChange={(event) => setPriority(event.target.value as typeof priority)}>
+                  <option value="all">Prioridade: Todas</option>
+                  <option value="Alta">Alta</option>
+                  <option value="Média">Média</option>
+                  <option value="Sem prioridade">Sem prioridade</option>
+                </select>
+                <select value={status} onChange={(event) => setStatus(event.target.value as typeof status)}>
+                  <option value="all">Status: Todos</option>
+                  <option value="todo">A fazer</option>
+                  <option value="doing">Atendendo</option>
+                  <option value="paused">Pausado</option>
+                  <option value="done">Finalizado</option>
+                </select>
+              </div>
+            </div>
+
+            <section className="kanban-grid">
+              {columns.map((column) => {
+                const columnTickets = filteredTickets.filter((ticket) => ticket.status === column.key);
+                const ColumnIcon = columnIcons[column.key];
+
+                return (
+                  <article
+                    key={column.key}
+                    className={`kanban-column${dragOverColumn === column.key ? " drag-over" : ""}`}
+                    onDragOver={(event) => onColumnDragOver(event, column.key)}
+                    onDragLeave={(event) => {
+                      if (event.currentTarget === event.target) {
+                        setDragOverColumn(null);
+                      }
+                    }}
+                    onDrop={(event) => onColumnDrop(event, column.key)}
+                  >
+                    <header className="column-header" style={{ backgroundColor: column.color }}>
+                      <div>
+                        <h2>{column.title}</h2>
+                        <p>{columnTickets.length}</p>
+                      </div>
+                      <span className="column-icon">
+                        <ColumnIcon aria-hidden="true" />
+                      </span>
+                    </header>
+
+                    <div className="column-cards">
+                      {columnTickets.length > 0 ? (
+                        columnTickets.map((ticket) => (
+                          <TicketCard
+                            key={ticket.id}
+                            ticket={ticket}
+                            onDragStart={onTicketDragStart}
+                            onDragEnd={onTicketDragEnd}
+                            onOpen={openTicket}
+                          />
+                        ))
+                      ) : (
+                        <p className="empty-column">Sem tickets para os filtros selecionados.</p>
+                      )}
+                    </div>
+                  </article>
+                );
+              })}
+            </section>
+          </>
+        )}
       </section>
     </main>
   );

@@ -1,6 +1,14 @@
 export type TicketStatus = "todo" | "doing" | "paused" | "done";
 export type TicketPriority = "Alta" | "Média" | "Sem prioridade";
 
+export interface TicketInteraction {
+  id: string;
+  autor: string;
+  tempo: string;
+  mensagem: string;
+  corBorda?: "azul" | "verde" | "vermelho";
+}
+
 export interface Ticket {
   id: number;
   empresa: string;
@@ -11,6 +19,16 @@ export interface Ticket {
   progressoSla: number;
   progressoTarefa: number;
   status: TicketStatus;
+  descricao?: string;
+  contato?: string;
+  tipoTicket?: string;
+  categoria?: string;
+  mesaTrabalho?: string;
+  operador?: string;
+  dataCriacao?: string;
+  slaResposta?: string;
+  slaSolucao?: string;
+  interacoes?: TicketInteraction[];
 }
 
 export interface KanbanColumn {
