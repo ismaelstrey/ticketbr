@@ -28,6 +28,7 @@ export interface Ticket {
   dataCriacao?: string;
   slaResposta?: string;
   slaSolucao?: string;
+  pauseReason?: string;
   interacoes?: TicketInteraction[];
 }
 

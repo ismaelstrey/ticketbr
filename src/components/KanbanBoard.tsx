@@ -118,7 +118,12 @@ export default function KanbanBoard() {
     onTicketDragEnd,
     onColumnDragOver,
     onColumnDrop,
-    setDragOverColumn
+    setDragOverColumn,
+    pauseModalTicket,
+    pauseReason,
+    setPauseReason,
+    closePauseModal,
+    confirmPause
   } = useTicketDragDrop(initialTickets);
 
   const { selectedTicket, openTicket, closeTicket, updateSelectedTicket } = useTicketEditor(tickets, setTickets);
@@ -258,6 +263,45 @@ export default function KanbanBoard() {
             </section>
           </>
         )}
+
+        {pauseModalTicket ? (
+          <div className="pause-modal-overlay" role="dialog" aria-modal="true">
+            <div className="pause-modal">
+              <header>
+                <h3>
+                  Pausar ticket #{pauseModalTicket.id} - {pauseModalTicket.assunto}
+                </h3>
+                <button type="button" className="ghost-button" onClick={closePauseModal}>
+                  Fechar
+                </button>
+              </header>
+
+              <p className="pause-modal-subtitle">
+                Informe o motivo da pausa para registrar no ticket antes de mover para a coluna Pausado.
+              </p>
+
+              <textarea
+                placeholder="Descreva o motivo da pausa do ticket..."
+                value={pauseReason}
+                onChange={(event) => setPauseReason(event.target.value)}
+              />
+
+              <div className="pause-modal-actions">
+                <button type="button" className="ghost-button" onClick={closePauseModal}>
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  className="save-button"
+                  onClick={confirmPause}
+                  disabled={!pauseReason.trim()}
+                >
+                  Confirmar pausa
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : null}
       </section>
     </main>
   );

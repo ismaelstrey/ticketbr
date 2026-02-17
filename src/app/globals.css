@@ -523,3 +523,63 @@ progress::-webkit-progress-value {
     grid-template-columns: 1fr;
   }
 }
+
+.pause-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(19, 24, 39, 0.45);
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  z-index: 40;
+}
+
+.pause-modal {
+  width: min(760px, 100%);
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.2);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.pause-modal header {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.8rem;
+  align-items: center;
+}
+
+.pause-modal h3 {
+  margin: 0;
+  color: #111827;
+  font-size: 1.05rem;
+}
+
+.pause-modal-subtitle {
+  margin: 0;
+  color: #4b5563;
+  font-size: 0.92rem;
+}
+
+.pause-modal textarea {
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  min-height: 170px;
+  padding: 0.65rem;
+  font: inherit;
+  resize: vertical;
+}
+
+.pause-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+}
+
+.save-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

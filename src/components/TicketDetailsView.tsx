@@ -134,6 +134,15 @@ export default function TicketDetailsView({
             <textarea value={ticket.descricao ?? ""} onChange={(event) => onChange({ descricao: event.target.value })} />
           </label>
 
+          <label>
+            Motivo da pausa
+            <textarea
+              value={ticket.pauseReason ?? ""}
+              onChange={(event) => onChange({ pauseReason: event.target.value })}
+              placeholder="Descreva o motivo quando o ticket estiver pausado"
+            />
+          </label>
+
           <p className="updated-at">
             <FiClock aria-hidden="true" /> Última atualização: {ticket.data}
           </p>
