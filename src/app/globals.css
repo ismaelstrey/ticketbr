@@ -42,6 +42,9 @@ body {
   border: 1px solid #5f6c84;
   border-radius: 8px;
   background: transparent;
+  color: #b9c4d6;
+  display: grid;
+  place-items: center;
 }
 
 .content {
@@ -56,12 +59,26 @@ body {
   margin-bottom: 1rem;
 }
 
-.search {
+.search-wrap {
   border: 1px solid #ddd;
   border-radius: 999px;
-  padding: 0.7rem 1rem;
   background: #fff;
   min-width: 280px;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0 0.85rem;
+  color: #7b7b7b;
+}
+
+.search {
+  border: none;
+  border-radius: 999px;
+  padding: 0.7rem 0.15rem;
+  background: transparent;
+  min-width: 220px;
+  width: 100%;
+  outline: none;
 }
 
 .actions {
@@ -77,6 +94,9 @@ body {
   font-weight: 700;
   color: white;
   background: linear-gradient(135deg, #4285ff, #3f62d4);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
 }
 
 .pill-button:nth-child(2) {
@@ -170,6 +190,15 @@ body {
   text-transform: uppercase;
 }
 
+.column-icon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+}
+
 .column-cards {
   margin-top: 0.8rem;
   display: flex;
@@ -188,6 +217,9 @@ body {
   color: #26a8d9;
   font-weight: 800;
   margin: 0 0 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
 }
 
 .empresa {
@@ -200,6 +232,9 @@ body {
 .assunto {
   margin: 0.25rem 0;
   color: #555;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
 }
 
 .meta {
@@ -210,6 +245,12 @@ body {
   gap: 0.6rem;
   font-size: 0.8rem;
   color: #666;
+}
+
+.meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
 }
 
 .priority {
@@ -287,6 +328,11 @@ progress::-webkit-progress-value {
 
   .filter-group {
     flex-direction: column;
+  }
+
+  .search-wrap {
+    width: 100%;
+    min-width: 0;
   }
 
   .search {

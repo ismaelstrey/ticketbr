@@ -1,6 +1,26 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import {
+  FiAlertCircle,
+  FiBookOpen,
+  FiCheckCircle,
+  FiClock,
+  FiFilter,
+  FiGrid,
+  FiHash,
+  FiHelpCircle,
+  FiHome,
+  FiList,
+  FiPauseCircle,
+  FiSearch,
+  FiSettings,
+  FiTool,
+  FiUser,
+  FiUsers,
+  FiWifi,
+  FiZap
+} from "react-icons/fi";
 import { columns, tickets } from "@/data/tickets";
 import { Ticket, TicketPriority, TicketStatus } from "@/types/ticket";
 
@@ -14,13 +34,21 @@ function PriorityBadge({ priority }: { priority: TicketPriority }) {
 function TicketCard({ ticket }: { ticket: Ticket }) {
   return (
     <article className="ticket-card">
-      <p className="ticket-id">#{ticket.id}</p>
+      <p className="ticket-id">
+        <FiHash aria-hidden="true" /> {ticket.id}
+      </p>
       <p className="empresa">{ticket.empresa}</p>
-      <p className="solicitante">{ticket.solicitante}</p>
-      <p className="assunto">{ticket.assunto}</p>
+      <p className="solicitante">
+        <FiUser aria-hidden="true" /> {ticket.solicitante}
+      </p>
+      <p className="assunto">
+        <FiTool aria-hidden="true" /> {ticket.assunto}
+      </p>
       <div className="meta">
         <PriorityBadge priority={ticket.prioridade} />
-        <span>{ticket.data}</span>
+        <span>
+          <FiClock aria-hidden="true" /> {ticket.data}
+        </span>
       </div>
       <div className="progress-row">
         <progress max={100} value={ticket.progressoSla} />
@@ -29,6 +57,35 @@ function TicketCard({ ticket }: { ticket: Ticket }) {
     </article>
   );
 }
+
+const menuIcons = [
+  FiHome,
+  FiSearch,
+  FiGrid,
+  FiList,
+  FiUsers,
+  FiBookOpen,
+  FiWifi,
+  FiZap,
+  FiSettings,
+  FiHelpCircle,
+  FiAlertCircle
+];
+
+const actionButtons = [
+  { label: "Ticket", icon: FiTool },
+  { label: "Tarefa", icon: FiCheckCircle },
+  { label: "Filtros", icon: FiFilter },
+  { label: "Ajuda", icon: FiHelpCircle },
+  { label: "Universidade", icon: FiBookOpen }
+];
+
+const columnIcons = {
+  todo: FiAlertCircle,
+  doing: FiZap,
+  paused: FiPauseCircle,
+  done: FiCheckCircle
+} as const;
 
 export default function KanbanBoard() {
   const [query, setQuery] = useState("");
@@ -56,23 +113,29 @@ export default function KanbanBoard() {
     <main className="app-shell">
       <aside className="sidebar">
         <div className="logo">m</div>
-        {Array.from({ length: 11 }).map((_, index) => (
-          <button key={index} aria-label={`menu-${index + 1}`} className="menu-icon" />
+        {menuIcons.map((Icon, index) => (
+          <button key={index} aria-label={`menu-${index + 1}`} className="menu-icon" type="button">
+            <Icon aria-hidden="true" />
+          </button>
         ))}
       </aside>
 
       <section className="content">
         <header className="topbar">
-          <input
-            className="search"
-            placeholder="Buscar ticket, empresa ou assunto"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-          />
+          <div className="search-wrap">
+            <FiSearch aria-hidden="true" />
+            <input
+              className="search"
+              placeholder="Buscar ticket, empresa ou assunto"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+            />
+          </div>
           <div className="actions">
-            {["Ticket", "Tarefa", "Filtros", "Ajuda", "Universidade"].map((item) => (
-              <button key={item} className="pill-button" type="button">
-                {item}
+            {actionButtons.map(({ label, icon: Icon }) => (
+              <button key={label} className="pill-button" type="button">
+                <Icon aria-hidden="true" />
+                {label}
               </button>
             ))}
           </div>
@@ -115,6 +178,7 @@ export default function KanbanBoard() {
         <section className="kanban-grid">
           {columns.map((column) => {
             const columnTickets = filteredTickets.filter((ticket) => ticket.status === column.key);
+            const ColumnIcon = columnIcons[column.key];
 
             return (
               <article key={column.key} className="kanban-column">
@@ -123,7 +187,9 @@ export default function KanbanBoard() {
                     <h2>{column.title}</h2>
                     <p>{columnTickets.length}</p>
                   </div>
-                  <span className="column-icon">●</span>
+                  <span className="column-icon">
+                    <ColumnIcon aria-hidden="true" />
+                  </span>
                 </header>
 
                 <div className="column-cards">
