@@ -173,6 +173,13 @@ body {
   border-radius: 12px;
   padding: 0.6rem;
   min-height: 500px;
+  border: 2px dashed transparent;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.kanban-column.drag-over {
+  border-color: #5b8cff;
+  background: #e5ebff;
 }
 
 .column-header {
@@ -211,6 +218,11 @@ body {
   border-radius: 12px;
   padding: 0.9rem;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+  cursor: grab;
+}
+
+.ticket-card:active {
+  cursor: grabbing;
 }
 
 .ticket-id {

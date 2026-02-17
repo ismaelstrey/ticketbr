@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import type { DragEvent } from "react";
 import {
   FiAlertCircle,
   FiBookOpen,
@@ -20,8 +20,10 @@ import {
   FiUsers,
   FiWifi,
   FiZap
-} from "react-icons/fi";
-import { columns, tickets } from "@/data/tickets";
+} from "@/components/icons";
+import { columns, tickets as initialTickets } from "@/data/tickets";
+import { useTicketDragDrop } from "@/hooks/useTicketDragDrop";
+import { useTicketFilters } from "@/hooks/useTicketFilters";
 import { Ticket, TicketPriority, TicketStatus } from "@/types/ticket";
 
 function PriorityBadge({ priority }: { priority: TicketPriority }) {
@@ -31,9 +33,24 @@ function PriorityBadge({ priority }: { priority: TicketPriority }) {
   return <span className={cssClass}>{priority}</span>;
 }
 
-function TicketCard({ ticket }: { ticket: Ticket }) {
+function TicketCard({
+  ticket,
+  onDragStart,
+  onDragEnd
+}: {
+  ticket: Ticket;
+  onDragStart: (event: DragEvent<HTMLElement>, ticketId: number) => void;
+  onDragEnd: () => void;
+}) {
   return (
-    <article className="ticket-card">
+    <article
+      className="ticket-card"
+      draggable
+      onDragStart={(event) => onDragStart(event, ticket.id)}
+      onDragEnd={onDragEnd}
+      role="button"
+      aria-label={`Ticket ${ticket.id}`}
+    >
       <p className="ticket-id">
         <FiHash aria-hidden="true" /> {ticket.id}
       </p>
@@ -88,26 +105,27 @@ const columnIcons = {
 } as const;
 
 export default function KanbanBoard() {
-  const [query, setQuery] = useState("");
-  const [priority, setPriority] = useState<"all" | TicketPriority>("all");
-  const [status, setStatus] = useState<"all" | TicketStatus>("all");
+  const {
+    tickets,
+    dragOverColumn,
+    onTicketDragStart,
+    onTicketDragEnd,
+    onColumnDragOver,
+    onColumnDrop,
+    setDragOverColumn
+  } = useTicketDragDrop(initialTickets);
 
-  const filteredTickets = useMemo(() => {
-    return tickets.filter((ticket) => {
-      const haystack = `${ticket.id} ${ticket.empresa} ${ticket.solicitante} ${ticket.assunto}`.toLowerCase();
-      const matchesQuery = haystack.includes(query.toLowerCase());
-      const matchesPriority = priority === "all" || ticket.prioridade === priority;
-      const matchesStatus = status === "all" || ticket.status === status;
-
-      return matchesQuery && matchesPriority && matchesStatus;
-    });
-  }, [query, priority, status]);
-
-  const totalOpen = filteredTickets.filter((ticket) => ticket.status !== "done").length;
-  const avgSla =
-    filteredTickets.length === 0
-      ? 0
-      : Math.round(filteredTickets.reduce((acc, ticket) => acc + ticket.progressoSla, 0) / filteredTickets.length);
+  const {
+    filteredTickets,
+    query,
+    setQuery,
+    priority,
+    setPriority,
+    status,
+    setStatus,
+    totalOpen,
+    avgSla
+  } = useTicketFilters(tickets);
 
   return (
     <main className="app-shell">
@@ -181,7 +199,17 @@ export default function KanbanBoard() {
             const ColumnIcon = columnIcons[column.key];
 
             return (
-              <article key={column.key} className="kanban-column">
+              <article
+                key={column.key}
+                className={`kanban-column${dragOverColumn === column.key ? " drag-over" : ""}`}
+                onDragOver={(event) => onColumnDragOver(event, column.key)}
+                onDragLeave={(event) => {
+                  if (event.currentTarget === event.target) {
+                    setDragOverColumn(null);
+                  }
+                }}
+                onDrop={(event) => onColumnDrop(event, column.key)}
+              >
                 <header className="column-header" style={{ backgroundColor: column.color }}>
                   <div>
                     <h2>{column.title}</h2>
@@ -194,7 +222,14 @@ export default function KanbanBoard() {
 
                 <div className="column-cards">
                   {columnTickets.length > 0 ? (
-                    columnTickets.map((ticket) => <TicketCard key={ticket.id} ticket={ticket} />)
+                    columnTickets.map((ticket) => (
+                      <TicketCard
+                        key={ticket.id}
+                        ticket={ticket}
+                        onDragStart={onTicketDragStart}
+                        onDragEnd={onTicketDragEnd}
+                      />
+                    ))
                   ) : (
                     <p className="empty-column">Sem tickets para os filtros selecionados.</p>
                   )}
