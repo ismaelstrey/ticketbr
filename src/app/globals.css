@@ -42,6 +42,9 @@ body {
   border: 1px solid #5f6c84;
   border-radius: 8px;
   background: transparent;
+  color: #b9c4d6;
+  display: grid;
+  place-items: center;
 }
 
 .content {
@@ -56,12 +59,26 @@ body {
   margin-bottom: 1rem;
 }
 
-.search {
+.search-wrap {
   border: 1px solid #ddd;
   border-radius: 999px;
-  padding: 0.7rem 1rem;
   background: #fff;
+  min-width: 280px;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0 0.85rem;
+  color: #7b7b7b;
+}
+
+.search {
+  border: none;
+  border-radius: 999px;
+  padding: 0.7rem 0.15rem;
+  background: transparent;
   min-width: 220px;
+  width: 100%;
+  outline: none;
 }
 
 .actions {
@@ -77,6 +94,9 @@ body {
   font-weight: 700;
   color: white;
   background: linear-gradient(135deg, #4285ff, #3f62d4);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
 }
 
 .pill-button:nth-child(2) {
@@ -92,11 +112,36 @@ body {
   background: linear-gradient(135deg, #4db0ff, #2f80d9);
 }
 
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(120px, 1fr));
+  gap: 0.8rem;
+  margin-bottom: 1rem;
+}
+
+.kpis article {
+  background: #fff;
+  border-radius: 12px;
+  padding: 0.8rem 1rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+}
+
+.kpis p {
+  margin: 0;
+  color: #666;
+  font-size: 0.8rem;
+}
+
+.kpis strong {
+  font-size: 1.35rem;
+}
+
 .filters-line {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
+  gap: 0.8rem;
 }
 
 .filters-line h1 {
@@ -104,8 +149,16 @@ body {
   font-size: 1.4rem;
 }
 
-.secondary {
-  min-width: 300px;
+.filter-group {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.filter-group select {
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 0.55rem 0.7rem;
+  background: #fff;
 }
 
 .kanban-grid {
@@ -137,6 +190,15 @@ body {
   text-transform: uppercase;
 }
 
+.column-icon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+}
+
 .column-cards {
   margin-top: 0.8rem;
   display: flex;
@@ -155,6 +217,9 @@ body {
   color: #26a8d9;
   font-weight: 800;
   margin: 0 0 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
 }
 
 .empresa {
@@ -167,6 +232,9 @@ body {
 .assunto {
   margin: 0.25rem 0;
   color: #555;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
 }
 
 .meta {
@@ -177,6 +245,12 @@ body {
   gap: 0.6rem;
   font-size: 0.8rem;
   color: #666;
+}
+
+.meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
 }
 
 .priority {
@@ -201,6 +275,15 @@ body {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0.6rem;
+}
+
+.empty-column {
+  margin: 0;
+  background: #fff;
+  border-radius: 12px;
+  padding: 0.9rem;
+  color: #666;
+  font-size: 0.9rem;
 }
 
 progress {
@@ -239,7 +322,19 @@ progress::-webkit-progress-value {
     align-items: stretch;
   }
 
-  .secondary,
+  .kpis {
+    grid-template-columns: 1fr;
+  }
+
+  .filter-group {
+    flex-direction: column;
+  }
+
+  .search-wrap {
+    width: 100%;
+    min-width: 0;
+  }
+
   .search {
     width: 100%;
     min-width: 0;
