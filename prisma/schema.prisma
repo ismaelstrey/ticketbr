@@ -5,7 +5,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("NILEDB_URL")
   schemas  = ["public", "users"]
 }
 
