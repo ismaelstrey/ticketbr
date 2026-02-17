@@ -1,10 +1,12 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["multiSchema"]
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url      = env("NILEDB_URL")
+  schemas  = ["public", "users"]
 }
 
 enum TicketStatus {
@@ -12,12 +14,16 @@ enum TicketStatus {
   DOING
   PAUSED
   DONE
+
+  @@schema("public")
 }
 
 enum TicketPriority {
   HIGH
   MEDIUM
   NONE
+
+  @@schema("public")
 }
 
 enum TicketEventType {
@@ -29,48 +35,52 @@ enum TicketEventType {
   ASSIGNED
   SLA_UPDATED
   UPDATED
+
+  @@schema("public")
 }
 
 model Ticket {
-  id             String         @id @default(cuid())
-  number         Int            @unique @default(autoincrement())
-  company         String
-  requester       String
-  subject         String
-  description     String?
-  status          TicketStatus  @default(TODO)
-  priority        TicketPriority @default(NONE)
-  operator        String?
-  contact         String?
-  ticketType      String?
-  category        String?
-  workbench       String?
-  responseSlaAt   DateTime?
-  solutionSlaAt   DateTime?
-  pausedReason    String?
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
-  events          TicketEvent[]
+  id            String         @id @default(cuid())
+  number        Int            @unique @default(autoincrement())
+  company       String
+  requester     String
+  subject       String
+  description   String?
+  status        TicketStatus   @default(TODO)
+  priority      TicketPriority @default(NONE)
+  operator      String?
+  contact       String?
+  ticketType    String?
+  category      String?
+  workbench     String?
+  responseSlaAt DateTime?
+  solutionSlaAt DateTime?
+  pausedReason  String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  events        TicketEvent[]
 
   @@index([status])
   @@index([priority])
   @@index([createdAt])
+  @@schema("public")
 }
 
 model TicketEvent {
-  id           String          @id @default(cuid())
-  ticketId      String
-  ticket        Ticket          @relation(fields: [ticketId], references: [id], onDelete: Cascade)
-  type          TicketEventType
-  title         String
-  description   String?
-  fromStatus    TicketStatus?
-  toStatus      TicketStatus?
-  pauseReason   String?
-  metadata      Json?
-  author        String?
-  createdAt     DateTime        @default(now())
+  id          String          @id @default(cuid())
+  ticketId    String
+  ticket      Ticket          @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  type        TicketEventType
+  title       String
+  description String?
+  fromStatus  TicketStatus?
+  toStatus    TicketStatus?
+  pauseReason String?
+  metadata    Json?
+  author      String?
+  createdAt   DateTime        @default(now())
 
   @@index([ticketId, createdAt])
   @@index([type])
+  @@schema("public")
 }
