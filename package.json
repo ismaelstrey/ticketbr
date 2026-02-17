@@ -28,9 +28,9 @@
     "@types/node": "latest",
     "@types/react": "latest",
     "@types/react-dom": "latest",
-    "eslint": "latest",
-    "eslint-config-next": "latest",
-    "prisma": "latest",
+    "eslint": "^4.1.1",
+    "eslint-config-next": "^0.2.4",
+    "prisma": "^6.19.2",
     "typescript": "latest"
   }
 }
