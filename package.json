@@ -16,11 +16,13 @@
     "db:push": "node scripts/db-push.cjs"
   },
   "dependencies": {
+    "@prisma/adapter-pg": "^7.4.0",
+    "@prisma/client": "latest",
     "next": "latest",
+    "pg": "^8.18.0",
     "react": "latest",
     "react-dom": "latest",
-    "react-icons": "latest",
-    "@prisma/client": "latest"
+    "react-icons": "latest"
   },
   "devDependencies": {
     "@types/node": "latest",
@@ -28,7 +30,7 @@
     "@types/react-dom": "latest",
     "eslint": "latest",
     "eslint-config-next": "latest",
-    "typescript": "latest",
-    "prisma": "latest"
+    "prisma": "latest",
+    "typescript": "latest"
   }
 }
