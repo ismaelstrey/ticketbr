@@ -9,11 +9,11 @@
     "start": "next start",
     "lint": "next lint",
     "postinstall": "prisma generate",
-    "db:migrate": "prisma migrate deploy || prisma db push",
-    "db:push": "prisma db push",
+    "db:migrate": "node scripts/db-migrate.cjs",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "prisma:studio": "prisma studio"
+    "prisma:studio": "prisma studio",
+    "db:push": "node scripts/db-push.cjs"
   },
   "dependencies": {
     "next": "latest",
