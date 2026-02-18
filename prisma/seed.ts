@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client'
+import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
 
@@ -68,14 +69,32 @@ async function main() {
     }
   }
 
+  // Seed User (Legacy - for Login)
+  const hashedPassword = await bcrypt.hash('admin123', 10)
+  const user = await prisma.user.upsert({
+    where: { email: 'admin@ticketbr.com' },
+    update: {
+      password: hashedPassword,
+    },
+    create: {
+      email: 'admin@ticketbr.com',
+      name: 'Admin',
+      password: hashedPassword,
+      role: 'ADMIN',
+    },
+  })
+  console.log(`Created/Updated User (Legacy): ${user.email}`)
+
   // Seed Operador (Admin)
   const admin = await prisma.operador.upsert({
     where: { email: 'admin@ticketbr.com' },
-    update: {},
+    update: {
+      senha_hash: hashedPassword, // Using same hash for consistency
+    },
     create: {
       nome: 'Administrador',
       email: 'admin@ticketbr.com',
-      senha_hash: 'hash_placeholder', // In real app, hash this
+      senha_hash: hashedPassword,
       matricula: 'ADM001',
       perfil: 'Admin',
       is_tecnico: true,
@@ -85,6 +104,7 @@ async function main() {
   console.log(`Created/Updated Operator: ${admin.nome}`)
 
   // Seed Mesa de Trabalho
+  // ... rest of the file
   const mesa = await prisma.mesa_Trabalho.upsert({
     where: { id: 'mesa-n1-default' }, // using fixed ID for simplicity in upsert if possible, but ID is cuid. 
     // We can't upsert by ID easily if it's random. Let's try finding by name first or just create if empty.

@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { sign } from "jsonwebtoken";
-
-const JWT_SECRET = process.env.JWT_SECRET || "default_secret";
+import { compare } from "bcryptjs";
+import { login } from "@/lib/auth";
 
 export async function POST(request: Request) {
   try {
@@ -19,21 +18,33 @@ export async function POST(request: Request) {
       where: { email }
     });
 
-    if (!user || user.password !== password) {
+    if (!user) {
       return NextResponse.json(
         { error: "Credenciais inválidas" },
         { status: 401 }
       );
     }
 
-    const token = sign(
-      { userId: user.id, email: user.email, role: user.role },
-      JWT_SECRET,
-      { expiresIn: "8h" }
-    );
+    const isPasswordValid = await compare(password, user.password);
+
+    if (!isPasswordValid) {
+      return NextResponse.json(
+        { error: "Credenciais inválidas" },
+        { status: 401 }
+      );
+    }
+
+    // Realiza login: Gera token e define cookie HTTP-only
+    const token = await login({ 
+      sub: user.id, // 'sub' é padrão JWT para ID do usuário
+      id: user.id,  // Adicionado para compatibilidade com o frontend
+      email: user.email, 
+      role: user.role,
+      name: user.name
+    });
 
     return NextResponse.json({
-      token,
+      message: "Login realizado com sucesso",
       user: {
         id: user.id,
         email: user.email,
@@ -41,6 +52,7 @@ export async function POST(request: Request) {
         role: user.role
       }
     });
+
   } catch (error) {
     console.error("Login error:", error);
     return NextResponse.json(
