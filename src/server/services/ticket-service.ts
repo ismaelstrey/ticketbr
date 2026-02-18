@@ -11,6 +11,18 @@ import {
 } from "@/server/ticket-mappers";
 import { TicketStatus, TicketPriority } from "@prisma/client";
 
+function calculateSlaProgress(createdAt: Date, slaAt?: Date | null): number {
+  if (!slaAt) return 0;
+  
+  const total = slaAt.getTime() - createdAt.getTime();
+  const elapsed = Date.now() - createdAt.getTime();
+  
+  if (total <= 0) return 100;
+  
+  const progress = Math.round((elapsed / total) * 100);
+  return Math.min(Math.max(progress, 0), 100);
+}
+
 function mapTicket(ticket: any) {
   return {
     id: ticket.id,
@@ -21,6 +33,12 @@ function mapTicket(ticket: any) {
     descricao: ticket.description,
     prioridade: fromPrismaPriority(ticket.priority as any),
     status: fromPrismaStatus(ticket.status as any),
+    data: ticket.createdAt.toLocaleString("pt-BR", { 
+        day: "2-digit", month: "2-digit", year: "numeric", 
+        hour: "2-digit", minute: "2-digit" 
+    }),
+    progressoSla: calculateSlaProgress(ticket.createdAt, ticket.solutionSlaAt),
+    progressoTarefa: 0, // Campo não existe no banco, retornando 0 por padrão
     operador: ticket.operator,
     contato: ticket.contact,
     tipoTicket: ticket.ticketType,

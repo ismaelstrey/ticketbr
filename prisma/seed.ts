@@ -1,6 +1,7 @@
 import "dotenv/config";
 import { Pool } from "pg";
 import { randomUUID } from "crypto";
+import bcrypt from "bcryptjs";
 
 const connectionString = `${process.env.DATABASE_URL}`;
 const pool = new Pool({ connectionString });
@@ -210,6 +211,9 @@ async function main() {
   const client = await pool.connect();
 
   try {
+    // Generate Hash
+    const hashedPassword = await bcrypt.hash("admin123", 10);
+
     // Upsert Admin User
     const userEmail = "admin@ticketbr.com";
     const userRes = await client.query('SELECT id FROM "User" WHERE email = $1', [userEmail]);
@@ -218,13 +222,15 @@ async function main() {
     if (userRes.rows.length === 0) {
       userId = randomUUID();
       await client.query(`
-        INSERT INTO "User" (id, email, name, role, "createdAt", "updatedAt")
-        VALUES ($1, $2, $3, $4, NOW(), NOW())
-      `, [userId, userEmail, "Admin", "ADMIN"]);
+        INSERT INTO "User" (id, email, name, password, role, "createdAt", "updatedAt")
+        VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
+      `, [userId, userEmail, "Admin", hashedPassword, "ADMIN"]);
       console.log("Default user created.");
     } else {
       userId = userRes.rows[0].id;
-      console.log("Default user already exists.");
+      // Update password just in case
+      await client.query('UPDATE "User" SET password = $1 WHERE id = $2', [hashedPassword, userId]);
+      console.log("Default user updated.");
     }
 
     for (const t of tickets) {
@@ -278,20 +284,22 @@ async function main() {
         console.log(`Created ticket ${t.number}`);
       }
 
+      // Handle interactions (simplified)
       if (t.interacoes && t.interacoes.length > 0) {
-        for (const interaction of t.interacoes) {
-          // Check if similar event exists to avoid duplicates
-          // Simplified: just insert for now, assuming clean DB or we don't care about duplicates in seed
-          // But to be safe, let's verify count
-          const eventId = randomUUID();
-          await client.query(`
-            INSERT INTO "TicketEvent" (
-              id, "ticketId", type, title, description, author, "createdAt"
-            ) VALUES (
-              $1, $2, 'COMMENT', 'Comentário', $3, $4, NOW()
-            )
-          `, [eventId, ticketId, interaction.mensagem, interaction.autor]);
-        }
+          // Clear existing for this ticket to avoid dups logic complexity in seed
+          // (In production seed, be careful, but here it's fine)
+          await client.query('DELETE FROM "TicketEvent" WHERE "ticketId" = $1', [ticketId]);
+          
+          for (const interaction of t.interacoes) {
+            const eventId = randomUUID();
+            await client.query(`
+                INSERT INTO "TicketEvent" (
+                id, "ticketId", type, title, description, author, "createdAt"
+                ) VALUES (
+                $1, $2, 'COMMENT', 'Comentário', $3, $4, NOW()
+                )
+            `, [eventId, ticketId, interaction.mensagem, interaction.autor]);
+          }
       }
     }
 

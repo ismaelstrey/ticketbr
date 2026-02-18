@@ -8,7 +8,7 @@ export function useTicketFilters(tickets: Ticket[]) {
 
   const filteredTickets = useMemo(() => {
     return tickets.filter((ticket) => {
-      const haystack = `${ticket.id} ${ticket.empresa} ${ticket.solicitante} ${ticket.assunto}`.toLowerCase();
+      const haystack = `${ticket.number} ${ticket.empresa} ${ticket.solicitante} ${ticket.assunto}`.toLowerCase();
       const matchesQuery = haystack.includes(query.toLowerCase());
       const matchesPriority = priority === "all" || ticket.prioridade === priority;
       const matchesStatus = status === "all" || ticket.status === status;
@@ -23,6 +23,8 @@ export function useTicketFilters(tickets: Ticket[]) {
       ? 0
       : Math.round(filteredTickets.reduce((acc, ticket) => acc + ticket.progressoSla, 0) / filteredTickets.length);
 
+
+      
   return {
     filteredTickets,
     query,

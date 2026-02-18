@@ -42,9 +42,9 @@ function TicketCard({
   onOpen
 }: {
   ticket: Ticket;
-  onDragStart: (event: DragEvent<HTMLElement>, ticketId: number) => void;
+  onDragStart: (event: DragEvent<HTMLElement>, ticketId: string) => void;
   onDragEnd: () => void;
-  onOpen: (ticketId: number) => void;
+  onOpen: (ticketId: string) => void;
 }) {
   return (
     <article
@@ -54,10 +54,10 @@ function TicketCard({
       onDragEnd={onDragEnd}
       role="button"
       onClick={() => onOpen(ticket.id)}
-      aria-label={`Ticket ${ticket.id}`}
+      aria-label={`Ticket ${ticket.number}`}
     >
       <p className="ticket-id">
-        <FiHash aria-hidden="true" /> {ticket.id}
+        <FiHash aria-hidden="true" /> {ticket.number}
       </p>
       <p className="empresa">{ticket.empresa}</p>
       <p className="solicitante">
@@ -109,6 +109,8 @@ const columnIcons = {
   done: FiCheckCircle
 } as const;
 
+import { api } from "@/services/api";
+
 export default function KanbanBoard() {
   const {
     tickets,
@@ -140,6 +142,19 @@ export default function KanbanBoard() {
     avgSla
   } = useTicketFilters(tickets);
 
+
+
+  const handleSaveTicket = async () => {
+    if (!selectedTicket) return;
+    try {
+        await api.tickets.update(selectedTicket.id, selectedTicket);
+        closeTicket();
+    } catch (err) {
+        console.error("Failed to save ticket", err);
+        alert("Erro ao salvar ticket");
+    }
+  };
+
   return (
     <main className="app-shell">
       <aside className="sidebar">
@@ -157,7 +172,7 @@ export default function KanbanBoard() {
             ticket={selectedTicket}
             onBack={closeTicket}
             onChange={updateSelectedTicket}
-            onSave={closeTicket}
+            onSave={handleSaveTicket}
           />
         ) : (
           <>

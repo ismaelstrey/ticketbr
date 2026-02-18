@@ -3,14 +3,14 @@ import { useMemo, useState } from "react";
 import { Ticket } from "@/types/ticket";
 
 export function useTicketEditor(tickets: Ticket[], setTickets: Dispatch<SetStateAction<Ticket[]>>) {
-  const [selectedTicketId, setSelectedTicketId] = useState<number | null>(null);
+  const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
 
   const selectedTicket = useMemo(
     () => tickets.find((ticket) => ticket.id === selectedTicketId) ?? null,
     [tickets, selectedTicketId]
   );
 
-  const openTicket = (ticketId: number) => setSelectedTicketId(ticketId);
+  const openTicket = (ticketId: string) => setSelectedTicketId(ticketId);
   const closeTicket = () => setSelectedTicketId(null);
 
   const updateSelectedTicket = (changes: Partial<Ticket>) => {

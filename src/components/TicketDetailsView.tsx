@@ -28,7 +28,7 @@ export default function TicketDetailsView({
 
         <div className="detail-title-wrap">
           <h2>
-            <FiHash aria-hidden="true" /> {ticket.id}
+            <FiHash aria-hidden="true" /> {ticket.number}
           </h2>
           <input
             value={ticket.assunto}

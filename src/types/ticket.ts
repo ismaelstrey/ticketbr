@@ -10,7 +10,8 @@ export interface TicketInteraction {
 }
 
 export interface Ticket {
-  id: number;
+  id: string;
+  number: number;
   empresa: string;
   solicitante: string;
   assunto: string;

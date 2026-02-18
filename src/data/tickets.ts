@@ -9,7 +9,8 @@ export const columns: KanbanColumn[] = [
 
 export const tickets: Ticket[] = [
   {
-    id: 2391,
+    id: "2391",
+    number: 2391,
     empresa: "NETMITT",
     solicitante: "João Vitor Lisboa",
     assunto: "Queda total de conectividade no bairro Centro",
@@ -45,7 +46,8 @@ export const tickets: Ticket[] = [
     ]
   },
   {
-    id: 2389,
+    id: "2389",
+    number: 2389,
     empresa: "LP INTERNET",
     solicitante: "Lucas",
     assunto: "Cliente sem acesso PPPoE após troca de roteador",
@@ -65,7 +67,8 @@ export const tickets: Ticket[] = [
     interacoes: []
   },
   {
-    id: 2388,
+    id: "2388",
+    number: 2388,
     empresa: "ACEM PRIME SERVIÇOS",
     solicitante: "Cynthia",
     assunto: "Acompanhamento de ativação técnica",
@@ -82,7 +85,8 @@ export const tickets: Ticket[] = [
     interacoes: []
   },
   {
-    id: 2384,
+    id: "2384",
+    number: 2384,
     empresa: "ACEM PRIME SERVIÇOS DE INTERNET LTDA",
     solicitante: "Cynthia",
     assunto: "Acompanhamento diário",
@@ -93,7 +97,8 @@ export const tickets: Ticket[] = [
     status: "doing"
   },
   {
-    id: 2376,
+    id: "2376",
+    number: 2376,
     empresa: "NETFIBRA",
     solicitante: "Marina",
     assunto: "Cliente sem comunicação com OLT NH",
@@ -104,7 +109,8 @@ export const tickets: Ticket[] = [
     status: "doing"
   },
   {
-    id: 2381,
+    id: "2381",
+    number: 2381,
     empresa: "LP INTERNET",
     solicitante: "Fabrício",
     assunto: "LINK IP SUL CONNECT",
@@ -147,7 +153,8 @@ export const tickets: Ticket[] = [
     ]
   },
   {
-    id: 2334,
+    id: "2334",
+    number: 2334,
     empresa: "ACEM PRIME SERVIÇOS DE INTERNET LTDA",
     solicitante: "Cynthia",
     assunto: "ATIVAÇÃO | Bourbon Shopping 19/02",
@@ -158,7 +165,8 @@ export const tickets: Ticket[] = [
     status: "paused"
   },
   {
-    id: 2383,
+    id: "2383",
+    number: 2383,
     empresa: "NETMITT",
     solicitante: "João Vitor Lisboa",
     assunto: "Perda de comunicação com OLT NH",
@@ -169,7 +177,8 @@ export const tickets: Ticket[] = [
     status: "done"
   },
   {
-    id: 2382,
+    id: "2382",
+    number: 2382,
     empresa: "ACEM PRIME SERVIÇOS DE INTERNET LTDA",
     solicitante: "Cynthia",
     assunto: "Acompanhamento diário",

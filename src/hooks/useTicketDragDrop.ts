@@ -1,18 +1,33 @@
-import { DragEvent, useMemo, useState } from "react";
+import { DragEvent, useMemo, useState, useEffect } from "react";
 import { Ticket, TicketStatus } from "@/types/ticket";
+import { api } from "@/services/api";
 
 const TICKET_ID_MIME = "application/x-ticket-id";
 
-function getTransferTicketId(event: DragEvent<HTMLElement>, fallback: number | null) {
-  const transferredId = Number(event.dataTransfer.getData(TICKET_ID_MIME) || event.dataTransfer.getData("text/plain"));
-  return Number.isNaN(transferredId) ? fallback : transferredId;
+function getTransferTicketId(event: DragEvent<HTMLElement>, fallback: string | null) {
+  const transferredId = event.dataTransfer.getData(TICKET_ID_MIME) || event.dataTransfer.getData("text/plain");
+  return !transferredId ? fallback : transferredId;
 }
 
 export function useTicketDragDrop(initialTickets: Ticket[]) {
-  const [tickets, setTickets] = useState<Ticket[]>(initialTickets);
-  const [draggingTicketId, setDraggingTicketId] = useState<number | null>(null);
+  const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/tickets")
+      .then((res) => res.json())
+      .then((data) => {
+          if (data.data) {
+              setTickets(data.data);
+          }
+      })
+      .catch((err) => console.error("Failed to load tickets", err))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const [draggingTicketId, setDraggingTicketId] = useState<string | null>(null);
   const [dragOverColumn, setDragOverColumn] = useState<TicketStatus | null>(null);
-  const [pauseModalTicketId, setPauseModalTicketId] = useState<number | null>(null);
+  const [pauseModalTicketId, setPauseModalTicketId] = useState<string | null>(null);
   const [pauseReason, setPauseReason] = useState("");
 
   const pauseModalTicket = useMemo(
@@ -20,13 +35,13 @@ export function useTicketDragDrop(initialTickets: Ticket[]) {
     [tickets, pauseModalTicketId]
   );
 
-  const updateTicketStatus = (ticketId: number, targetStatus: TicketStatus, reason?: string) => {
+  const updateTicketStatus = (ticketId: string, targetStatus: TicketStatus, reason?: string) => {
+    // Optimistic update
     setTickets((current) =>
       current.map((ticket) => {
         if (ticket.id !== ticketId) {
           return ticket;
         }
-
         return {
           ...ticket,
           status: targetStatus,
@@ -34,6 +49,14 @@ export function useTicketDragDrop(initialTickets: Ticket[]) {
         };
       })
     );
+
+    // Call API (Background)
+    api.tickets.updateStatus(ticketId, targetStatus, reason)
+        .then(() => console.log(`Ticket ${ticketId} updated to ${targetStatus}`))
+        .catch((err) => {
+            console.error(`Failed to update ticket ${ticketId}`, err);
+            // Revert? For now just log error.
+        });
   };
 
   const closePauseModal = () => {
@@ -50,11 +73,11 @@ export function useTicketDragDrop(initialTickets: Ticket[]) {
     closePauseModal();
   };
 
-  const onTicketDragStart = (event: DragEvent<HTMLElement>, ticketId: number) => {
+  const onTicketDragStart = (event: DragEvent<HTMLElement>, ticketId: string) => {
     setDraggingTicketId(ticketId);
     event.dataTransfer.effectAllowed = "move";
-    event.dataTransfer.setData(TICKET_ID_MIME, String(ticketId));
-    event.dataTransfer.setData("text/plain", String(ticketId));
+    event.dataTransfer.setData(TICKET_ID_MIME, ticketId);
+    event.dataTransfer.setData("text/plain", ticketId);
   };
 
   const onTicketDragEnd = () => {
