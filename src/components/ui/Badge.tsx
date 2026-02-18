@@ -1,11 +1,12 @@
 import styled, { css } from "styled-components";
+import React from "react";
 import { TicketPriority } from "@/types/ticket";
 
-interface BadgeProps {
+interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
   priority?: TicketPriority;
 }
 
-export const Badge = styled.span<BadgeProps>`
+const StyledBadge = styled.span<{ $priority?: TicketPriority }>`
   border: 1px solid #9b9b9b;
   border-radius: 20px;
   padding: 0.3rem 0.7rem;
@@ -16,8 +17,8 @@ export const Badge = styled.span<BadgeProps>`
   align-items: center;
   justify-content: center;
 
-  ${({ priority, theme }) => {
-    switch (priority) {
+  ${({ $priority, theme }) => {
+    switch ($priority) {
       case "Alta":
         return css`
           border-color: ${theme.colors.status.warning};
@@ -33,3 +34,11 @@ export const Badge = styled.span<BadgeProps>`
     }
   }}
 `;
+
+export function Badge({ priority, children, ...props }: BadgeProps) {
+  return (
+    <StyledBadge $priority={priority} {...props}>
+      {children}
+    </StyledBadge>
+  );
+}

@@ -37,6 +37,7 @@ enum Role {
   CUSTOMER
 }
 
+// Existing User model - keeping for backward compatibility or future migration
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
@@ -49,32 +50,164 @@ model User {
   updatedAt DateTime @updatedAt
 }
 
+model Solicitante {
+  id               String   @id @default(cuid())
+  razao_social     String   @db.VarChar(255)
+  nome_fantasia    String   @db.VarChar(255)
+  cnpj             String   @unique @db.VarChar(14)
+  email            String   @db.VarChar(255)
+  telefone         String   @db.VarChar(20)
+  endereco_completo String   @db.Text
+  data_cadastro    DateTime @default(now())
+  status           Boolean  @default(true)
+  
+  // Audit fields
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+  created_by       String?
+  updated_by       String?
+  deleted_at       DateTime?
+
+  tickets          Ticket[]
+
+  @@index([cnpj])
+  @@index([email])
+}
+
+model Tipo_Ticket {
+  id                String   @id @default(cuid())
+  nome              String   @unique @db.VarChar(100)
+  descricao         String   @db.Text
+  sla_horas         Int
+  prioridade_default String   @db.VarChar(20)
+  status            Boolean  @default(true)
+  
+  // Audit fields
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+  created_by        String?
+  updated_by        String?
+  deleted_at        DateTime?
+
+  categorias        Categoria_Ticket[]
+  tickets           Ticket[]
+}
+
+model Categoria_Ticket {
+  id             String      @id @default(cuid())
+  tipo_ticket_id String
+  tipo_ticket    Tipo_Ticket @relation(fields: [tipo_ticket_id], references: [id], onDelete: Restrict)
+  nome           String      @db.VarChar(100)
+  descricao      String      @db.Text
+  status         Boolean     @default(true)
+  
+  // Audit fields
+  created_at     DateTime    @default(now())
+  updated_at     DateTime    @updatedAt
+  created_by     String?
+  updated_by     String?
+  deleted_at     DateTime?
+
+  tickets        Ticket[]
+
+  @@unique([tipo_ticket_id, nome])
+}
+
+model Mesa_Trabalho {
+  id             String    @id @default(cuid())
+  nome           String    @db.VarChar(100)
+  localizacao    String    @db.VarChar(255)
+  capacidade     Int
+  responsavel_id String?
+  responsavel    Operador? @relation("MesaResponsavel", fields: [responsavel_id], references: [id], onDelete: SetNull)
+  status         Boolean   @default(true)
+  tipo           String    @db.VarChar(50)
+  
+  // Audit fields
+  created_at     DateTime  @default(now())
+  updated_at     DateTime  @updatedAt
+  created_by     String?
+  updated_by     String?
+  deleted_at     DateTime?
+
+  operadores     Operador[] @relation("MesaOperadores")
+  tickets        Ticket[]
+}
+
+model Operador {
+  id               String   @id @default(cuid())
+  nome             String   @db.VarChar(255)
+  email            String   @unique @db.VarChar(255)
+  senha_hash       String   @db.VarChar(255)
+  matricula        String   @unique @db.VarChar(50)
+  perfil           String   @db.VarChar(50)
+  mesa_trabalho_id String?
+  mesa_trabalho    Mesa_Trabalho? @relation("MesaOperadores", fields: [mesa_trabalho_id], references: [id], onDelete: SetNull)
+  is_tecnico       Boolean  @default(true)
+  is_active        Boolean  @default(true)
+  ultimo_acesso    DateTime?
+  especialidade    String?  @db.VarChar(100)
+  
+  // Audit fields
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+  created_by       String?
+  updated_by       String?
+  deleted_at       DateTime?
+
+  mesas_responsaveis Mesa_Trabalho[] @relation("MesaResponsavel")
+  tickets            Ticket[]
+}
+
 model Ticket {
   id            String         @id @default(cuid())
   number        Int            @unique @default(autoincrement())
-  company       String
-  requester     String
+  
+  // New relationships
+  solicitante_id String?
+  solicitante    Solicitante? @relation(fields: [solicitante_id], references: [id], onDelete: Restrict)
+  
+  tipo_ticket_id String?
+  tipo_ticket    Tipo_Ticket? @relation(fields: [tipo_ticket_id], references: [id], onDelete: Restrict)
+  
+  categoria_id   String?
+  categoria      Categoria_Ticket? @relation(fields: [categoria_id], references: [id], onDelete: Restrict)
+  
+  mesa_trabalho_id String?
+  mesa_trabalho_rel Mesa_Trabalho? @relation(fields: [mesa_trabalho_id], references: [id], onDelete: Restrict)
+  
+  operador_id    String?
+  operador_rel   Operador? @relation(fields: [operador_id], references: [id], onDelete: Restrict)
+
+  // Legacy fields (keeping for compatibility/migration or plain text storage if relation not available)
+  company       String?
+  requester     String?
   subject       String
   description   String?
   status        TicketStatus   @default(TODO)
   priority      TicketPriority @default(NONE)
   
-  // Legacy string field, keeping for compatibility during migration
   operator      String?
   
-  // Relation to User model
+  // Relation to User model (Legacy)
   operatorId    String?
   operatorUser  User?          @relation("OperatorTickets", fields: [operatorId], references: [id])
   
   contact       String?
-  ticketType    String?
-  category      String?
-  workbench     String?
+  ticketType    String? // Legacy string field
+  category      String? // Legacy string field
+  workbench     String? // Legacy string field
   responseSlaAt DateTime?
   solutionSlaAt DateTime?
   pausedReason  String?
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
+  
+  // Audit fields
+  created_by    String?
+  updated_by    String?
+  deleted_at    DateTime?
+
   events        TicketEvent[]
 
   @@index([status])

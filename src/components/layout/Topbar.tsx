@@ -1,7 +1,7 @@
 "use client";
 
 import styled from "styled-components";
-import { FiSearch, FiTool, FiCheckCircle, FiFilter, FiHelpCircle } from "@/components/icons";
+import { FiSearch, FiTool, FiCheckCircle, FiFilter, FiHelpCircle, FiPlus } from "@/components/icons";
 import { Button } from "@/components/ui/Button";
 
 const TopbarContainer = styled.header`
@@ -66,9 +66,10 @@ const actionButtons = [
 interface TopbarProps {
   query: string;
   setQuery: (query: string) => void;
+  onNewTicket?: () => void;
 }
 
-export function Topbar({ query, setQuery }: TopbarProps) {
+export function Topbar({ query, setQuery, onNewTicket }: TopbarProps) {
   return (
     <TopbarContainer>
       <SearchWrapper>
@@ -80,8 +81,12 @@ export function Topbar({ query, setQuery }: TopbarProps) {
         />
       </SearchWrapper>
       <ActionsWrapper>
+        <Button variant="primary" onClick={onNewTicket} type="button">
+          <FiPlus aria-hidden="true" />
+          Novo Ticket
+        </Button>
         {actionButtons.map(({ label, icon: Icon }, index) => (
-          <Button key={label} variant="pill" $pillIndex={index} type="button">
+          <Button key={label} variant="pill" pillIndex={index} type="button">
             <Icon aria-hidden="true" />
             {label}
           </Button>

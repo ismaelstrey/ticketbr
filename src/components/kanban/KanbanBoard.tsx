@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import {
   FiAlertCircle,
@@ -16,6 +16,7 @@ import { Select } from "@/components/ui/Input";
 import { KanbanColumn } from "./Column";
 import { PauseModal } from "./PauseModal";
 import TicketDetails from "@/components/ticket/TicketDetails";
+import NewTicketModal from "@/components/ticket/NewTicketModal";
 
 import { columns, tickets as initialTickets } from "@/data/tickets";
 import { useTicketDragDrop } from "@/hooks/useTicketDragDrop";
@@ -131,6 +132,8 @@ export default function KanbanBoard() {
     avgSla
   } = useTicketFilters(tickets);
 
+  const [isNewTicketModalOpen, setIsNewTicketModalOpen] = useState(false);
+
   const handleSaveTicket = async () => {
     if (!selectedTicket) return;
     try {
@@ -155,7 +158,11 @@ export default function KanbanBoard() {
           />
         ) : (
           <>
-            <Topbar query={query} setQuery={setQuery} />
+            <Topbar 
+              query={query} 
+              setQuery={setQuery} 
+              onNewTicket={() => setIsNewTicketModalOpen(true)}
+            />
 
             <KPIsGrid>
               <KPIArticle>
@@ -229,6 +236,11 @@ export default function KanbanBoard() {
             onConfirm={confirmPause}
           />
         )}
+
+        <NewTicketModal 
+          isOpen={isNewTicketModalOpen} 
+          onClose={() => setIsNewTicketModalOpen(false)} 
+        />
       </MainContent>
     </AppShellContainer>
   );

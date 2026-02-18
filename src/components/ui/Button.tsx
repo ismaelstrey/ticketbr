@@ -1,11 +1,12 @@
 import styled, { css } from "styled-components";
+import React from "react";
 
-interface ButtonProps {
+interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "primary" | "ghost" | "save" | "pill" | "danger";
-  $pillIndex?: number; // For the gradient pills
+  pillIndex?: number; // For the gradient pills
 }
 
-export const Button = styled.button<ButtonProps>`
+const StyledButton = styled.button<{ $variant?: string; $pillIndex?: number }>`
   border: none;
   border-radius: ${({ theme }) => theme.borderRadius.pill};
   padding: 0.55rem 0.95rem;
@@ -26,8 +27,8 @@ export const Button = styled.button<ButtonProps>`
     transform: scale(0.98);
   }
 
-  ${({ variant, theme, $pillIndex }) => {
-    switch (variant) {
+  ${({ $variant, theme, $pillIndex }) => {
+    switch ($variant) {
       case "ghost":
         return css`
           background: #eceff5;
@@ -71,3 +72,11 @@ export const Button = styled.button<ButtonProps>`
     }
   }}
 `;
+
+export function Button({ variant, pillIndex, children, ...props }: ButtonProps) {
+  return (
+    <StyledButton $variant={variant} $pillIndex={pillIndex} {...props}>
+      {children}
+    </StyledButton>
+  );
+}
