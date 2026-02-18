@@ -9,16 +9,22 @@ export default function UserHeader() {
 
   return (
     <header className="user-header">
-      <div className="user-info">
-        <h1>TicketBR</h1>
-        <p>Olá, {user.name} ({user.role})</p>
+      <div className="user-brand">
+        TicketBR
       </div>
-      <button
-        onClick={logout}
-        className="logout-button"
-      >
-        Sair
-      </button>
+      <div className="user-controls">
+        <div className="user-profile">
+          <span className="user-name">{user.name}</span>
+          <span className="user-role">{user.role}</span>
+        </div>
+        <button
+          onClick={logout}
+          className="logout-button"
+          aria-label="Sair do sistema"
+        >
+          Sair
+        </button>
+      </div>
     </header>
   );
 }

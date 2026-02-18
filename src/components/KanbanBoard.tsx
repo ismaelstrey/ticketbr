@@ -164,7 +164,9 @@ export default function KanbanBoard() {
             <Icon aria-hidden="true" />
           </button>
         ))}
+        
       </aside>
+
 
       <section className="content">
         {selectedTicket ? (

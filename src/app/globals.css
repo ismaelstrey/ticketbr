@@ -670,37 +670,82 @@ progress::-webkit-progress-value {
 
 /* === User Header Styles === */
 .user-header {
-  background: #fff;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); /* shadow */
-  padding: 1rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
-  border-radius: 12px;
+  padding: 0.5rem 1rem;
+  background: #fff;
+  border-bottom: 1px solid #e5e7eb;
+  height: 60px;
 }
 
-.user-info h1 {
-  font-size: 1.25rem; /* text-xl */
+.user-brand {
   font-weight: 700;
-  margin: 0;
+  font-size: 1.1rem;
+  color: #111827;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-.user-info p {
-  font-size: 0.875rem; /* text-sm */
-  color: #4b5563; /* text-gray-600 */
-  margin: 0;
+.user-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.user-profile {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1.2;
+}
+
+.user-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.user-role {
+  font-size: 0.75rem;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
 }
 
 .logout-button {
-  padding: 0.5rem 1rem;
-  background-color: #ef4444; /* bg-red-500 */
-  color: white;
+  background: transparent;
+  border: 1px solid #e5e7eb;
+  color: #4b5563;
+  padding: 0.4rem 0.8rem;
   border-radius: 6px;
-  font-size: 0.875rem; /* text-sm */
-  transition: background-color 0.2s;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .logout-button:hover {
-  background-color: #dc2626; /* hover:bg-red-600 */
+  background-color: #f3f4f6;
+  color: #dc2626;
+  border-color: #d1d5db;
+}
+
+@media (max-width: 640px) {
+  .user-header {
+    flex-direction: column;
+    height: auto;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    align-items: stretch;
+  }
+  
+  .user-controls {
+    justify-content: space-between;
+  }
+  
+  .user-profile {
+    align-items: flex-start;
+  }
 }
