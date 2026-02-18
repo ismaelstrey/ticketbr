@@ -4,7 +4,7 @@ import { CreateTicketSchema } from "@/lib/validations/ticket";
 
 export async function GET() {
   const tickets = await listTickets();
-  console.log(tickets);
+
   return NextResponse.json({ data: tickets });
 }
 
