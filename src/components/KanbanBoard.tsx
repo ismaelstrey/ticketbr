@@ -98,8 +98,7 @@ const actionButtons = [
   { label: "Ticket", icon: FiTool },
   { label: "Tarefa", icon: FiCheckCircle },
   { label: "Filtros", icon: FiFilter },
-  { label: "Ajuda", icon: FiHelpCircle },
-  { label: "Universidade", icon: FiBookOpen }
+  { label: "Ajuda", icon: FiHelpCircle }
 ];
 
 const columnIcons = {
@@ -158,7 +157,7 @@ export default function KanbanBoard() {
   return (
     <main className="app-shell">
       <aside className="sidebar">
-        <div className="logo">m</div>
+        <div className="logo">T</div>
         {menuIcons.map((Icon, index) => (
           <button key={index} aria-label={`menu-${index + 1}`} className="menu-icon" type="button">
             <Icon aria-hidden="true" />
