@@ -1,13 +1,11 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { jwtVerify } from "jose";
-
-const SECRET_KEY = process.env.JWT_SECRET || "super-secret-key-change-me";
-const key = new TextEncoder().encode(SECRET_KEY);
+import { JWT_KEY } from "@/lib/constants";
 
 async function verify(token: string) {
     try {
-        await jwtVerify(token, key);
+        await jwtVerify(token, JWT_KEY);
         return true;
     } catch {
         return false;
