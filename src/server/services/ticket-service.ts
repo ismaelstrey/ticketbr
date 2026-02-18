@@ -1,4 +1,4 @@
-import { getPrismaClient } from "@/lib/prisma";
+import { prisma } from "@/lib/prisma";
 import { CreateTicketInput, UpdateTicketInput } from "@/lib/validations/ticket";
 import {
   DbStatus,
@@ -76,7 +76,6 @@ function mapTicket(ticket: any) {
 }
 
 export async function listTickets() {
-  const prisma = await getPrismaClient();
   try {
     const tickets = await prisma.ticket.findMany({
       include: { events: true },
@@ -91,7 +90,6 @@ export async function listTickets() {
 }
 
 export async function getTicketById(id: string) {
-  const prisma = await getPrismaClient();
   const ticket = await prisma.ticket.findUnique({
     where: { id },
     include: { events: true }
@@ -101,7 +99,6 @@ export async function getTicketById(id: string) {
 }
 
 export async function createTicket(input: CreateTicketInput) {
-  const prisma = await getPrismaClient();
   // Safe cast to Prisma enum strings
   const status = (input.status ? toPrismaStatus(input.status as UiStatus) : "TODO") as TicketStatus;
   const priority = (input.prioridade ? toPrismaPriority(input.prioridade as UiPriority) : undefined) as TicketPriority | undefined;
@@ -136,7 +133,6 @@ export async function createTicket(input: CreateTicketInput) {
 }
 
 export async function updateTicket(id: string, input: UpdateTicketInput) {
-  const prisma = await getPrismaClient();
   const current = await prisma.ticket.findUnique({ where: { id } });
   if (!current) {
     return null;
@@ -185,7 +181,6 @@ export async function updateTicket(id: string, input: UpdateTicketInput) {
 }
 
 export async function deleteTicket(id: string) {
-  const prisma = await getPrismaClient();
   try {
     await prisma.ticket.delete({ where: { id } });
     return true;
@@ -195,7 +190,6 @@ export async function deleteTicket(id: string) {
 }
 
 export async function changeTicketStatus(id: string, status: UiStatus, author?: string, pauseReason?: string) {
-  const prisma = await getPrismaClient();
   const current = await prisma.ticket.findUnique({ where: { id } });
   if (!current) {
     return null;
@@ -231,7 +225,6 @@ export async function addTicketInteraction(
   id: string,
   payload: { title: string; description?: string; author?: string; type?: "COMMENT" | "NOTE" }
 ) {
-  const prisma = await getPrismaClient();
   const exists = await prisma.ticket.findUnique({ where: { id } });
   if (!exists) {
     return null;
@@ -251,7 +244,6 @@ export async function addTicketInteraction(
 }
 
 export async function getTicketRoadmap(id: string) {
-  const prisma = await getPrismaClient();
   const ticket = await prisma.ticket.findUnique({
     where: { id },
     include: {

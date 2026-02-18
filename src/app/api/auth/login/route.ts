@@ -1,46 +1,51 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getPrismaClient } from "@/lib/prisma";
-import { login } from "@/lib/auth";
-import bcrypt from "bcryptjs";
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { sign } from "jsonwebtoken";
 
-export async function POST(request: NextRequest) {
+const JWT_SECRET = process.env.JWT_SECRET || "default_secret";
+
+export async function POST(request: Request) {
   try {
     const { email, password } = await request.json();
 
     if (!email || !password) {
-      return NextResponse.json({ error: "Email e senha obrigatórios" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Email e senha são obrigatórios" },
+        { status: 400 }
+      );
     }
 
-    const prisma = await getPrismaClient();
     const user = await prisma.user.findUnique({
-      where: { email },
+      where: { email }
     });
 
-    if (!user) {
-      return NextResponse.json({ error: "Credenciais inválidas" }, { status: 401 });
+    if (!user || user.password !== password) {
+      return NextResponse.json(
+        { error: "Credenciais inválidas" },
+        { status: 401 }
+      );
     }
 
-    // Se o usuário não tiver senha (antigo), falha
-    if (!user.password) {
-        return NextResponse.json({ error: "Usuário sem senha definida. Contate admin." }, { status: 401 });
-    }
+    const token = sign(
+      { userId: user.id, email: user.email, role: user.role },
+      JWT_SECRET,
+      { expiresIn: "8h" }
+    );
 
-    const isValid = await bcrypt.compare(password, user.password);
-
-    if (!isValid) {
-      return NextResponse.json({ error: "Credenciais inválidas" }, { status: 401 });
-    }
-
-    // Login sucesso
-    const token = await login({ sub: user.id, email: user.email, role: user.role, name: user.name });
-
-    return NextResponse.json({ 
-        message: "Login realizado com sucesso",
-        user: { id: user.id, email: user.email, name: user.name, role: user.role } 
+    return NextResponse.json({
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role
+      }
     });
-
   } catch (error) {
     console.error("Login error:", error);
-    return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Erro interno no servidor" },
+      { status: 500 }
+    );
   }
 }
