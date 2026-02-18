@@ -13,24 +13,32 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
-    "db:push": "node scripts/db-push.cjs"
+    "db:push": "node scripts/db-push.cjs",
+    "seed": "tsx prisma/seed.ts"
+  },
+  "prisma": {
+    "seed": "npm run seed"
   },
   "dependencies": {
-    "@prisma/adapter-pg": "^7.4.0",
-    "@prisma/client": "latest",
+    "@prisma/client": "^5.22.0",
+    "dotenv": "^17.3.1",
     "next": "latest",
     "pg": "^8.18.0",
+    "prisma": "^5.22.0",
     "react": "latest",
     "react-dom": "latest",
-    "react-icons": "latest"
+    "react-icons": "latest",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@types/node": "latest",
+    "@types/pg": "^8.16.0",
     "@types/react": "latest",
     "@types/react-dom": "latest",
     "eslint": "^4.1.1",
     "eslint-config-next": "^0.2.4",
-    "prisma": "^6.19.2",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.21.0",
     "typescript": "latest"
   }
 }

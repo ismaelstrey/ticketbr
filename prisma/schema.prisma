@@ -1,10 +1,10 @@
 generator client {
-  provider        = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
-  schemas  = ["public", "users"]
+  url      = env("DATABASE_URL")
 }
 
 enum TicketStatus {
@@ -12,16 +12,12 @@ enum TicketStatus {
   DOING
   PAUSED
   DONE
-
-  @@schema("public")
 }
 
 enum TicketPriority {
   HIGH
   MEDIUM
   NONE
-
-  @@schema("public")
 }
 
 enum TicketEventType {
@@ -33,8 +29,23 @@ enum TicketEventType {
   ASSIGNED
   SLA_UPDATED
   UPDATED
+}
 
-  @@schema("public")
+enum Role {
+  ADMIN
+  AGENT
+  CUSTOMER
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  role      Role     @default(AGENT)
+  tickets   Ticket[] @relation("OperatorTickets")
+  events    TicketEvent[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Ticket {
@@ -46,7 +57,14 @@ model Ticket {
   description   String?
   status        TicketStatus   @default(TODO)
   priority      TicketPriority @default(NONE)
+  
+  // Legacy string field, keeping for compatibility during migration
   operator      String?
+  
+  // Relation to User model
+  operatorId    String?
+  operatorUser  User?          @relation("OperatorTickets", fields: [operatorId], references: [id])
+  
   contact       String?
   ticketType    String?
   category      String?
@@ -61,7 +79,6 @@ model Ticket {
   @@index([status])
   @@index([priority])
   @@index([createdAt])
-  @@schema("public")
 }
 
 model TicketEvent {
@@ -75,10 +92,16 @@ model TicketEvent {
   toStatus    TicketStatus?
   pauseReason String?
   metadata    Json?
+  
+  // Legacy string field
   author      String?
+  
+  // Relation to User model
+  authorId    String?
+  authorUser  User?           @relation(fields: [authorId], references: [id])
+  
   createdAt   DateTime        @default(now())
 
   @@index([ticketId, createdAt])
   @@index([type])
-  @@schema("public")
 }

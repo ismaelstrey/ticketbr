@@ -1,4 +1,5 @@
 import { getPrismaClient } from "@/lib/prisma";
+import { CreateTicketInput, UpdateTicketInput } from "@/lib/validations/ticket";
 import {
   DbStatus,
   fromPrismaPriority,
@@ -8,24 +9,7 @@ import {
   UiPriority,
   UiStatus
 } from "@/server/ticket-mappers";
-
-type CreateTicketInput = {
-  empresa: string;
-  solicitante: string;
-  assunto: string;
-  descricao?: string;
-  prioridade?: UiPriority;
-  status?: UiStatus;
-  operador?: string;
-  contato?: string;
-  tipoTicket?: string;
-  categoria?: string;
-  mesaTrabalho?: string;
-};
-
-type UpdateTicketInput = Partial<CreateTicketInput> & {
-  pauseReason?: string;
-};
+import { TicketStatus, TicketPriority } from "@prisma/client";
 
 function mapTicket(ticket: any) {
   return {
@@ -35,8 +19,8 @@ function mapTicket(ticket: any) {
     solicitante: ticket.requester,
     assunto: ticket.subject,
     descricao: ticket.description,
-    prioridade: fromPrismaPriority(ticket.priority),
-    status: fromPrismaStatus(ticket.status),
+    prioridade: fromPrismaPriority(ticket.priority as any),
+    status: fromPrismaStatus(ticket.status as any),
     operador: ticket.operator,
     contato: ticket.contact,
     tipoTicket: ticket.ticketType,
@@ -47,6 +31,15 @@ function mapTicket(ticket: any) {
     slaResposta: ticket.responseSlaAt,
     slaSolucao: ticket.solutionSlaAt,
     pauseReason: ticket.pausedReason,
+    interacoes: (ticket.events ?? [])
+      .filter((e: any) => e.type === "COMMENT" || e.type === "NOTE")
+      .map((e: any) => ({
+        id: e.id,
+        autor: e.author,
+        tempo: e.createdAt.toLocaleString("pt-BR"),
+        mensagem: e.description,
+        corBorda: e.type === "NOTE" ? "vermelho" : "azul"
+      })),
     roadmap: (ticket.events ?? [])
       .sort((a: any, b: any) => b.createdAt.getTime() - a.createdAt.getTime())
       .map((event: any) => ({
@@ -54,8 +47,8 @@ function mapTicket(ticket: any) {
         type: event.type,
         title: event.title,
         description: event.description,
-        fromStatus: event.fromStatus ? fromPrismaStatus(event.fromStatus) : null,
-        toStatus: event.toStatus ? fromPrismaStatus(event.toStatus) : null,
+        fromStatus: event.fromStatus ? fromPrismaStatus(event.fromStatus as any) : null,
+        toStatus: event.toStatus ? fromPrismaStatus(event.toStatus as any) : null,
         pauseReason: event.pauseReason,
         metadata: event.metadata,
         author: event.author,
@@ -66,12 +59,17 @@ function mapTicket(ticket: any) {
 
 export async function listTickets() {
   const prisma = await getPrismaClient();
-  const tickets = await prisma.ticket.findMany({
-    include: { events: true },
-    orderBy: { createdAt: "desc" }
-  });
-
-  return tickets.map(mapTicket);
+  try {
+    const tickets = await prisma.ticket.findMany({
+      include: { events: true },
+      orderBy: { createdAt: "desc" }
+    });
+    console.log(`[Service] Found ${tickets.length} tickets`);
+    return tickets.map(mapTicket);
+  } catch (error) {
+    console.error("[Service] Error listing tickets:", error);
+    return [];
+  }
 }
 
 export async function getTicketById(id: string) {
@@ -86,8 +84,9 @@ export async function getTicketById(id: string) {
 
 export async function createTicket(input: CreateTicketInput) {
   const prisma = await getPrismaClient();
-  const status = input.status ? toPrismaStatus(input.status) : "TODO";
-  const priority = input.prioridade ? toPrismaPriority(input.prioridade) : undefined;
+  // Safe cast to Prisma enum strings
+  const status = (input.status ? toPrismaStatus(input.status as UiStatus) : "TODO") as TicketStatus;
+  const priority = (input.prioridade ? toPrismaPriority(input.prioridade as UiPriority) : undefined) as TicketPriority | undefined;
 
   const ticket = await prisma.ticket.create({
     data: {
@@ -137,12 +136,15 @@ export async function updateTicket(id: string, input: UpdateTicketInput) {
     workbench: input.mesaTrabalho
   };
 
+  // Remove undefined keys
+  Object.keys(data).forEach(key => data[key] === undefined && delete data[key]);
+
   if (input.status) {
-    data.status = toPrismaStatus(input.status);
+    data.status = toPrismaStatus(input.status as UiStatus);
   }
 
   if (input.prioridade) {
-    data.priority = toPrismaPriority(input.prioridade);
+    data.priority = toPrismaPriority(input.prioridade as UiPriority);
   }
 
   if (input.pauseReason !== undefined) {
@@ -181,7 +183,7 @@ export async function changeTicketStatus(id: string, status: UiStatus, author?: 
     return null;
   }
 
-  const nextStatus = toPrismaStatus(status);
+  const nextStatus = toPrismaStatus(status) as TicketStatus;
 
   const updated = await prisma.ticket.update({
     where: { id },
@@ -249,14 +251,14 @@ export async function getTicketRoadmap(id: string) {
     ticketId: ticket.id,
     ticketNumber: ticket.number,
     subject: ticket.subject,
-    status: fromPrismaStatus(ticket.status as DbStatus),
+    status: fromPrismaStatus(ticket.status as any),
     events: ticket.events.map((event: any) => ({
       id: event.id,
       type: event.type,
       title: event.title,
       description: event.description,
-      fromStatus: event.fromStatus ? fromPrismaStatus(event.fromStatus) : null,
-      toStatus: event.toStatus ? fromPrismaStatus(event.toStatus) : null,
+      fromStatus: event.fromStatus ? fromPrismaStatus(event.fromStatus as any) : null,
+      toStatus: event.toStatus ? fromPrismaStatus(event.toStatus as any) : null,
       pauseReason: event.pauseReason,
       metadata: event.metadata,
       author: event.author,

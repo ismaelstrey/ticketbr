@@ -1,22 +1,17 @@
-type PrismaClientLike = {
-  ticket: any;
-  ticketEvent: any;
-};
+import { PrismaClient } from "@prisma/client";
 
 declare global {
-  var prismaClientInstance: PrismaClientLike | undefined;
+  var prismaClientInstance: PrismaClient | undefined;
 }
 
-export async function getPrismaClient(): Promise<PrismaClientLike> {
+export async function getPrismaClient(): Promise<PrismaClient> {
   if (global.prismaClientInstance) {
     return global.prismaClientInstance;
   }
 
-  const moduleName = "@prisma/client";
-  const mod = await import(moduleName);
-  const client = new mod.PrismaClient({
+  const client = new PrismaClient({
     log: process.env.NODE_ENV === "development" ? ["query", "warn", "error"] : ["error"]
-  }) as PrismaClientLike;
+  });
 
   if (process.env.NODE_ENV !== "production") {
     global.prismaClientInstance = client;
