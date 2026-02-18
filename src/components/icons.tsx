@@ -22,3 +22,4 @@ export const FiUser = () => <Icon symbol="👤" />;
 export const FiUsers = () => <Icon symbol="👥" />;
 export const FiWifi = () => <Icon symbol="📶" />;
 export const FiZap = () => <Icon symbol="⚡" />;
+export const FiLogOut = () => <Icon symbol="🚪" />;

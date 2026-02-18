@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { AuthProvider } from "@/context/AuthContext";
-import "./globals.css";
+import StyledComponentsRegistry from "@/lib/registry";
+import { StyledComponentsProvider } from "@/styles/StyledComponentsProvider";
 
 const appUrl = "https://ticketbr.vercel.app";
 
@@ -29,9 +30,13 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <body>
-        <AuthProvider>
-          {children}
-        </AuthProvider>
+        <StyledComponentsRegistry>
+          <StyledComponentsProvider>
+            <AuthProvider>
+              {children}
+            </AuthProvider>
+          </StyledComponentsProvider>
+        </StyledComponentsRegistry>
       </body>
     </html>
   );
