@@ -1,316 +1,168 @@
-import "dotenv/config";
-import { Pool } from "pg";
-import { randomUUID } from "crypto";
-import bcrypt from "bcryptjs";
+import { PrismaClient } from '@prisma/client'
+import bcrypt from 'bcryptjs'
 
-const connectionString = `${process.env.DATABASE_URL}`;
-const pool = new Pool({ connectionString });
-
-function parseDate(dateStr: string): Date {
-  // Format: "DD/MM/YYYY HH:mm"
-  const [datePart, timePart] = dateStr.split(" ");
-  const [day, month, year] = datePart.split("/").map(Number);
-  const [hour, minute] = timePart.split(":").map(Number);
-  return new Date(year, month - 1, day, hour, minute);
-}
-
-function mapPriority(priority: string): string {
-  switch (priority) {
-    case "Alta": return "HIGH";
-    case "Média": return "MEDIUM";
-    default: return "NONE";
-  }
-}
-
-function mapStatus(status: string): string {
-  switch (status) {
-    case "todo": return "TODO";
-    case "doing": return "DOING";
-    case "paused": return "PAUSED";
-    case "done": return "DONE";
-    default: return "TODO";
-  }
-}
-
-const tickets = [
-  {
-    number: 2391,
-    empresa: "NETMITT",
-    solicitante: "João Vitor Lisboa",
-    assunto: "Queda total de conectividade no bairro Centro",
-    prioridade: "Alta",
-    data: "17/02/2026 08:30",
-    progressoSla: 72,
-    progressoTarefa: 15,
-    status: "todo",
-    descricao: "Cliente reportou oscilação e indisponibilidade desde a madrugada.",
-    contato: "joao@netmitt.com",
-    tipoTicket: "Incidente",
-    categoria: "Conectividade",
-    mesaTrabalho: "NOC",
-    operador: "Marciano",
-    dataCriacao: "17/02/2026 06:30",
-    slaResposta: "17/02/2026 07:00",
-    slaSolucao: "17/02/2026 12:00",
-    interacoes: [
-      {
-        id: "2391-1",
-        autor: "Marciano",
-        tempo: "há 2 dias",
-        mensagem: "Validação inicial concluída. Estamos verificando enlace principal.",
-        corBorda: "azul"
-      },
-      {
-        id: "2391-2",
-        autor: "NOC",
-        tempo: "há 1 dia",
-        mensagem: "Detectada degradação em interface upstream. Escalado para campo.",
-        corBorda: "verde"
-      }
-    ]
-  },
-  {
-    number: 2389,
-    empresa: "LP INTERNET",
-    solicitante: "Lucas",
-    assunto: "Cliente sem acesso PPPoE após troca de roteador",
-    prioridade: "Média",
-    data: "16/02/2026 17:44",
-    progressoSla: 45,
-    progressoTarefa: 25,
-    status: "todo",
-    contato: "lucas@lpinternet.com",
-    tipoTicket: "Suporte",
-    categoria: "PPPoE",
-    mesaTrabalho: "Incidentes",
-    operador: "Cynthia",
-    dataCriacao: "16/02/2026 17:10",
-    slaResposta: "16/02/2026 18:00",
-    slaSolucao: "17/02/2026 13:00",
-    interacoes: []
-  },
-  {
-    number: 2388,
-    empresa: "ACEM PRIME SERVIÇOS",
-    solicitante: "Cynthia",
-    assunto: "Acompanhamento de ativação técnica",
-    prioridade: "Sem prioridade",
-    data: "16/02/2026 16:10",
-    progressoSla: 20,
-    progressoTarefa: 10,
-    status: "todo",
-    contato: "cynthia@acem.com",
-    tipoTicket: "Ativação",
-    categoria: "Projeto",
-    mesaTrabalho: "Implantação",
-    operador: "Marciano",
-    interacoes: []
-  },
-  {
-    number: 2384,
-    empresa: "ACEM PRIME SERVIÇOS DE INTERNET LTDA",
-    solicitante: "Cynthia",
-    assunto: "Acompanhamento diário",
-    prioridade: "Sem prioridade",
-    data: "17/02/2026 03:00",
-    progressoSla: 48,
-    progressoTarefa: 52,
-    status: "doing"
-  },
-  {
-    number: 2376,
-    empresa: "NETFIBRA",
-    solicitante: "Marina",
-    assunto: "Cliente sem comunicação com OLT NH",
-    prioridade: "Média",
-    data: "16/02/2026 18:55",
-    progressoSla: 63,
-    progressoTarefa: 45,
-    status: "doing"
-  },
-  {
-    number: 2381,
-    empresa: "LP INTERNET",
-    solicitante: "Fabrício",
-    assunto: "LINK IP SUL CONNECT",
-    prioridade: "Sem prioridade",
-    data: "14/02/2026 15:59",
-    progressoSla: 50,
-    progressoTarefa: 50,
-    status: "paused",
-    descricao: "Boa tarde será liberado um link IP para parceiro SUL CONNECT.",
-    contato: "noc@lpinternet.com.br",
-    tipoTicket: "Incidente",
-    categoria: "Roteamento",
-    mesaTrabalho: "Incidentes",
-    operador: "Marciano",
-    dataCriacao: "14/02/2026 15:59",
-    slaResposta: "16/02/2026 08:30",
-    slaSolucao: "20/02/2026 16:00",
-    interacoes: [
-      {
-        id: "2381-1",
-        autor: "Marciano",
-        tempo: "há 2 dias",
-        mensagem: "ASN validado. Aguardando retorno do cliente para janela de mudança.",
-        corBorda: "azul"
-      },
-      {
-        id: "2381-2",
-        autor: "Marciano",
-        tempo: "há 2 dias",
-        mensagem: "Atendimento interno: revisar prefixos e rota preferencial.",
-        corBorda: "verde"
-      },
-      {
-        id: "2381-3",
-        autor: "Fabrício LP Internet",
-        tempo: "há 3 dias",
-        mensagem: "Solicitação inicial enviada para subir link em mesma porta com rede neutra.",
-        corBorda: "vermelho"
-      }
-    ]
-  },
-  {
-    number: 2334,
-    empresa: "ACEM PRIME SERVIÇOS DE INTERNET LTDA",
-    solicitante: "Cynthia",
-    assunto: "ATIVAÇÃO | Bourbon Shopping 19/02",
-    prioridade: "Alta",
-    data: "05/02/2026 20:57",
-    progressoSla: 84,
-    progressoTarefa: 84,
-    status: "paused"
-  },
-  {
-    number: 2383,
-    empresa: "NETMITT",
-    solicitante: "João Vitor Lisboa",
-    assunto: "Perda de comunicação com OLT NH",
-    prioridade: "Média",
-    data: "16/02/2026 16:44",
-    progressoSla: 100,
-    progressoTarefa: 100,
-    status: "done"
-  },
-  {
-    number: 2382,
-    empresa: "ACEM PRIME SERVIÇOS DE INTERNET LTDA",
-    solicitante: "Cynthia",
-    assunto: "Acompanhamento diário",
-    prioridade: "Sem prioridade",
-    data: "16/02/2026 03:00",
-    progressoSla: 100,
-    progressoTarefa: 100,
-    status: "done"
-  }
-];
+const prisma = new PrismaClient()
 
 async function main() {
-  console.log("Start seeding (Direct PG)...");
-  const client = await pool.connect();
+  console.log('Start seeding ...')
 
-  try {
-    // Generate Hash
-    const hashedPassword = await bcrypt.hash("admin123", 10);
+  // Seed Tipo_Ticket
+  const ticketTypes = [
+    {
+      nome: 'Incidente',
+      descricao: 'Interrupção não planejada de um serviço ou redução na qualidade do serviço.',
+      sla_horas: 24,
+      prioridade_default: 'Alta',
+    },
+    {
+      nome: 'Solicitação de Serviço',
+      descricao: 'Pedido de um usuário para informações, conselhos, uma mudança padrão ou acesso a um serviço.',
+      sla_horas: 48,
+      prioridade_default: 'Média',
+    },
+    {
+      nome: 'Problema',
+      descricao: 'Causa raiz de um ou mais incidentes.',
+      sla_horas: 72,
+      prioridade_default: 'Média',
+    },
+    {
+      nome: 'Mudança',
+      descricao: 'Adição, modificação ou remoção de qualquer coisa que possa ter efeito nos serviços de TI.',
+      sla_horas: 120,
+      prioridade_default: 'Baixa',
+    },
+  ]
 
-    // Upsert Admin User
-    const userEmail = "admin@ticketbr.com";
-    const userRes = await client.query('SELECT id FROM "User" WHERE email = $1', [userEmail]);
-    
-    let userId;
-    if (userRes.rows.length === 0) {
-      userId = randomUUID();
-      await client.query(`
-        INSERT INTO "User" (id, email, name, password, role, "createdAt", "updatedAt")
-        VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
-      `, [userId, userEmail, "Admin", hashedPassword, "ADMIN"]);
-      console.log("Default user created.");
-    } else {
-      userId = userRes.rows[0].id;
-      // Update password just in case
-      await client.query('UPDATE "User" SET password = $1 WHERE id = $2', [hashedPassword, userId]);
-      console.log("Default user updated.");
+  for (const t of ticketTypes) {
+    const type = await prisma.tipo_Ticket.upsert({
+      where: { nome: t.nome },
+      update: {},
+      create: t,
+    })
+    console.log(`Created/Updated Ticket Type: ${type.nome}`)
+
+    // Seed Categories for this type
+    let categories: string[] = []
+    if (t.nome === 'Incidente') {
+      categories = ['Hardware', 'Software', 'Rede', 'Segurança']
+    } else if (t.nome === 'Solicitação de Serviço') {
+      categories = ['Acesso', 'Instalação', 'Dúvida', 'Equipamento']
     }
 
-    for (const t of tickets) {
-      const status = mapStatus(t.status);
-      const priority = mapPriority(t.prioridade);
-      const createdAt = parseDate(t.data);
-      const responseSlaAt = t.slaResposta ? parseDate(t.slaResposta) : null;
-      const solutionSlaAt = t.slaSolucao ? parseDate(t.slaSolucao) : null;
-
-      // Upsert Ticket
-      const ticketRes = await client.query('SELECT id FROM "Ticket" WHERE number = $1', [t.number]);
-      let ticketId;
-
-      if (ticketRes.rows.length > 0) {
-        ticketId = ticketRes.rows[0].id;
-        await client.query(`
-          UPDATE "Ticket" SET
-            company = $1, requester = $2, subject = $3, description = $4,
-            status = $5::"TicketStatus", priority = $6::"TicketPriority", operator = $7, contact = $8,
-            "ticketType" = $9, category = $10, workbench = $11, "responseSlaAt" = $12,
-            "solutionSlaAt" = $13, "createdAt" = $14, "updatedAt" = NOW()
-          WHERE id = $15
-        `, [
-          t.empresa, t.solicitante, t.assunto, t.descricao || null,
-          status, priority, t.operador || null, t.contato || null,
-          t.tipoTicket || null, t.categoria || null, t.mesaTrabalho || null,
-          responseSlaAt, solutionSlaAt, createdAt,
-          ticketId
-        ]);
-        console.log(`Updated ticket ${t.number}`);
-      } else {
-        ticketId = randomUUID();
-        await client.query(`
-          INSERT INTO "Ticket" (
-            id, number, company, requester, subject, description,
-            status, priority, operator, contact,
-            "ticketType", category, workbench, "responseSlaAt",
-            "solutionSlaAt", "createdAt", "updatedAt"
-          ) VALUES (
-            $1, $2, $3, $4, $5, $6,
-            $7::"TicketStatus", $8::"TicketPriority", $9, $10,
-            $11, $12, $13, $14,
-            $15, $16, NOW()
-          )
-        `, [
-          ticketId, t.number, t.empresa, t.solicitante, t.assunto, t.descricao || null,
-          status, priority, t.operador || null, t.contato || null,
-          t.tipoTicket || null, t.categoria || null, t.mesaTrabalho || null,
-          responseSlaAt, solutionSlaAt, createdAt
-        ]);
-        console.log(`Created ticket ${t.number}`);
-      }
-
-      // Handle interactions (simplified)
-      if (t.interacoes && t.interacoes.length > 0) {
-          // Clear existing for this ticket to avoid dups logic complexity in seed
-          // (In production seed, be careful, but here it's fine)
-          await client.query('DELETE FROM "TicketEvent" WHERE "ticketId" = $1', [ticketId]);
-          
-          for (const interaction of t.interacoes) {
-            const eventId = randomUUID();
-            await client.query(`
-                INSERT INTO "TicketEvent" (
-                id, "ticketId", type, title, description, author, "createdAt"
-                ) VALUES (
-                $1, $2, 'COMMENT', 'Comentário', $3, $4, NOW()
-                )
-            `, [eventId, ticketId, interaction.mensagem, interaction.autor]);
-          }
-      }
+    for (const catName of categories) {
+      await prisma.categoria_Ticket.upsert({
+        where: {
+          tipo_ticket_id_nome: {
+            tipo_ticket_id: type.id,
+            nome: catName,
+          },
+        },
+        update: {},
+        create: {
+          nome: catName,
+          descricao: `Categoria ${catName} para ${t.nome}`,
+          tipo_ticket_id: type.id,
+        },
+      })
+      console.log(`  - Created/Updated Category: ${catName}`)
     }
+  }
 
-    console.log("Seeding finished.");
-  } catch (e) {
-    console.error("Seeding error:", e);
-    process.exit(1);
-  } finally {
-    client.release();
-    await pool.end();
+  // Seed User (Legacy - for Login)
+  const hashedPassword = await bcrypt.hash('admin123', 10)
+  const user = await prisma.user.upsert({
+    where: { email: 'admin@ticketbr.com' },
+    update: {
+      password: hashedPassword,
+    },
+    create: {
+      email: 'admin@ticketbr.com',
+      name: 'Admin',
+      password: hashedPassword,
+      role: 'ADMIN',
+    },
+  })
+  console.log(`Created/Updated User (Legacy): ${user.email}`)
+
+  // Seed Operador (Admin)
+  const admin = await prisma.operador.upsert({
+    where: { email: 'admin@ticketbr.com' },
+    update: {
+      senha_hash: hashedPassword, // Using same hash for consistency
+    },
+    create: {
+      nome: 'Administrador',
+      email: 'admin@ticketbr.com',
+      senha_hash: hashedPassword,
+      matricula: 'ADM001',
+      perfil: 'Admin',
+      is_tecnico: true,
+      especialidade: 'Geral',
+    },
+  })
+  console.log(`Created/Updated Operator: ${admin.nome}`)
+
+  // Seed Mesa de Trabalho
+  const mesa = await prisma.mesa_Trabalho.upsert({
+    where: { id: 'mesa-n1-default' }, // using fixed ID for simplicity in upsert if possible, but ID is cuid. 
+    // We can't upsert by ID easily if it's random. Let's try finding by name first or just create if empty.
+    update: {},
+    create: {
+      id: 'mesa-n1-default',
+      nome: 'Nível 1 - Geral',
+      localizacao: 'Matriz - 1º Andar',
+      capacidade: 10,
+      tipo: 'N1',
+      responsavel_id: admin.id,
+    },
+  })
+  console.log(`Created/Updated Workbench: ${mesa.nome}`)
+
+  // Seed Solicitantes (Clientes)
+  const requesters = [
+    {
+      razao_social: 'Empresa A Ltda',
+      nome_fantasia: 'Empresa A',
+      cnpj: '12345678000100',
+      email: 'contato@empresaa.com',
+      telefone: '11999990001',
+      endereco_completo: 'Rua A, 100, SP',
+    },
+    {
+      razao_social: 'Comércio B S.A.',
+      nome_fantasia: 'Comércio B',
+      cnpj: '98765432000199',
+      email: 'suporte@comerciob.com',
+      telefone: '21988880002',
+      endereco_completo: 'Av B, 200, RJ',
+    },
+    {
+      razao_social: 'Tech Solutions',
+      nome_fantasia: 'Tech Sol',
+      cnpj: '11223344000155',
+      email: 'ti@techsol.com',
+      telefone: '31977770003',
+      endereco_completo: 'Rua C, 300, MG',
+    }
+  ]
+
+  for (const r of requesters) {
+    await prisma.solicitante.upsert({
+      where: { cnpj: r.cnpj },
+      update: {},
+      create: r
+    })
+    console.log(`Created/Updated Requester: ${r.nome_fantasia}`)
   }
 }
 
-main();
+main()
+  .then(async () => {
+    await prisma.$disconnect()
+  })
+  .catch(async (e) => {
+    console.error(e)
+    await prisma.$disconnect()
+    process.exit(1)
+  })
