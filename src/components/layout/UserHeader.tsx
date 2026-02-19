@@ -10,8 +10,8 @@ const HeaderContainer = styled.header`
   justify-content: space-between;
   align-items: center;
   padding: 0.5rem 1rem;
-  background: ${({ theme }) => theme.colors.surface};
-  border-bottom: 1px solid ${({ theme }) => theme.colors.border};
+  // background: ${({ theme }) => theme.colors.surface};
+  // border-bottom: 1px solid ${({ theme }) => theme.colors.border};
   height: 60px;
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
@@ -28,6 +28,7 @@ const Brand = styled.div`
   font-size: 1.1rem;
   color: ${({ theme }) => theme.colors.text.primary};
   display: flex;
+  margin-left: 10rem;
   align-items: center;
   gap: 0.5rem;
 `;
@@ -99,7 +100,7 @@ export function UserHeader() {
   return (
     <HeaderContainer>
       <Brand>
-        TicketBR <small style={{ fontWeight: 400, fontSize: "0.8rem", color: "#666" }}>v0.1.0</small>
+        {/* TicketBR <small style={{ fontWeight: 400, fontSize: "0.8rem", color: "#666" }}>v0.1.0</small> */}
       </Brand>
       
       <Controls>

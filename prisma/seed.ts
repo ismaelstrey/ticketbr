@@ -104,12 +104,12 @@ async function main() {
   console.log(`Created/Updated Operator: ${admin.nome}`)
 
   // Seed Mesa de Trabalho
-  // ... rest of the file
   const mesa = await prisma.mesa_Trabalho.upsert({
     where: { id: 'mesa-n1-default' }, // using fixed ID for simplicity in upsert if possible, but ID is cuid. 
     // We can't upsert by ID easily if it's random. Let's try finding by name first or just create if empty.
     update: {},
     create: {
+      id: 'mesa-n1-default',
       nome: 'Nível 1 - Geral',
       localizacao: 'Matriz - 1º Andar',
       capacidade: 10,
@@ -117,8 +117,44 @@ async function main() {
       responsavel_id: admin.id,
     },
   })
-  // Note: upsert requires unique field. Mesa doesn't have unique name in schema (my bad, should have added it). 
-  // I'll check if one exists with findFirst instead.
+  console.log(`Created/Updated Workbench: ${mesa.nome}`)
+
+  // Seed Solicitantes (Clientes)
+  const requesters = [
+    {
+      razao_social: 'Empresa A Ltda',
+      nome_fantasia: 'Empresa A',
+      cnpj: '12345678000100',
+      email: 'contato@empresaa.com',
+      telefone: '11999990001',
+      endereco_completo: 'Rua A, 100, SP',
+    },
+    {
+      razao_social: 'Comércio B S.A.',
+      nome_fantasia: 'Comércio B',
+      cnpj: '98765432000199',
+      email: 'suporte@comerciob.com',
+      telefone: '21988880002',
+      endereco_completo: 'Av B, 200, RJ',
+    },
+    {
+      razao_social: 'Tech Solutions',
+      nome_fantasia: 'Tech Sol',
+      cnpj: '11223344000155',
+      email: 'ti@techsol.com',
+      telefone: '31977770003',
+      endereco_completo: 'Rua C, 300, MG',
+    }
+  ]
+
+  for (const r of requesters) {
+    await prisma.solicitante.upsert({
+      where: { cnpj: r.cnpj },
+      update: {},
+      create: r
+    })
+    console.log(`Created/Updated Requester: ${r.nome_fantasia}`)
+  }
 }
 
 main()

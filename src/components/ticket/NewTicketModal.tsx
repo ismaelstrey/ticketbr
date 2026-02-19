@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { FiX, FiPaperclip, FiClock, FiSave, FiLock, FiBold, FiItalic, FiUnderline, FiList, FiAlignLeft, FiLink, FiImage, FiCode } from "react-icons/fi";
 import { Button } from "@/components/ui/Button";
 import { Input, Select } from "@/components/ui/Input";
+import { useAuth } from "@/context/AuthContext";
 
 const Overlay = styled.div`
   position: fixed;
@@ -280,6 +281,8 @@ interface NewTicketModalProps {
 }
 
 export default function NewTicketModal({ isOpen, onClose }: NewTicketModalProps) {
+  const { user } = useAuth();
+  // Form State
   const [requester, setRequester] = useState("");
   const [subject, setSubject] = useState("");
   const [description, setDescription] = useState("");
@@ -288,6 +291,125 @@ export default function NewTicketModal({ isOpen, onClose }: NewTicketModalProps)
   const [ticketType, setTicketType] = useState("");
   const [category, setCategory] = useState("");
   const [workTable, setWorkTable] = useState("");
+  const [operator, setOperator] = useState("");
+
+  // Domain Data State
+  const [ticketTypes, setTicketTypes] = useState<any[]>([]);
+  const [workbenches, setWorkbenches] = useState<any[]>([]);
+  const [requesters, setRequesters] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [isRequesterListOpen, setIsRequesterListOpen] = useState(false);
+
+  const handleRequesterSelect = (value: string) => {
+    setRequester(value);
+    setSearchTerm(value);
+    setIsRequesterListOpen(false);
+  };
+  
+  // Derived State
+  const categories = ticketTypes.find(t => t.nome === ticketType)?.categorias || [];
+  const operators = workbenches.find(w => w.nome === workTable)?.operadores || [];
+
+  // Fetch Domain Data and Auto-select User
+  useEffect(() => {
+    if (isOpen) {
+      setLoading(true);
+      Promise.all([
+        fetch("/api/domain/ticket-types").then(res => res.json()),
+        fetch("/api/domain/workbenches").then(res => res.json()),
+        fetch("/api/domain/requesters").then(res => res.json())
+      ]).then(([typesData, workbenchesData, requestersData]) => {
+        const benches = Array.isArray(workbenchesData) ? workbenchesData : [];
+        setTicketTypes(Array.isArray(typesData) ? typesData : []);
+        setWorkbenches(benches);
+        setRequesters(Array.isArray(requestersData) ? requestersData : []);
+
+        // Auto-select user if present in any workbench
+        if (user && !workTable) {
+            const userWorkbench = benches.find((w: any) => w.operadores.some((op: any) => op.nome === user.name));
+            if (userWorkbench) {
+                setWorkTable(userWorkbench.nome);
+                setOperator(user.name);
+            }
+        }
+      }).catch(err => console.error("Failed to load domain data", err))
+        .finally(() => setLoading(false));
+    }
+  }, [isOpen]); 
+
+  // Update operator when workbench changes manually
+  useEffect(() => {
+     if (workTable && user) {
+         // Check if user is in the new workbench
+         const bench = workbenches.find(w => w.nome === workTable);
+         if (bench) {
+             const userInBench = bench.operadores.some((op: any) => op.nome === user.name);
+             if (userInBench) {
+                 setOperator(user.name);
+             } else {
+                 setOperator(""); // Reset if user not in this bench
+             }
+         }
+     }
+  }, [workTable, user, workbenches]);
+
+  const [searchTerm, setSearchTerm] = useState("");
+  
+  // Filter requesters based on search term
+  const filteredRequesters = requesters.filter(req => 
+    req.nome_fantasia.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    req.email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // ... (inside useEffect) ...
+
+  const handleSubmit = async () => {
+    // Validation: requester is required (stored in requester state)
+    if (!requester || !subject || !priority) {
+      alert("Preencha os campos obrigatórios (Solicitante, Assunto, Prioridade)");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const payload = {
+        empresa: requester, // Usando ID ou Nome como empresa por enquanto
+        solicitante: requester, // ID ou Nome
+        assunto: subject,
+        descricao: description,
+        prioridade: priority, // Alta, Média, Baixa (UI) -> Mapeado no backend
+        status: "todo",
+        operador: operator,
+        tipoTicket: ticketType,
+        categoria: category,
+        mesaTrabalho: workTable,
+        // followTicket (não suportado na API ainda)
+      };
+
+      const res = await fetch("/api/tickets", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Erro ao criar ticket");
+      }
+
+      const data = await res.json();
+      console.log("Ticket criado:", data);
+      alert("Ticket criado com sucesso!");
+      onClose();
+      // O ideal seria recarregar o Kanban aqui
+      window.location.reload(); 
+    } catch (error: any) {
+      console.error("Erro:", error);
+      alert(`Erro: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
   
   // Format current date
   const now = new Date();
@@ -307,22 +429,65 @@ export default function NewTicketModal({ isOpen, onClose }: NewTicketModalProps)
           <MainColumn>
             <FormGroup>
               <label>Solicitante</label>
-              <Select 
-                style={ErrorInputStyle} 
-                value={requester} 
-                onChange={(e) => setRequester(e.target.value)}
-              >
-                <option value="" disabled>Selecione ou Pesquise por Nome, CNPJ, CPF, Telefone, Celular ou E-mail</option>
-                <option value="1">Cliente Exemplo</option>
-                <option value="2">Outro Cliente</option>
-              </Select>
+              <div style={{ position: 'relative' }}>
+                <Input
+                  placeholder="Pesquisar solicitante..."
+                  value={searchTerm}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                    setIsRequesterListOpen(true);
+                    setRequester(""); // Reset selection on type
+                  }}
+                  onFocus={() => setIsRequesterListOpen(true)}
+                  style={!requester ? ErrorInputStyle : undefined}
+                />
+                {isRequesterListOpen && (
+                  <div style={{
+                    position: 'absolute',
+                    top: '100%',
+                    left: 0,
+                    right: 0,
+                    background: 'white',
+                    border: '1px solid #ddd',
+                    borderRadius: '4px',
+                    zIndex: 10,
+                    maxHeight: '200px',
+                    overflowY: 'auto',
+                    boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+                  }}>
+                    {filteredRequesters.length > 0 ? (
+                      filteredRequesters.map((req: any) => (
+                        <div
+                          key={req.id}
+                          onClick={() => handleRequesterSelect(req.nome_fantasia)}
+                          style={{
+                            padding: '8px 12px',
+                            cursor: 'pointer',
+                            borderBottom: '1px solid #eee',
+                            fontSize: '0.9rem'
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9f9f9'}
+                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
+                        >
+                          <strong>{req.nome_fantasia}</strong>
+                          <div style={{ fontSize: '0.8rem', color: '#666' }}>{req.email} - {req.cnpj}</div>
+                        </div>
+                      ))
+                    ) : (
+                      <div style={{ padding: '8px 12px', color: '#666', fontStyle: 'italic' }}>
+                        Nenhum solicitante encontrado.
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             </FormGroup>
 
             <FormGroup>
               <label>Assunto</label>
               <Input 
                 placeholder="Assunto" 
-                style={ErrorInputStyle} 
+                style={!subject ? ErrorInputStyle : undefined} 
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
               />
@@ -388,11 +553,12 @@ export default function NewTicketModal({ isOpen, onClose }: NewTicketModalProps)
               <Select 
                 value={priority} 
                 onChange={(e) => setPriority(e.target.value)}
+                style={!priority ? ErrorInputStyle : undefined}
               >
                 <option value="" disabled>Selecione</option>
                 <option value="Alta">Alta</option>
-                <option value="Media">Média</option>
-                <option value="Baixa">Baixa</option>
+                <option value="Média">Média</option>
+                <option value="Sem prioridade">Sem prioridade</option>
               </Select>
             </FormGroup>
 
@@ -408,11 +574,15 @@ export default function NewTicketModal({ isOpen, onClose }: NewTicketModalProps)
               <label>Tipo de Ticket</label>
               <Select 
                 value={ticketType} 
-                onChange={(e) => setTicketType(e.target.value)}
+                onChange={(e) => {
+                    setTicketType(e.target.value);
+                    setCategory(""); // Reset category when type changes
+                }}
               >
                 <option value="" disabled>Selecione</option>
-                <option value="Incidente">Incidente</option>
-                <option value="Solicitacao">Solicitação</option>
+                {ticketTypes.map((t: any) => (
+                    <option key={t.id} value={t.nome}>{t.nome}</option>
+                ))}
               </Select>
             </FormGroup>
 
@@ -421,40 +591,62 @@ export default function NewTicketModal({ isOpen, onClose }: NewTicketModalProps)
               <Select 
                 value={category} 
                 onChange={(e) => setCategory(e.target.value)}
+                disabled={!ticketType}
               >
                 <option value="" disabled>Selecione</option>
-                <option value="Hardware">Hardware</option>
-                <option value="Software">Software</option>
+                {categories.map((c: any) => (
+                    <option key={c.id} value={c.nome}>{c.nome}</option>
+                ))}
               </Select>
             </FormGroup>
 
             <FormGroup>
               <label>Mesa de Trabalho</label>
               <Select 
-                style={ErrorInputStyle} 
                 value={workTable} 
-                onChange={(e) => setWorkTable(e.target.value)}
+                onChange={(e) => {
+                    setWorkTable(e.target.value);
+                    setOperator(""); // Reset operator when workbench changes
+                }}
               >
                 <option value="" disabled>Selecione</option>
-                <option value="N1">Nível 1</option>
-                <option value="N2">Nível 2</option>
+                {workbenches.map((w: any) => (
+                    <option key={w.id} value={w.nome}>{w.nome}</option>
+                ))}
               </Select>
             </FormGroup>
 
             <FormGroup>
               <label>Operador</label>
-              <Select disabled value="">
-                <option value="" disabled>Selecione uma mesa de trabalho antes!</option>
+              <Select 
+                value={operator} 
+                onChange={(e) => setOperator(e.target.value)}
+                disabled={!workTable}
+              >
+                <option value="" disabled>Selecione</option>
+                {operators.map((op: any) => (
+                    <option key={op.id} value={op.nome}>{op.nome}</option>
+                ))}
               </Select>
             </FormGroup>
           </Sidebar>
         </Content>
 
         <Footer>
-          <FooterButton className="save" type="button">
-            <FiSave style={{ marginRight: '5px' }} /> Salvar e Abrir
+          <FooterButton 
+            className="save" 
+            type="button" 
+            onClick={handleSubmit}
+            disabled={loading}
+          >
+            <FiSave style={{ marginRight: '5px' }} /> 
+            {loading ? "Salvando..." : "Salvar e Abrir"}
           </FooterButton>
-          <FooterButton className="open" type="button">
+          <FooterButton 
+            className="open" 
+            type="button"
+            disabled={loading}
+          >
             <FiLock style={{ marginRight: '5px' }} /> Abrir ticket
           </FooterButton>
         </Footer>

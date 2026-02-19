@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createTicket, listTickets } from "@/server/services/ticket-service";
 import { CreateTicketSchema } from "@/lib/validations/ticket";
+import { z } from "zod";
 
 export async function GET() {
   const tickets = await listTickets();
@@ -15,7 +16,7 @@ export async function POST(request: NextRequest) {
 
     if (!result.success) {
       return NextResponse.json(
-        { error: "Erro de validação", details: result.error.format() },
+        { error: "Erro de validação", details: z.treeifyError(result.error) },
         { status: 400 }
       );
     }

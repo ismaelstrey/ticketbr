@@ -1,6 +1,7 @@
 "use client";
 
-import styled from "styled-components";
+import React, { useState } from "react";
+import styled, { css } from "styled-components";
 import {
   FiHome,
   FiSearch,
@@ -12,70 +13,301 @@ import {
   FiZap,
   FiSettings,
   FiHelpCircle,
-  FiAlertCircle
+  FiAlertCircle,
+  FiMenu,
+  FiChevronDown,
+  FiChevronRight
 } from "@/components/icons";
 
-const SidebarContainer = styled.aside`
+const SidebarContainer = styled.aside<{ $isExpanded: boolean }>`
   background: ${({ theme }) => theme.colors.secondary};
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 0.9rem;
-  padding: 1rem 0.5rem;
+  height: 100vh;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 100;
+  width: ${({ $isExpanded }) => ($isExpanded ? "260px" : "64px")};
+  transition: width 0.3s ease-in-out;
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  /* Custom Scrollbar */
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+  }
 
   @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
+    width: ${({ $isExpanded }) => ($isExpanded ? "260px" : "0")};
+    /* transform: ${({ $isExpanded }) => ($isExpanded ? "translateX(0)" : "translateX(-100%)")}; */
+    /* width is better for layout shifting if using grid, but absolute + transform is better for overlay */
+  }
+`;
+
+const SidebarHeader = styled.div<{ $isExpanded: boolean }>`
+  display: flex;
+  align-items: center;
+  justify-content: ${({ $isExpanded }) => ($isExpanded ? "space-between" : "center")};
+  padding: 1rem 0.8rem;
+  min-height: 64px;
+`;
+
+const Logo = styled.div<{ $isExpanded: boolean }>`
+  color: #f4f7fb;
+  font-size: 1.4rem;
+  font-weight: 700;
+  display: ${({ $isExpanded }) => ($isExpanded ? "block" : "none")};
+  white-space: nowrap;
+`;
+
+const LogoSmall = styled.div<{ $isExpanded: boolean }>`
+  color: #f4f7fb;
+  font-size: 1.6rem;
+  font-weight: 700;
+  display: ${({ $isExpanded }) => ($isExpanded ? "none" : "block")};
+`;
+
+const ToggleButton = styled.button`
+  background: transparent;
+  border: none;
+  color: #b9c4d6;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.2rem;
+  border-radius: 4px;
+
+  &:hover {
+    color: white;
+    background: rgba(255, 255, 255, 0.1);
+  }
+`;
+
+const MenuList = styled.nav`
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.5rem;
+  flex: 1;
+`;
+
+const MenuItemContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+
+const MenuItem = styled.button<{ $isActive: boolean; $isExpanded: boolean }>`
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 0.7rem 0.6rem;
+  background: ${({ $isActive }) => ($isActive ? "rgba(66, 133, 244, 0.15)" : "transparent")};
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  color: ${({ $isActive }) => ($isActive ? "#4285f4" : "#b9c4d6")};
+  border-left: 3px solid ${({ $isActive }) => ($isActive ? "#4285f4" : "transparent")};
+  transition: all 0.2s;
+  justify-content: ${({ $isExpanded }) => ($isExpanded ? "flex-start" : "center")};
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+  }
+
+  svg {
+    font-size: 1.2rem;
+    min-width: 24px;
+  }
+`;
+
+const MenuLabel = styled.span<{ $isExpanded: boolean }>`
+  margin-left: 0.8rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  display: ${({ $isExpanded }) => ($isExpanded ? "block" : "none")};
+  white-space: nowrap;
+  flex: 1;
+  text-align: left;
+`;
+
+const ChevronIcon = styled.span<{ $isExpanded: boolean }>`
+  display: ${({ $isExpanded }) => ($isExpanded ? "flex" : "none")};
+  align-items: center;
+  font-size: 1rem;
+`;
+
+const SubMenu = styled.div<{ $isOpen: boolean; $isExpanded: boolean }>`
+  display: ${({ $isOpen, $isExpanded }) => ($isOpen && $isExpanded ? "flex" : "none")};
+  flex-direction: column;
+  padding-left: 2.5rem;
+  gap: 0.2rem;
+  margin-top: 0.2rem;
+`;
+
+const SubMenuItem = styled.a<{ $isActive: boolean }>`
+  display: block;
+  padding: 0.5rem 0.5rem;
+  color: ${({ $isActive }) => ($isActive ? "white" : "#8b9bb4")};
+  font-size: 0.85rem;
+  text-decoration: none;
+  border-radius: 4px;
+  transition: all 0.2s;
+
+  &:hover {
+    color: white;
+    background: rgba(255, 255, 255, 0.05);
+  }
+`;
+
+const MobileOverlay = styled.div<{ $isVisible: boolean }>`
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 90;
+  display: ${({ $isVisible }) => ($isVisible ? "block" : "none")};
+  
+  @media (min-width: ${({ theme }) => theme.breakpoints.tablet}) {
     display: none;
   }
 `;
 
-const Logo = styled.div`
-  color: #f4f7fb;
-  font-size: 1.6rem;
-  font-weight: 700;
-  margin-bottom: 0.5rem;
-`;
+interface MenuItemType {
+  label: string;
+  icon: React.ElementType;
+  path?: string;
+  subItems?: { label: string; path: string }[];
+}
 
-const MenuButton = styled.button`
-  width: 28px;
-  height: 28px;
-  border: 1px solid #5f6c84;
-  border-radius: 8px;
-  background: transparent;
-  color: #b9c4d6;
-  display: grid;
-  place-items: center;
-  cursor: pointer;
-  transition: all 0.2s;
-
-  &:hover {
-    border-color: #b9c4d6;
-    color: white;
-  }
-`;
-
-const menuIcons = [
-  FiHome,
-  FiSearch,
-  FiGrid,
-  FiList,
-  FiUsers,
-  FiBookOpen,
-  FiWifi,
-  FiZap,
-  FiSettings,
-  FiHelpCircle,
-  FiAlertCircle
+const menuItems: MenuItemType[] = [
+  { label: "Dashboards", icon: FiHome, path: "/" },
+  { label: "Tickets", icon: FiList, path: "/tickets", subItems: [
+      { label: "Todos os Tickets", path: "/tickets" },
+      { label: "Meus Tickets", path: "/tickets/me" },
+      { label: "Abertos", path: "/tickets/open" }
+    ] 
+  },
+  { label: "Chat", icon: FiUsers, path: "/chat" },
+  { label: "Tarefas", icon: FiGrid, path: "/tasks" },
+  { label: "Projetos", icon: FiBookOpen, path: "/projects" },
+  { label: "Inventário", icon: FiWifi, path: "/inventory" },
+  { label: "Relatórios", icon: FiZap, path: "/reports" },
+  { label: "Configurações", icon: FiSettings, path: "/settings" },
 ];
 
 export function Sidebar() {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [openSubMenus, setOpenSubMenus] = useState<string[]>([]);
+  const [activePath, setActivePath] = useState("/"); // In real app, use usePathname()
+
+  const toggleSidebar = () => setIsExpanded(!isExpanded);
+
+  const toggleSubMenu = (label: string) => {
+    if (!isExpanded) {
+        setIsExpanded(true);
+        setOpenSubMenus([label]);
+        return;
+    }
+    setOpenSubMenus(prev => 
+      prev.includes(label) 
+        ? prev.filter(item => item !== label) 
+        : [...prev, label]
+    );
+  };
+
+  const handleMenuClick = (item: MenuItemType) => {
+    if (item.subItems) {
+      toggleSubMenu(item.label);
+    } else {
+      setActivePath(item.path || "/");
+      // Prevent navigation if path is not defined or is just '#'
+      if (item.path && item.path !== '#') {
+          // Use window.location for now as we are in a simple client component without router context setup yet
+          window.location.href = item.path;
+      }
+    }
+  };
+
   return (
-    <SidebarContainer>
-      <Logo>T</Logo>
-      {menuIcons.map((Icon, index) => (
-        <MenuButton key={index} aria-label={`menu-${index + 1}`} type="button">
-          <Icon aria-hidden="true" />
-        </MenuButton>
-      ))}
-    </SidebarContainer>
+    <>
+      <MobileOverlay $isVisible={isExpanded} onClick={() => setIsExpanded(false)} />
+      {/* Spacer is only for desktop, on mobile sidebar is overlay */}
+      <div 
+        style={{ 
+          width: isExpanded ? '260px' : '64px', 
+          transition: 'width 0.3s ease-in-out', 
+          flexShrink: 0,
+          display: 'block'
+        }} 
+        className="sidebar-spacer" 
+      />
+      <style jsx>{`
+        @media (max-width: 768px) {
+          .sidebar-spacer {
+            display: none !important;
+          }
+        }
+      `}</style>
+      <SidebarContainer $isExpanded={isExpanded}>
+        <SidebarHeader $isExpanded={isExpanded}>
+          <Logo $isExpanded={isExpanded}>TicketBR</Logo>
+          <LogoSmall $isExpanded={isExpanded}>T</LogoSmall>
+          <ToggleButton onClick={toggleSidebar} aria-label="Toggle Sidebar">
+            <FiMenu />
+          </ToggleButton>
+        </SidebarHeader>
+
+        <MenuList>
+          {menuItems.map((item, index) => {
+            const isActive = activePath === item.path;
+            const hasSubItems = !!item.subItems;
+            const isSubMenuOpen = openSubMenus.includes(item.label);
+
+            return (
+              <MenuItemContainer key={index}>
+                <MenuItem 
+                  $isActive={isActive} 
+                  $isExpanded={isExpanded}
+                  onClick={() => handleMenuClick(item)}
+                  title={!isExpanded ? item.label : ""}
+                >
+                  <item.icon />
+                  <MenuLabel $isExpanded={isExpanded}>{item.label}</MenuLabel>
+                  {hasSubItems && (
+                    <ChevronIcon $isExpanded={isExpanded}>
+                      {isSubMenuOpen ? <FiChevronDown /> : <FiChevronRight />}
+                    </ChevronIcon>
+                  )}
+                </MenuItem>
+                
+                {hasSubItems && (
+                  <SubMenu $isOpen={isSubMenuOpen} $isExpanded={isExpanded}>
+                    {item.subItems!.map((sub, subIndex) => (
+                      <SubMenuItem 
+                        key={subIndex} 
+                        href="#" 
+                        $isActive={activePath === sub.path}
+                        onClick={(e) => {
+                            e.preventDefault();
+                            setActivePath(sub.path);
+                        }}
+                      >
+                        {sub.label}
+                      </SubMenuItem>
+                    ))}
+                  </SubMenu>
+                )}
+              </MenuItemContainer>
+            );
+          })}
+        </MenuList>
+      </SidebarContainer>
+    </>
   );
 }

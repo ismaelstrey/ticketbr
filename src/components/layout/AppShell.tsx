@@ -7,6 +7,7 @@ export const AppShellContainer = styled.div`
 
   @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
     grid-template-columns: 1fr;
+    padding-left: 0;
   }
 `;
 

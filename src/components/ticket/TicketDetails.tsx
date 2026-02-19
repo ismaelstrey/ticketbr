@@ -9,12 +9,14 @@ import {
   FiHash,
   FiSearch,
   FiTool,
-  FiUser
+  FiUser,
+  FiPlus
 } from "@/components/icons";
 import { Ticket, TicketPriority, TicketStatus } from "@/types/ticket";
 import { Button } from "@/components/ui/Button";
 import { Input, Select, Textarea } from "@/components/ui/Input";
 import { Card } from "@/components/ui/Card";
+import NewCommentModal from "./NewCommentModal";
 
 const Container = styled.section`
   display: flex;
@@ -162,8 +164,16 @@ export default function TicketDetails({
   onChange: (changes: Partial<Ticket>) => void;
   onSave: () => void;
 }) {
+  const [isCommentModalOpen, setIsCommentModalOpen] = React.useState(false);
+
   return (
     <Container>
+      <NewCommentModal 
+        isOpen={isCommentModalOpen} 
+        onClose={() => setIsCommentModalOpen(false)} 
+        ticketId={ticket.id}
+        onCommentAdded={(updatedTicket) => onChange(updatedTicket)}
+      />
       <Header>
         <Button variant="ghost" onClick={onBack}>
           ← Voltar ao Kanban
@@ -191,7 +201,9 @@ export default function TicketDetails({
         <FilterTag>
           <FiSearch aria-hidden="true" /> Pesquisar
         </FilterTag>
-        <FilterTag>Comentários</FilterTag>
+        <Button variant="ghost" onClick={() => setIsCommentModalOpen(true)} style={{ padding: '0.4rem 0.65rem', fontSize: '0.85rem' }}>
+          <FiPlus /> Adicionar Comentário
+        </Button>
         <FilterTag>Anexos</FilterTag>
         <FilterTag>Checklist</FilterTag>
       </TopFilters>
