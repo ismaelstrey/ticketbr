@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import styled, { css } from "styled-components";
+import { useAuth } from "@/context/AuthContext";
 import {
   FiHome,
   FiSearch,
@@ -16,7 +17,8 @@ import {
   FiAlertCircle,
   FiMenu,
   FiChevronDown,
-  FiChevronRight
+  FiChevronRight,
+  FiLogOut
 } from "@/components/icons";
 
 const SidebarContainer = styled.aside<{ $isExpanded: boolean }>`
@@ -201,7 +203,86 @@ const menuItems: MenuItemType[] = [
   { label: "Configurações", icon: FiSettings, path: "/settings" },
 ];
 
+const UserSection = styled.div<{ $isExpanded: boolean }>`
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1rem 0.8rem;
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+`;
+
+const UserInfo = styled.div<{ $isExpanded: boolean }>`
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.5rem;
+  
+  justify-content: ${({ $isExpanded }) => ($isExpanded ? "flex-start" : "center")};
+`;
+
+const UserAvatar = styled.div`
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4285f4, #34a853);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+`;
+
+const UserDetails = styled.div<{ $isExpanded: boolean }>`
+  display: ${({ $isExpanded }) => ($isExpanded ? "flex" : "none")};
+  flex-direction: column;
+  overflow: hidden;
+`;
+
+const UserName = styled.span`
+  color: #f4f7fb;
+  font-size: 0.9rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
+
+const UserRole = styled.span`
+  color: #8b9bb4;
+  font-size: 0.75rem;
+  white-space: nowrap;
+`;
+
+const LogoutButton = styled.button<{ $isExpanded: boolean }>`
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.6rem;
+  border-radius: 8px;
+  color: #ff6b6b;
+  width: 100%;
+  transition: all 0.2s;
+  justify-content: ${({ $isExpanded }) => ($isExpanded ? "flex-start" : "center")};
+
+  &:hover {
+    background: rgba(255, 107, 107, 0.1);
+  }
+
+  span {
+    display: ${({ $isExpanded }) => ($isExpanded ? "block" : "none")};
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+`;
+
 export function Sidebar() {
+  const { user, logout } = useAuth();
   const [isExpanded, setIsExpanded] = useState(false);
   const [openSubMenus, setOpenSubMenus] = useState<string[]>([]);
   const [activePath, setActivePath] = useState("/"); // In real app, use usePathname()
@@ -307,6 +388,24 @@ export function Sidebar() {
             );
           })}
         </MenuList>
+
+        {user && (
+          <UserSection $isExpanded={isExpanded}>
+            <UserInfo $isExpanded={isExpanded}>
+              <UserAvatar>{user.name.charAt(0).toUpperCase()}</UserAvatar>
+              {isExpanded && (
+                <UserDetails $isExpanded={isExpanded}>
+                  <UserName>{user.name}</UserName>
+                  <UserRole>{user.role}</UserRole>
+                </UserDetails>
+              )}
+            </UserInfo>
+            <LogoutButton $isExpanded={isExpanded} onClick={logout} title={!isExpanded ? "Sair" : ""}>
+              <FiLogOut />
+              <span>Sair</span>
+            </LogoutButton>
+          </UserSection>
+        )}
       </SidebarContainer>
     </>
   );
