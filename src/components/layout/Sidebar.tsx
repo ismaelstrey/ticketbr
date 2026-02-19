@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
-import styled, { css } from "styled-components";
+import React, { useEffect, useMemo, useState } from "react";
+import styled from "styled-components";
+import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import {
   FiHome,
@@ -18,7 +19,9 @@ import {
   FiMenu,
   FiChevronDown,
   FiChevronRight,
-  FiLogOut
+  FiLogOut,
+  FiEdit,
+  FiLayers
 } from "@/components/icons";
 
 const SidebarContainer = styled.aside<{ $isExpanded: boolean }>`
@@ -200,6 +203,14 @@ const menuItems: MenuItemType[] = [
   { label: "Projetos", icon: FiBookOpen, path: "/projects" },
   { label: "Inventário", icon: FiWifi, path: "/inventory" },
   { label: "Relatórios", icon: FiZap, path: "/reports" },
+  { label: "Cadastros", icon: FiEdit, path: "/cadastros", subItems: [
+      { label: "Visão Geral", path: "/cadastros" },
+      { label: "Solicitante", path: "/cadastros/solicitante" },
+      { label: "Operador", path: "/cadastros/operador" },
+      { label: "User", path: "/cadastros/user" }
+    ]
+  },
+  { label: "Design System", icon: FiLayers, path: "/design-system" },
   { label: "Configurações", icon: FiSettings, path: "/settings" },
 ];
 
@@ -283,11 +294,30 @@ const LogoutButton = styled.button<{ $isExpanded: boolean }>`
 
 export function Sidebar() {
   const { user, logout } = useAuth();
+  const router = useRouter();
+  const pathname = usePathname();
   const [isExpanded, setIsExpanded] = useState(false);
   const [openSubMenus, setOpenSubMenus] = useState<string[]>([]);
-  const [activePath, setActivePath] = useState("/"); // In real app, use usePathname()
 
   const toggleSidebar = () => setIsExpanded(!isExpanded);
+
+  const activePath = pathname ?? "/";
+
+  const activeLabels = useMemo(() => {
+    const labels: string[] = [];
+    for (const item of menuItems) {
+      if (item.subItems?.some((sub) => activePath === sub.path || activePath.startsWith(`${sub.path}/`))) {
+        labels.push(item.label);
+      }
+    }
+    return labels;
+  }, [activePath]);
+
+  useEffect(() => {
+    if (activeLabels.length > 0) {
+      setOpenSubMenus((prev) => Array.from(new Set([...prev, ...activeLabels])));
+    }
+  }, [activeLabels]);
 
   const toggleSubMenu = (label: string) => {
     if (!isExpanded) {
@@ -306,11 +336,9 @@ export function Sidebar() {
     if (item.subItems) {
       toggleSubMenu(item.label);
     } else {
-      setActivePath(item.path || "/");
-      // Prevent navigation if path is not defined or is just '#'
-      if (item.path && item.path !== '#') {
-          // Use window.location for now as we are in a simple client component without router context setup yet
-          window.location.href = item.path;
+      if (item.path) {
+        router.push(item.path);
+        setIsExpanded(false);
       }
     }
   };
@@ -372,11 +400,12 @@ export function Sidebar() {
                     {item.subItems!.map((sub, subIndex) => (
                       <SubMenuItem 
                         key={subIndex} 
-                        href="#" 
-                        $isActive={activePath === sub.path}
+                        href={sub.path} 
+                        $isActive={activePath === sub.path || activePath.startsWith(`${sub.path}/`)}
                         onClick={(e) => {
                             e.preventDefault();
-                            setActivePath(sub.path);
+                            router.push(sub.path);
+                            setIsExpanded(false);
                         }}
                       >
                         {sub.label}

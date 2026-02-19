@@ -42,3 +42,5 @@ export const FiX = () => <Icon symbol="✕" />;
 export const FiPaperclip = () => <Icon symbol="📎" />;
 export const FiSave = () => <Icon symbol="💾" />;
 export const FiLock = () => <Icon symbol="🔒" />;
+export const FiEdit = () => <Icon symbol="✎" />;
+export const FiLayers = () => <Icon symbol="☰" />; // Placeholder for Layers icon

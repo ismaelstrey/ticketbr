@@ -1,0 +1,32 @@
+# TicketBR
+
+## Cadastros \u2192 Solicitantes
+
+- Acesso: `/cadastros/solicitante`
+- Funcionalidades: listar, buscar, ordenar, paginar (10/25/50), criar, editar e excluir (soft delete via `status=false`).
+
+### API (Solicitantes)
+
+- `GET /api/solicitantes?page=1&pageSize=10&search=&sortBy=data_cadastro&sortDir=desc`
+  - Retorna `{ data, total, page, pageSize }`
+- `POST /api/solicitantes`
+  - Body: `{ nome, cpfCnpj, email, telefone, enderecoCompleto }`
+- `PUT /api/solicitantes/:id`
+  - Body parcial: mesmos campos do POST
+- `DELETE /api/solicitantes/:id`
+
+Observações:
+- CPF/CNPJ: aceita 11 (CPF) ou 14 (CNPJ) dígitos.
+- Operações dependem de sessão autenticada (cookie) quando o middleware estiver ativo.
+
+## Testes
+
+- Unit tests: `npm test`
+- Watch: `npm run test:watch`
+
+## Desenvolvimento
+
+- Subir app: `npm run dev`
+- Aplicar migrations: `npm run prisma:migrate`
+- Seed: `npm run seed`
+
