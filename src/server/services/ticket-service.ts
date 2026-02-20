@@ -197,13 +197,12 @@ export async function changeTicketStatus(id: string, status: UiStatus, author?: 
 
   const nextStatus = toPrismaStatus(status) as TicketStatus;
 
-  const updated = await prisma.ticket.update({
+  await prisma.ticket.update({
     where: { id },
     data: {
       status: nextStatus,
       pausedReason: nextStatus === "PAUSED" ? pauseReason ?? "" : null
-    },
-    include: { events: true }
+    }
   });
 
   await prisma.ticketEvent.create({
@@ -218,7 +217,7 @@ export async function changeTicketStatus(id: string, status: UiStatus, author?: 
     }
   });
 
-  return mapTicket(updated);
+  return getTicketById(id);
 }
 
 export async function addTicketInteraction(

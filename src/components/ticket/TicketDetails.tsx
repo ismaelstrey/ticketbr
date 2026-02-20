@@ -153,6 +153,22 @@ const statusLabels: Record<TicketStatus, string> = {
   done: "Finalizado"
 };
 
+
+function getRoadmapColor(eventType: string) {
+  if (eventType === "CREATED") return "#22c55e";
+  if (eventType === "PAUSED") return "#f59e0b";
+  if (eventType === "STATUS_CHANGED") return "#3b82f6";
+  if (eventType === "COMMENT") return "#6366f1";
+  if (eventType === "UPDATED") return "#a855f7";
+  return "#6b7280";
+}
+
+function formatRoadmapDate(value: string | Date) {
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return "-";
+  return date.toLocaleString("pt-BR");
+}
+
 export default function TicketDetails({
   ticket,
   onBack,
@@ -210,20 +226,28 @@ export default function TicketDetails({
 
       <ContentGrid>
         <Timeline>
-          {(ticket.interacoes ?? []).map((item) => {
-             let borderColor = "#3b82f6"; // azul
-             if (item.corBorda === "verde") borderColor = "#22c55e";
-             if (item.corBorda === "vermelho") borderColor = "#ef4444";
-             
+          {(ticket.roadmap && ticket.roadmap.length > 0 ? ticket.roadmap : []).map((event) => {
+             const borderColor = getRoadmapColor(event.type);
+             const transition = event.fromStatus && event.toStatus
+              ? ` (${statusLabels[event.fromStatus]} → ${statusLabels[event.toStatus]})`
+              : "";
+
              return (
-              <TimelineCard key={item.id} $borderColor={borderColor}>
+              <TimelineCard key={event.id} $borderColor={borderColor}>
                 <TimelineHead>
-                  <strong>{item.autor}</strong> • {item.tempo}
+                  <strong>{event.author ?? "Sistema"}</strong> • {formatRoadmapDate(event.createdAt)}
                 </TimelineHead>
-                <p>{item.mensagem}</p>
+                <p><strong>{event.title}</strong>{transition}</p>
+                {event.description ? <p>{event.description}</p> : null}
+                {event.pauseReason ? <p><strong>Motivo da pausa:</strong> {event.pauseReason}</p> : null}
               </TimelineCard>
              );
           })}
+          {(!ticket.roadmap || ticket.roadmap.length === 0) && (
+            <TimelineCard>
+              <p>Sem histórico registrado para este ticket.</p>
+            </TimelineCard>
+          )}
         </Timeline>
 
         <SidebarForm>
