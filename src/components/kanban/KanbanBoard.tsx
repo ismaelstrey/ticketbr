@@ -23,6 +23,7 @@ import { useTicketDragDrop } from "@/hooks/useTicketDragDrop";
 import { useTicketEditor } from "@/hooks/useTicketEditor";
 import { useTicketFilters } from "@/hooks/useTicketFilters";
 import { api } from "@/services/api";
+import { useToast } from "@/context/ToastContext";
 
 const columnIcons = {
   todo: FiAlertCircle,
@@ -133,6 +134,7 @@ export default function KanbanBoard() {
   } = useTicketFilters(tickets);
 
   const [isNewTicketModalOpen, setIsNewTicketModalOpen] = useState(false);
+  const { showToast } = useToast();
   const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -166,9 +168,10 @@ export default function KanbanBoard() {
     try {
         await api.tickets.update(selectedTicket.id, selectedTicket);
         closeTicket();
+        showToast("Ticket atualizado com sucesso.", "success");
     } catch (err) {
         console.error("Failed to save ticket", err);
-        alert("Erro ao salvar ticket");
+        showToast("Erro ao atualizar ticket.", "error");
     }
   };
 
@@ -267,7 +270,13 @@ export default function KanbanBoard() {
 
         <NewTicketModal 
           isOpen={isNewTicketModalOpen} 
-          onClose={() => setIsNewTicketModalOpen(false)} 
+          onClose={() => setIsNewTicketModalOpen(false)}
+          onCreated={async () => {
+            const response = await api.tickets.list();
+            if (Array.isArray(response.data)) {
+              setTickets(response.data);
+            }
+          }}
         />
       </MainContent>
     </AppShellContainer>
