@@ -30,3 +30,8 @@ Observações:
 - Aplicar migrations: `npm run prisma:migrate`
 - Seed: `npm run seed`
 
+
+## Build/Deploy
+
+- O `postbuild` não executa migration por padrão.
+- Para executar migration no pipeline de build, defina `RUN_DB_MIGRATE_ON_BUILD=true`.

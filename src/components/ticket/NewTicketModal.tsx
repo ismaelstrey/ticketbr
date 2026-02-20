@@ -6,6 +6,7 @@ import { FiX, FiPaperclip, FiClock, FiSave, FiLock, FiBold, FiItalic, FiUnderlin
 import { Button } from "@/components/ui/Button";
 import { Input, Select } from "@/components/ui/Input";
 import { useAuth } from "@/context/AuthContext";
+import { useToast } from "@/context/ToastContext";
 
 const Overlay = styled.div`
   position: fixed;
@@ -278,10 +279,12 @@ const FooterButton = styled(Button)`
 interface NewTicketModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onCreated?: () => Promise<void> | void;
 }
 
-export default function NewTicketModal({ isOpen, onClose }: NewTicketModalProps) {
+export default function NewTicketModal({ isOpen, onClose, onCreated }: NewTicketModalProps) {
   const { user } = useAuth();
+  const { showToast } = useToast();
   // Form State
   const [requester, setRequester] = useState("");
   const [subject, setSubject] = useState("");
@@ -366,7 +369,7 @@ export default function NewTicketModal({ isOpen, onClose }: NewTicketModalProps)
   const handleSubmit = async () => {
     // Validation: requester is required (stored in requester state)
     if (!requester || !subject || !priority) {
-      alert("Preencha os campos obrigatórios (Solicitante, Assunto, Prioridade)");
+      showToast("Preencha os campos obrigatórios (Solicitante, Assunto, Prioridade).", "error");
       return;
     }
 
@@ -399,13 +402,12 @@ export default function NewTicketModal({ isOpen, onClose }: NewTicketModalProps)
 
       const data = await res.json();
       console.log("Ticket criado:", data);
-      alert("Ticket criado com sucesso!");
-      onClose();
-      // O ideal seria recarregar o Kanban aqui
-      window.location.reload(); 
+      showToast("Ticket criado com sucesso.", "success");
+      if (onCreated) await onCreated();
+      onClose(); 
     } catch (error: any) {
       console.error("Erro:", error);
-      alert(`Erro: ${error.message}`);
+      showToast(`Erro ao criar ticket: ${error.message}`, "error");
     } finally {
       setLoading(false);
     }
