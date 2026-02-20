@@ -119,7 +119,7 @@ export default function DesignSystemPage() {
         <Title>Botões</Title>
         <Flex>
           <Button variant="primary">Primary</Button>
-          <Button variant="secondary">Secondary</Button>
+          <Button variant="pill">Pill</Button>
           <Button variant="ghost">Ghost</Button>
           <Button variant="primary" disabled>Disabled</Button>
           <Button variant="primary">
