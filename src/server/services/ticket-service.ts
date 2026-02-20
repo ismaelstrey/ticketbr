@@ -19,6 +19,73 @@ const COMPANY_SLA_HOURS: Record<string, number> = {
   "LP INTERNET": 8,
 };
 
+const LEGACY_MISSING_COLUMNS = ["pauseSla", "pausedStartedAt", "pausedTotalSeconds"];
+
+function isMissingPauseColumnsError(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : String(error);
+  return LEGACY_MISSING_COLUMNS.some((column) => message.includes(column) && message.includes("does not exist"));
+}
+
+const ticketLegacySelect = {
+  id: true,
+  number: true,
+  company: true,
+  requester: true,
+  subject: true,
+  description: true,
+  status: true,
+  priority: true,
+  operator: true,
+  contact: true,
+  ticketType: true,
+  category: true,
+  workbench: true,
+  responseSlaAt: true,
+  solutionSlaAt: true,
+  pausedReason: true,
+  createdAt: true,
+  updatedAt: true,
+  events: true,
+} as const;
+
+async function findTicketsWithCompatibility() {
+  try {
+    return await prisma.ticket.findMany({
+      include: { events: true },
+      orderBy: { createdAt: "desc" }
+    });
+  } catch (error) {
+    if (!isMissingPauseColumnsError(error)) {
+      throw error;
+    }
+
+    console.warn("[Service] DB sem colunas de pausa de SLA. Usando fallback compatível para listagem.");
+    return prisma.ticket.findMany({
+      select: ticketLegacySelect,
+      orderBy: { createdAt: "desc" }
+    });
+  }
+}
+
+async function findTicketByIdWithCompatibility(id: string) {
+  try {
+    return await prisma.ticket.findUnique({
+      where: { id },
+      include: { events: true }
+    });
+  } catch (error) {
+    if (!isMissingPauseColumnsError(error)) {
+      throw error;
+    }
+
+    console.warn(`[Service] DB sem colunas de pausa de SLA. Usando fallback compatível para ticket ${id}.`);
+    return prisma.ticket.findUnique({
+      where: { id },
+      select: ticketLegacySelect
+    });
+  }
+}
+
 function resolveSlaDeadline(ticket: any): Date | null {
   if (ticket.solutionSlaAt) {
     return ticket.solutionSlaAt;
@@ -132,10 +199,7 @@ function mapTicket(ticket: any) {
 
 export async function listTickets() {
   try {
-    const tickets = await prisma.ticket.findMany({
-      include: { events: true },
-      orderBy: { createdAt: "desc" }
-    });
+    const tickets = await findTicketsWithCompatibility();
     console.log(`[Service] Found ${tickets.length} tickets`);
     return tickets.map(mapTicket);
   } catch (error) {
@@ -145,11 +209,7 @@ export async function listTickets() {
 }
 
 export async function getTicketById(id: string) {
-  const ticket = await prisma.ticket.findUnique({
-    where: { id },
-    include: { events: true }
-  });
-
+  const ticket = await findTicketByIdWithCompatibility(id);
   return ticket ? mapTicket(ticket) : null;
 }
 
