@@ -17,6 +17,7 @@ export interface TicketRoadmapEvent {
   fromStatus?: TicketStatus | null;
   toStatus?: TicketStatus | null;
   pauseReason?: string | null;
+  pauseSla?: boolean;
   author?: string;
   createdAt: string | Date;
 }
@@ -42,6 +43,7 @@ export interface Ticket {
   slaResposta?: string;
   slaSolucao?: string;
   pauseReason?: string;
+  pauseSla?: boolean;
   interacoes?: TicketInteraction[];
   roadmap?: TicketRoadmapEvent[];
 }

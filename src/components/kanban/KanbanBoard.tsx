@@ -116,7 +116,9 @@ export default function KanbanBoard() {
     pauseReason,
     setPauseReason,
     closePauseModal,
-    confirmPause
+    confirmPause,
+    pauseSla,
+    setPauseSla
   } = useTicketDragDrop();
 
   const { selectedTicket, openTicket, closeTicket, updateSelectedTicket } = useTicketEditor(tickets, setTickets);
@@ -268,6 +270,8 @@ export default function KanbanBoard() {
             ticket={pauseModalTicket}
             reason={pauseReason}
             setReason={setPauseReason}
+            pauseSla={pauseSla}
+            setPauseSla={setPauseSla}
             onClose={closePauseModal}
             onConfirm={confirmPause}
           />

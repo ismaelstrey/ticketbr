@@ -34,13 +34,14 @@ export function useTicketDragDrop() {
   const [dragOverColumn, setDragOverColumn] = useState<TicketStatus | null>(null);
   const [pauseModalTicketId, setPauseModalTicketId] = useState<string | null>(null);
   const [pauseReason, setPauseReason] = useState("");
+  const [pauseSla, setPauseSla] = useState(false);
 
   const pauseModalTicket = useMemo(
     () => tickets.find((ticket) => ticket.id === pauseModalTicketId) ?? null,
     [tickets, pauseModalTicketId]
   );
 
-  const updateTicketStatus = (ticketId: string, targetStatus: TicketStatus, reason?: string) => {
+  const updateTicketStatus = (ticketId: string, targetStatus: TicketStatus, reason?: string, pauseSlaFlag?: boolean) => {
     const previousTickets = tickets;
 
     // Optimistic update
@@ -52,13 +53,14 @@ export function useTicketDragDrop() {
         return {
           ...ticket,
           status: targetStatus,
-          pauseReason: targetStatus === "paused" ? reason ?? ticket.pauseReason ?? "" : undefined
+          pauseReason: targetStatus === "paused" ? reason ?? ticket.pauseReason ?? "" : undefined,
+          pauseSla: targetStatus === "paused" ? Boolean(pauseSlaFlag) : false
         };
       })
     );
 
     // Call API (Background)
-    api.tickets.updateStatus(ticketId, targetStatus, reason)
+    api.tickets.updateStatus(ticketId, targetStatus, reason, pauseSlaFlag)
       .then((response) => {
         if (response?.data) {
           setTickets((current) => current.map((ticket) => (ticket.id === ticketId ? response.data : ticket)));
@@ -75,6 +77,7 @@ export function useTicketDragDrop() {
   const closePauseModal = () => {
     setPauseModalTicketId(null);
     setPauseReason("");
+    setPauseSla(false);
   };
 
   const confirmPause = () => {
@@ -82,7 +85,7 @@ export function useTicketDragDrop() {
       return;
     }
 
-    updateTicketStatus(pauseModalTicketId, "paused", pauseReason.trim());
+    updateTicketStatus(pauseModalTicketId, "paused", pauseReason.trim(), pauseSla);
     closePauseModal();
   };
 
@@ -118,6 +121,7 @@ export function useTicketDragDrop() {
     if (targetStatus === "paused") {
       setPauseModalTicketId(sourceId);
       setPauseReason("");
+      setPauseSla(false);
     } else {
       updateTicketStatus(sourceId, targetStatus);
     }
@@ -135,6 +139,8 @@ export function useTicketDragDrop() {
     pauseModalTicket,
     pauseReason,
     setPauseReason,
+    pauseSla,
+    setPauseSla,
     closePauseModal,
     confirmPause,
     onTicketDragStart,

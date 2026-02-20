@@ -29,14 +29,42 @@ function resolveSlaDeadline(ticket: any): Date | null {
   return new Date(ticket.createdAt.getTime() + configuredHours * 60 * 60 * 1000);
 }
 
-function calculateSlaProgress(createdAt: Date, slaAt?: Date | null): number {
+function calculateElapsedWithOptionalPause(
+  createdAt: Date,
+  pausedTotalSeconds: number,
+  pauseSla?: boolean | null,
+  pausedStartedAt?: Date | null,
+  status?: DbStatus | null
+): number {
+  const baseElapsed = Date.now() - createdAt.getTime();
+  const persistedPausedMs = Math.max(0, pausedTotalSeconds || 0) * 1000;
+
+  if (!pauseSla) {
+    return Math.max(baseElapsed, 0);
+  }
+
+  const activePausedMs = status === "PAUSED" && pausedStartedAt
+    ? Math.max(Date.now() - pausedStartedAt.getTime(), 0)
+    : 0;
+
+  return Math.max(baseElapsed - persistedPausedMs - activePausedMs, 0);
+}
+
+function calculateSlaProgress(
+  createdAt: Date,
+  slaAt?: Date | null,
+  pausedTotalSeconds: number = 0,
+  pauseSla?: boolean | null,
+  pausedStartedAt?: Date | null,
+  status?: DbStatus | null
+): number {
   if (!slaAt) return 0;
-  
+
   const total = slaAt.getTime() - createdAt.getTime();
-  const elapsed = Date.now() - createdAt.getTime();
-  
+  const elapsed = calculateElapsedWithOptionalPause(createdAt, pausedTotalSeconds, pauseSla, pausedStartedAt, status);
+
   if (total <= 0) return 100;
-  
+
   const progress = Math.round((elapsed / total) * 100);
   return Math.min(Math.max(progress, 0), 100);
 }
@@ -55,7 +83,14 @@ function mapTicket(ticket: any) {
         day: "2-digit", month: "2-digit", year: "numeric", 
         hour: "2-digit", minute: "2-digit" 
     }),
-    progressoSla: calculateSlaProgress(ticket.createdAt, resolveSlaDeadline(ticket)),
+    progressoSla: calculateSlaProgress(
+      ticket.createdAt,
+      resolveSlaDeadline(ticket),
+      ticket.pausedTotalSeconds ?? 0,
+      ticket.pauseSla,
+      ticket.pausedStartedAt,
+      ticket.status
+    ),
     progressoTarefa: 0, // Campo não existe no banco, retornando 0 por padrão
     operador: ticket.operator,
     contato: ticket.contact,
@@ -67,6 +102,7 @@ function mapTicket(ticket: any) {
     slaResposta: ticket.responseSlaAt,
     slaSolucao: ticket.solutionSlaAt,
     pauseReason: ticket.pausedReason,
+    pauseSla: ticket.pauseSla,
     interacoes: (ticket.events ?? [])
       .filter((e: any) => e.type === "COMMENT" || e.type === "NOTE")
       .map((e: any) => ({
@@ -86,6 +122,7 @@ function mapTicket(ticket: any) {
         fromStatus: event.fromStatus ? fromPrismaStatus(event.fromStatus as any) : null,
         toStatus: event.toStatus ? fromPrismaStatus(event.toStatus as any) : null,
         pauseReason: event.pauseReason,
+        pauseSla: event.metadata?.pauseSla,
         metadata: event.metadata,
         author: event.author,
         createdAt: event.createdAt
@@ -183,6 +220,10 @@ export async function updateTicket(id: string, input: UpdateTicketInput) {
     data.pausedReason = input.pauseReason;
   }
 
+  if (input.pauseSla !== undefined) {
+    data.pauseSla = input.pauseSla;
+  }
+
   await prisma.ticket.update({ where: { id }, data });
 
   await prisma.ticketEvent.create({
@@ -207,7 +248,7 @@ export async function deleteTicket(id: string) {
   }
 }
 
-export async function changeTicketStatus(id: string, status: UiStatus, author?: string, pauseReason?: string) {
+export async function changeTicketStatus(id: string, status: UiStatus, author?: string, pauseReason?: string, pauseSla?: boolean) {
   const current = await prisma.ticket.findUnique({ where: { id } });
   if (!current) {
     return null;
@@ -215,11 +256,21 @@ export async function changeTicketStatus(id: string, status: UiStatus, author?: 
 
   const nextStatus = toPrismaStatus(status) as TicketStatus;
 
+  const now = new Date();
+  const pausedStartedAt = current.pausedStartedAt;
+  const shouldClosePausedWindow = current.status === "PAUSED" && current.pauseSla && pausedStartedAt && nextStatus !== "PAUSED";
+  const pauseWindowSeconds = shouldClosePausedWindow && pausedStartedAt
+    ? Math.max(Math.round((now.getTime() - pausedStartedAt.getTime()) / 1000), 0)
+    : 0;
+
   await prisma.ticket.update({
     where: { id },
     data: {
       status: nextStatus,
-      pausedReason: nextStatus === "PAUSED" ? pauseReason ?? "" : null
+      pausedReason: nextStatus === "PAUSED" ? pauseReason ?? "" : null,
+      pauseSla: nextStatus === "PAUSED" ? Boolean(pauseSla) : false,
+      pausedStartedAt: nextStatus === "PAUSED" && pauseSla ? now : null,
+      pausedTotalSeconds: (current.pausedTotalSeconds ?? 0) + pauseWindowSeconds
     }
   });
 
@@ -231,6 +282,7 @@ export async function changeTicketStatus(id: string, status: UiStatus, author?: 
       fromStatus: current.status,
       toStatus: nextStatus,
       pauseReason,
+      metadata: nextStatus === "PAUSED" ? { pauseSla: Boolean(pauseSla) } : undefined,
       author: author ?? "Sistema"
     }
   });

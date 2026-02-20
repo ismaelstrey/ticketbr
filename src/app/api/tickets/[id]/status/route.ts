@@ -21,7 +21,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   const session = await getSession();
   const author = (session?.name as string | undefined) ?? body?.author ?? "Sistema";
 
-  const ticket = await changeTicketStatus(id, status, author, body?.pauseReason);
+  const ticket = await changeTicketStatus(id, status, author, body?.pauseReason, Boolean(body?.pauseSla));
 
   if (!ticket) {
     return NextResponse.json({ error: "Ticket não encontrado." }, { status: 404 });
