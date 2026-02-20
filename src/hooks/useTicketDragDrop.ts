@@ -1,6 +1,7 @@
 import { DragEvent, useMemo, useState, useEffect } from "react";
 import { Ticket, TicketStatus } from "@/types/ticket";
 import { api } from "@/services/api";
+import { useToast } from "@/context/ToastContext";
 
 const TICKET_ID_MIME = "application/x-ticket-id";
 
@@ -9,9 +10,10 @@ function getTransferTicketId(event: DragEvent<HTMLElement>, fallback: string | n
   return !transferredId ? fallback : transferredId;
 }
 
-export function useTicketDragDrop(initialTickets: Ticket[]) {
+export function useTicketDragDrop() {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
+  const { showToast } = useToast();
 
   useEffect(() => {
     fetch("/api/tickets")
@@ -21,9 +23,12 @@ export function useTicketDragDrop(initialTickets: Ticket[]) {
               setTickets(data.data);
           }
       })
-      .catch((err) => console.error("Failed to load tickets", err))
+      .catch((err) => {
+        console.error("Failed to load tickets", err);
+        showToast("Não foi possível carregar tickets do servidor.", "error");
+      })
       .finally(() => setLoading(false));
-  }, []);
+  }, [showToast]);
 
   const [draggingTicketId, setDraggingTicketId] = useState<string | null>(null);
   const [dragOverColumn, setDragOverColumn] = useState<TicketStatus | null>(null);
@@ -36,6 +41,8 @@ export function useTicketDragDrop(initialTickets: Ticket[]) {
   );
 
   const updateTicketStatus = (ticketId: string, targetStatus: TicketStatus, reason?: string) => {
+    const previousTickets = tickets;
+
     // Optimistic update
     setTickets((current) =>
       current.map((ticket) => {
@@ -52,11 +59,17 @@ export function useTicketDragDrop(initialTickets: Ticket[]) {
 
     // Call API (Background)
     api.tickets.updateStatus(ticketId, targetStatus, reason)
-        .then(() => console.log(`Ticket ${ticketId} updated to ${targetStatus}`))
-        .catch((err) => {
-            console.error(`Failed to update ticket ${ticketId}`, err);
-            // Revert? For now just log error.
-        });
+      .then((response) => {
+        if (response?.data) {
+          setTickets((current) => current.map((ticket) => (ticket.id === ticketId ? response.data : ticket)));
+        }
+        showToast("Status do ticket atualizado com sucesso.", "success");
+      })
+      .catch((err) => {
+        console.error(`Failed to update ticket ${ticketId}`, err);
+        setTickets(previousTickets);
+        showToast("Erro ao atualizar o status do ticket.", "error");
+      });
   };
 
   const closePauseModal = () => {
@@ -116,6 +129,7 @@ export function useTicketDragDrop(initialTickets: Ticket[]) {
   return {
     tickets,
     setTickets,
+    loading,
     draggingTicketId,
     dragOverColumn,
     pauseModalTicket,
