@@ -1,6 +1,9 @@
 export type RateLimitResult = {
   allowed: boolean;
   retryAfterSeconds: number;
+  remaining: number;
+  limit: number;
+  resetAt: number;
 };
 
 type Entry = {
@@ -21,18 +24,37 @@ export class FixedWindowRateLimiter {
     const current = this.store.get(key);
 
     if (!current || current.resetAt <= now) {
-      this.store.set(key, { count: 1, resetAt: now + this.windowMs });
-      return { allowed: true, retryAfterSeconds: 0 };
+      const resetAt = now + this.windowMs;
+      this.store.set(key, { count: 1, resetAt });
+      return {
+        allowed: true,
+        retryAfterSeconds: 0,
+        remaining: Math.max(0, this.maxRequests - 1),
+        limit: this.maxRequests,
+        resetAt,
+      };
     }
 
     if (current.count >= this.maxRequests) {
       const retryAfterSeconds = Math.max(1, Math.ceil((current.resetAt - now) / 1000));
-      return { allowed: false, retryAfterSeconds };
+      return {
+        allowed: false,
+        retryAfterSeconds,
+        remaining: 0,
+        limit: this.maxRequests,
+        resetAt: current.resetAt,
+      };
     }
 
     current.count += 1;
     this.store.set(key, current);
-    return { allowed: true, retryAfterSeconds: 0 };
+    return {
+      allowed: true,
+      retryAfterSeconds: 0,
+      remaining: Math.max(0, this.maxRequests - current.count),
+      limit: this.maxRequests,
+      resetAt: current.resetAt,
+    };
   }
 
   reset(key: string) {
