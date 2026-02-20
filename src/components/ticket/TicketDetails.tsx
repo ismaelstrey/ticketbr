@@ -88,24 +88,83 @@ const ContentGrid = styled.section`
   }
 `;
 
-const Timeline = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+const RoadmapWrapper = styled(Card)`
+  padding: 1rem;
 `;
 
-const TimelineCard = styled(Card)<{ $borderColor?: string }>`
-  border-left: 4px solid ${({ $borderColor }) => $borderColor || "#3b82f6"};
+const RoadmapTitle = styled.h3`
+  margin: 0 0 0.9rem;
+  font-size: 1rem;
+  color: ${({ theme }) => theme.colors.text.primary};
+`;
+
+const Timeline = styled.div`
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  padding-left: 2rem;
+
+  &::before {
+    content: "";
+    position: absolute;
+    left: 0.68rem;
+    top: 0.2rem;
+    bottom: 0.2rem;
+    width: 2px;
+    background: ${({ theme }) => theme.colors.border};
+  }
+`;
+
+const TimelineItem = styled.article`
+  position: relative;
+`;
+
+const TimelineMarker = styled.span<{ $bg: string }>`
+  position: absolute;
+  left: -2rem;
+  top: 0.65rem;
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: ${({ $bg }) => $bg};
+  border: 3px solid #fff;
+  box-shadow: 0 0 0 2px ${({ theme }) => theme.colors.border};
+`;
+
+const TimelineCard = styled(Card)`
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  background: ${({ theme }) => theme.colors.surface};
+  padding: 0.75rem 0.85rem;
 
   p {
-    margin: 0;
+    margin: 0.25rem 0 0;
     color: ${({ theme }) => theme.colors.text.secondary};
   }
 `;
 
-const TimelineHead = styled.p`
-  margin: 0 0 0.35rem !important;
-  color: ${({ theme }) => theme.colors.text.primary} !important;
+const TimelineHead = styled.div`
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+
+  strong {
+    color: ${({ theme }) => theme.colors.text.primary};
+  }
+
+  span {
+    color: ${({ theme }) => theme.colors.text.secondary};
+    font-size: 0.85rem;
+  }
+`;
+
+const EventBadge = styled.span<{ $tone: string }>`
+  font-size: 0.75rem !important;
+  border-radius: 999px;
+  padding: 0.1rem 0.5rem;
+  border: 1px solid ${({ $tone }) => $tone};
+  color: ${({ $tone }) => $tone} !important;
 `;
 
 const SidebarForm = styled(Card)`
@@ -153,7 +212,6 @@ const statusLabels: Record<TicketStatus, string> = {
   done: "Finalizado"
 };
 
-
 function getRoadmapColor(eventType: string) {
   if (eventType === "CREATED") return "#22c55e";
   if (eventType === "PAUSED") return "#f59e0b";
@@ -161,6 +219,15 @@ function getRoadmapColor(eventType: string) {
   if (eventType === "COMMENT") return "#6366f1";
   if (eventType === "UPDATED") return "#a855f7";
   return "#6b7280";
+}
+
+function getRoadmapTypeLabel(eventType: string) {
+  if (eventType === "CREATED") return "Criado";
+  if (eventType === "PAUSED") return "Pausado";
+  if (eventType === "STATUS_CHANGED") return "Status";
+  if (eventType === "COMMENT") return "Comentário";
+  if (eventType === "UPDATED") return "Atualização";
+  return eventType;
 }
 
 function formatRoadmapDate(value: string | Date) {
@@ -184,9 +251,9 @@ export default function TicketDetails({
 
   return (
     <Container>
-      <NewCommentModal 
-        isOpen={isCommentModalOpen} 
-        onClose={() => setIsCommentModalOpen(false)} 
+      <NewCommentModal
+        isOpen={isCommentModalOpen}
+        onClose={() => setIsCommentModalOpen(false)}
         ticketId={ticket.id}
         onCommentAdded={(updatedTicket) => onChange(updatedTicket)}
       />
@@ -217,7 +284,7 @@ export default function TicketDetails({
         <FilterTag>
           <FiSearch aria-hidden="true" /> Pesquisar
         </FilterTag>
-        <Button variant="ghost" onClick={() => setIsCommentModalOpen(true)} style={{ padding: '0.4rem 0.65rem', fontSize: '0.85rem' }}>
+        <Button variant="ghost" onClick={() => setIsCommentModalOpen(true)} style={{ padding: "0.4rem 0.65rem", fontSize: "0.85rem" }}>
           <FiPlus /> Adicionar Comentário
         </Button>
         <FilterTag>Anexos</FilterTag>
@@ -225,30 +292,49 @@ export default function TicketDetails({
       </TopFilters>
 
       <ContentGrid>
-        <Timeline>
-          {(ticket.roadmap && ticket.roadmap.length > 0 ? ticket.roadmap : []).map((event) => {
-             const borderColor = getRoadmapColor(event.type);
-             const transition = event.fromStatus && event.toStatus
-              ? ` (${statusLabels[event.fromStatus]} → ${statusLabels[event.toStatus]})`
-              : "";
+        <RoadmapWrapper>
+          <RoadmapTitle>Roadmap</RoadmapTitle>
+          <Timeline>
+            {(ticket.roadmap && ticket.roadmap.length > 0 ? ticket.roadmap : []).map((event) => {
+              const markerColor = getRoadmapColor(event.type);
+              const transition =
+                event.fromStatus && event.toStatus
+                  ? ` (${statusLabels[event.fromStatus]} → ${statusLabels[event.toStatus]})`
+                  : "";
 
-             return (
-              <TimelineCard key={event.id} $borderColor={borderColor}>
-                <TimelineHead>
-                  <strong>{event.author ?? "Sistema"}</strong> • {formatRoadmapDate(event.createdAt)}
-                </TimelineHead>
-                <p><strong>{event.title}</strong>{transition}</p>
-                {event.description ? <p>{event.description}</p> : null}
-                {event.pauseReason ? <p><strong>Motivo da pausa:</strong> {event.pauseReason}</p> : null}
-              </TimelineCard>
-             );
-          })}
-          {(!ticket.roadmap || ticket.roadmap.length === 0) && (
-            <TimelineCard>
-              <p>Sem histórico registrado para este ticket.</p>
-            </TimelineCard>
-          )}
-        </Timeline>
+              return (
+                <TimelineItem key={event.id}>
+                  <TimelineMarker $bg={markerColor} />
+                  <TimelineCard>
+                    <TimelineHead>
+                      <strong>{event.author ?? "Sistema"}</strong>
+                      <span>{formatRoadmapDate(event.createdAt)}</span>
+                      <EventBadge $tone={markerColor}>{getRoadmapTypeLabel(event.type)}</EventBadge>
+                    </TimelineHead>
+                    <p>
+                      <strong>{event.title}</strong>
+                      {transition}
+                    </p>
+                    {event.description ? <p>{event.description}</p> : null}
+                    {event.pauseReason ? (
+                      <p>
+                        <strong>Motivo da pausa:</strong> {event.pauseReason}
+                      </p>
+                    ) : null}
+                  </TimelineCard>
+                </TimelineItem>
+              );
+            })}
+            {(!ticket.roadmap || ticket.roadmap.length === 0) && (
+              <TimelineItem>
+                <TimelineMarker $bg="#9ca3af" />
+                <TimelineCard>
+                  <p>Sem histórico registrado para este ticket.</p>
+                </TimelineCard>
+              </TimelineItem>
+            )}
+          </Timeline>
+        </RoadmapWrapper>
 
         <SidebarForm>
           <Metric>
