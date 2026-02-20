@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+import { Prisma, prisma } from "@/lib/prisma";
 import { CreateTicketInput, UpdateTicketInput } from "@/lib/validations/ticket";
 import {
   DbStatus,
@@ -23,7 +23,20 @@ const LEGACY_MISSING_COLUMNS = ["pauseSla", "pausedStartedAt", "pausedTotalSecon
 
 function isMissingPauseColumnsError(error: unknown): boolean {
   const message = error instanceof Error ? error.message : String(error);
-  return LEGACY_MISSING_COLUMNS.some((column) => message.includes(column) && message.includes("does not exist"));
+
+  if (error instanceof Prisma.PrismaClientKnownRequestError) {
+    if (error.code === "P2022") {
+      const column = String((error.meta as Record<string, unknown> | undefined)?.column ?? "");
+      if (LEGACY_MISSING_COLUMNS.some((candidate) => column.includes(candidate))) {
+        return true;
+      }
+      return LEGACY_MISSING_COLUMNS.some((candidate) => message.includes(candidate));
+    }
+  }
+
+  return (
+    message.includes("P2022") && LEGACY_MISSING_COLUMNS.some((column) => message.includes(column))
+  ) || LEGACY_MISSING_COLUMNS.some((column) => message.includes(column) && message.includes("does not exist"));
 }
 
 const ticketLegacySelect = {
