@@ -18,8 +18,10 @@ Realiza logout (remove o cookie).
 
 
 ### GET /api/health
-Endpoint público de healthcheck básico.
-- **Response**: `{ status, service, timestamp }`
+Endpoint público de healthcheck com dependências.
+- **200** quando a API e o banco estão saudáveis (`status: "ok"`).
+- **503** quando a API está no ar, mas com dependência degradada (`status: "degraded"`).
+- **Response**: `{ status, service, timestamp, uptimeSeconds, version, dependencies: { database: { status, checkedAt } } }`
 
 ## Tickets
 
