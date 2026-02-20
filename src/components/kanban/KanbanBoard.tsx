@@ -34,7 +34,7 @@ const columnIcons = {
 
 const KPIsGrid = styled.section`
   display: grid;
-  grid-template-columns: repeat(3, minmax(120px, 1fr));
+  grid-template-columns: repeat(4, minmax(120px, 1fr));
   gap: 0.8rem;
   margin-bottom: 1rem;
 
@@ -130,7 +130,8 @@ export default function KanbanBoard() {
     status,
     setStatus,
     totalOpen,
-    avgSla
+    avgSla,
+    atRiskCount
   } = useTicketFilters(tickets);
 
   const [isNewTicketModalOpen, setIsNewTicketModalOpen] = useState(false);
@@ -204,8 +205,12 @@ export default function KanbanBoard() {
                 <strong>{totalOpen}</strong>
               </KPIArticle>
               <KPIArticle>
-                <p>Média SLA</p>
+                <p>SLA médio (abertos)</p>
                 <strong>{avgSla}%</strong>
+              </KPIArticle>
+              <KPIArticle>
+                <p>SLA em atenção</p>
+                <strong>{atRiskCount}</strong>
               </KPIArticle>
             </KPIsGrid>
 

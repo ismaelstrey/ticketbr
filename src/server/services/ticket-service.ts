@@ -11,6 +11,24 @@ import {
 } from "@/server/ticket-mappers";
 import type { TicketPriority, TicketStatus } from "../../../prisma/generated/enums";
 
+
+
+const COMPANY_SLA_HOURS: Record<string, number> = {
+  "ACEM PRIME SERVIÇOS DE INTERNET LTDA": 6,
+  "NETMITT": 4,
+  "LP INTERNET": 8,
+};
+
+function resolveSlaDeadline(ticket: any): Date | null {
+  if (ticket.solutionSlaAt) {
+    return ticket.solutionSlaAt;
+  }
+
+  const company = ticket.company ?? "";
+  const configuredHours = COMPANY_SLA_HOURS[company] ?? 8;
+  return new Date(ticket.createdAt.getTime() + configuredHours * 60 * 60 * 1000);
+}
+
 function calculateSlaProgress(createdAt: Date, slaAt?: Date | null): number {
   if (!slaAt) return 0;
   
@@ -37,7 +55,7 @@ function mapTicket(ticket: any) {
         day: "2-digit", month: "2-digit", year: "numeric", 
         hour: "2-digit", minute: "2-digit" 
     }),
-    progressoSla: calculateSlaProgress(ticket.createdAt, ticket.solutionSlaAt),
+    progressoSla: calculateSlaProgress(ticket.createdAt, resolveSlaDeadline(ticket)),
     progressoTarefa: 0, // Campo não existe no banco, retornando 0 por padrão
     operador: ticket.operator,
     contato: ticket.contact,
