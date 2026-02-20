@@ -8,6 +8,7 @@ A autenticação é feita via JWT armazenado em cookies HTTP-only.
 Realiza login e define o cookie de sessão.
 - **Body**: `{ email, password }`
 - **Response**: `{ message, user: { id, name, email, role } }`
+- **429**: após muitas tentativas, retorna erro de rate limit com header `Retry-After`.
 
 ### GET /api/auth/me
 Retorna o usuário logado.
@@ -15,6 +16,13 @@ Retorna o usuário logado.
 
 ### POST /api/auth/me
 Realiza logout (remove o cookie).
+
+
+### GET /api/health
+Endpoint público de healthcheck com dependências.
+- **200** quando a API e o banco estão saudáveis (`status: "ok"`).
+- **503** quando a API está no ar, mas com dependência degradada (`status: "degraded"`).
+- **Response**: `{ status, service, timestamp, uptimeSeconds, version, dependencies: { database: { status, checkedAt } } }`
 
 ## Tickets
 
@@ -59,3 +67,9 @@ interface Ticket {
   // ... outros campos
 }
 ```
+
+
+## Autorização (RBAC)
+
+- Endpoints de administração (`/api/users`, `/api/operators`, `/api/operadores`, `/api/mesas-trabalho`, `/api/tipos-ticket`, `/api/categorias-ticket`) exigem usuário com `role=ADMIN`.
+- Para usuários autenticados sem privilégio administrativo, esses endpoints retornam `403 Forbidden`.

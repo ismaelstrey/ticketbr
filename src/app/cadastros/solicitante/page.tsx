@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/Input";
 import { Modal } from "@/components/ui/Modal";
 import { SolicitanteForm } from "@/components/forms/SolicitanteForm";
 import { FiEdit2, FiPlus, FiSearch, FiTrash2 } from "react-icons/fi";
+import { useToast } from "@/context/ToastContext";
 
 const Page = styled.div`
   padding: 1rem;
@@ -158,6 +159,7 @@ export default function SolicitantePage() {
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const { showToast } = useToast();
   const [editingItem, setEditingItem] = useState<any | null>(null);
 
   const totalPages = useMemo(() => Math.max(1, Math.ceil(total / pageSize)), [total, pageSize]);
@@ -229,9 +231,11 @@ export default function SolicitantePage() {
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error || "Falha ao excluir solicitante");
       setMessage({ type: "success", text: "Solicitante excluído com sucesso." });
+      showToast("Solicitante excluído com sucesso.", "success");
       await fetchData();
     } catch (err: any) {
       setMessage({ type: "error", text: err.message || "Falha ao excluir solicitante" });
+      showToast(err.message || "Falha ao excluir solicitante", "error");
     } finally {
       setLoading(false);
     }
@@ -251,10 +255,12 @@ export default function SolicitantePage() {
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error || "Falha ao salvar solicitante");
       setMessage({ type: "success", text: editingItem ? "Solicitante atualizado com sucesso." : "Solicitante cadastrado com sucesso." });
+      showToast(editingItem ? "Solicitante atualizado com sucesso." : "Solicitante cadastrado com sucesso.", "success");
       setIsModalOpen(false);
       await fetchData();
     } catch (err: any) {
       setMessage({ type: "error", text: err.message || "Falha ao salvar solicitante" });
+      showToast(err.message || "Falha ao salvar solicitante", "error");
     } finally {
       setLoading(false);
     }

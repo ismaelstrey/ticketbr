@@ -2,10 +2,26 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { compare } from "bcryptjs";
 import { login } from "@/lib/auth";
+import { loginRateLimiter } from "@/lib/rateLimit";
 
 export async function POST(request: Request) {
   try {
     const { email, password } = await request.json();
+
+    const forwardedFor = request.headers.get("x-forwarded-for");
+    const clientIp = forwardedFor?.split(",")[0]?.trim() || "unknown";
+
+    const rate = loginRateLimiter.consume(clientIp);
+    if (!rate.allowed) {
+      return NextResponse.json(
+        { error: "Muitas tentativas de login. Tente novamente mais tarde." },
+        {
+          status: 429,
+          headers: { "Retry-After": String(rate.retryAfterSeconds) }
+        }
+      );
+    }
+
 
     if (!email || !password) {
       return NextResponse.json(
@@ -42,6 +58,8 @@ export async function POST(request: Request) {
       role: user.role,
       name: user.name
     });
+
+    loginRateLimiter.reset(clientIp);
 
     return NextResponse.json({
       message: "Login realizado com sucesso",
