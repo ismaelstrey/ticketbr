@@ -1,9 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useToast } from "@/context/ToastContext";
 
 export function useCrud<T extends { id: string | number }>(apiEndpoint: string) {
   const [data, setData] = useState<T[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { showToast } = useToast();
 
   const fetchAll = useCallback(async () => {
     setLoading(true);
@@ -31,9 +33,10 @@ export function useCrud<T extends { id: string | number }>(apiEndpoint: string) 
       });
       if (!res.ok) throw new Error("Falha ao criar item");
       await fetchAll();
+      showToast("Registro criado com sucesso.", "success");
       return true;
     } catch (err: any) {
-      alert(err.message);
+      showToast(err.message, "error");
       return false;
     } finally {
       setLoading(false);
@@ -50,9 +53,10 @@ export function useCrud<T extends { id: string | number }>(apiEndpoint: string) 
       });
       if (!res.ok) throw new Error("Falha ao atualizar item");
       await fetchAll();
+      showToast("Registro atualizado com sucesso.", "success");
       return true;
     } catch (err: any) {
-      alert(err.message);
+      showToast(err.message, "error");
       return false;
     } finally {
       setLoading(false);
@@ -68,9 +72,10 @@ export function useCrud<T extends { id: string | number }>(apiEndpoint: string) 
       });
       if (!res.ok) throw new Error("Falha ao excluir item");
       await fetchAll();
+      showToast("Registro excluído com sucesso.", "success");
       return true;
     } catch (err: any) {
-      alert(err.message);
+      showToast(err.message, "error");
       return false;
     } finally {
       setLoading(false);
