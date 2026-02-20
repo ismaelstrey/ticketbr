@@ -59,8 +59,10 @@ export function useTicketDragDrop(initialTickets: Ticket[]) {
 
     // Call API (Background)
     api.tickets.updateStatus(ticketId, targetStatus, reason)
-      .then(() => {
-        console.log(`Ticket ${ticketId} updated to ${targetStatus}`);
+      .then((response) => {
+        if (response?.data) {
+          setTickets((current) => current.map((ticket) => (ticket.id === ticketId ? response.data : ticket)));
+        }
         showToast("Status do ticket atualizado com sucesso.", "success");
       })
       .catch((err) => {

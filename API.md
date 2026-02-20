@@ -44,6 +44,12 @@ Atualiza um ticket.
 Atualiza apenas o status de um ticket.
 - **Body**: `{ status: "todo" | "doing" | "paused" | "done", pauseReason?: string }`
 - **Response**: `{ data: Ticket }`
+- Gera evento no roadmap com autor do usuário logado (quando disponível).
+
+
+### GET /api/tickets/:id/roadmap
+Retorna o roadmap completo de eventos do ticket (criação, mudanças de status, pausas, comentários e atualizações).
+- **Response**: `{ data: { ticketId, ticketNumber, subject, status, events[] } }`
 
 ## Usuários
 
