@@ -8,6 +8,7 @@ A autenticação é feita via JWT armazenado em cookies HTTP-only.
 Realiza login e define o cookie de sessão.
 - **Body**: `{ email, password }`
 - **Response**: `{ message, user: { id, name, email, role } }`
+- **429**: após muitas tentativas, retorna erro de rate limit com header `Retry-After`.
 
 ### GET /api/auth/me
 Retorna o usuário logado.
