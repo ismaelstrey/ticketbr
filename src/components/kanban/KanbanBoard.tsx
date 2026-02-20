@@ -18,7 +18,7 @@ import { PauseModal } from "./PauseModal";
 import TicketDetails from "@/components/ticket/TicketDetails";
 import NewTicketModal from "@/components/ticket/NewTicketModal";
 
-import { columns, tickets as initialTickets } from "@/data/tickets";
+import { columns } from "@/data/kanban-columns";
 import { useTicketDragDrop } from "@/hooks/useTicketDragDrop";
 import { useTicketEditor } from "@/hooks/useTicketEditor";
 import { useTicketFilters } from "@/hooks/useTicketFilters";
@@ -117,7 +117,7 @@ export default function KanbanBoard() {
     setPauseReason,
     closePauseModal,
     confirmPause
-  } = useTicketDragDrop(initialTickets);
+  } = useTicketDragDrop();
 
   const { selectedTicket, openTicket, closeTicket, updateSelectedTicket } = useTicketEditor(tickets, setTickets);
 

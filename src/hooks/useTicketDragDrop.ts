@@ -10,8 +10,8 @@ function getTransferTicketId(event: DragEvent<HTMLElement>, fallback: string | n
   return !transferredId ? fallback : transferredId;
 }
 
-export function useTicketDragDrop(initialTickets: Ticket[]) {
-  const [tickets, setTickets] = useState<Ticket[]>(initialTickets ?? []);
+export function useTicketDragDrop() {
+  const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
   const { showToast } = useToast();
 
