@@ -143,7 +143,7 @@ export default function KanbanBoard() {
         const response = await api.tickets.list();
         if (!isMounted) return;
 
-        if (Array.isArray(response.data) && response.data.length > 0) {
+        if (Array.isArray(response.data)) {
           setTickets(response.data);
         }
         setLoadError(null);
