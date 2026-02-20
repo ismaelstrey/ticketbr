@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { changeTicketStatus } from "@/server/services/ticket-service";
+import { getSession } from "@/lib/auth";
 import { UiStatus } from "@/server/ticket-mappers";
 
 const acceptedStatuses: UiStatus[] = ["todo", "doing", "paused", "done"];
@@ -17,7 +18,10 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     return NextResponse.json({ error: "Motivo da pausa é obrigatório para status pausado." }, { status: 400 });
   }
 
-  const ticket = await changeTicketStatus(id, status, body?.author, body?.pauseReason);
+  const session = await getSession();
+  const author = (session?.name as string | undefined) ?? body?.author ?? "Sistema";
+
+  const ticket = await changeTicketStatus(id, status, author, body?.pauseReason, Boolean(body?.pauseSla));
 
   if (!ticket) {
     return NextResponse.json({ error: "Ticket não encontrado." }, { status: 404 });
