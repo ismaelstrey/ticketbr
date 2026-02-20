@@ -2,21 +2,18 @@
 const { spawnSync } = require('node:child_process');
 
 function runPrismaMigrateDeploy() {
-  const prismaBin = process.platform === 'win32' ? 'prisma.cmd' : 'prisma';
-  return spawnSync(prismaBin, ['migrate', 'deploy'], { encoding: 'utf8' });
+  return spawnSync('prisma', ['migrate', 'deploy'], {
+    encoding: 'utf8',
+    shell: true
+  });
 }
 
 const result = runPrismaMigrateDeploy();
 const output = `${result.stdout || ''}${result.stderr || ''}`;
 
-if (result.error) {
-  if (result.error.code === 'ENOENT') {
-    console.warn('[db:migrate] Prisma CLI não disponível no ambiente. Pulando migração automaticamente.');
-    process.exit(0);
-  }
-
-  console.error(`[db:migrate] Falha ao executar Prisma CLI: ${result.error.message}`);
-  process.exit(1);
+if (result.error || /prisma: not found/i.test(output)) {
+  console.warn('[db:migrate] Prisma CLI não disponível no ambiente. Pulando migração automaticamente.');
+  process.exit(0);
 }
 
 if (result.status === 0) {
@@ -25,7 +22,7 @@ if (result.status === 0) {
   process.exit(0);
 }
 
-const hasBaselineIssue = /Error:\s*P3005/.test(output);
+const hasBaselineIssue = /Error:\s*P3005/.test(output) && /No migration found in prisma\/migrations/.test(output);
 
 if (hasBaselineIssue) {
   process.stdout.write(result.stdout || '');

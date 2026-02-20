@@ -1,20 +1,15 @@
 #!/usr/bin/env node
 const { spawnSync } = require('node:child_process');
 
-function runPrismaDbPush() {
-  const prismaBin = process.platform === 'win32' ? 'prisma.cmd' : 'prisma';
-  return spawnSync(prismaBin, ['db', 'push'], { encoding: 'utf8' });
-}
+const result = spawnSync('prisma', ['db', 'push'], {
+  encoding: 'utf8',
+  shell: true
+});
 
-const result = runPrismaDbPush();
 const output = `${result.stdout || ''}${result.stderr || ''}`;
 
-if (result.error) {
-  if (result.error.code === 'ENOENT') {
-    console.error('[db:push] Prisma CLI não encontrado no ambiente.');
-  } else {
-    console.error(`[db:push] Falha ao executar Prisma CLI: ${result.error.message}`);
-  }
+if (result.error || /prisma: not found/i.test(output)) {
+  console.error('[db:push] Prisma CLI não encontrado no ambiente.');
   process.exit(1);
 }
 
@@ -24,8 +19,7 @@ if (result.status === 0) {
   process.exit(0);
 }
 
-const hasEnumDuplicateError =
-  /Error:\s*P2002/.test(output) && /enum_nsp`,`enum_name/.test(output);
+const hasEnumDuplicateError = /Error:\s*P2002/.test(output) && /enum_nsp`,`enum_name/.test(output);
 
 if (hasEnumDuplicateError) {
   process.stdout.write(result.stdout || '');
