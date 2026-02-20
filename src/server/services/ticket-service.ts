@@ -22,7 +22,17 @@ const COMPANY_SLA_HOURS: Record<string, number> = {
 const LEGACY_MISSING_COLUMNS = ["pauseSla", "pausedStartedAt", "pausedTotalSeconds"];
 
 function isMissingPauseColumnsError(error: unknown): boolean {
-  const message = error instanceof Error ? error.message : String(error);
+  const plainError = (error && typeof error === "object" ? error : {}) as Record<string, unknown>;
+  const message = [
+    error instanceof Error ? error.message : "",
+    typeof plainError.originalMessage === "string" ? plainError.originalMessage : "",
+    typeof plainError.message === "string" ? plainError.message : "",
+    JSON.stringify(error)
+  ]
+    .filter(Boolean)
+    .join(" | ");
+
+  const hasLegacyColumnName = LEGACY_MISSING_COLUMNS.some((column) => message.includes(column));
 
   if (error instanceof Prisma.PrismaClientKnownRequestError) {
     if (error.code === "P2022") {
@@ -30,13 +40,20 @@ function isMissingPauseColumnsError(error: unknown): boolean {
       if (LEGACY_MISSING_COLUMNS.some((candidate) => column.includes(candidate))) {
         return true;
       }
-      return LEGACY_MISSING_COLUMNS.some((candidate) => message.includes(candidate));
+      return hasLegacyColumnName;
     }
   }
 
+  const originalCode = String(plainError.originalCode ?? "");
+  const kind = String(plainError.kind ?? "");
+
+  if ((originalCode === "42703" || kind === "ColumnNotFound") && hasLegacyColumnName) {
+    return true;
+  }
+
   return (
-    message.includes("P2022") && LEGACY_MISSING_COLUMNS.some((column) => message.includes(column))
-  ) || LEGACY_MISSING_COLUMNS.some((column) => message.includes(column) && message.includes("does not exist"));
+    message.includes("P2022") && hasLegacyColumnName
+  ) || (message.includes("does not exist") && hasLegacyColumnName);
 }
 
 const ticketLegacySelect = {
