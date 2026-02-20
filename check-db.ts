@@ -1,10 +1,15 @@
 import "dotenv/config";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "./prisma/generated/client";
+import { PrismaPostgresAdapter } from "@prisma/adapter-ppg";
 
-const prisma = new PrismaClient();
+const connectionString = process.env.DATABASE_URL;
+if (!connectionString) {
+  throw new Error("DATABASE_URL is required");
+}
+const adapter = new PrismaPostgresAdapter({ connectionString });
+const prisma = new PrismaClient({ adapter });
 
 async function main() {
-    console.log("DATABASE_URL:", process.env.DATABASE_URL);
     console.log("Checking DB...");
     try {
         const count = await prisma.ticket.count();

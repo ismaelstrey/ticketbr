@@ -38,22 +38,19 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 require("dotenv/config");
 var client_1 = require("@prisma/client");
+var adapter_ppg_1 = require("@prisma/adapter-ppg");
 function main() {
     return __awaiter(this, void 0, void 0, function () {
-        var connectionString, prisma, tickets, e_1;
+        var connectionString, adapter, prisma, tickets, e_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     connectionString = "".concat(process.env.DATABASE_URL);
-                    console.log("Using DB URL:", connectionString);
-                    prisma = new client_1.PrismaClient({
-                        datasources: {
-                            db: {
-                                url: connectionString
-                            }
-                        },
-                        log: ["query", "warn", "error"]
-                    });
+                    if (!connectionString) {
+                        throw new Error("DATABASE_URL is required");
+                    }
+                    adapter = new adapter_ppg_1.PrismaPostgresAdapter({ connectionString: connectionString });
+                    prisma = new client_1.PrismaClient({ adapter: adapter, log: ["query", "warn", "error"] });
                     console.log("Connecting via Standard Prisma Client...");
                     _a.label = 1;
                 case 1:

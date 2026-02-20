@@ -9,7 +9,7 @@ import {
   UiPriority,
   UiStatus
 } from "@/server/ticket-mappers";
-import { TicketStatus, TicketPriority } from "@prisma/client";
+import type { TicketPriority, TicketStatus } from "../../../prisma/generated/enums";
 
 function calculateSlaProgress(createdAt: Date, slaAt?: Date | null): number {
   if (!slaAt) return 0;
