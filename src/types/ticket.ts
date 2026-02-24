@@ -9,6 +9,19 @@ export interface TicketInteraction {
   corBorda?: "azul" | "verde" | "vermelho";
 }
 
+export interface TicketRoadmapEvent {
+  id: string;
+  type: string;
+  title: string;
+  description?: string;
+  fromStatus?: TicketStatus | null;
+  toStatus?: TicketStatus | null;
+  pauseReason?: string | null;
+  pauseSla?: boolean;
+  author?: string;
+  createdAt: string | Date;
+}
+
 export interface Ticket {
   id: string;
   number: number;
@@ -30,7 +43,9 @@ export interface Ticket {
   slaResposta?: string;
   slaSolucao?: string;
   pauseReason?: string;
+  pauseSla?: boolean;
   interacoes?: TicketInteraction[];
+  roadmap?: TicketRoadmapEvent[];
 }
 
 export interface KanbanColumn {
