@@ -29,6 +29,75 @@ async function evolutionRequest(path: string, init?: RequestInit) {
   return json;
 }
 
+function findStringValue(obj: unknown, predicate: (value: string) => boolean): string | null {
+  if (!obj) return null;
+
+  if (typeof obj === "string") {
+    return predicate(obj) ? obj : null;
+  }
+
+  if (Array.isArray(obj)) {
+    for (const item of obj) {
+      const found = findStringValue(item, predicate);
+      if (found) return found;
+    }
+    return null;
+  }
+
+  if (typeof obj === "object") {
+    for (const value of Object.values(obj as Record<string, unknown>)) {
+      const found = findStringValue(value, predicate);
+      if (found) return found;
+    }
+  }
+
+  return null;
+}
+
+function normalizeQrCode(raw: string | null) {
+  if (!raw) return null;
+  if (raw.startsWith("data:image")) return raw;
+  return `data:image/png;base64,${raw}`;
+}
+
+export async function getEvolutionConnectionState() {
+  try {
+    return await evolutionRequest(`/instance/connectionState/${EVOLUTION_INSTANCE}`);
+  } catch {
+    return null;
+  }
+}
+
+export async function getEvolutionQrCode() {
+  const attempts: Array<{ path: string; init?: RequestInit }> = [
+    { path: `/instance/connect/${EVOLUTION_INSTANCE}`, init: { method: "GET" } },
+    { path: `/instance/connect/${EVOLUTION_INSTANCE}`, init: { method: "POST" } },
+    { path: `/instance/qrcode/${EVOLUTION_INSTANCE}`, init: { method: "GET" } }
+  ];
+
+  let lastError: unknown = null;
+
+  for (const attempt of attempts) {
+    try {
+      const payload = await evolutionRequest(attempt.path, attempt.init);
+      const qrRaw = findStringValue(payload, (value) =>
+        value.startsWith("data:image") || value.length > 100
+      );
+      const pairingCode = findStringValue(payload, (value) => /[A-Z0-9]{4}-?[A-Z0-9]{4}/i.test(value));
+
+      return {
+        qrCode: normalizeQrCode(qrRaw),
+        pairingCode,
+        raw: payload
+      };
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  throw lastError instanceof Error ? lastError : new Error("Não foi possível obter QR Code da Evolution API.");
+}
+
 export async function sendTextToEvolution(number: string, text: string) {
   return evolutionRequest(`/message/sendText/${EVOLUTION_INSTANCE}`, {
     method: "POST",

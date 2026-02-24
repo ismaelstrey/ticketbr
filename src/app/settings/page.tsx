@@ -101,6 +101,10 @@ export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<TabKey>("general");
   const [whatsSettings, setWhatsSettings] = useState<WhatsAppSettings>(defaultWhatsSettings);
   const [testing, setTesting] = useState(false);
+  const [loadingQr, setLoadingQr] = useState(false);
+  const [qrCode, setQrCode] = useState<string | null>(null);
+  const [pairingCode, setPairingCode] = useState<string | null>(null);
+  const [connectionStatus, setConnectionStatus] = useState<string>("desconhecido");
 
   const tabs = useMemo(
     () => [
@@ -144,6 +148,32 @@ export default function SettingsPage() {
       showToast(error?.message ?? "Falha ao testar integração", "error");
     } finally {
       setTesting(false);
+    }
+  };
+
+
+
+  const loadWhatsQrCode = async () => {
+    try {
+      setLoadingQr(true);
+      const res = await fetch("/api/settings/whatsapp/qrcode");
+      const json = await res.json();
+      if (!res.ok) {
+        throw new Error(json?.error || "Falha ao carregar QR Code");
+      }
+
+      const statusCandidate = json?.data?.status?.instance?.state || json?.data?.status?.state || "desconhecido";
+      setConnectionStatus(String(statusCandidate));
+      setQrCode(typeof json?.data?.qrCode === "string" ? json.data.qrCode : null);
+      setPairingCode(typeof json?.data?.pairingCode === "string" ? json.data.pairingCode : null);
+
+      if (!json?.data?.qrCode) {
+        showToast("Instância pode já estar conectada. Nenhum QR Code retornado.", "success");
+      }
+    } catch (error: any) {
+      showToast(error?.message ?? "Erro ao buscar QR Code", "error");
+    } finally {
+      setLoadingQr(false);
     }
   };
 
@@ -228,7 +258,23 @@ export default function SettingsPage() {
                 <Button variant="ghost" onClick={testConnection} disabled={testing}>
                   {testing ? "Testando..." : "Testar conexão"}
                 </Button>
+                <Button variant="primary" onClick={loadWhatsQrCode} disabled={loadingQr}>
+                  {loadingQr ? "Carregando QR..." : "Gerar/Atualizar QR Code"}
+                </Button>
               </Footer>
+
+              <div style={{ marginTop: 16, border: "1px solid #e5e7eb", borderRadius: 12, padding: 12 }}>
+                <strong>Status da conexão:</strong> {connectionStatus}
+                {pairingCode ? <p style={{ margin: "8px 0", color: "#374151" }}><strong>Código de pareamento:</strong> {pairingCode}</p> : null}
+                {qrCode ? (
+                  <div>
+                    <p style={{ margin: "8px 0", color: "#374151" }}>Escaneie este QR Code no WhatsApp para vincular.</p>
+                    <img src={qrCode} alt="QR Code do WhatsApp" style={{ width: 280, maxWidth: "100%", border: "1px solid #e5e7eb", borderRadius: 8 }} />
+                  </div>
+                ) : (
+                  <p style={{ margin: "8px 0", color: "#6b7280" }}>Clique em "Gerar/Atualizar QR Code" para carregar o QR.</p>
+                )}
+              </div>
             </div>
           )}
 
