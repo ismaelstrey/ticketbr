@@ -6,6 +6,7 @@ import { FiHash, FiUser, FiTool, FiClock } from "@/components/icons";
 import { Ticket } from "@/types/ticket";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
+import { getSlaColor, getSlaLabel } from "@/lib/sla";
 
 const StyledCard = styled(Card)`
   cursor: grab;
@@ -55,11 +56,19 @@ const MetaRow = styled.div`
 
 const ProgressGrid = styled.div`
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.6rem;
+  grid-template-columns: 1fr;
+  gap: 0.45rem;
 `;
 
-const StyledProgress = styled.progress`
+const ProgressLabel = styled.div`
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+  color: ${({ theme }) => theme.colors.text.secondary};
+`;
+
+const StyledProgress = styled.progress<{ $barColor: string }>`
   width: 100%;
   height: 8px;
   appearance: none;
@@ -71,7 +80,7 @@ const StyledProgress = styled.progress`
 
   &::-webkit-progress-value {
     border-radius: 999px;
-    background: #18b5d9;
+    background: ${({ $barColor }) => $barColor};
   }
 `;
 
@@ -88,6 +97,9 @@ export function TicketCard({
   onDragEnd,
   onOpen
 }: TicketCardProps) {
+  const slaColor = getSlaColor(ticket.progressoSla);
+  const slaLabel = getSlaLabel(ticket.progressoSla);
+
   return (
     <StyledCard
       draggable
@@ -116,8 +128,17 @@ export function TicketCard({
         </span>
       </MetaRow>
       <ProgressGrid>
-        <StyledProgress max={100} value={ticket.progressoSla} />
-        <StyledProgress max={100} value={ticket.progressoTarefa} />
+        <ProgressLabel>
+          <strong>{slaLabel}</strong>
+          <span>{ticket.progressoSla}%</span>
+        </ProgressLabel>
+        <StyledProgress max={100} value={ticket.progressoSla} $barColor={slaColor} />
+
+        <ProgressLabel>
+          <span>Andamento</span>
+          <span>{ticket.progressoTarefa}%</span>
+        </ProgressLabel>
+        <StyledProgress max={100} value={ticket.progressoTarefa} $barColor="#18b5d9" />
       </ProgressGrid>
     </StyledCard>
   );

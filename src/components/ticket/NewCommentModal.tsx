@@ -5,6 +5,7 @@ import styled from "styled-components";
 import { FiX, FiCheck, FiSave, FiBold, FiItalic, FiList, FiLink, FiCode, FiEye, FiEdit2, FiMaximize, FiMinimize, FiImage } from "react-icons/fi";
 import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/context/AuthContext";
+import { useToast } from "@/context/ToastContext";
 import { Ticket } from "@/types/ticket";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -188,6 +189,7 @@ interface NewCommentModalProps {
 
 export default function NewCommentModal({ isOpen, onClose, ticketId, onCommentAdded }: NewCommentModalProps) {
   const { user } = useAuth();
+  const { showToast } = useToast();
   const [comment, setComment] = useState("");
   const [loading, setLoading] = useState(false);
   const [viewMode, setViewMode] = useState<"edit" | "preview" | "split">("edit");
@@ -240,7 +242,7 @@ export default function NewCommentModal({ isOpen, onClose, ticketId, onCommentAd
 
   const handleSubmit = async () => {
     if (!comment.trim()) {
-      alert("O comentário não pode estar vazio.");
+      showToast("O comentário não pode estar vazio.", "error");
       return;
     }
 
@@ -270,10 +272,11 @@ export default function NewCommentModal({ isOpen, onClose, ticketId, onCommentAd
       setComment("");
       localStorage.removeItem(`draft_comment_${ticketId}`);
       onCommentAdded(updatedTicket);
+      showToast("Comentário adicionado com sucesso.", "success");
       onClose();
     } catch (error: any) {
       console.error("Erro ao adicionar comentário:", error);
-      alert(`Erro: ${error.message}`);
+      showToast(`Erro ao adicionar comentário: ${error.message}`, "error");
     } finally {
       setLoading(false);
     }

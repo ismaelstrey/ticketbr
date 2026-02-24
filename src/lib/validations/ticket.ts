@@ -29,6 +29,7 @@ export const CreateTicketSchema = z.object({
 
 export const UpdateTicketSchema = CreateTicketSchema.partial().extend({
   pauseReason: z.string().optional(),
+  pauseSla: z.boolean().optional(),
 });
 
 export type CreateTicketInput = z.infer<typeof CreateTicketSchema>;
