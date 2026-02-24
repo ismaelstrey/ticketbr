@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createTicket, listTickets } from "@/server/services/ticket-service";
 import { CreateTicketSchema } from "@/lib/validations/ticket";
 import { z } from "zod";
+import { getSession } from "@/lib/auth";
 
 export async function GET() {
   const tickets = await listTickets();
@@ -21,7 +22,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const ticket = await createTicket(result.data);
+    const session = await getSession();
+    const payload = {
+      ...result.data,
+      operador: result.data.operador ?? ((session?.name as string | undefined) ?? "Sistema"),
+    };
+
+    const ticket = await createTicket(payload);
     return NextResponse.json({ data: ticket }, { status: 201 });
   } catch (error) {
     console.error("Error creating ticket:", error);

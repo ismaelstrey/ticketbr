@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { addTicketInteraction } from "@/server/services/ticket-service";
+import { getSession } from "@/lib/auth";
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -9,10 +10,13 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     return NextResponse.json({ error: "Título da interação é obrigatório." }, { status: 400 });
   }
 
+  const session = await getSession();
+  const author = (session?.name as string | undefined) ?? body.author ?? "Sistema";
+
   const ticket = await addTicketInteraction(id, {
     title: body.title,
     description: body.description,
-    author: body.author,
+    author,
     type: body.type
   });
 
