@@ -42,13 +42,11 @@ async function getPayload(token: string): Promise<SessionPayload | null> {
   }
 }
 
-function isAdminApi(pathname: string) {
-  return ADMIN_API_PREFIXES.some((prefix) => pathname.startsWith(prefix));
-}
+const isAdminApiPath = (pathname: string) =>
+  ADMIN_API_PREFIXES.some((prefix) => pathname.startsWith(prefix));
 
-function isPublicApi(pathname: string) {
-  return PUBLIC_API_PATHS.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
-}
+const isPublicApiPath = (pathname: string) =>
+  PUBLIC_API_PATHS.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
 
 function applyCorsHeaders(request: NextRequest, response: NextResponse) {
   const origin = request.headers.get("origin");
@@ -67,10 +65,6 @@ function applyCorsHeaders(request: NextRequest, response: NextResponse) {
   return response;
 }
 
-function isAdminApi(pathname: string) {
-  return ADMIN_API_PREFIXES.some((prefix) => pathname.startsWith(prefix));
-}
-
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -82,7 +76,7 @@ export async function proxy(request: NextRequest) {
     return applyCorsHeaders(request, new NextResponse(null, { status: 204 }));
   }
 
-  if (pathname === "/login" || isPublicApi(pathname)) {
+  if (pathname === "/login" || isPublicApiPath(pathname)) {
     if (pathname.startsWith("/api/")) {
       return applyCorsHeaders(request, NextResponse.next());
     }
@@ -98,7 +92,7 @@ export async function proxy(request: NextRequest) {
       return applyCorsHeaders(request, NextResponse.json({ error: "Unauthorized" }, { status: 401 }));
     }
 
-    if (isAdminApi(pathname) && payload.role !== "ADMIN") {
+    if (isAdminApiPath(pathname) && payload.role !== "ADMIN") {
       return applyCorsHeaders(request, NextResponse.json({ error: "Forbidden" }, { status: 403 }));
     }
 
