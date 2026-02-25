@@ -28,10 +28,12 @@ export type AggregateTicket = {
 
 export type TicketAvgAggregateOutputType = {
   number: number | null
+  pausedTotalSeconds: number | null
 }
 
 export type TicketSumAggregateOutputType = {
   number: number | null
+  pausedTotalSeconds: number | null
 }
 
 export type TicketMinAggregateOutputType = {
@@ -57,6 +59,9 @@ export type TicketMinAggregateOutputType = {
   responseSlaAt: Date | null
   solutionSlaAt: Date | null
   pausedReason: string | null
+  pauseSla: boolean | null
+  pausedStartedAt: Date | null
+  pausedTotalSeconds: number | null
   createdAt: Date | null
   updatedAt: Date | null
   created_by: string | null
@@ -87,6 +92,9 @@ export type TicketMaxAggregateOutputType = {
   responseSlaAt: Date | null
   solutionSlaAt: Date | null
   pausedReason: string | null
+  pauseSla: boolean | null
+  pausedStartedAt: Date | null
+  pausedTotalSeconds: number | null
   createdAt: Date | null
   updatedAt: Date | null
   created_by: string | null
@@ -117,6 +125,9 @@ export type TicketCountAggregateOutputType = {
   responseSlaAt: number
   solutionSlaAt: number
   pausedReason: number
+  pauseSla: number
+  pausedStartedAt: number
+  pausedTotalSeconds: number
   createdAt: number
   updatedAt: number
   created_by: number
@@ -128,10 +139,12 @@ export type TicketCountAggregateOutputType = {
 
 export type TicketAvgAggregateInputType = {
   number?: true
+  pausedTotalSeconds?: true
 }
 
 export type TicketSumAggregateInputType = {
   number?: true
+  pausedTotalSeconds?: true
 }
 
 export type TicketMinAggregateInputType = {
@@ -157,6 +170,9 @@ export type TicketMinAggregateInputType = {
   responseSlaAt?: true
   solutionSlaAt?: true
   pausedReason?: true
+  pauseSla?: true
+  pausedStartedAt?: true
+  pausedTotalSeconds?: true
   createdAt?: true
   updatedAt?: true
   created_by?: true
@@ -187,6 +203,9 @@ export type TicketMaxAggregateInputType = {
   responseSlaAt?: true
   solutionSlaAt?: true
   pausedReason?: true
+  pauseSla?: true
+  pausedStartedAt?: true
+  pausedTotalSeconds?: true
   createdAt?: true
   updatedAt?: true
   created_by?: true
@@ -217,6 +236,9 @@ export type TicketCountAggregateInputType = {
   responseSlaAt?: true
   solutionSlaAt?: true
   pausedReason?: true
+  pauseSla?: true
+  pausedStartedAt?: true
+  pausedTotalSeconds?: true
   createdAt?: true
   updatedAt?: true
   created_by?: true
@@ -334,6 +356,9 @@ export type TicketGroupByOutputType = {
   responseSlaAt: Date | null
   solutionSlaAt: Date | null
   pausedReason: string | null
+  pauseSla: boolean
+  pausedStartedAt: Date | null
+  pausedTotalSeconds: number
   createdAt: Date
   updatedAt: Date
   created_by: string | null
@@ -387,6 +412,9 @@ export type TicketWhereInput = {
   responseSlaAt?: Prisma.DateTimeNullableFilter<"Ticket"> | Date | string | null
   solutionSlaAt?: Prisma.DateTimeNullableFilter<"Ticket"> | Date | string | null
   pausedReason?: Prisma.StringNullableFilter<"Ticket"> | string | null
+  pauseSla?: Prisma.BoolFilter<"Ticket"> | boolean
+  pausedStartedAt?: Prisma.DateTimeNullableFilter<"Ticket"> | Date | string | null
+  pausedTotalSeconds?: Prisma.IntFilter<"Ticket"> | number
   createdAt?: Prisma.DateTimeFilter<"Ticket"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Ticket"> | Date | string
   created_by?: Prisma.StringNullableFilter<"Ticket"> | string | null
@@ -424,6 +452,9 @@ export type TicketOrderByWithRelationInput = {
   responseSlaAt?: Prisma.SortOrderInput | Prisma.SortOrder
   solutionSlaAt?: Prisma.SortOrderInput | Prisma.SortOrder
   pausedReason?: Prisma.SortOrderInput | Prisma.SortOrder
+  pauseSla?: Prisma.SortOrder
+  pausedStartedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  pausedTotalSeconds?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   created_by?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -464,6 +495,9 @@ export type TicketWhereUniqueInput = Prisma.AtLeast<{
   responseSlaAt?: Prisma.DateTimeNullableFilter<"Ticket"> | Date | string | null
   solutionSlaAt?: Prisma.DateTimeNullableFilter<"Ticket"> | Date | string | null
   pausedReason?: Prisma.StringNullableFilter<"Ticket"> | string | null
+  pauseSla?: Prisma.BoolFilter<"Ticket"> | boolean
+  pausedStartedAt?: Prisma.DateTimeNullableFilter<"Ticket"> | Date | string | null
+  pausedTotalSeconds?: Prisma.IntFilter<"Ticket"> | number
   createdAt?: Prisma.DateTimeFilter<"Ticket"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Ticket"> | Date | string
   created_by?: Prisma.StringNullableFilter<"Ticket"> | string | null
@@ -501,6 +535,9 @@ export type TicketOrderByWithAggregationInput = {
   responseSlaAt?: Prisma.SortOrderInput | Prisma.SortOrder
   solutionSlaAt?: Prisma.SortOrderInput | Prisma.SortOrder
   pausedReason?: Prisma.SortOrderInput | Prisma.SortOrder
+  pauseSla?: Prisma.SortOrder
+  pausedStartedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  pausedTotalSeconds?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   created_by?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -539,6 +576,9 @@ export type TicketScalarWhereWithAggregatesInput = {
   responseSlaAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Ticket"> | Date | string | null
   solutionSlaAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Ticket"> | Date | string | null
   pausedReason?: Prisma.StringNullableWithAggregatesFilter<"Ticket"> | string | null
+  pauseSla?: Prisma.BoolWithAggregatesFilter<"Ticket"> | boolean
+  pausedStartedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Ticket"> | Date | string | null
+  pausedTotalSeconds?: Prisma.IntWithAggregatesFilter<"Ticket"> | number
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Ticket"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Ticket"> | Date | string
   created_by?: Prisma.StringNullableWithAggregatesFilter<"Ticket"> | string | null
@@ -563,6 +603,9 @@ export type TicketCreateInput = {
   responseSlaAt?: Date | string | null
   solutionSlaAt?: Date | string | null
   pausedReason?: string | null
+  pauseSla?: boolean
+  pausedStartedAt?: Date | string | null
+  pausedTotalSeconds?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   created_by?: string | null
@@ -600,6 +643,9 @@ export type TicketUncheckedCreateInput = {
   responseSlaAt?: Date | string | null
   solutionSlaAt?: Date | string | null
   pausedReason?: string | null
+  pauseSla?: boolean
+  pausedStartedAt?: Date | string | null
+  pausedTotalSeconds?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   created_by?: string | null
@@ -624,6 +670,9 @@ export type TicketUpdateInput = {
   responseSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   solutionSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pausedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pauseSla?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pausedStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pausedTotalSeconds?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -661,6 +710,9 @@ export type TicketUncheckedUpdateInput = {
   responseSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   solutionSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pausedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pauseSla?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pausedStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pausedTotalSeconds?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -692,6 +744,9 @@ export type TicketCreateManyInput = {
   responseSlaAt?: Date | string | null
   solutionSlaAt?: Date | string | null
   pausedReason?: string | null
+  pauseSla?: boolean
+  pausedStartedAt?: Date | string | null
+  pausedTotalSeconds?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   created_by?: string | null
@@ -715,6 +770,9 @@ export type TicketUpdateManyMutationInput = {
   responseSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   solutionSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pausedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pauseSla?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pausedStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pausedTotalSeconds?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -745,6 +803,9 @@ export type TicketUncheckedUpdateManyInput = {
   responseSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   solutionSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pausedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pauseSla?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pausedStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pausedTotalSeconds?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -785,6 +846,9 @@ export type TicketCountOrderByAggregateInput = {
   responseSlaAt?: Prisma.SortOrder
   solutionSlaAt?: Prisma.SortOrder
   pausedReason?: Prisma.SortOrder
+  pauseSla?: Prisma.SortOrder
+  pausedStartedAt?: Prisma.SortOrder
+  pausedTotalSeconds?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   created_by?: Prisma.SortOrder
@@ -794,6 +858,7 @@ export type TicketCountOrderByAggregateInput = {
 
 export type TicketAvgOrderByAggregateInput = {
   number?: Prisma.SortOrder
+  pausedTotalSeconds?: Prisma.SortOrder
 }
 
 export type TicketMaxOrderByAggregateInput = {
@@ -819,6 +884,9 @@ export type TicketMaxOrderByAggregateInput = {
   responseSlaAt?: Prisma.SortOrder
   solutionSlaAt?: Prisma.SortOrder
   pausedReason?: Prisma.SortOrder
+  pauseSla?: Prisma.SortOrder
+  pausedStartedAt?: Prisma.SortOrder
+  pausedTotalSeconds?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   created_by?: Prisma.SortOrder
@@ -849,6 +917,9 @@ export type TicketMinOrderByAggregateInput = {
   responseSlaAt?: Prisma.SortOrder
   solutionSlaAt?: Prisma.SortOrder
   pausedReason?: Prisma.SortOrder
+  pauseSla?: Prisma.SortOrder
+  pausedStartedAt?: Prisma.SortOrder
+  pausedTotalSeconds?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   created_by?: Prisma.SortOrder
@@ -858,6 +929,7 @@ export type TicketMinOrderByAggregateInput = {
 
 export type TicketSumOrderByAggregateInput = {
   number?: Prisma.SortOrder
+  pausedTotalSeconds?: Prisma.SortOrder
 }
 
 export type TicketScalarRelationFilter = {
@@ -1156,6 +1228,9 @@ export type TicketCreateWithoutOperatorUserInput = {
   responseSlaAt?: Date | string | null
   solutionSlaAt?: Date | string | null
   pausedReason?: string | null
+  pauseSla?: boolean
+  pausedStartedAt?: Date | string | null
+  pausedTotalSeconds?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   created_by?: string | null
@@ -1191,6 +1266,9 @@ export type TicketUncheckedCreateWithoutOperatorUserInput = {
   responseSlaAt?: Date | string | null
   solutionSlaAt?: Date | string | null
   pausedReason?: string | null
+  pauseSla?: boolean
+  pausedStartedAt?: Date | string | null
+  pausedTotalSeconds?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   created_by?: string | null
@@ -1251,6 +1329,9 @@ export type TicketScalarWhereInput = {
   responseSlaAt?: Prisma.DateTimeNullableFilter<"Ticket"> | Date | string | null
   solutionSlaAt?: Prisma.DateTimeNullableFilter<"Ticket"> | Date | string | null
   pausedReason?: Prisma.StringNullableFilter<"Ticket"> | string | null
+  pauseSla?: Prisma.BoolFilter<"Ticket"> | boolean
+  pausedStartedAt?: Prisma.DateTimeNullableFilter<"Ticket"> | Date | string | null
+  pausedTotalSeconds?: Prisma.IntFilter<"Ticket"> | number
   createdAt?: Prisma.DateTimeFilter<"Ticket"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Ticket"> | Date | string
   created_by?: Prisma.StringNullableFilter<"Ticket"> | string | null
@@ -1275,6 +1356,9 @@ export type TicketCreateWithoutSolicitanteInput = {
   responseSlaAt?: Date | string | null
   solutionSlaAt?: Date | string | null
   pausedReason?: string | null
+  pauseSla?: boolean
+  pausedStartedAt?: Date | string | null
+  pausedTotalSeconds?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   created_by?: string | null
@@ -1310,6 +1394,9 @@ export type TicketUncheckedCreateWithoutSolicitanteInput = {
   responseSlaAt?: Date | string | null
   solutionSlaAt?: Date | string | null
   pausedReason?: string | null
+  pauseSla?: boolean
+  pausedStartedAt?: Date | string | null
+  pausedTotalSeconds?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   created_by?: string | null
@@ -1361,6 +1448,9 @@ export type TicketCreateWithoutTipo_ticketInput = {
   responseSlaAt?: Date | string | null
   solutionSlaAt?: Date | string | null
   pausedReason?: string | null
+  pauseSla?: boolean
+  pausedStartedAt?: Date | string | null
+  pausedTotalSeconds?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   created_by?: string | null
@@ -1396,6 +1486,9 @@ export type TicketUncheckedCreateWithoutTipo_ticketInput = {
   responseSlaAt?: Date | string | null
   solutionSlaAt?: Date | string | null
   pausedReason?: string | null
+  pauseSla?: boolean
+  pausedStartedAt?: Date | string | null
+  pausedTotalSeconds?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   created_by?: string | null
@@ -1447,6 +1540,9 @@ export type TicketCreateWithoutCategoriaInput = {
   responseSlaAt?: Date | string | null
   solutionSlaAt?: Date | string | null
   pausedReason?: string | null
+  pauseSla?: boolean
+  pausedStartedAt?: Date | string | null
+  pausedTotalSeconds?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   created_by?: string | null
@@ -1482,6 +1578,9 @@ export type TicketUncheckedCreateWithoutCategoriaInput = {
   responseSlaAt?: Date | string | null
   solutionSlaAt?: Date | string | null
   pausedReason?: string | null
+  pauseSla?: boolean
+  pausedStartedAt?: Date | string | null
+  pausedTotalSeconds?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   created_by?: string | null
@@ -1533,6 +1632,9 @@ export type TicketCreateWithoutMesa_trabalho_relInput = {
   responseSlaAt?: Date | string | null
   solutionSlaAt?: Date | string | null
   pausedReason?: string | null
+  pauseSla?: boolean
+  pausedStartedAt?: Date | string | null
+  pausedTotalSeconds?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   created_by?: string | null
@@ -1568,6 +1670,9 @@ export type TicketUncheckedCreateWithoutMesa_trabalho_relInput = {
   responseSlaAt?: Date | string | null
   solutionSlaAt?: Date | string | null
   pausedReason?: string | null
+  pauseSla?: boolean
+  pausedStartedAt?: Date | string | null
+  pausedTotalSeconds?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   created_by?: string | null
@@ -1619,6 +1724,9 @@ export type TicketCreateWithoutOperador_relInput = {
   responseSlaAt?: Date | string | null
   solutionSlaAt?: Date | string | null
   pausedReason?: string | null
+  pauseSla?: boolean
+  pausedStartedAt?: Date | string | null
+  pausedTotalSeconds?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   created_by?: string | null
@@ -1654,6 +1762,9 @@ export type TicketUncheckedCreateWithoutOperador_relInput = {
   responseSlaAt?: Date | string | null
   solutionSlaAt?: Date | string | null
   pausedReason?: string | null
+  pauseSla?: boolean
+  pausedStartedAt?: Date | string | null
+  pausedTotalSeconds?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   created_by?: string | null
@@ -1705,6 +1816,9 @@ export type TicketCreateWithoutEventsInput = {
   responseSlaAt?: Date | string | null
   solutionSlaAt?: Date | string | null
   pausedReason?: string | null
+  pauseSla?: boolean
+  pausedStartedAt?: Date | string | null
+  pausedTotalSeconds?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   created_by?: string | null
@@ -1741,6 +1855,9 @@ export type TicketUncheckedCreateWithoutEventsInput = {
   responseSlaAt?: Date | string | null
   solutionSlaAt?: Date | string | null
   pausedReason?: string | null
+  pauseSla?: boolean
+  pausedStartedAt?: Date | string | null
+  pausedTotalSeconds?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   created_by?: string | null
@@ -1780,6 +1897,9 @@ export type TicketUpdateWithoutEventsInput = {
   responseSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   solutionSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pausedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pauseSla?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pausedStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pausedTotalSeconds?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1816,6 +1936,9 @@ export type TicketUncheckedUpdateWithoutEventsInput = {
   responseSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   solutionSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pausedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pauseSla?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pausedStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pausedTotalSeconds?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1845,6 +1968,9 @@ export type TicketCreateManyOperatorUserInput = {
   responseSlaAt?: Date | string | null
   solutionSlaAt?: Date | string | null
   pausedReason?: string | null
+  pauseSla?: boolean
+  pausedStartedAt?: Date | string | null
+  pausedTotalSeconds?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   created_by?: string | null
@@ -1868,6 +1994,9 @@ export type TicketUpdateWithoutOperatorUserInput = {
   responseSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   solutionSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pausedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pauseSla?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pausedStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pausedTotalSeconds?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1903,6 +2032,9 @@ export type TicketUncheckedUpdateWithoutOperatorUserInput = {
   responseSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   solutionSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pausedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pauseSla?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pausedStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pausedTotalSeconds?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1933,6 +2065,9 @@ export type TicketUncheckedUpdateManyWithoutOperatorUserInput = {
   responseSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   solutionSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pausedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pauseSla?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pausedStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pausedTotalSeconds?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1962,6 +2097,9 @@ export type TicketCreateManySolicitanteInput = {
   responseSlaAt?: Date | string | null
   solutionSlaAt?: Date | string | null
   pausedReason?: string | null
+  pauseSla?: boolean
+  pausedStartedAt?: Date | string | null
+  pausedTotalSeconds?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   created_by?: string | null
@@ -1985,6 +2123,9 @@ export type TicketUpdateWithoutSolicitanteInput = {
   responseSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   solutionSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pausedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pauseSla?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pausedStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pausedTotalSeconds?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2020,6 +2161,9 @@ export type TicketUncheckedUpdateWithoutSolicitanteInput = {
   responseSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   solutionSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pausedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pauseSla?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pausedStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pausedTotalSeconds?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2050,6 +2194,9 @@ export type TicketUncheckedUpdateManyWithoutSolicitanteInput = {
   responseSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   solutionSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pausedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pauseSla?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pausedStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pausedTotalSeconds?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2079,6 +2226,9 @@ export type TicketCreateManyTipo_ticketInput = {
   responseSlaAt?: Date | string | null
   solutionSlaAt?: Date | string | null
   pausedReason?: string | null
+  pauseSla?: boolean
+  pausedStartedAt?: Date | string | null
+  pausedTotalSeconds?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   created_by?: string | null
@@ -2102,6 +2252,9 @@ export type TicketUpdateWithoutTipo_ticketInput = {
   responseSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   solutionSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pausedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pauseSla?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pausedStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pausedTotalSeconds?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2137,6 +2290,9 @@ export type TicketUncheckedUpdateWithoutTipo_ticketInput = {
   responseSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   solutionSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pausedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pauseSla?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pausedStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pausedTotalSeconds?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2167,6 +2323,9 @@ export type TicketUncheckedUpdateManyWithoutTipo_ticketInput = {
   responseSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   solutionSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pausedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pauseSla?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pausedStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pausedTotalSeconds?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2196,6 +2355,9 @@ export type TicketCreateManyCategoriaInput = {
   responseSlaAt?: Date | string | null
   solutionSlaAt?: Date | string | null
   pausedReason?: string | null
+  pauseSla?: boolean
+  pausedStartedAt?: Date | string | null
+  pausedTotalSeconds?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   created_by?: string | null
@@ -2219,6 +2381,9 @@ export type TicketUpdateWithoutCategoriaInput = {
   responseSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   solutionSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pausedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pauseSla?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pausedStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pausedTotalSeconds?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2254,6 +2419,9 @@ export type TicketUncheckedUpdateWithoutCategoriaInput = {
   responseSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   solutionSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pausedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pauseSla?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pausedStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pausedTotalSeconds?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2284,6 +2452,9 @@ export type TicketUncheckedUpdateManyWithoutCategoriaInput = {
   responseSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   solutionSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pausedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pauseSla?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pausedStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pausedTotalSeconds?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2313,6 +2484,9 @@ export type TicketCreateManyMesa_trabalho_relInput = {
   responseSlaAt?: Date | string | null
   solutionSlaAt?: Date | string | null
   pausedReason?: string | null
+  pauseSla?: boolean
+  pausedStartedAt?: Date | string | null
+  pausedTotalSeconds?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   created_by?: string | null
@@ -2336,6 +2510,9 @@ export type TicketUpdateWithoutMesa_trabalho_relInput = {
   responseSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   solutionSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pausedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pauseSla?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pausedStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pausedTotalSeconds?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2371,6 +2548,9 @@ export type TicketUncheckedUpdateWithoutMesa_trabalho_relInput = {
   responseSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   solutionSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pausedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pauseSla?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pausedStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pausedTotalSeconds?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2401,6 +2581,9 @@ export type TicketUncheckedUpdateManyWithoutMesa_trabalho_relInput = {
   responseSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   solutionSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pausedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pauseSla?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pausedStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pausedTotalSeconds?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2430,6 +2613,9 @@ export type TicketCreateManyOperador_relInput = {
   responseSlaAt?: Date | string | null
   solutionSlaAt?: Date | string | null
   pausedReason?: string | null
+  pauseSla?: boolean
+  pausedStartedAt?: Date | string | null
+  pausedTotalSeconds?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   created_by?: string | null
@@ -2453,6 +2639,9 @@ export type TicketUpdateWithoutOperador_relInput = {
   responseSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   solutionSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pausedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pauseSla?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pausedStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pausedTotalSeconds?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2488,6 +2677,9 @@ export type TicketUncheckedUpdateWithoutOperador_relInput = {
   responseSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   solutionSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pausedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pauseSla?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pausedStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pausedTotalSeconds?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2518,6 +2710,9 @@ export type TicketUncheckedUpdateManyWithoutOperador_relInput = {
   responseSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   solutionSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pausedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pauseSla?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pausedStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pausedTotalSeconds?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2579,6 +2774,9 @@ export type TicketSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   responseSlaAt?: boolean
   solutionSlaAt?: boolean
   pausedReason?: boolean
+  pauseSla?: boolean
+  pausedStartedAt?: boolean
+  pausedTotalSeconds?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   created_by?: boolean
@@ -2617,6 +2815,9 @@ export type TicketSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   responseSlaAt?: boolean
   solutionSlaAt?: boolean
   pausedReason?: boolean
+  pauseSla?: boolean
+  pausedStartedAt?: boolean
+  pausedTotalSeconds?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   created_by?: boolean
@@ -2653,6 +2854,9 @@ export type TicketSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   responseSlaAt?: boolean
   solutionSlaAt?: boolean
   pausedReason?: boolean
+  pauseSla?: boolean
+  pausedStartedAt?: boolean
+  pausedTotalSeconds?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   created_by?: boolean
@@ -2689,6 +2893,9 @@ export type TicketSelectScalar = {
   responseSlaAt?: boolean
   solutionSlaAt?: boolean
   pausedReason?: boolean
+  pauseSla?: boolean
+  pausedStartedAt?: boolean
+  pausedTotalSeconds?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   created_by?: boolean
@@ -2696,7 +2903,7 @@ export type TicketSelectScalar = {
   deleted_at?: boolean
 }
 
-export type TicketOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "number" | "solicitante_id" | "tipo_ticket_id" | "categoria_id" | "mesa_trabalho_id" | "operador_id" | "company" | "requester" | "subject" | "description" | "status" | "priority" | "operator" | "operatorId" | "contact" | "ticketType" | "category" | "workbench" | "responseSlaAt" | "solutionSlaAt" | "pausedReason" | "createdAt" | "updatedAt" | "created_by" | "updated_by" | "deleted_at", ExtArgs["result"]["ticket"]>
+export type TicketOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "number" | "solicitante_id" | "tipo_ticket_id" | "categoria_id" | "mesa_trabalho_id" | "operador_id" | "company" | "requester" | "subject" | "description" | "status" | "priority" | "operator" | "operatorId" | "contact" | "ticketType" | "category" | "workbench" | "responseSlaAt" | "solutionSlaAt" | "pausedReason" | "pauseSla" | "pausedStartedAt" | "pausedTotalSeconds" | "createdAt" | "updatedAt" | "created_by" | "updated_by" | "deleted_at", ExtArgs["result"]["ticket"]>
 export type TicketInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   solicitante?: boolean | Prisma.Ticket$solicitanteArgs<ExtArgs>
   tipo_ticket?: boolean | Prisma.Ticket$tipo_ticketArgs<ExtArgs>
@@ -2758,6 +2965,9 @@ export type $TicketPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     responseSlaAt: Date | null
     solutionSlaAt: Date | null
     pausedReason: string | null
+    pauseSla: boolean
+    pausedStartedAt: Date | null
+    pausedTotalSeconds: number
     createdAt: Date
     updatedAt: Date
     created_by: string | null
@@ -3215,6 +3425,9 @@ export interface TicketFieldRefs {
   readonly responseSlaAt: Prisma.FieldRef<"Ticket", 'DateTime'>
   readonly solutionSlaAt: Prisma.FieldRef<"Ticket", 'DateTime'>
   readonly pausedReason: Prisma.FieldRef<"Ticket", 'String'>
+  readonly pauseSla: Prisma.FieldRef<"Ticket", 'Boolean'>
+  readonly pausedStartedAt: Prisma.FieldRef<"Ticket", 'DateTime'>
+  readonly pausedTotalSeconds: Prisma.FieldRef<"Ticket", 'Int'>
   readonly createdAt: Prisma.FieldRef<"Ticket", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Ticket", 'DateTime'>
   readonly created_by: Prisma.FieldRef<"Ticket", 'String'>

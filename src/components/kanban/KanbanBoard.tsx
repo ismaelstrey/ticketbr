@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import {
   FiAlertCircle,
@@ -18,11 +18,12 @@ import { PauseModal } from "./PauseModal";
 import TicketDetails from "@/components/ticket/TicketDetails";
 import NewTicketModal from "@/components/ticket/NewTicketModal";
 
-import { columns, tickets as initialTickets } from "@/data/tickets";
+import { columns } from "@/data/kanban-columns";
 import { useTicketDragDrop } from "@/hooks/useTicketDragDrop";
 import { useTicketEditor } from "@/hooks/useTicketEditor";
 import { useTicketFilters } from "@/hooks/useTicketFilters";
 import { api } from "@/services/api";
+import { useToast } from "@/context/ToastContext";
 
 const columnIcons = {
   todo: FiAlertCircle,
@@ -33,7 +34,7 @@ const columnIcons = {
 
 const KPIsGrid = styled.section`
   display: grid;
-  grid-template-columns: repeat(3, minmax(120px, 1fr));
+  grid-template-columns: repeat(4, minmax(120px, 1fr));
   gap: 0.8rem;
   margin-bottom: 1rem;
 
@@ -115,8 +116,10 @@ export default function KanbanBoard() {
     pauseReason,
     setPauseReason,
     closePauseModal,
-    confirmPause
-  } = useTicketDragDrop(initialTickets);
+    confirmPause,
+    pauseSla,
+    setPauseSla
+  } = useTicketDragDrop();
 
   const { selectedTicket, openTicket, closeTicket, updateSelectedTicket } = useTicketEditor(tickets, setTickets);
 
@@ -129,19 +132,49 @@ export default function KanbanBoard() {
     status,
     setStatus,
     totalOpen,
-    avgSla
+    avgSla,
+    atRiskCount
   } = useTicketFilters(tickets);
 
   const [isNewTicketModalOpen, setIsNewTicketModalOpen] = useState(false);
+  const { showToast } = useToast();
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadTickets() {
+      try {
+        const response = await api.tickets.list();
+        if (!isMounted) return;
+
+        if (Array.isArray(response.data)) {
+          setTickets(response.data);
+        }
+        setLoadError(null);
+      } catch (error) {
+        if (!isMounted) return;
+        console.error("Failed to load tickets from API. Using local fallback.", error);
+        setLoadError("Não foi possível sincronizar tickets com o servidor.");
+      }
+    }
+
+    loadTickets();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [setTickets]);
 
   const handleSaveTicket = async () => {
     if (!selectedTicket) return;
     try {
         await api.tickets.update(selectedTicket.id, selectedTicket);
         closeTicket();
+        showToast("Ticket atualizado com sucesso.", "success");
     } catch (err) {
         console.error("Failed to save ticket", err);
-        alert("Erro ao salvar ticket");
+        showToast("Erro ao atualizar ticket.", "error");
     }
   };
 
@@ -174,13 +207,18 @@ export default function KanbanBoard() {
                 <strong>{totalOpen}</strong>
               </KPIArticle>
               <KPIArticle>
-                <p>Média SLA</p>
+                <p>SLA médio (abertos)</p>
                 <strong>{avgSla}%</strong>
+              </KPIArticle>
+              <KPIArticle>
+                <p>SLA em atenção</p>
+                <strong>{atRiskCount}</strong>
               </KPIArticle>
             </KPIsGrid>
 
             <FiltersContainer>
               <h1>Tickets • Listagem de Tickets</h1>
+              {loadError && <small>{loadError}</small>}
               <FilterGroup>
                 <Select value={priority} onChange={(event) => setPriority(event.target.value as any)}>
                   <option value="all">Prioridade: Todas</option>
@@ -232,6 +270,8 @@ export default function KanbanBoard() {
             ticket={pauseModalTicket}
             reason={pauseReason}
             setReason={setPauseReason}
+            pauseSla={pauseSla}
+            setPauseSla={setPauseSla}
             onClose={closePauseModal}
             onConfirm={confirmPause}
           />
@@ -239,7 +279,13 @@ export default function KanbanBoard() {
 
         <NewTicketModal 
           isOpen={isNewTicketModalOpen} 
-          onClose={() => setIsNewTicketModalOpen(false)} 
+          onClose={() => setIsNewTicketModalOpen(false)}
+          onCreated={async () => {
+            const response = await api.tickets.list();
+            if (Array.isArray(response.data)) {
+              setTickets(response.data);
+            }
+          }}
         />
       </MainContent>
     </AppShellContainer>
