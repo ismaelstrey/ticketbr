@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { Ticket, TicketPriority, TicketStatus } from "@/types/ticket";
+import { getSlaTone } from "@/lib/sla";
 
 export function useTicketFilters(tickets: Ticket[]) {
   const [query, setQuery] = useState("");
@@ -17,14 +18,19 @@ export function useTicketFilters(tickets: Ticket[]) {
     });
   }, [tickets, query, priority, status]);
 
-  const totalOpen = filteredTickets.filter((ticket) => ticket.status !== "done").length;
+  const openTickets = filteredTickets.filter((ticket) => ticket.status !== "done");
+  const totalOpen = openTickets.length;
+
   const avgSla =
-    filteredTickets.length === 0
+    openTickets.length === 0
       ? 0
-      : Math.round(filteredTickets.reduce((acc, ticket) => acc + ticket.progressoSla, 0) / filteredTickets.length);
+      : Math.round(openTickets.reduce((acc, ticket) => acc + ticket.progressoSla, 0) / openTickets.length);
 
+  const atRiskCount = openTickets.filter((ticket) => {
+    const tone = getSlaTone(ticket.progressoSla);
+    return tone === "warning" || tone === "danger" || tone === "breach";
+  }).length;
 
-      
   return {
     filteredTickets,
     query,
@@ -34,6 +40,7 @@ export function useTicketFilters(tickets: Ticket[]) {
     status,
     setStatus,
     totalOpen,
-    avgSla
+    avgSla,
+    atRiskCount
   };
 }

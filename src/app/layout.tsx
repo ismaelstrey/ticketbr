@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { AuthProvider } from "@/context/AuthContext";
+import { ToastProvider } from "@/context/ToastContext";
 import StyledComponentsRegistry from "@/lib/registry";
 import { StyledComponentsProvider } from "@/styles/StyledComponentsProvider";
 
@@ -33,7 +34,7 @@ export default function RootLayout({
         <StyledComponentsRegistry>
           <StyledComponentsProvider>
             <AuthProvider>
-              {children}
+              <ToastProvider>{children}</ToastProvider>
             </AuthProvider>
           </StyledComponentsProvider>
         </StyledComponentsRegistry>
