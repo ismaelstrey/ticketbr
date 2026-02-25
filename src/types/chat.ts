@@ -5,6 +5,8 @@ export interface ChatContact {
   name: string;
   email?: string;
   phone?: string;
+  company?: string;
+  tags?: string[];
 }
 
 export interface ChatAttachment {
