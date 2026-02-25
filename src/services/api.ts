@@ -26,10 +26,10 @@ export const api = {
         method: "PATCH",
         body: JSON.stringify(data)
     }),
-    updateStatus: (id: string, status: TicketStatus, reason?: string) => 
+    updateStatus: (id: string, status: TicketStatus, reason?: string, pauseSla?: boolean) => 
         fetchJson<{ data: Ticket }>(`/tickets/${id}/status`, {
             method: "POST",
-            body: JSON.stringify({ status, pauseReason: reason })
+            body: JSON.stringify({ status, pauseReason: reason, pauseSla })
         })
   },
   users: {
