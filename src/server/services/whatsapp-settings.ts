@@ -1,12 +1,22 @@
 import type { NextRequest } from "next/server";
 
 export interface WhatsAppRuntimeConfig {
-  baseUrl: string;
-  apiKey: string;
-  instance: string;
+  // Evolution (opcional quando fluxo é n8n-first)
+  baseUrl?: string;
+  apiKey?: string;
+  instance?: string;
+
+  // Comportamento do chat
   webhookUrl?: string;
   autoLinkTickets?: boolean;
+
+  // n8n automation hub
   n8nWebhookUrl?: string;
+  n8nBaseUrl?: string;
+  n8nApiKey?: string;
+  n8nConversationsPath?: string;
+  n8nMessagesPath?: string;
+  n8nSendPath?: string;
 }
 
 export const WHATSAPP_CONFIG_COOKIE = "ticketbr_whatsapp_cfg";
@@ -23,22 +33,28 @@ export function normalizeWhatsAppConfig(input: unknown): WhatsAppRuntimeConfig |
   if (!input || typeof input !== "object") return null;
   const raw = input as Record<string, unknown>;
 
-  const baseUrl = String(raw.baseUrl ?? raw.evolutionBaseUrl ?? "").trim();
-  const apiKey = String(raw.apiKey ?? raw.evolutionApiKey ?? "").trim();
-  const instance = String(raw.instance ?? raw.evolutionInstance ?? "").trim();
+  const config: WhatsAppRuntimeConfig = {
+    baseUrl: String(raw.baseUrl ?? raw.evolutionBaseUrl ?? "").trim() || undefined,
+    apiKey: String(raw.apiKey ?? raw.evolutionApiKey ?? "").trim() || undefined,
+    instance: String(raw.instance ?? raw.evolutionInstance ?? "").trim() || undefined,
+    webhookUrl: String(raw.webhookUrl ?? "").trim() || undefined,
+    autoLinkTickets: raw.autoLinkTickets === undefined ? undefined : Boolean(raw.autoLinkTickets),
+    n8nWebhookUrl: String(raw.n8nWebhookUrl ?? "").trim() || undefined,
+    n8nBaseUrl: String(raw.n8nBaseUrl ?? "").trim() || undefined,
+    n8nApiKey: String(raw.n8nApiKey ?? "").trim() || undefined,
+    n8nConversationsPath: String(raw.n8nConversationsPath ?? "").trim() || undefined,
+    n8nMessagesPath: String(raw.n8nMessagesPath ?? "").trim() || undefined,
+    n8nSendPath: String(raw.n8nSendPath ?? "").trim() || undefined
+  };
 
-  if (!baseUrl || !apiKey || !instance) {
+  const hasEvolution = Boolean(config.baseUrl && config.apiKey && config.instance);
+  const hasN8n = Boolean(config.n8nWebhookUrl || config.n8nBaseUrl);
+
+  if (!hasEvolution && !hasN8n) {
     return null;
   }
 
-  return {
-    baseUrl,
-    apiKey,
-    instance,
-    webhookUrl: String(raw.webhookUrl ?? "").trim() || undefined,
-    autoLinkTickets: raw.autoLinkTickets === undefined ? undefined : Boolean(raw.autoLinkTickets),
-    n8nWebhookUrl: String(raw.n8nWebhookUrl ?? "").trim() || undefined
-  };
+  return config;
 }
 
 export function encodeWhatsAppConfigCookie(config: WhatsAppRuntimeConfig) {
@@ -62,7 +78,13 @@ export function getWhatsAppConfigFromRequest(request: NextRequest): WhatsAppRunt
 export function sanitizeWhatsAppConfig(config: WhatsAppRuntimeConfig) {
   return {
     ...config,
-    apiKeyMasked: config.apiKey.length > 8 ? `${config.apiKey.slice(0, 4)}••••${config.apiKey.slice(-4)}` : "••••",
-    apiKey: undefined
+    apiKeyMasked: config.apiKey
+      ? (config.apiKey.length > 8 ? `${config.apiKey.slice(0, 4)}••••${config.apiKey.slice(-4)}` : "••••")
+      : undefined,
+    n8nApiKeyMasked: config.n8nApiKey
+      ? (config.n8nApiKey.length > 8 ? `${config.n8nApiKey.slice(0, 4)}••••${config.n8nApiKey.slice(-4)}` : "••••")
+      : undefined,
+    apiKey: undefined,
+    n8nApiKey: undefined
   };
 }
