@@ -30,3 +30,14 @@ Observações:
 - Aplicar migrations: `npm run prisma:migrate`
 - Seed: `npm run seed`
 
+
+## Build/Deploy
+
+- O `postbuild` não executa migration por padrão.
+- Para executar migration no pipeline de build, defina `RUN_DB_MIGRATE_ON_BUILD=true`.
+
+
+## Segurança / CORS
+
+- O `Access-Control-Allow-Origin` da API é controlado por `CORS_ALLOW_ORIGIN` (fallback: `http://localhost:3000`).
+- O projeto usa `allowedDevOrigins` para permitir chamadas de `localhost` e `127.0.0.1` em desenvolvimento.
