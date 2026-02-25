@@ -67,6 +67,10 @@ function applyCorsHeaders(request: NextRequest, response: NextResponse) {
   return response;
 }
 
+function isAdminApi(pathname: string) {
+  return ADMIN_API_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+}
+
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
