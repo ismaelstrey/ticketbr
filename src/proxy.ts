@@ -16,6 +16,23 @@ const ADMIN_API_PREFIXES = [
   "/api/categorias-ticket"
 ];
 
+const PUBLIC_API_PATHS = [
+  "/api/auth/login",
+  "/api/health",
+  "/api/chat/webhook"
+];
+
+const ALLOWED_CORS_ORIGINS = new Set(
+  [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "https://evo.strey.com.br",
+    "https://n8n.strey.com.br",
+    ...(process.env.CORS_ALLOW_ORIGINS?.split(",") ?? []).map((origin) => origin.trim()).filter(Boolean),
+    process.env.CORS_ALLOW_ORIGIN?.trim() ?? ""
+  ].filter(Boolean)
+);
+
 async function getPayload(token: string): Promise<SessionPayload | null> {
   try {
     const { payload } = await jwtVerify(token, JWT_KEY);
@@ -29,6 +46,31 @@ function isAdminApi(pathname: string) {
   return ADMIN_API_PREFIXES.some((prefix) => pathname.startsWith(prefix));
 }
 
+function isPublicApi(pathname: string) {
+  return PUBLIC_API_PATHS.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
+}
+
+function applyCorsHeaders(request: NextRequest, response: NextResponse) {
+  const origin = request.headers.get("origin");
+  if (origin && ALLOWED_CORS_ORIGINS.has(origin)) {
+    response.headers.set("Access-Control-Allow-Origin", origin);
+    response.headers.set("Access-Control-Allow-Credentials", "true");
+    response.headers.set("Vary", "Origin");
+  }
+
+  response.headers.set("Access-Control-Allow-Methods", "GET,DELETE,PATCH,POST,PUT,OPTIONS");
+  response.headers.set(
+    "Access-Control-Allow-Headers",
+    "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization"
+  );
+
+  return response;
+}
+
+function isAdminApi(pathname: string) {
+  return ADMIN_API_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+}
+
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -36,7 +78,14 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  if (pathname === "/login" || pathname === "/api/auth/login" || pathname === "/api/health") {
+  if (pathname.startsWith("/api/") && request.method === "OPTIONS") {
+    return applyCorsHeaders(request, new NextResponse(null, { status: 204 }));
+  }
+
+  if (pathname === "/login" || isPublicApi(pathname)) {
+    if (pathname.startsWith("/api/")) {
+      return applyCorsHeaders(request, NextResponse.next());
+    }
     return NextResponse.next();
   }
 
@@ -46,14 +95,14 @@ export async function proxy(request: NextRequest) {
 
   if (pathname.startsWith("/api/")) {
     if (!isAuthenticated) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return applyCorsHeaders(request, NextResponse.json({ error: "Unauthorized" }, { status: 401 }));
     }
 
     if (isAdminApi(pathname) && payload.role !== "ADMIN") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      return applyCorsHeaders(request, NextResponse.json({ error: "Forbidden" }, { status: 403 }));
     }
 
-    return NextResponse.next();
+    return applyCorsHeaders(request, NextResponse.next());
   }
 
   if (!isAuthenticated && pathname !== "/login") {
