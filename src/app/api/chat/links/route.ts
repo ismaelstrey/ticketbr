@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
+import { emitChatEventToN8n } from "@/server/services/n8n-adapter";
+import { getWhatsAppConfigFromRequest } from "@/server/services/whatsapp-settings";
 
 export async function GET(request: NextRequest) {
   const contactId = request.nextUrl.searchParams.get("contactId");
@@ -54,6 +56,8 @@ export async function POST(request: NextRequest) {
 
     const session = await getSession();
 
+    const config = getWhatsAppConfigFromRequest(request);
+
     const event = await prisma.ticketEvent.create({
       data: {
         ticketId: body.ticketId,
@@ -68,6 +72,18 @@ export async function POST(request: NextRequest) {
         }
       }
     });
+
+    await emitChatEventToN8n({
+      type: "chat.ticket.linked",
+      source: "ticketbr-chat",
+      occurredAt: new Date().toISOString(),
+      data: {
+        ticketId: body.ticketId,
+        contactId: body.contactId,
+        channel: body.channel ?? "whatsapp",
+        conversationId: body.conversationId
+      }
+    }, config);
 
     return NextResponse.json({ data: event }, { status: 201 });
   } catch (error) {

@@ -1,3 +1,5 @@
+import { WhatsAppRuntimeConfig } from "@/server/services/whatsapp-settings";
+
 const EVOLUTION_BASE_URL = process.env.EVOLUTION_API_BASE_URL;
 const EVOLUTION_API_KEY = process.env.EVOLUTION_API_KEY;
 const EVOLUTION_INSTANCE = process.env.EVOLUTION_API_INSTANCE;
@@ -18,20 +20,30 @@ export interface EvolutionMappedMessage {
   createdAt: string;
 }
 
-function isConfigured() {
-  return Boolean(EVOLUTION_BASE_URL && EVOLUTION_API_KEY && EVOLUTION_INSTANCE);
+function resolveConfig(overrides?: WhatsAppRuntimeConfig | null) {
+  return {
+    baseUrl: overrides?.baseUrl ?? EVOLUTION_BASE_URL ?? "",
+    apiKey: overrides?.apiKey ?? EVOLUTION_API_KEY ?? "",
+    instance: overrides?.instance ?? EVOLUTION_INSTANCE ?? ""
+  };
 }
 
-async function evolutionRequest(path: string, init?: RequestInit) {
-  if (!isConfigured()) {
+function isConfigured(overrides?: WhatsAppRuntimeConfig | null) {
+  const cfg = resolveConfig(overrides);
+  return Boolean(cfg.baseUrl && cfg.apiKey && cfg.instance);
+}
+
+async function evolutionRequest(path: string, init?: RequestInit, overrides?: WhatsAppRuntimeConfig | null) {
+  const cfg = resolveConfig(overrides);
+  if (!isConfigured(overrides)) {
     throw new Error("Evolution API não configurada. Defina EVOLUTION_API_BASE_URL, EVOLUTION_API_KEY e EVOLUTION_API_INSTANCE.");
   }
 
-  const response = await fetch(`${EVOLUTION_BASE_URL}${path}`, {
+  const response = await fetch(`${cfg.baseUrl}${path}`, {
     ...init,
     headers: {
       "Content-Type": "application/json",
-      apikey: EVOLUTION_API_KEY as string,
+      apikey: cfg.apiKey,
       ...init?.headers
     }
   });
@@ -183,26 +195,28 @@ function mapRawMessage(item: unknown, fallbackNumber: string): EvolutionMappedMe
   };
 }
 
-export async function getEvolutionConnectionState() {
+export async function getEvolutionConnectionState(config?: WhatsAppRuntimeConfig | null) {
   try {
-    return await evolutionRequest(`/instance/connectionState/${EVOLUTION_INSTANCE}`);
+    const cfg = resolveConfig(config);
+    return await evolutionRequest(`/instance/connectionState/${cfg.instance}`, undefined, config);
   } catch {
     return null;
   }
 }
 
-export async function getEvolutionQrCode() {
+export async function getEvolutionQrCode(config?: WhatsAppRuntimeConfig | null) {
+  const cfg = resolveConfig(config);
   const attempts: Array<{ path: string; init?: RequestInit }> = [
-    { path: `/instance/connect/${EVOLUTION_INSTANCE}`, init: { method: "GET" } },
-    { path: `/instance/connect/${EVOLUTION_INSTANCE}`, init: { method: "POST" } },
-    { path: `/instance/qrcode/${EVOLUTION_INSTANCE}`, init: { method: "GET" } }
+    { path: `/instance/connect/${cfg.instance}`, init: { method: "GET" } },
+    { path: `/instance/connect/${cfg.instance}`, init: { method: "POST" } },
+    { path: `/instance/qrcode/${cfg.instance}`, init: { method: "GET" } }
   ];
 
   let lastError: unknown = null;
 
   for (const attempt of attempts) {
     try {
-      const payload = await evolutionRequest(attempt.path, attempt.init);
+      const payload = await evolutionRequest(attempt.path, attempt.init, config);
       const qrRaw = findStringValue(payload, (value) => value.startsWith("data:image") || value.length > 100);
       const pairingCode = findStringValue(payload, (value) => /[A-Z0-9]{4}-?[A-Z0-9]{4}/i.test(value));
 
@@ -219,20 +233,21 @@ export async function getEvolutionQrCode() {
   throw lastError instanceof Error ? lastError : new Error("Não foi possível obter QR Code da Evolution API.");
 }
 
-export async function fetchConversationsFromEvolution() {
-  if (!isConfigured()) return [];
+export async function fetchConversationsFromEvolution(config?: WhatsAppRuntimeConfig | null) {
+  if (!isConfigured(config)) return [];
 
+  const cfg = resolveConfig(config);
   const attempts = [
-    `/chat/findChats/${EVOLUTION_INSTANCE}`,
-    `/chat/findChats/${EVOLUTION_INSTANCE}?page=1&limit=300`,
-    `/chat/all/${EVOLUTION_INSTANCE}`
+    `/chat/findChats/${cfg.instance}`,
+    `/chat/findChats/${cfg.instance}?page=1&limit=300`,
+    `/chat/all/${cfg.instance}`
   ];
 
   let lastError: unknown = null;
 
   for (const path of attempts) {
     try {
-      const payload = await evolutionRequest(path, { method: "GET" });
+      const payload = await evolutionRequest(path, { method: "GET" }, config);
       const arrays = findArrays(payload);
       const mapped = arrays.flatMap((arr) => arr.map(mapRawConversation).filter(Boolean) as EvolutionConversation[]);
 
@@ -252,10 +267,11 @@ export async function fetchConversationsFromEvolution() {
   return [];
 }
 
-export async function fetchMessagesFromEvolution(number: string) {
-  if (!isConfigured()) return [];
+export async function fetchMessagesFromEvolution(number: string, config?: WhatsAppRuntimeConfig | null) {
+  if (!isConfigured(config)) return [];
 
-  const payload = await evolutionRequest(`/chat/findMessages/${EVOLUTION_INSTANCE}/${encodeURIComponent(number)}`);
+  const cfg = resolveConfig(config);
+  const payload = await evolutionRequest(`/chat/findMessages/${cfg.instance}/${encodeURIComponent(number)}`, undefined, config);
   const arrays = findArrays(payload);
   const mapped = arrays.flatMap((arr) => arr.map((item) => mapRawMessage(item, number)).filter(Boolean) as EvolutionMappedMessage[]);
 
@@ -264,8 +280,9 @@ export async function fetchMessagesFromEvolution(number: string) {
   return Array.from(unique.values()).sort((a, b) => a.createdAt.localeCompare(b.createdAt));
 }
 
-export async function sendTextToEvolution(number: string, text: string) {
-  return evolutionRequest(`/message/sendText/${EVOLUTION_INSTANCE}`, {
+export async function sendTextToEvolution(number: string, text: string, config?: WhatsAppRuntimeConfig | null) {
+  const cfg = resolveConfig(config);
+  return evolutionRequest(`/message/sendText/${cfg.instance}`, {
     method: "POST",
     body: JSON.stringify({
       number,
@@ -273,17 +290,21 @@ export async function sendTextToEvolution(number: string, text: string) {
       delay: 0,
       presenceType: "composing"
     })
-  });
+  }, config);
 }
 
-export async function sendMediaToEvolution(input: {
-  number: string;
-  caption?: string;
-  fileName: string;
-  mimeType: string;
-  media: string;
-}) {
-  return evolutionRequest(`/message/sendMedia/${EVOLUTION_INSTANCE}`, {
+export async function sendMediaToEvolution(
+  input: {
+    number: string;
+    caption?: string;
+    fileName: string;
+    mimeType: string;
+    media: string;
+  },
+  config?: WhatsAppRuntimeConfig | null
+) {
+  const cfg = resolveConfig(config);
+  return evolutionRequest(`/message/sendMedia/${cfg.instance}`, {
     method: "POST",
     body: JSON.stringify({
       number: input.number,
@@ -294,9 +315,9 @@ export async function sendMediaToEvolution(input: {
       fileName: input.fileName,
       delay: 0
     })
-  });
+  }, config);
 }
 
-export function evolutionIsConfigured() {
-  return isConfigured();
+export function evolutionIsConfigured(config?: WhatsAppRuntimeConfig | null) {
+  return isConfigured(config);
 }

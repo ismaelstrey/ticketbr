@@ -1,18 +1,30 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { evolutionIsConfigured, getEvolutionConnectionState, getEvolutionQrCode } from "@/server/services/evolution-service";
+import { getWhatsAppConfigFromRequest, normalizeWhatsAppConfig } from "@/server/services/whatsapp-settings";
 
-export async function GET() {
-  if (!evolutionIsConfigured()) {
+export async function POST(request: NextRequest) {
+  let bodyConfig = null;
+  try {
+    const body = await request.json();
+    bodyConfig = normalizeWhatsAppConfig(body);
+    (request as any).__ticketbrBodyConfig = bodyConfig;
+  } catch {
+    // optional body
+  }
+
+  const config = bodyConfig ?? getWhatsAppConfigFromRequest(request);
+
+  if (!evolutionIsConfigured(config)) {
     return NextResponse.json(
-      { error: "Evolution API não configurada no servidor." },
+      { error: "Evolution API não configurada no servidor/sessão." },
       { status: 400 }
     );
   }
 
   try {
     const [status, qrData] = await Promise.all([
-      getEvolutionConnectionState(),
-      getEvolutionQrCode()
+      getEvolutionConnectionState(config),
+      getEvolutionQrCode(config)
     ]);
 
     return NextResponse.json({

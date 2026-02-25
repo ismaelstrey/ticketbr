@@ -1,7 +1,8 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { evolutionIsConfigured, fetchConversationsFromEvolution } from "@/server/services/evolution-service";
 import { ChatContact } from "@/types/chat";
+import { getWhatsAppConfigFromRequest } from "@/server/services/whatsapp-settings";
 
 function inferTags(name: string) {
   const tags: string[] = [];
@@ -15,8 +16,10 @@ function onlyDigits(input?: string) {
   return (input ?? "").replace(/\D/g, "");
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const config = getWhatsAppConfigFromRequest(request);
+
     const contacts = await prisma.solicitante.findMany({
       where: { status: true },
       orderBy: { nome_fantasia: "asc" },
@@ -37,15 +40,15 @@ export async function GET() {
       phone: c.telefone,
       tags: inferTags(c.nome_fantasia),
       conversationId: c.telefone ? `${onlyDigits(c.telefone)}@s.whatsapp.net` : undefined,
-      lastMessagePreview: undefined as string | undefined,
-      lastMessageAt: undefined as string | undefined
+      lastMessagePreview: undefined,
+      lastMessageAt: undefined
     }));
 
-    if (!evolutionIsConfigured()) {
+    if (!evolutionIsConfigured(config)) {
       return NextResponse.json({ data: baseContacts });
     }
 
-    const conversations = await fetchConversationsFromEvolution();
+    const conversations = await fetchConversationsFromEvolution(config);
     const byPhone = new Map(baseContacts.map((c) => [onlyDigits(c.phone), c]));
 
     for (const conversation of conversations) {

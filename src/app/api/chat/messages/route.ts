@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { appendMessage, listMessages } from "@/server/services/chat-memory";
 import { evolutionIsConfigured, fetchMessagesFromEvolution, sendMediaToEvolution, sendTextToEvolution } from "@/server/services/evolution-service";
+import { getWhatsAppConfigFromRequest } from "@/server/services/whatsapp-settings";
+import { emitChatEventToN8n } from "@/server/services/n8n-adapter";
 
 function normalizePhone(input?: string) {
   return (input ?? "").replace(/\D/g, "");
@@ -12,10 +14,11 @@ export async function GET(request: NextRequest) {
   const contactPhone = normalizePhone(request.nextUrl.searchParams.get("contactPhone") ?? "");
 
   try {
+    const config = getWhatsAppConfigFromRequest(request);
     const localMessages = listMessages(contactId, channel);
 
-    if (channel === "whatsapp" && contactPhone && evolutionIsConfigured()) {
-      const evolutionMessages = await fetchMessagesFromEvolution(contactPhone).catch((error) => {
+    if (channel === "whatsapp" && contactPhone && evolutionIsConfigured(config)) {
+      const evolutionMessages = await fetchMessagesFromEvolution(contactPhone, config).catch((error) => {
         console.warn("Evolution fetch messages failed", error);
         return [];
       });
@@ -52,6 +55,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "contactId é obrigatório" }, { status: 400 });
     }
 
+    const config = getWhatsAppConfigFromRequest(request);
+
     const message = {
       id: crypto.randomUUID(),
       contactId: body.contactId,
@@ -62,7 +67,7 @@ export async function POST(request: NextRequest) {
       createdAt: new Date().toISOString()
     };
 
-    if (channel === "whatsapp" && body.contactPhone && evolutionIsConfigured()) {
+    if (channel === "whatsapp" && body.contactPhone && evolutionIsConfigured(config)) {
       const phone = normalizePhone(body.contactPhone);
       if (body.attachment?.data && body.attachment?.name && body.attachment?.mimeType) {
         await sendMediaToEvolution({
@@ -71,13 +76,23 @@ export async function POST(request: NextRequest) {
           fileName: body.attachment.name,
           mimeType: body.attachment.mimeType,
           media: body.attachment.data
-        });
+        }, config);
       } else if (body.text?.trim()) {
-        await sendTextToEvolution(phone, body.text);
+        await sendTextToEvolution(phone, body.text, config);
       }
     }
 
     appendMessage(message);
+
+    await emitChatEventToN8n(
+      {
+        type: "chat.message.sent",
+        source: "ticketbr-chat",
+        occurredAt: new Date().toISOString(),
+        data: message as unknown as Record<string, unknown>
+      },
+      config
+    );
 
     return NextResponse.json({ data: message }, { status: 201 });
   } catch (error: any) {

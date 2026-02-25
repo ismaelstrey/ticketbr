@@ -84,6 +84,7 @@ interface WhatsAppSettings {
   evolutionInstance: string;
   webhookUrl: string;
   autoLinkTickets: boolean;
+  n8nWebhookUrl: string;
 }
 
 const storageKey = "ticketbr:settings:whatsapp";
@@ -93,7 +94,8 @@ const defaultWhatsSettings: WhatsAppSettings = {
   evolutionApiKey: "",
   evolutionInstance: "",
   webhookUrl: "",
-  autoLinkTickets: true
+  autoLinkTickets: true,
+  n8nWebhookUrl: ""
 };
 
 export default function SettingsPage() {
@@ -125,15 +127,49 @@ export default function SettingsPage() {
     } catch {
       // keep defaults
     }
+
+    fetch("/api/settings/whatsapp/config")
+      .then((res) => res.json())
+      .then((json) => {
+        if (json?.data) {
+          setWhatsSettings((curr) => ({
+            ...curr,
+            evolutionBaseUrl: json.data.baseUrl ?? curr.evolutionBaseUrl,
+            evolutionInstance: json.data.instance ?? curr.evolutionInstance,
+            webhookUrl: json.data.webhookUrl ?? curr.webhookUrl,
+            n8nWebhookUrl: json.data.n8nWebhookUrl ?? curr.n8nWebhookUrl
+          }));
+        }
+      })
+      .catch(() => undefined);
   }, []);
 
   const updateWhats = (patch: Partial<WhatsAppSettings>) => {
     setWhatsSettings((curr) => ({ ...curr, ...patch }));
   };
 
-  const saveWhatsSettings = () => {
+  const saveWhatsSettings = async () => {
     localStorage.setItem(storageKey, JSON.stringify(whatsSettings));
-    showToast("Configurações do WhatsApp salvas localmente.", "success");
+
+    const res = await fetch("/api/settings/whatsapp/config", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        baseUrl: whatsSettings.evolutionBaseUrl,
+        apiKey: whatsSettings.evolutionApiKey,
+        instance: whatsSettings.evolutionInstance,
+        webhookUrl: whatsSettings.webhookUrl,
+        autoLinkTickets: whatsSettings.autoLinkTickets,
+        n8nWebhookUrl: whatsSettings.n8nWebhookUrl
+      })
+    });
+
+    const json = await res.json();
+    if (!res.ok) {
+      throw new Error(json?.error || "Erro ao salvar configuração");
+    }
+
+    showToast("Configurações do WhatsApp salvas para esta sessão.", "success");
   };
 
   const testConnection = async () => {
@@ -156,7 +192,18 @@ export default function SettingsPage() {
   const loadWhatsQrCode = async () => {
     try {
       setLoadingQr(true);
-      const res = await fetch("/api/settings/whatsapp/qrcode");
+      const res = await fetch("/api/settings/whatsapp/qrcode", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          baseUrl: whatsSettings.evolutionBaseUrl,
+          apiKey: whatsSettings.evolutionApiKey,
+          instance: whatsSettings.evolutionInstance,
+          webhookUrl: whatsSettings.webhookUrl,
+          autoLinkTickets: whatsSettings.autoLinkTickets,
+          n8nWebhookUrl: whatsSettings.n8nWebhookUrl
+        })
+      });
       const json = await res.json();
       if (!res.ok) {
         throw new Error(json?.error || "Falha ao carregar QR Code");
@@ -242,6 +289,15 @@ export default function SettingsPage() {
                     onChange={(e) => updateWhats({ webhookUrl: e.target.value })}
                   />
                 </Field>
+
+                <Field>
+                  Webhook do n8n (eventos)
+                  <Input
+                    placeholder="https://n8n.seudominio/webhook/ticketbr-chat"
+                    value={whatsSettings.n8nWebhookUrl}
+                    onChange={(e) => updateWhats({ n8nWebhookUrl: e.target.value })}
+                  />
+                </Field>
               </FormGrid>
 
               <label style={{ display: "flex", gap: 8, marginTop: 12 }}>
@@ -254,7 +310,7 @@ export default function SettingsPage() {
               </label>
 
               <Footer>
-                <Button variant="save" onClick={saveWhatsSettings}>Salvar</Button>
+                <Button variant="save" onClick={() => saveWhatsSettings().catch((error) => showToast(error.message, "error"))}>Salvar</Button>
                 <Button variant="ghost" onClick={testConnection} disabled={testing}>
                   {testing ? "Testando..." : "Testar conexão"}
                 </Button>

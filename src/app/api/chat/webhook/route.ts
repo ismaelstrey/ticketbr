@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { appendMessage } from "@/server/services/chat-memory";
+import { emitChatEventToN8n } from "@/server/services/n8n-adapter";
 
 function asRecord(input: unknown): Record<string, unknown> {
   return input && typeof input === "object" ? (input as Record<string, unknown>) : {};
@@ -21,13 +22,22 @@ export async function POST(request: NextRequest) {
       String(asRecord(message.extendedTextMessage).text ?? "") ||
       "Mensagem recebida";
 
-    appendMessage({
+    const incoming = {
       id: crypto.randomUUID(),
       contactId,
-      channel: "whatsapp",
-      direction: "in",
+      channel: "whatsapp" as const,
+      direction: "in" as const,
       text,
       createdAt: new Date().toISOString()
+    };
+
+    appendMessage(incoming);
+
+    await emitChatEventToN8n({
+      type: "chat.message.received",
+      source: "ticketbr-chat",
+      occurredAt: new Date().toISOString(),
+      data: incoming as unknown as Record<string, unknown>
     });
 
     return NextResponse.json({ ok: true });
