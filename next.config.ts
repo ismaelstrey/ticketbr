@@ -1,5 +1,7 @@
 import type { NextConfig } from "next";
 
+const allowedOrigin = process.env.CORS_ALLOW_ORIGIN || "http://localhost:3000";
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   allowedDevOrigins: ["127.0.0.1", "localhost"],
