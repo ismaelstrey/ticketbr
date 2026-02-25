@@ -250,13 +250,14 @@ export default function ChatPage() {
 
     if (!contactId && nextContacts.length) {
       setContactId(nextContacts[0].id);
-      setConversationId(`whatsapp:${nextContacts[0].id}`);
+      setConversationId(nextContacts[0].conversationId || `whatsapp:${nextContacts[0].id}`);
     }
   }
 
   async function loadMessages() {
     if (!contactId) return;
-    const params = new URLSearchParams({ contactId, channel, contactPhone: selectedContact?.phone ?? "" });
+    const fallbackPhone = selectedContact?.id.startsWith("wa:") ? selectedContact.id.replace("wa:", "") : "";
+    const params = new URLSearchParams({ contactId, channel, contactPhone: selectedContact?.phone ?? fallbackPhone });
     const res = await fetch(`/api/chat/messages?${params.toString()}`);
     const json = await res.json();
     if (!res.ok) throw new Error(json?.error || "Erro ao carregar mensagens");
@@ -374,26 +375,27 @@ export default function ChatPage() {
 
             <ContactList>
               {filteredContacts.map((contact) => {
-                const last = messages.filter((m) => m.contactId === contact.id).at(-1);
+                const lastPreview = contact.lastMessagePreview || contact.phone || contact.email || "Sem mensagens";
+                const lastAt = contact.lastMessageAt ? new Date(contact.lastMessageAt) : null;
                 return (
                   <ContactItem
                     key={contact.id}
                     $active={contact.id === contactId}
                     onClick={() => {
                       setContactId(contact.id);
-                      setConversationId(`whatsapp:${contact.id}`);
+                      setConversationId(contact.conversationId || `whatsapp:${contact.id}`);
                     }}
                   >
                     <Avatar>{contact.name.slice(0, 2).toUpperCase()}</Avatar>
                     <div>
                       <div style={{ fontWeight: 700 }}>{contact.name}</div>
                       <div style={{ color: "#6b7280", fontSize: "0.78rem" }}>{contact.company || "Sem empresa"}</div>
-                      <div style={{ color: "#4b5563", fontSize: "0.77rem", marginTop: 2 }}>{last?.text || contact.phone || contact.email || "Sem mensagens"}</div>
+                      <div style={{ color: "#4b5563", fontSize: "0.77rem", marginTop: 2 }}>{lastPreview}</div>
                       <Chips>
                         {(contact.tags || []).map((tag) => <Chip key={tag}>{tag}</Chip>)}
                       </Chips>
                     </div>
-                    <small style={{ color: "#6b7280" }}>{last ? new Date(last.createdAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }) : ""}</small>
+                    <small style={{ color: "#6b7280" }}>{lastAt ? lastAt.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }) : ""}</small>
                   </ContactItem>
                 );
               })}

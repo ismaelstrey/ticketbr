@@ -7,6 +7,9 @@ export interface ChatContact {
   phone?: string;
   company?: string;
   tags?: string[];
+  conversationId?: string;
+  lastMessagePreview?: string;
+  lastMessageAt?: string;
 }
 
 export interface ChatAttachment {
