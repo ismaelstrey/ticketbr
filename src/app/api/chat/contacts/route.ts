@@ -4,7 +4,7 @@ import type { EvolutionConversation } from "@/server/services/evolution-service"
 import { evolutionIsConfigured, fetchConversationsFromEvolution } from "@/server/services/evolution-service";
 import { fetchConversationsFromN8n, isN8nConfigured } from "@/server/services/n8n-adapter";
 import { ChatContact } from "@/types/chat";
-import { getWhatsAppConfigFromRequest } from "@/server/services/whatsapp-settings";
+import { resolveWhatsAppConfig } from "@/server/services/whatsapp-settings";
 
 function inferTags(name: string) {
   const tags: string[] = [];
@@ -46,7 +46,7 @@ function toConversationView(
 
 export async function GET(request: NextRequest) {
   try {
-    const config = getWhatsAppConfigFromRequest(request);
+    const config = await resolveWhatsAppConfig(request);
 
     const contacts = await prisma.solicitante.findMany({
       where: { status: true },

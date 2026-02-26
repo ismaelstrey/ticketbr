@@ -3,13 +3,16 @@ import {
   WHATSAPP_CONFIG_COOKIE,
   decodeWhatsAppConfigCookie,
   encodeWhatsAppConfigCookie,
+  getWhatsAppConfigFromDatabase,
   normalizeWhatsAppConfig,
+  saveWhatsAppConfigToDatabase,
   sanitizeWhatsAppConfig
 } from "@/server/services/whatsapp-settings";
 
 export async function GET(request: NextRequest) {
   const cookieValue = request.cookies.get(WHATSAPP_CONFIG_COOKIE)?.value;
-  const config = decodeWhatsAppConfigCookie(cookieValue);
+  const cookieConfig = decodeWhatsAppConfigCookie(cookieValue);
+  const config = cookieConfig ?? await getWhatsAppConfigFromDatabase();
   if (!config) {
     return NextResponse.json({ data: null });
   }
@@ -24,6 +27,8 @@ export async function POST(request: NextRequest) {
     if (!config) {
       return NextResponse.json({ error: "Informe configuração Evolution completa ou parâmetros n8n (n8nBaseUrl/n8nWebhookUrl)" }, { status: 400 });
     }
+
+    await saveWhatsAppConfigToDatabase(config);
 
     const response = NextResponse.json({ data: sanitizeWhatsAppConfig(config) });
     response.cookies.set({

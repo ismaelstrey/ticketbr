@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { emitChatEventToN8n } from "@/server/services/n8n-adapter";
-import { getWhatsAppConfigFromRequest } from "@/server/services/whatsapp-settings";
+import { resolveWhatsAppConfig } from "@/server/services/whatsapp-settings";
 
 export async function GET(request: NextRequest) {
   const contactId = request.nextUrl.searchParams.get("contactId");
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
 
     const session = await getSession();
 
-    const config = getWhatsAppConfigFromRequest(request);
+    const config = await resolveWhatsAppConfig(request);
 
     const event = await prisma.ticketEvent.create({
       data: {

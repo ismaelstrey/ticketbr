@@ -82,6 +82,8 @@ interface WhatsAppSettings {
   evolutionBaseUrl: string;
   evolutionApiKey: string;
   evolutionInstance: string;
+  n8nBaseUrl: string;
+  n8nApiKey: string;
   webhookUrl: string;
   autoLinkTickets: boolean;
   n8nWebhookUrl: string;
@@ -93,6 +95,8 @@ const defaultWhatsSettings: WhatsAppSettings = {
   evolutionBaseUrl: "",
   evolutionApiKey: "",
   evolutionInstance: "",
+  n8nBaseUrl: "",
+  n8nApiKey: "",
   webhookUrl: "",
   autoLinkTickets: true,
   n8nWebhookUrl: ""
@@ -136,6 +140,7 @@ export default function SettingsPage() {
             ...curr,
             evolutionBaseUrl: json.data.baseUrl ?? curr.evolutionBaseUrl,
             evolutionInstance: json.data.instance ?? curr.evolutionInstance,
+            n8nBaseUrl: json.data.n8nBaseUrl ?? curr.n8nBaseUrl,
             webhookUrl: json.data.webhookUrl ?? curr.webhookUrl,
             n8nWebhookUrl: json.data.n8nWebhookUrl ?? curr.n8nWebhookUrl
           }));
@@ -158,6 +163,8 @@ export default function SettingsPage() {
         baseUrl: whatsSettings.evolutionBaseUrl,
         apiKey: whatsSettings.evolutionApiKey,
         instance: whatsSettings.evolutionInstance,
+        n8nBaseUrl: whatsSettings.n8nBaseUrl,
+        n8nApiKey: whatsSettings.n8nApiKey,
         webhookUrl: whatsSettings.webhookUrl,
         autoLinkTickets: whatsSettings.autoLinkTickets,
         n8nWebhookUrl: whatsSettings.n8nWebhookUrl
@@ -169,7 +176,7 @@ export default function SettingsPage() {
       throw new Error(json?.error || "Erro ao salvar configuração");
     }
 
-    showToast("Configurações do WhatsApp salvas para esta sessão.", "success");
+    showToast("Configurações do WhatsApp salvas (sessão + banco).", "success");
   };
 
   const testConnection = async () => {
@@ -250,7 +257,7 @@ export default function SettingsPage() {
           {activeTab === "whatsapp" && (
             <div>
               <h3>Configurações do WhatsApp (Evolution API)</h3>
-              <Info>Configure os dados de conexão com a Evolution API v2 e ajustes de comportamento do chat.</Info>
+              <Info>Configure Evolution e/ou n8n. Para n8n-first, preencha ao menos Base URL do n8n.</Info>
 
               <FormGrid>
                 <Field>
@@ -296,6 +303,25 @@ export default function SettingsPage() {
                     placeholder="https://n8n.seudominio/webhook/ticketbr-chat"
                     value={whatsSettings.n8nWebhookUrl}
                     onChange={(e) => updateWhats({ n8nWebhookUrl: e.target.value })}
+                  />
+                </Field>
+
+                <Field>
+                  Base URL do n8n
+                  <Input
+                    placeholder="https://n8n.seudominio.com/api/chat"
+                    value={whatsSettings.n8nBaseUrl}
+                    onChange={(e) => updateWhats({ n8nBaseUrl: e.target.value })}
+                  />
+                </Field>
+
+                <Field>
+                  API Key do n8n
+                  <Input
+                    type="password"
+                    placeholder="••••••••••"
+                    value={whatsSettings.n8nApiKey}
+                    onChange={(e) => updateWhats({ n8nApiKey: e.target.value })}
                   />
                 </Field>
               </FormGrid>

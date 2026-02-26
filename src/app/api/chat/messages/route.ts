@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { appendMessage, listMessages } from "@/server/services/chat-memory";
 import { evolutionIsConfigured, fetchMessagesFromEvolution, sendMediaToEvolution, sendTextToEvolution } from "@/server/services/evolution-service";
-import { getWhatsAppConfigFromRequest } from "@/server/services/whatsapp-settings";
+import { resolveWhatsAppConfig } from "@/server/services/whatsapp-settings";
 import { emitChatEventToN8n, fetchMessagesFromN8n, isN8nConfigured, sendMessageToN8n } from "@/server/services/n8n-adapter";
 
 function normalizePhone(input?: string) {
@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
   const contactPhone = normalizePhone(request.nextUrl.searchParams.get("contactPhone") ?? "");
 
   try {
-    const config = getWhatsAppConfigFromRequest(request);
+    const config = await resolveWhatsAppConfig(request);
     const localMessages = listMessages(contactId, channel);
 
     if (channel === "whatsapp" && contactPhone && isN8nConfigured(config)) {
@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "contactId é obrigatório" }, { status: 400 });
     }
 
-    const config = getWhatsAppConfigFromRequest(request);
+    const config = await resolveWhatsAppConfig(request);
 
     const message = {
       id: crypto.randomUUID(),

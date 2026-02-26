@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { evolutionIsConfigured, getEvolutionConnectionState, getEvolutionQrCode } from "@/server/services/evolution-service";
-import { getWhatsAppConfigFromRequest, normalizeWhatsAppConfig } from "@/server/services/whatsapp-settings";
+import { normalizeWhatsAppConfig, resolveWhatsAppConfig } from "@/server/services/whatsapp-settings";
 
 export async function POST(request: NextRequest) {
   let bodyConfig = null;
@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
     // optional body
   }
 
-  const config = bodyConfig ?? getWhatsAppConfigFromRequest(request);
+  const config = await resolveWhatsAppConfig(request, bodyConfig);
 
   if (!evolutionIsConfigured(config)) {
     return NextResponse.json(

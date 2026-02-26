@@ -1,4 +1,5 @@
 import type { NextRequest } from "next/server";
+import { prisma } from "@/lib/prisma";
 
 export interface WhatsAppRuntimeConfig {
   // Evolution (opcional quando fluxo é n8n-first)
@@ -20,6 +21,7 @@ export interface WhatsAppRuntimeConfig {
 }
 
 export const WHATSAPP_CONFIG_COOKIE = "ticketbr_whatsapp_cfg";
+const WHATSAPP_CONFIG_DB_KEY = "whatsapp_runtime_config";
 
 function safeJsonParse(input: string) {
   try {
@@ -73,6 +75,49 @@ export function getWhatsAppConfigFromRequest(request: NextRequest): WhatsAppRunt
 
   const cookieValue = request.cookies.get(WHATSAPP_CONFIG_COOKIE)?.value;
   return decodeWhatsAppConfigCookie(cookieValue);
+}
+
+export async function getWhatsAppConfigFromDatabase(): Promise<WhatsAppRuntimeConfig | null> {
+  try {
+    const rows = await prisma.$queryRawUnsafe<Array<{ value: unknown }>>(
+      `SELECT value FROM app_runtime_settings WHERE key = $1 LIMIT 1`,
+      WHATSAPP_CONFIG_DB_KEY
+    );
+
+    if (!rows?.[0]?.value) return null;
+    return normalizeWhatsAppConfig(rows[0].value);
+  } catch {
+    return null;
+  }
+}
+
+export async function saveWhatsAppConfigToDatabase(config: WhatsAppRuntimeConfig) {
+  await prisma.$executeRawUnsafe(`
+    CREATE TABLE IF NOT EXISTS app_runtime_settings (
+      key TEXT PRIMARY KEY,
+      value JSONB NOT NULL,
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `);
+
+  await prisma.$executeRawUnsafe(
+    `
+      INSERT INTO app_runtime_settings (key, value, updated_at)
+      VALUES ($1, $2::jsonb, NOW())
+      ON CONFLICT (key)
+      DO UPDATE SET
+        value = EXCLUDED.value,
+        updated_at = NOW()
+    `,
+    WHATSAPP_CONFIG_DB_KEY,
+    JSON.stringify(config)
+  );
+}
+
+export async function resolveWhatsAppConfig(request: NextRequest, bodyConfig?: WhatsAppRuntimeConfig | null) {
+  const requestConfig = bodyConfig ?? getWhatsAppConfigFromRequest(request);
+  if (requestConfig) return requestConfig;
+  return getWhatsAppConfigFromDatabase();
 }
 
 export function sanitizeWhatsAppConfig(config: WhatsAppRuntimeConfig) {
