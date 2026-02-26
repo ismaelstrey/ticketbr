@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { appendMessage, listMessages } from "@/server/services/chat-memory";
 import { evolutionIsConfigured, fetchMessagesFromEvolution, sendMediaToEvolution, sendTextToEvolution } from "@/server/services/evolution-service";
 import { getWhatsAppConfigFromRequest } from "@/server/services/whatsapp-settings";
-import { emitChatEventToN8n } from "@/server/services/n8n-adapter";
+import { emitChatEventToN8n, fetchMessagesFromN8n, isN8nConfigured, sendMessageToN8n } from "@/server/services/n8n-adapter";
 
 function normalizePhone(input?: string) {
   return (input ?? "").replace(/\D/g, "");
@@ -16,6 +16,23 @@ export async function GET(request: NextRequest) {
   try {
     const config = getWhatsAppConfigFromRequest(request);
     const localMessages = listMessages(contactId, channel);
+
+    if (channel === "whatsapp" && contactPhone && isN8nConfigured(config)) {
+      const n8nMessages = await fetchMessagesFromN8n({
+        contactId,
+        phone: contactPhone,
+        channel
+      }, config).catch((error) => {
+        console.warn("n8n fetch messages failed", error);
+        return [];
+      });
+
+      const merged = [...n8nMessages, ...localMessages];
+      const unique = new Map<string, (typeof merged)[number]>();
+      merged.forEach((m) => unique.set(m.id, m));
+
+      return NextResponse.json({ data: Array.from(unique.values()).sort((a, b) => a.createdAt.localeCompare(b.createdAt)) });
+    }
 
     if (channel === "whatsapp" && contactPhone && evolutionIsConfigured(config)) {
       const evolutionMessages = await fetchMessagesFromEvolution(contactPhone, config).catch((error) => {
@@ -67,7 +84,15 @@ export async function POST(request: NextRequest) {
       createdAt: new Date().toISOString()
     };
 
-    if (channel === "whatsapp" && body.contactPhone && evolutionIsConfigured(config)) {
+    if (channel === "whatsapp" && body.contactPhone && isN8nConfigured(config)) {
+      await sendMessageToN8n({
+        contactId: body.contactId,
+        channel,
+        contactPhone: normalizePhone(body.contactPhone),
+        text: body.text,
+        attachment: body.attachment
+      }, config);
+    } else if (channel === "whatsapp" && body.contactPhone && evolutionIsConfigured(config)) {
       const phone = normalizePhone(body.contactPhone);
       if (body.attachment?.data && body.attachment?.name && body.attachment?.mimeType) {
         await sendMediaToEvolution({

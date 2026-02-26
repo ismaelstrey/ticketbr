@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     const config = normalizeWhatsAppConfig(body);
 
     if (!config) {
-      return NextResponse.json({ error: "baseUrl, apiKey e instance são obrigatórios" }, { status: 400 });
+      return NextResponse.json({ error: "Informe configuração Evolution completa ou parâmetros n8n (n8nBaseUrl/n8nWebhookUrl)" }, { status: 400 });
     }
 
     const response = NextResponse.json({ data: sanitizeWhatsAppConfig(config) });

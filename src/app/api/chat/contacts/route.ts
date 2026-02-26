@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import type { EvolutionConversation } from "@/server/services/evolution-service";
 import { evolutionIsConfigured, fetchConversationsFromEvolution } from "@/server/services/evolution-service";
+import { fetchConversationsFromN8n, isN8nConfigured } from "@/server/services/n8n-adapter";
 import { ChatContact } from "@/types/chat";
 import { getWhatsAppConfigFromRequest } from "@/server/services/whatsapp-settings";
 
@@ -14,6 +16,32 @@ function inferTags(name: string) {
 
 function onlyDigits(input?: string) {
   return (input ?? "").replace(/\D/g, "");
+}
+
+function toConversationView(
+  conversation: EvolutionConversation | ChatContact
+): Pick<ChatContact, "id" | "name" | "phone" | "email" | "conversationId" | "lastMessagePreview" | "lastMessageAt"> {
+  if ("number" in conversation) {
+    return {
+      id: `wa:${conversation.number}`,
+      name: conversation.name || conversation.number,
+      phone: conversation.number,
+      email: undefined,
+      conversationId: conversation.id,
+      lastMessagePreview: conversation.lastMessage,
+      lastMessageAt: conversation.lastMessageAt
+    };
+  }
+
+  return {
+    id: conversation.id,
+    name: conversation.name,
+    phone: conversation.phone,
+    email: conversation.email,
+    conversationId: conversation.conversationId || conversation.id,
+    lastMessagePreview: conversation.lastMessagePreview,
+    lastMessageAt: conversation.lastMessageAt
+  };
 }
 
 export async function GET(request: NextRequest) {
@@ -44,33 +72,46 @@ export async function GET(request: NextRequest) {
       lastMessageAt: undefined
     }));
 
-    if (!evolutionIsConfigured(config)) {
+    const conversations = isN8nConfigured(config)
+      ? await fetchConversationsFromN8n(config).catch((error) => {
+        console.warn("n8n fetch conversations failed", error);
+        return [];
+      })
+      : evolutionIsConfigured(config)
+        ? await fetchConversationsFromEvolution(config).catch((error) => {
+          console.warn("Evolution fetch conversations failed", error);
+          return [];
+        })
+        : [];
+
+    if (conversations.length === 0) {
       return NextResponse.json({ data: baseContacts });
     }
 
-    const conversations = await fetchConversationsFromEvolution(config);
     const byPhone = new Map(baseContacts.map((c) => [onlyDigits(c.phone), c]));
 
     for (const conversation of conversations) {
-      const matched = byPhone.get(conversation.number);
+      const normalized = toConversationView(conversation);
+      const conversationPhone = onlyDigits(normalized.phone);
+      const matched = byPhone.get(conversationPhone);
       if (matched) {
-        matched.conversationId = conversation.id;
-        matched.lastMessagePreview = conversation.lastMessage;
-        matched.lastMessageAt = conversation.lastMessageAt;
+        matched.conversationId = normalized.conversationId;
+        matched.lastMessagePreview = normalized.lastMessagePreview;
+        matched.lastMessageAt = normalized.lastMessageAt;
         const currentTags = matched.tags ?? [];
         if (!currentTags.includes("WhatsApp")) currentTags.push("WhatsApp");
         matched.tags = currentTags;
       } else {
         baseContacts.push({
-          id: `wa:${conversation.number}`,
-          name: conversation.name || conversation.number,
+          id: normalized.id,
+          name: normalized.name,
           company: "Sem empresa",
-          phone: conversation.number,
-          email: undefined,
+          phone: normalized.phone,
+          email: normalized.email,
           tags: ["WhatsApp"],
-          conversationId: conversation.id,
-          lastMessagePreview: conversation.lastMessage,
-          lastMessageAt: conversation.lastMessageAt
+          conversationId: normalized.conversationId,
+          lastMessagePreview: normalized.lastMessagePreview,
+          lastMessageAt: normalized.lastMessageAt
         });
       }
     }
