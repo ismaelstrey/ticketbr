@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Button } from "@/components/ui/Button";
@@ -112,6 +112,16 @@ const Field = styled.label`
   gap: 0.4rem;
   color: #111827;
   font-size: 0.9rem;
+`;
+
+const FieldHint = styled.span`
+  color: #6b7280;
+  font-size: 0.82rem;
+`;
+
+const FieldError = styled.span`
+  color: #b91c1c;
+  font-size: 0.82rem;
 `;
 
 const Footer = styled.div`
@@ -365,12 +375,20 @@ export default function SettingsPage() {
       setQrCode(typeof json?.data?.qrCode === "string" ? json.data.qrCode : null);
       setPairingCode(typeof json?.data?.pairingCode === "string" ? json.data.pairingCode : null);
     } catch (error: any) {
-      showToast(error?.message ?? "Erro ao buscar QR Code", "error");
+      const result: TestResult = {
+        ok: false,
+        message: error?.message ?? "Falha ao testar conexão.",
+        testedAt: new Date().toISOString()
+      };
+      setLastTest(result);
+      showToast(result.message, "error");
     } finally {
       setLoadingQr(false);
       setTestingApi(false);
     }
   };
+
+  const currentValidation = activeTab === "evolution" ? validateEvolution(settings) : validateN8n(settings);
 
   return (
     <Shell>
@@ -388,7 +406,7 @@ export default function SettingsPage() {
             ))}
           </Tabs>
 
-          {activeTab === "general" && (
+          {activeTab === "evolution" && (
             <div>
               <h3>Geral</h3>
               <Info>Valide a API local antes de testar integrações externas.</Info>
@@ -524,7 +542,7 @@ export default function SettingsPage() {
             </div>
           )}
 
-          {activeTab === "notifications" && (
+          {activeTab === "n8n" && (
             <div>
               <h3>Notificações</h3>
               <Info>Espaço reservado para alertas.</Info>
