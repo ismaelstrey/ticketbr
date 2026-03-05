@@ -375,20 +375,14 @@ export default function SettingsPage() {
       setQrCode(typeof json?.data?.qrCode === "string" ? json.data.qrCode : null);
       setPairingCode(typeof json?.data?.pairingCode === "string" ? json.data.pairingCode : null);
     } catch (error: any) {
-      const result: TestResult = {
-        ok: false,
-        message: error?.message ?? "Falha ao testar conexão.",
-        testedAt: new Date().toISOString()
-      };
-      setLastTest(result);
-      showToast(result.message, "error");
+      showToast(error?.message ?? "Falha ao testar conexão.", "error");
     } finally {
       setLoadingQr(false);
       setTestingApi(false);
     }
   };
 
-  const currentValidation = activeTab === "evolution" ? validateEvolution(settings) : validateN8n(settings);
+  
 
   return (
     <Shell>

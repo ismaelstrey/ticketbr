@@ -16,10 +16,6 @@ export interface WhatsAppRuntimeConfig {
   // Comportamento do chat
   webhookUrl?: string;
   evolutionWebhookUrl?: string;
-  evolutionTimeoutMs?: string;
-  evolutionRetryEnabled?: boolean;
-  evolutionRetryMax?: string;
-  evolutionRetryDelayMs?: string;
   autoLinkTickets?: boolean;
 
   // n8n automation hub
@@ -72,10 +68,6 @@ export function normalizeWhatsAppConfig(input: unknown): WhatsAppRuntimeConfig |
     instance: String(raw.instance ?? raw.evolutionInstance ?? "").trim() || undefined,
     webhookUrl: String(raw.webhookUrl ?? raw.evolutionWebhookUrl ?? "").trim() || undefined,
     evolutionWebhookUrl: String(raw.evolutionWebhookUrl ?? raw.webhookUrl ?? "").trim() || undefined,
-    evolutionTimeoutMs: String(raw.evolutionTimeoutMs ?? "").trim() || undefined,
-    evolutionRetryEnabled: raw.evolutionRetryEnabled === undefined ? undefined : Boolean(raw.evolutionRetryEnabled),
-    evolutionRetryMax: String(raw.evolutionRetryMax ?? "").trim() || undefined,
-    evolutionRetryDelayMs: String(raw.evolutionRetryDelayMs ?? "").trim() || undefined,
     autoLinkTickets: raw.autoLinkTickets === undefined ? undefined : Boolean(raw.autoLinkTickets),
     n8nWebhookUrl: String(raw.n8nWebhookUrl ?? "").trim() || undefined,
 

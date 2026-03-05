@@ -7,6 +7,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json().catch(() => ({}));
     const bodyConfig = normalizeWhatsAppConfig(body);
     const config = await resolveWhatsAppConfig(request, bodyConfig);
+    // console.log(config)
 
     const result = await syncWhatsAppContactsFromN8n(config);
     return NextResponse.json({ data: result });

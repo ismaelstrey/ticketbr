@@ -44,7 +44,7 @@ function normalizeWebhookUrl(url: string) {
 async function performN8nRequest(url: string, apiKey: string | undefined, init?: RequestInit) {
   const response = await fetch(url, {
     ...init,
-    method: effectiveMethod,
+    method: init?.method ?? "GET",
     headers: {
       "Content-Type": "application/json",
       ...(apiKey ? { Authorization: `Bearer ${apiKey}`, "X-N8N-API-KEY": apiKey } : {}),
