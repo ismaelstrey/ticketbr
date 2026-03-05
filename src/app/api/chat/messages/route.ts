@@ -8,6 +8,10 @@ function normalizePhone(input?: string) {
   return (input ?? "").replace(/\D/g, "");
 }
 
+function hasN8nSendConfig(config: Awaited<ReturnType<typeof resolveWhatsAppConfig>>) {
+  return Boolean(config?.n8nBaseUrl || process.env.N8N_CHAT_BASE_URL);
+}
+
 export async function GET(request: NextRequest) {
   const contactId = request.nextUrl.searchParams.get("contactId") ?? "";
   const channel = (request.nextUrl.searchParams.get("channel") ?? "whatsapp") as "whatsapp" | "email";
@@ -84,26 +88,49 @@ export async function POST(request: NextRequest) {
       createdAt: new Date().toISOString()
     };
 
-    if (channel === "whatsapp" && body.contactPhone && isN8nConfigured(config)) {
-      await sendMessageToN8n({
-        contactId: body.contactId,
-        channel,
-        contactPhone: normalizePhone(body.contactPhone),
-        text: body.text,
-        attachment: body.attachment
-      }, config);
-    } else if (channel === "whatsapp" && body.contactPhone && evolutionIsConfigured(config)) {
+    if (channel === "whatsapp" && body.contactPhone) {
       const phone = normalizePhone(body.contactPhone);
-      if (body.attachment?.data && body.attachment?.name && body.attachment?.mimeType) {
-        await sendMediaToEvolution({
-          number: phone,
-          caption: body.text,
-          fileName: body.attachment.name,
-          mimeType: body.attachment.mimeType,
-          media: body.attachment.data
-        }, config);
-      } else if (body.text?.trim()) {
-        await sendTextToEvolution(phone, body.text, config);
+      const shouldUseN8n = isN8nConfigured(config) && hasN8nSendConfig(config);
+      const shouldUseEvolution = evolutionIsConfigured(config);
+
+      if (!shouldUseN8n && !shouldUseEvolution) {
+        return NextResponse.json(
+          { error: "Integração WhatsApp não configurada. Configure Evolution API ou N8N em /settings." },
+          { status: 400 }
+        );
+      }
+
+      try {
+        if (shouldUseN8n) {
+          await sendMessageToN8n(
+            {
+              contactId: body.contactId,
+              channel,
+              contactPhone: phone,
+              text: body.text,
+              attachment: body.attachment
+            },
+            config
+          );
+        } else if (shouldUseEvolution) {
+          if (body.attachment?.data && body.attachment?.name && body.attachment?.mimeType) {
+            await sendMediaToEvolution(
+              {
+                number: phone,
+                caption: body.text,
+                fileName: body.attachment.name,
+                mimeType: body.attachment.mimeType,
+                media: body.attachment.data
+              },
+              config
+            );
+          } else if (body.text?.trim()) {
+            await sendTextToEvolution(phone, body.text, config);
+          }
+        }
+      } catch (error: any) {
+        const msg = error?.message ?? "Falha ao enviar mensagem para o provedor.";
+        return NextResponse.json({ error: msg }, { status: 502 });
       }
     }
 

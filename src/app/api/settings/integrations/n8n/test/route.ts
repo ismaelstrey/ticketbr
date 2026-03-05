@@ -62,11 +62,8 @@ export async function POST(request: NextRequest) {
     if (!baseUrl) {
       return NextResponse.json({ ok: false, message: "Informe a URL do serviço." }, { status: 400 });
     }
-    if (!apiKey) {
-      return NextResponse.json({ ok: false, message: "Informe a API Key." }, { status: 400 });
-    }
 
-    const url = `${baseUrl}/api/v1/workflows?limit=1`;
+    const url = apiKey ? `${baseUrl}/api/v1/workflows?limit=1` : `${baseUrl}/healthz/readiness`;
     const retries = retryEnabled ? Math.min(Math.max(retryMax, 0), 5) : 0;
 
     const { res, json, latencyMs } = await fetchWithRetry(
@@ -75,7 +72,7 @@ export async function POST(request: NextRequest) {
         method: "GET",
         headers: {
           accept: "application/json",
-          "X-N8N-API-KEY": apiKey
+          ...(apiKey ? { "X-N8N-API-KEY": apiKey } : {})
         },
         timeoutMs
       },
@@ -83,7 +80,8 @@ export async function POST(request: NextRequest) {
       retryDelayMs
     );
 
-    if (!res.ok) {
+    const isOk = res.ok || res.status === 304;
+    if (!isOk) {
       const msg = String((json as any)?.message ?? (json as any)?.error ?? `Falha ao conectar (HTTP ${res.status}).`);
       return NextResponse.json(
         {
@@ -93,7 +91,14 @@ export async function POST(request: NextRequest) {
           latencyMs,
           details: logEnabled
             ? {
-                request: { method: "GET", url, headers: { accept: "application/json", "X-N8N-API-KEY": "••••" }, timeoutMs, retries, retryDelayMs },
+                request: {
+                  method: "GET",
+                  url,
+                  headers: apiKey ? { accept: "application/json", "X-N8N-API-KEY": "••••" } : { accept: "application/json" },
+                  timeoutMs,
+                  retries,
+                  retryDelayMs
+                },
                 response: { status: res.status }
               }
             : undefined
@@ -102,15 +107,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const count = Array.isArray(json) ? json.length : Array.isArray((json as any)?.data) ? (json as any).data.length : undefined;
+    const count =
+      apiKey ? (Array.isArray(json) ? json.length : Array.isArray((json as any)?.data) ? (json as any).data.length : undefined) : undefined;
     return NextResponse.json({
       ok: true,
-      message: typeof count === "number" ? `Conexão OK. Itens retornados: ${count}.` : "Conexão OK.",
+      message: apiKey
+        ? (typeof count === "number" ? `Conexão OK. Itens retornados: ${count}.` : "Conexão OK.")
+        : "Conexão OK. Instância acessível via /healthz/readiness (API Key não informada).",
       statusCode: res.status,
       latencyMs,
       details: logEnabled
         ? {
-            request: { method: "GET", url, headers: { accept: "application/json", "X-N8N-API-KEY": "••••" }, timeoutMs, retries, retryDelayMs },
+            request: {
+              method: "GET",
+              url,
+              headers: apiKey ? { accept: "application/json", "X-N8N-API-KEY": "••••" } : { accept: "application/json" },
+              timeoutMs,
+              retries,
+              retryDelayMs
+            },
             response: { status: res.status }
           }
         : undefined
@@ -126,4 +141,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-

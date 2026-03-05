@@ -251,7 +251,6 @@ function validateEvolution(settings: IntegrationSettings) {
 function validateN8n(settings: IntegrationSettings) {
   const errors: Record<string, string> = {};
   if (!trimUrl(settings.n8nBaseUrl)) errors.n8nBaseUrl = "Informe a URL do serviço.";
-  if (!settings.n8nApiKey.trim()) errors.n8nApiKey = "Informe a API Key.";
   if (!settings.n8nWebhookUrl.trim()) errors.n8nWebhookUrl = "Informe o endpoint de webhook.";
   if (!isPositiveIntString(settings.n8nTimeoutMs)) errors.n8nTimeoutMs = "Informe um timeout em ms (> 0).";
   if (settings.n8nRetryEnabled) {
@@ -646,7 +645,7 @@ export default function SettingsPage() {
             <div>
               <h3>Integração: N8N</h3>
               <Info>
-                Autenticação via API Key no header <strong>X-N8N-API-KEY</strong>. O teste valida acesso ao endpoint <strong>/api/v1/workflows</strong>.
+                Quando informada, a API Key é enviada no header <strong>X-N8N-API-KEY</strong>. Sem API Key, o teste valida <strong>/healthz/readiness</strong>; com API Key, valida <strong>/api/v1/workflows</strong>.
               </Info>
 
               <FormGrid>
@@ -669,8 +668,9 @@ export default function SettingsPage() {
                     value={settings.n8nApiKey}
                     onChange={(e) => updateSettings({ n8nApiKey: e.target.value })}
                   />
-                  <FieldHint>Enviada no header X-N8N-API-KEY (não é exibida após salvar).</FieldHint>
-                  {currentValidation.errors.n8nApiKey ? <FieldError>{currentValidation.errors.n8nApiKey}</FieldError> : null}
+                  <FieldHint>
+                    Opcional. Se informada, será enviada no header X-N8N-API-KEY. Sem API Key, o teste valida somente o endpoint /healthz/readiness.
+                  </FieldHint>
                 </Field>
 
                 <Field>

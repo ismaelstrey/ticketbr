@@ -50,7 +50,7 @@ async function requestN8n(pathOrUrl: string, config?: WhatsAppRuntimeConfig | nu
     ...init,
     headers: {
       "Content-Type": "application/json",
-      ...(apiKey ? { Authorization: `Bearer ${apiKey}` } : {}),
+      ...(apiKey ? { "X-N8N-API-KEY": apiKey } : {}),
       ...init?.headers
     }
   });
