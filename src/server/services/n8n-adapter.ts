@@ -77,7 +77,11 @@ export function isN8nConfigured(config?: WhatsAppRuntimeConfig | null) {
 export async function fetchConversationsFromN8n(config?: WhatsAppRuntimeConfig | null): Promise<ChatContact[]> {
   if (!isN8nConfigured(config)) return [];
 
-  const path = resolvePath(config, "conversations");
+  // Prioriza o Webhook URL se estiver configurado
+  const webhook = resolveWebhook(config);
+  const relPath = resolvePath(config, "conversations");
+  const path = webhook ? buildUrl(webhook, relPath) : relPath;
+
   const payload = await requestN8n(path, config, { method: "GET" });
   const list = Array.isArray(payload?.data) ? payload.data : Array.isArray(payload) ? payload : [];
 
@@ -101,8 +105,12 @@ export async function fetchMessagesFromN8n(input: {
 }, config?: WhatsAppRuntimeConfig | null): Promise<ChatMessage[]> {
   if (!isN8nConfigured(config)) return [];
 
-  const path = resolvePath(config, "messages");
-  const url = `${path}${path.includes("?") ? "&" : "?"}contactId=${encodeURIComponent(input.contactId)}&channel=${encodeURIComponent(input.channel)}&phone=${encodeURIComponent(normalizePhone(input.phone))}`;
+  // Prioriza o Webhook URL se estiver configurado
+  const webhook = resolveWebhook(config);
+  const relPath = resolvePath(config, "messages");
+  const basePath = webhook ? buildUrl(webhook, relPath) : relPath;
+  
+  const url = `${basePath}${basePath.includes("?") ? "&" : "?"}contactId=${encodeURIComponent(input.contactId)}&channel=${encodeURIComponent(input.channel)}&phone=${encodeURIComponent(normalizePhone(input.phone))}`;
   const payload = await requestN8n(url, config, { method: "GET" });
   const list = Array.isArray(payload?.data) ? payload.data : Array.isArray(payload) ? payload : [];
 
@@ -119,7 +127,12 @@ export async function fetchMessagesFromN8n(input: {
 
 export async function sendMessageToN8n(payload: Record<string, unknown>, config?: WhatsAppRuntimeConfig | null) {
   if (!isN8nConfigured(config)) return null;
-  const path = resolvePath(config, "send");
+
+  // Prioriza o Webhook URL se estiver configurado, pois é o ponto de entrada explícito
+  const webhook = resolveWebhook(config);
+  const relPath = resolvePath(config, "send");
+  const path = webhook ? buildUrl(webhook, relPath) : relPath;
+
   return requestN8n(path, config, {
     method: "POST",
     body: JSON.stringify(payload)
