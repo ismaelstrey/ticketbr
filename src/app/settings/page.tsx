@@ -7,367 +7,166 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { useToast } from "@/context/ToastContext";
 
-type TabKey = "general" | "whatsapp" | "notifications";
+type TabKey = "general" | "evolution" | "n8n" | "notifications";
 
-const Shell = styled.div`
-  min-height: 100vh;
-  background: #f3f4f6;
-`;
-
-const Main = styled.main`
-  margin-left: 260px;
-  padding: 1rem;
-
-  @media (max-width: 1024px) {
-    margin-left: 64px;
-  }
-`;
-
-const Card = styled.section`
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 1rem;
-`;
-
-const Tabs = styled.div`
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-  flex-wrap: wrap;
-`;
-
+const Shell = styled.div`min-height: 100vh; background: #f3f4f6;`;
+const Main = styled.main`margin-left: 260px; padding: 1rem; @media (max-width: 1024px) { margin-left: 64px; }`;
+const Card = styled.section`background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 1rem;`;
+const Tabs = styled.div`display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap;`;
 const TabButton = styled.button<{ $active?: boolean }>`
   border: 1px solid ${({ $active }) => ($active ? "#2563eb" : "#d1d5db")};
   background: ${({ $active }) => ($active ? "#dbeafe" : "#fff")};
   color: ${({ $active }) => ($active ? "#1d4ed8" : "#374151")};
-  border-radius: 999px;
-  padding: 0.45rem 0.8rem;
-  font-weight: 600;
-  cursor: pointer;
+  border-radius: 999px; padding: 0.45rem 0.8rem; font-weight: 600; cursor: pointer;
 `;
-
 const FormGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(2, minmax(220px, 1fr));
-  gap: 0.75rem;
-
-  @media (max-width: 900px) {
-    grid-template-columns: 1fr;
-  }
+  display: grid; grid-template-columns: repeat(2, minmax(220px, 1fr)); gap: 0.75rem;
+  @media (max-width: 900px) { grid-template-columns: 1fr; }
 `;
+const Field = styled.label`display: flex; flex-direction: column; gap: 0.4rem; color: #111827; font-size: 0.9rem;`;
+const Footer = styled.div`margin-top: 1rem; display: flex; gap: 0.6rem; flex-wrap: wrap;`;
+const Info = styled.p`margin: 0 0 1rem; color: #6b7280; font-size: 0.9rem;`;
+const ResultBox = styled.pre`margin-top: 0.75rem; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 10px; padding: 0.75rem; font-size: 0.8rem; overflow-x: auto;`;
 
-const Field = styled.label`
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  color: #111827;
-  font-size: 0.9rem;
-`;
-
-const Footer = styled.div`
-  margin-top: 1rem;
-  display: flex;
-  gap: 0.6rem;
-  flex-wrap: wrap;
-`;
-
-const Info = styled.p`
-  margin: 0 0 1rem;
-  color: #6b7280;
-  font-size: 0.9rem;
-`;
-
-interface WhatsAppSettings {
+interface IntegrationSettings {
   evolutionBaseUrl: string;
   evolutionApiKey: string;
   evolutionInstance: string;
-  n8nBaseUrl: string;
-  n8nApiKey: string;
   webhookUrl: string;
   autoLinkTickets: boolean;
   n8nWebhookUrl: string;
+  n8nBaseUrl: string;
+  n8nApiKey: string;
+  n8nConversationsPath: string;
+  n8nMessagesPath: string;
+  n8nSendPath: string;
 }
 
-const storageKey = "ticketbr:settings:whatsapp";
-
-const defaultWhatsSettings: WhatsAppSettings = {
-  evolutionBaseUrl: "",
-  evolutionApiKey: "",
-  evolutionInstance: "",
-  n8nBaseUrl: "",
-  n8nApiKey: "",
-  webhookUrl: "",
-  autoLinkTickets: true,
-  n8nWebhookUrl: ""
+const storageKey = "ticketbr:settings:integrations";
+const defaults: IntegrationSettings = {
+  evolutionBaseUrl: "", evolutionApiKey: "", evolutionInstance: "", webhookUrl: "", autoLinkTickets: true,
+  n8nWebhookUrl: "", n8nBaseUrl: "", n8nApiKey: "", n8nConversationsPath: "/conversations", n8nMessagesPath: "/messages", n8nSendPath: "/messages/send"
 };
 
 export default function SettingsPage() {
   const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState<TabKey>("general");
-  const [whatsSettings, setWhatsSettings] = useState<WhatsAppSettings>(defaultWhatsSettings);
-  const [testing, setTesting] = useState(false);
+  const [settings, setSettings] = useState<IntegrationSettings>(defaults);
+  const [testingApi, setTestingApi] = useState(false);
+  const [testingN8n, setTestingN8n] = useState(false);
+  const [n8nTestResult, setN8nTestResult] = useState<unknown>(null);
   const [loadingQr, setLoadingQr] = useState(false);
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [pairingCode, setPairingCode] = useState<string | null>(null);
   const [connectionStatus, setConnectionStatus] = useState<string>("desconhecido");
 
-  const tabs = useMemo(
-    () => [
-      { key: "general" as const, label: "Geral" },
-      { key: "whatsapp" as const, label: "WhatsApp (Evolution)" },
-      { key: "notifications" as const, label: "Notificações" }
-    ],
-    []
-  );
+  const tabs = useMemo(() => [
+    { key: "general" as const, label: "Geral" },
+    { key: "evolution" as const, label: "Evolution API" },
+    { key: "n8n" as const, label: "N8N" },
+    { key: "notifications" as const, label: "Notificações" }
+  ], []);
 
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(storageKey);
-      if (saved) {
-        const parsed = JSON.parse(saved) as WhatsAppSettings;
-        setWhatsSettings({ ...defaultWhatsSettings, ...parsed });
+    try { const saved = localStorage.getItem(storageKey); if (saved) setSettings((c) => ({ ...c, ...(JSON.parse(saved) as IntegrationSettings) })); } catch {}
+    fetch("/api/settings/whatsapp/config").then((res) => res.json()).then((json) => {
+      if (json?.data) {
+        setSettings((curr) => ({
+          ...curr,
+          evolutionBaseUrl: json.data.baseUrl ?? curr.evolutionBaseUrl,
+          evolutionInstance: json.data.instance ?? curr.evolutionInstance,
+          webhookUrl: json.data.webhookUrl ?? curr.webhookUrl,
+          autoLinkTickets: typeof json.data.autoLinkTickets === "boolean" ? json.data.autoLinkTickets : curr.autoLinkTickets,
+          n8nWebhookUrl: json.data.n8nWebhookUrl ?? curr.n8nWebhookUrl,
+          n8nBaseUrl: json.data.n8nBaseUrl ?? curr.n8nBaseUrl,
+          n8nConversationsPath: json.data.n8nConversationsPath ?? curr.n8nConversationsPath,
+          n8nMessagesPath: json.data.n8nMessagesPath ?? curr.n8nMessagesPath,
+          n8nSendPath: json.data.n8nSendPath ?? curr.n8nSendPath
+        }));
       }
-    } catch {
-      // keep defaults
-    }
-
-    fetch("/api/settings/whatsapp/config")
-      .then((res) => res.json())
-      .then((json) => {
-        if (json?.data) {
-          setWhatsSettings((curr) => ({
-            ...curr,
-            evolutionBaseUrl: json.data.baseUrl ?? curr.evolutionBaseUrl,
-            evolutionInstance: json.data.instance ?? curr.evolutionInstance,
-            n8nBaseUrl: json.data.n8nBaseUrl ?? curr.n8nBaseUrl,
-            webhookUrl: json.data.webhookUrl ?? curr.webhookUrl,
-            n8nWebhookUrl: json.data.n8nWebhookUrl ?? curr.n8nWebhookUrl
-          }));
-        }
-      })
-      .catch(() => undefined);
+    }).catch(() => undefined);
   }, []);
 
-  const updateWhats = (patch: Partial<WhatsAppSettings>) => {
-    setWhatsSettings((curr) => ({ ...curr, ...patch }));
-  };
+  const update = (patch: Partial<IntegrationSettings>) => setSettings((curr) => ({ ...curr, ...patch }));
 
-  const saveWhatsSettings = async () => {
-    localStorage.setItem(storageKey, JSON.stringify(whatsSettings));
-
-    const res = await fetch("/api/settings/whatsapp/config", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        baseUrl: whatsSettings.evolutionBaseUrl,
-        apiKey: whatsSettings.evolutionApiKey,
-        instance: whatsSettings.evolutionInstance,
-        n8nBaseUrl: whatsSettings.n8nBaseUrl,
-        n8nApiKey: whatsSettings.n8nApiKey,
-        webhookUrl: whatsSettings.webhookUrl,
-        autoLinkTickets: whatsSettings.autoLinkTickets,
-        n8nWebhookUrl: whatsSettings.n8nWebhookUrl
-      })
-    });
-
+  const saveSettings = async () => {
+    localStorage.setItem(storageKey, JSON.stringify(settings));
+    const res = await fetch("/api/settings/whatsapp/config", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({
+      baseUrl: settings.evolutionBaseUrl, apiKey: settings.evolutionApiKey, instance: settings.evolutionInstance, webhookUrl: settings.webhookUrl,
+      autoLinkTickets: settings.autoLinkTickets, n8nWebhookUrl: settings.n8nWebhookUrl, n8nBaseUrl: settings.n8nBaseUrl, n8nApiKey: settings.n8nApiKey,
+      n8nConversationsPath: settings.n8nConversationsPath, n8nMessagesPath: settings.n8nMessagesPath, n8nSendPath: settings.n8nSendPath
+    }) });
     const json = await res.json();
-    if (!res.ok) {
-      throw new Error(json?.error || "Erro ao salvar configuração");
-    }
-
-    showToast("Configurações do WhatsApp salvas (sessão + banco).", "success");
+    if (!res.ok) throw new Error(json?.error || "Erro ao salvar configuração");
+    showToast("Configurações salvas.", "success");
   };
 
-  const testConnection = async () => {
+  const testSystemApi = async () => {
+    try { setTestingApi(true); const res = await fetch("/api/health"); if (!res.ok) throw new Error("Healthcheck falhou"); showToast("API online.", "success"); }
+    catch (error: any) { showToast(error?.message ?? "Falha ao testar API", "error"); }
+    finally { setTestingApi(false); }
+  };
+
+  const testN8n = async () => {
     try {
-      setTesting(true);
-      const res = await fetch("/api/health");
-      if (!res.ok) {
-        throw new Error("Healthcheck falhou");
-      }
-      showToast("Teste executado com sucesso. API do sistema está online.", "success");
-    } catch (error: any) {
-      showToast(error?.message ?? "Falha ao testar integração", "error");
-    } finally {
-      setTesting(false);
-    }
+      setTestingN8n(true); setN8nTestResult(null);
+      const res = await fetch("/api/settings/n8n/test", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({
+        n8nBaseUrl: settings.n8nBaseUrl, n8nApiKey: settings.n8nApiKey, n8nWebhookUrl: settings.n8nWebhookUrl,
+        n8nConversationsPath: settings.n8nConversationsPath, n8nMessagesPath: settings.n8nMessagesPath, n8nSendPath: settings.n8nSendPath
+      }) });
+      const json = await res.json(); setN8nTestResult(json); if (!res.ok) throw new Error(json?.error || "Falha no teste do N8N");
+      showToast("Comunicação com n8n OK.", "success");
+    } catch (error: any) { showToast(error?.message ?? "Falha ao testar N8N", "error"); }
+    finally { setTestingN8n(false); }
   };
 
-
-
-  const loadWhatsQrCode = async () => {
+  const loadQr = async () => {
     try {
       setLoadingQr(true);
-      const res = await fetch("/api/settings/whatsapp/qrcode", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          baseUrl: whatsSettings.evolutionBaseUrl,
-          apiKey: whatsSettings.evolutionApiKey,
-          instance: whatsSettings.evolutionInstance,
-          webhookUrl: whatsSettings.webhookUrl,
-          autoLinkTickets: whatsSettings.autoLinkTickets,
-          n8nWebhookUrl: whatsSettings.n8nWebhookUrl
-        })
-      });
-      const json = await res.json();
-      if (!res.ok) {
-        throw new Error(json?.error || "Falha ao carregar QR Code");
-      }
-
-      const statusCandidate = json?.data?.status?.instance?.state || json?.data?.status?.state || "desconhecido";
-      setConnectionStatus(String(statusCandidate));
+      const res = await fetch("/api/settings/whatsapp/qrcode", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({
+        baseUrl: settings.evolutionBaseUrl, apiKey: settings.evolutionApiKey, instance: settings.evolutionInstance,
+        webhookUrl: settings.webhookUrl, autoLinkTickets: settings.autoLinkTickets, n8nWebhookUrl: settings.n8nWebhookUrl
+      }) });
+      const json = await res.json(); if (!res.ok) throw new Error(json?.error || "Falha ao carregar QR Code");
+      setConnectionStatus(String(json?.data?.status?.instance?.state || json?.data?.status?.state || "desconhecido"));
       setQrCode(typeof json?.data?.qrCode === "string" ? json.data.qrCode : null);
       setPairingCode(typeof json?.data?.pairingCode === "string" ? json.data.pairingCode : null);
-
-      if (!json?.data?.qrCode) {
-        showToast("Instância pode já estar conectada. Nenhum QR Code retornado.", "success");
-      }
-    } catch (error: any) {
-      showToast(error?.message ?? "Erro ao buscar QR Code", "error");
-    } finally {
-      setLoadingQr(false);
-    }
+    } catch (error: any) { showToast(error?.message ?? "Erro ao buscar QR Code", "error"); }
+    finally { setLoadingQr(false); }
   };
 
   return (
-    <Shell>
-      <Sidebar />
-      <Main>
-        <Card>
-          <h1 style={{ margin: "0 0 0.35rem" }}>Configurações do Sistema</h1>
-          <Info>Use as abas para organizar as configurações. A aba de WhatsApp já está preparada para Evolution API.</Info>
+    <Shell><Sidebar /><Main><Card>
+      <h1 style={{ margin: "0 0 0.35rem" }}>Configurações de Integração</h1>
+      <Info>Configuração separada para Evolution API e N8N com teste dedicado de comunicação.</Info>
+      <Tabs>{tabs.map((tab) => <TabButton key={tab.key} $active={activeTab === tab.key} onClick={() => setActiveTab(tab.key)}>{tab.label}</TabButton>)}</Tabs>
 
-          <Tabs>
-            {tabs.map((tab) => (
-              <TabButton key={tab.key} $active={activeTab === tab.key} onClick={() => setActiveTab(tab.key)}>
-                {tab.label}
-              </TabButton>
-            ))}
-          </Tabs>
+      {activeTab === "general" && <div><h3>Geral</h3><Info>Valide a API local antes de testar integrações externas.</Info><Footer><Button variant="ghost" onClick={testSystemApi} disabled={testingApi}>{testingApi ? "Testando..." : "Testar API"}</Button></Footer></div>}
 
-          {activeTab === "general" && (
-            <div>
-              <h3>Geral</h3>
-              <Info>Espaço reservado para configurações globais do sistema (branding, regionalização e preferências).</Info>
-            </div>
-          )}
+      {activeTab === "evolution" && <div><h3>Integração: Evolution API</h3><FormGrid>
+        <Field>URL base<Input placeholder="https://evo.exemplo.com" value={settings.evolutionBaseUrl} onChange={(e) => update({ evolutionBaseUrl: e.target.value })} /></Field>
+        <Field>Instância<Input placeholder="ticketbr" value={settings.evolutionInstance} onChange={(e) => update({ evolutionInstance: e.target.value })} /></Field>
+        <Field>API Key<Input type="password" value={settings.evolutionApiKey} onChange={(e) => update({ evolutionApiKey: e.target.value })} /></Field>
+        <Field>Webhook (entrada)<Input placeholder="https://seu-dominio/api/chat/webhook" value={settings.webhookUrl} onChange={(e) => update({ webhookUrl: e.target.value })} /></Field>
+      </FormGrid>
+      <label style={{ display: "flex", gap: 8, marginTop: 12 }}><input type="checkbox" checked={settings.autoLinkTickets} onChange={(e) => update({ autoLinkTickets: e.target.checked })} />Associar automaticamente conversas a tickets</label>
+      <Footer><Button variant="save" onClick={() => saveSettings().catch((error) => showToast(error.message, "error"))}>Salvar Evolution</Button><Button variant="primary" onClick={loadQr} disabled={loadingQr}>{loadingQr ? "Carregando QR..." : "Gerar/Atualizar QR"}</Button></Footer>
+      <div style={{ marginTop: 16, border: "1px solid #e5e7eb", borderRadius: 12, padding: 12 }}><strong>Status:</strong> {connectionStatus}{pairingCode ? <p><strong>Código:</strong> {pairingCode}</p> : null}{qrCode ? <img src={qrCode} alt="QR Code do WhatsApp" style={{ width: 280, maxWidth: "100%", border: "1px solid #e5e7eb", borderRadius: 8 }} /> : null}</div>
+      </div>}
 
-          {activeTab === "whatsapp" && (
-            <div>
-              <h3>Configurações do WhatsApp (Evolution API)</h3>
-              <Info>Configure Evolution e/ou n8n. Para n8n-first, preencha ao menos Base URL do n8n.</Info>
+      {activeTab === "n8n" && <div><h3>Integração: N8N</h3><Info>Para produção no n8n use /webhook/... (não /webhook-test/...).</Info><FormGrid>
+        <Field>URL do serviço<Input placeholder="https://n8n.exemplo.com" value={settings.n8nBaseUrl} onChange={(e) => update({ n8nBaseUrl: e.target.value })} /></Field>
+        <Field>API Key<Input type="password" value={settings.n8nApiKey} onChange={(e) => update({ n8nApiKey: e.target.value })} /></Field>
+        <Field>Webhook de eventos<Input placeholder="https://n8n.exemplo.com/webhook/messages" value={settings.n8nWebhookUrl} onChange={(e) => update({ n8nWebhookUrl: e.target.value })} /></Field>
+        <Field>Path conversa (GET)<Input value={settings.n8nConversationsPath} onChange={(e) => update({ n8nConversationsPath: e.target.value })} /></Field>
+        <Field>Path mensagens (GET)<Input value={settings.n8nMessagesPath} onChange={(e) => update({ n8nMessagesPath: e.target.value })} /></Field>
+        <Field>Path envio (POST)<Input value={settings.n8nSendPath} onChange={(e) => update({ n8nSendPath: e.target.value })} /></Field>
+      </FormGrid>
+      <Footer><Button variant="save" onClick={() => saveSettings().catch((error) => showToast(error.message, "error"))}>Salvar N8N</Button><Button variant="ghost" onClick={testN8n} disabled={testingN8n}>{testingN8n ? "Testando..." : "Testar comunicação com N8N"}</Button></Footer>
+      {n8nTestResult ? <ResultBox>{JSON.stringify(n8nTestResult, null, 2)}</ResultBox> : null}
+      </div>}
 
-              <FormGrid>
-                <Field>
-                  URL base da Evolution API
-                  <Input
-                    placeholder="https://evolution.suaempresa.com"
-                    value={whatsSettings.evolutionBaseUrl}
-                    onChange={(e) => updateWhats({ evolutionBaseUrl: e.target.value })}
-                  />
-                </Field>
-
-                <Field>
-                  Nome da instância
-                  <Input
-                    placeholder="ticketbr-instance"
-                    value={whatsSettings.evolutionInstance}
-                    onChange={(e) => updateWhats({ evolutionInstance: e.target.value })}
-                  />
-                </Field>
-
-                <Field>
-                  API Key
-                  <Input
-                    type="password"
-                    placeholder="••••••••••"
-                    value={whatsSettings.evolutionApiKey}
-                    onChange={(e) => updateWhats({ evolutionApiKey: e.target.value })}
-                  />
-                </Field>
-
-                <Field>
-                  URL do webhook (entrada)
-                  <Input
-                    placeholder="https://seu-dominio.com/api/chat/webhook"
-                    value={whatsSettings.webhookUrl}
-                    onChange={(e) => updateWhats({ webhookUrl: e.target.value })}
-                  />
-                </Field>
-
-                <Field>
-                  Webhook do n8n (eventos)
-                  <Input
-                    placeholder="https://n8n.seudominio/webhook/ticketbr-chat"
-                    value={whatsSettings.n8nWebhookUrl}
-                    onChange={(e) => updateWhats({ n8nWebhookUrl: e.target.value })}
-                  />
-                </Field>
-
-                <Field>
-                  Base URL do n8n
-                  <Input
-                    placeholder="https://n8n.seudominio.com/api/chat"
-                    value={whatsSettings.n8nBaseUrl}
-                    onChange={(e) => updateWhats({ n8nBaseUrl: e.target.value })}
-                  />
-                </Field>
-
-                <Field>
-                  API Key do n8n
-                  <Input
-                    type="password"
-                    placeholder="••••••••••"
-                    value={whatsSettings.n8nApiKey}
-                    onChange={(e) => updateWhats({ n8nApiKey: e.target.value })}
-                  />
-                </Field>
-              </FormGrid>
-
-              <label style={{ display: "flex", gap: 8, marginTop: 12 }}>
-                <input
-                  type="checkbox"
-                  checked={whatsSettings.autoLinkTickets}
-                  onChange={(e) => updateWhats({ autoLinkTickets: e.target.checked })}
-                />
-                Tentar associar automaticamente conversas a tickets existentes
-              </label>
-
-              <Footer>
-                <Button variant="save" onClick={() => saveWhatsSettings().catch((error) => showToast(error.message, "error"))}>Salvar</Button>
-                <Button variant="ghost" onClick={testConnection} disabled={testing}>
-                  {testing ? "Testando..." : "Testar conexão"}
-                </Button>
-                <Button variant="primary" onClick={loadWhatsQrCode} disabled={loadingQr}>
-                  {loadingQr ? "Carregando QR..." : "Gerar/Atualizar QR Code"}
-                </Button>
-              </Footer>
-
-              <div style={{ marginTop: 16, border: "1px solid #e5e7eb", borderRadius: 12, padding: 12 }}>
-                <strong>Status da conexão:</strong> {connectionStatus}
-                {pairingCode ? <p style={{ margin: "8px 0", color: "#374151" }}><strong>Código de pareamento:</strong> {pairingCode}</p> : null}
-                {qrCode ? (
-                  <div>
-                    <p style={{ margin: "8px 0", color: "#374151" }}>Escaneie este QR Code no WhatsApp para vincular.</p>
-                    <img src={qrCode} alt="QR Code do WhatsApp" style={{ width: 280, maxWidth: "100%", border: "1px solid #e5e7eb", borderRadius: 8 }} />
-                  </div>
-                ) : (
-                  <p style={{ margin: "8px 0", color: "#6b7280" }}>Clique em "Gerar/Atualizar QR Code" para carregar o QR.</p>
-                )}
-              </div>
-            </div>
-          )}
-
-          {activeTab === "notifications" && (
-            <div>
-              <h3>Notificações</h3>
-              <Info>Espaço reservado para políticas de alerta (som, pop-up, e-mail e SLA).</Info>
-            </div>
-          )}
-        </Card>
-      </Main>
-    </Shell>
+      {activeTab === "notifications" && <div><h3>Notificações</h3><Info>Espaço reservado para alertas.</Info></div>}
+    </Card></Main></Shell>
   );
 }
