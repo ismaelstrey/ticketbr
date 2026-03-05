@@ -351,13 +351,11 @@ export default function SettingsPage() {
 
   const loadQr = async () => {
     try {
-      setTesting(true);
-      setLastTest(null);
-
-      const endpoint =
-        activeTab === "evolution" ? "/api/settings/integrations/evolution/test" : "/api/settings/integrations/n8n/test";
-
-      const res = await fetch(endpoint, {
+      // compat: usa estados existentes em vez de aliases antigos (setTesting/setLastTest)
+      setTestingApi(true);
+      setN8nTestResult(null);
+      setLoadingQr(true);
+      const res = await fetch("/api/settings/whatsapp/qrcode", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -385,7 +383,8 @@ export default function SettingsPage() {
       setLastTest(result);
       showToast(result.message, "error");
     } finally {
-      setTesting(false);
+      setLoadingQr(false);
+      setTestingApi(false);
     }
   };
 
