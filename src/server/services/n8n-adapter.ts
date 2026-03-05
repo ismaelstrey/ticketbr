@@ -37,6 +37,10 @@ function buildUrl(base: string, pathOrUrl: string) {
   return `${normalizedBase}${normalizedPath}`;
 }
 
+function isWebhookUrl(url: string) {
+  return /\/webhook(?:-test)?\//i.test(url);
+}
+
 async function requestN8n(pathOrUrl: string, config?: WhatsAppRuntimeConfig | null, init?: RequestInit) {
   const base = resolveN8nBase(config);
   if (!base && !isAbsoluteUrl(pathOrUrl)) {
@@ -45,15 +49,19 @@ async function requestN8n(pathOrUrl: string, config?: WhatsAppRuntimeConfig | nu
 
   const url = buildUrl(base, pathOrUrl);
   const apiKey = config?.n8nApiKey || process.env.N8N_CHAT_API_KEY;
+  const method = (init?.method || "GET").toUpperCase();
+  const effectiveMethod = isWebhookUrl(url) && method === "GET" ? "POST" : method;
 
   const response = await fetch(url, {
     ...init,
+    method: effectiveMethod,
     headers: {
       "Content-Type": "application/json",
       ...(apiKey ? { "X-N8N-API-KEY": apiKey } : {}),
       ...init?.headers
     }
   });
+  console.log("Errro N8n",response)
 
   const json = await response.json().catch(() => ({}));
   if (!response.ok) {
