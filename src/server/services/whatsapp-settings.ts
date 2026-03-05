@@ -7,6 +7,12 @@ export interface WhatsAppRuntimeConfig {
   apiKey?: string;
   instance?: string;
 
+  evolutionTimeoutMs?: number;
+  evolutionRetryEnabled?: boolean;
+  evolutionRetryMax?: number;
+  evolutionRetryDelayMs?: number;
+  evolutionLogEnabled?: boolean;
+
   // Comportamento do chat
   webhookUrl?: string;
   autoLinkTickets?: boolean;
@@ -18,6 +24,12 @@ export interface WhatsAppRuntimeConfig {
   n8nConversationsPath?: string;
   n8nMessagesPath?: string;
   n8nSendPath?: string;
+
+  n8nTimeoutMs?: number;
+  n8nRetryEnabled?: boolean;
+  n8nRetryMax?: number;
+  n8nRetryDelayMs?: number;
+  n8nLogEnabled?: boolean;
 }
 
 export const WHATSAPP_CONFIG_COOKIE = "ticketbr_whatsapp_cfg";
@@ -35,6 +47,20 @@ export function normalizeWhatsAppConfig(input: unknown): WhatsAppRuntimeConfig |
   if (!input || typeof input !== "object") return null;
   const raw = input as Record<string, unknown>;
 
+  const toNumberOrUndefined = (value: unknown) => {
+    if (value === undefined || value === null || value === "") return undefined;
+    const n = typeof value === "number" ? value : Number(value);
+    return Number.isFinite(n) ? n : undefined;
+  };
+
+  const evolutionTimeoutMsRaw = raw.evolutionTimeoutMs ?? raw.timeoutMs ?? undefined;
+  const evolutionRetryMaxRaw = raw.evolutionRetryMax ?? undefined;
+  const evolutionRetryDelayMsRaw = raw.evolutionRetryDelayMs ?? undefined;
+
+  const n8nTimeoutMsRaw = raw.n8nTimeoutMs ?? undefined;
+  const n8nRetryMaxRaw = raw.n8nRetryMax ?? undefined;
+  const n8nRetryDelayMsRaw = raw.n8nRetryDelayMs ?? undefined;
+
   const config: WhatsAppRuntimeConfig = {
     baseUrl: String(raw.baseUrl ?? raw.evolutionBaseUrl ?? "").trim() || undefined,
     apiKey: String(raw.apiKey ?? raw.evolutionApiKey ?? "").trim() || undefined,
@@ -42,12 +68,26 @@ export function normalizeWhatsAppConfig(input: unknown): WhatsAppRuntimeConfig |
     webhookUrl: String(raw.webhookUrl ?? "").trim() || undefined,
     autoLinkTickets: raw.autoLinkTickets === undefined ? undefined : Boolean(raw.autoLinkTickets),
     n8nWebhookUrl: String(raw.n8nWebhookUrl ?? "").trim() || undefined,
+
+    evolutionTimeoutMs: toNumberOrUndefined(evolutionTimeoutMsRaw),
+    evolutionRetryEnabled: raw.evolutionRetryEnabled === undefined ? undefined : Boolean(raw.evolutionRetryEnabled),
+    evolutionRetryMax: toNumberOrUndefined(evolutionRetryMaxRaw),
+    evolutionRetryDelayMs: toNumberOrUndefined(evolutionRetryDelayMsRaw),
+    evolutionLogEnabled: raw.evolutionLogEnabled === undefined ? undefined : Boolean(raw.evolutionLogEnabled),
+
     n8nBaseUrl: String(raw.n8nBaseUrl ?? "").trim() || undefined,
     n8nApiKey: String(raw.n8nApiKey ?? "").trim() || undefined,
     n8nConversationsPath: String(raw.n8nConversationsPath ?? "").trim() || undefined,
     n8nMessagesPath: String(raw.n8nMessagesPath ?? "").trim() || undefined,
-    n8nSendPath: String(raw.n8nSendPath ?? "").trim() || undefined
+    n8nSendPath: String(raw.n8nSendPath ?? "").trim() || undefined,
+
+    n8nTimeoutMs: toNumberOrUndefined(n8nTimeoutMsRaw),
+    n8nRetryEnabled: raw.n8nRetryEnabled === undefined ? undefined : Boolean(raw.n8nRetryEnabled),
+    n8nRetryMax: toNumberOrUndefined(n8nRetryMaxRaw),
+    n8nRetryDelayMs: toNumberOrUndefined(n8nRetryDelayMsRaw),
+    n8nLogEnabled: raw.n8nLogEnabled === undefined ? undefined : Boolean(raw.n8nLogEnabled)
   };
+
 
   const hasEvolution = Boolean(config.baseUrl && config.apiKey && config.instance);
   const hasN8n = Boolean(config.n8nWebhookUrl || config.n8nBaseUrl);
