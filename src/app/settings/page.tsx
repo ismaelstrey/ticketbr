@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Button } from "@/components/ui/Button";
@@ -104,6 +104,16 @@ const Field = styled.label`
   font-size: 0.9rem;
 `;
 
+const FieldHint = styled.span`
+  color: #6b7280;
+  font-size: 0.82rem;
+`;
+
+const FieldError = styled.span`
+  color: #b91c1c;
+  font-size: 0.82rem;
+`;
+
 const Footer = styled.div`
   margin-top: 1rem;
   display: flex;
@@ -146,6 +156,63 @@ const ContactsTable = styled.table`
     font-weight: 700;
   }
 `;
+
+function safeJsonParse<T>(raw: string | null): T | null {
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw) as T;
+  } catch {
+    return null;
+  }
+}
+
+function trimUrl(value: string) {
+  return value.trim().replace(/\/+$/, "");
+}
+
+function isPositiveIntString(value: string) {
+  return /^\d+$/.test(value.trim()) && Number(value) > 0;
+}
+
+function validateEvolution(settings: IntegrationSettings) {
+  const errors: Record<string, string> = {};
+  if (!trimUrl(settings.evolutionBaseUrl)) errors.evolutionBaseUrl = "Informe a URL do serviço.";
+  if (!settings.evolutionApiKey.trim()) errors.evolutionApiKey = "Informe a API Key.";
+  if (!settings.evolutionInstance.trim()) errors.evolutionInstance = "Informe o nome da instância.";
+  if (!settings.evolutionWebhookUrl.trim()) errors.evolutionWebhookUrl = "Informe o endpoint de webhook.";
+  if (!isPositiveIntString(settings.evolutionTimeoutMs)) errors.evolutionTimeoutMs = "Informe um timeout em ms (> 0).";
+  if (settings.evolutionRetryEnabled) {
+    if (!isPositiveIntString(settings.evolutionRetryMax)) errors.evolutionRetryMax = "Informe o número máximo de tentativas (> 0).";
+    if (!isPositiveIntString(settings.evolutionRetryDelayMs)) errors.evolutionRetryDelayMs = "Informe o atraso entre tentativas em ms (> 0).";
+  }
+  return { errors, isValid: Object.keys(errors).length === 0 };
+}
+
+function validateN8n(settings: IntegrationSettings) {
+  const errors: Record<string, string> = {};
+  if (!trimUrl(settings.n8nBaseUrl)) errors.n8nBaseUrl = "Informe a URL do serviço.";
+  if (!settings.n8nWebhookUrl.trim()) errors.n8nWebhookUrl = "Informe o endpoint de webhook.";
+  if (!isPositiveIntString(settings.n8nTimeoutMs)) errors.n8nTimeoutMs = "Informe um timeout em ms (> 0).";
+  if (settings.n8nRetryEnabled) {
+    if (!isPositiveIntString(settings.n8nRetryMax)) errors.n8nRetryMax = "Informe o número máximo de tentativas (> 0).";
+    if (!isPositiveIntString(settings.n8nRetryDelayMs)) errors.n8nRetryDelayMs = "Informe o atraso entre tentativas em ms (> 0).";
+  }
+  return { errors, isValid: Object.keys(errors).length === 0 };
+}
+
+function readHistory(key: string): TestResult[] {
+  if (typeof window === "undefined") return [];
+  const parsed = safeJsonParse<TestResult[]>(localStorage.getItem(key));
+  if (!parsed || !Array.isArray(parsed)) return [];
+  return parsed.filter((item) => item && typeof item === "object").slice(0, 20);
+}
+
+function writeHistory(key: string, entry: TestResult) {
+  if (typeof window === "undefined") return;
+  const curr = readHistory(key);
+  const next = [entry, ...curr].slice(0, 20);
+  localStorage.setItem(key, JSON.stringify(next));
+}
 
 export default function SettingsPage() {
   const { showToast } = useToast();
@@ -321,8 +388,13 @@ export default function SettingsPage() {
 
   const loadQr = async () => {
     try {
-      setLoadingQr(true);
-      const res = await fetch("/api/settings/whatsapp/qrcode", {
+      setTesting(true);
+      setLastTest(null);
+
+      const endpoint =
+        activeTab === "evolution" ? "/api/settings/integrations/evolution/test" : "/api/settings/integrations/n8n/test";
+
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -342,11 +414,19 @@ export default function SettingsPage() {
       setQrCode(typeof json?.data?.qrCode === "string" ? json.data.qrCode : null);
       setPairingCode(typeof json?.data?.pairingCode === "string" ? json.data.pairingCode : null);
     } catch (error: any) {
-      showToast(error?.message ?? "Erro ao buscar QR Code", "error");
+      const result: TestResult = {
+        ok: false,
+        message: error?.message ?? "Falha ao testar conexão.",
+        testedAt: new Date().toISOString()
+      };
+      setLastTest(result);
+      showToast(result.message, "error");
     } finally {
-      setLoadingQr(false);
+      setTesting(false);
     }
   };
+
+  const currentValidation = activeTab === "evolution" ? validateEvolution(settings) : validateN8n(settings);
 
   return (
     <Shell>
@@ -364,7 +444,7 @@ export default function SettingsPage() {
             ))}
           </Tabs>
 
-          {activeTab === "general" && (
+          {activeTab === "evolution" && (
             <div>
               <h3>Geral</h3>
               <Info>Valide a API local antes de testar integrações externas.</Info>
@@ -500,7 +580,7 @@ export default function SettingsPage() {
             </div>
           )}
 
-          {activeTab === "notifications" && (
+          {activeTab === "n8n" && (
             <div>
               <h3>Notificações</h3>
               <Info>Espaço reservado para alertas.</Info>
