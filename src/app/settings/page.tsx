@@ -14,6 +14,11 @@ interface IntegrationSettings {
   evolutionApiKey: string;
   evolutionInstance: string;
   webhookUrl: string;
+  evolutionWebhookUrl: string;
+  evolutionTimeoutMs: string;
+  evolutionRetryEnabled: boolean;
+  evolutionRetryMax: string;
+  evolutionRetryDelayMs: string;
   autoLinkTickets: boolean;
   n8nWebhookUrl: string;
   n8nBaseUrl: string;
@@ -39,6 +44,11 @@ const defaults: IntegrationSettings = {
   evolutionApiKey: "",
   evolutionInstance: "",
   webhookUrl: "",
+  evolutionWebhookUrl: "",
+  evolutionTimeoutMs: "15000",
+  evolutionRetryEnabled: true,
+  evolutionRetryMax: "2",
+  evolutionRetryDelayMs: "750",
   autoLinkTickets: true,
   n8nWebhookUrl: "",
   n8nBaseUrl: "",
@@ -157,63 +167,6 @@ const ContactsTable = styled.table`
   }
 `;
 
-function safeJsonParse<T>(raw: string | null): T | null {
-  if (!raw) return null;
-  try {
-    return JSON.parse(raw) as T;
-  } catch {
-    return null;
-  }
-}
-
-function trimUrl(value: string) {
-  return value.trim().replace(/\/+$/, "");
-}
-
-function isPositiveIntString(value: string) {
-  return /^\d+$/.test(value.trim()) && Number(value) > 0;
-}
-
-function validateEvolution(settings: IntegrationSettings) {
-  const errors: Record<string, string> = {};
-  if (!trimUrl(settings.evolutionBaseUrl)) errors.evolutionBaseUrl = "Informe a URL do serviço.";
-  if (!settings.evolutionApiKey.trim()) errors.evolutionApiKey = "Informe a API Key.";
-  if (!settings.evolutionInstance.trim()) errors.evolutionInstance = "Informe o nome da instância.";
-  if (!settings.evolutionWebhookUrl.trim()) errors.evolutionWebhookUrl = "Informe o endpoint de webhook.";
-  if (!isPositiveIntString(settings.evolutionTimeoutMs)) errors.evolutionTimeoutMs = "Informe um timeout em ms (> 0).";
-  if (settings.evolutionRetryEnabled) {
-    if (!isPositiveIntString(settings.evolutionRetryMax)) errors.evolutionRetryMax = "Informe o número máximo de tentativas (> 0).";
-    if (!isPositiveIntString(settings.evolutionRetryDelayMs)) errors.evolutionRetryDelayMs = "Informe o atraso entre tentativas em ms (> 0).";
-  }
-  return { errors, isValid: Object.keys(errors).length === 0 };
-}
-
-function validateN8n(settings: IntegrationSettings) {
-  const errors: Record<string, string> = {};
-  if (!trimUrl(settings.n8nBaseUrl)) errors.n8nBaseUrl = "Informe a URL do serviço.";
-  if (!settings.n8nWebhookUrl.trim()) errors.n8nWebhookUrl = "Informe o endpoint de webhook.";
-  if (!isPositiveIntString(settings.n8nTimeoutMs)) errors.n8nTimeoutMs = "Informe um timeout em ms (> 0).";
-  if (settings.n8nRetryEnabled) {
-    if (!isPositiveIntString(settings.n8nRetryMax)) errors.n8nRetryMax = "Informe o número máximo de tentativas (> 0).";
-    if (!isPositiveIntString(settings.n8nRetryDelayMs)) errors.n8nRetryDelayMs = "Informe o atraso entre tentativas em ms (> 0).";
-  }
-  return { errors, isValid: Object.keys(errors).length === 0 };
-}
-
-function readHistory(key: string): TestResult[] {
-  if (typeof window === "undefined") return [];
-  const parsed = safeJsonParse<TestResult[]>(localStorage.getItem(key));
-  if (!parsed || !Array.isArray(parsed)) return [];
-  return parsed.filter((item) => item && typeof item === "object").slice(0, 20);
-}
-
-function writeHistory(key: string, entry: TestResult) {
-  if (typeof window === "undefined") return;
-  const curr = readHistory(key);
-  const next = [entry, ...curr].slice(0, 20);
-  localStorage.setItem(key, JSON.stringify(next));
-}
-
 export default function SettingsPage() {
   const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState<TabKey>("general");
@@ -276,7 +229,12 @@ export default function SettingsPage() {
             ...curr,
             evolutionBaseUrl: json.data.baseUrl ?? curr.evolutionBaseUrl,
             evolutionInstance: json.data.instance ?? curr.evolutionInstance,
-            webhookUrl: json.data.webhookUrl ?? curr.webhookUrl,
+            webhookUrl: json.data.webhookUrl ?? json.data.evolutionWebhookUrl ?? curr.webhookUrl,
+            evolutionWebhookUrl: json.data.evolutionWebhookUrl ?? json.data.webhookUrl ?? curr.evolutionWebhookUrl,
+            evolutionTimeoutMs: String(json.data.evolutionTimeoutMs ?? curr.evolutionTimeoutMs),
+            evolutionRetryEnabled: typeof json.data.evolutionRetryEnabled === "boolean" ? json.data.evolutionRetryEnabled : curr.evolutionRetryEnabled,
+            evolutionRetryMax: String(json.data.evolutionRetryMax ?? curr.evolutionRetryMax),
+            evolutionRetryDelayMs: String(json.data.evolutionRetryDelayMs ?? curr.evolutionRetryDelayMs),
             autoLinkTickets: typeof json.data.autoLinkTickets === "boolean" ? json.data.autoLinkTickets : curr.autoLinkTickets,
             n8nWebhookUrl: json.data.n8nWebhookUrl ?? curr.n8nWebhookUrl,
             n8nBaseUrl: json.data.n8nBaseUrl ?? curr.n8nBaseUrl,
@@ -301,7 +259,12 @@ export default function SettingsPage() {
         baseUrl: settings.evolutionBaseUrl,
         apiKey: settings.evolutionApiKey,
         instance: settings.evolutionInstance,
-        webhookUrl: settings.webhookUrl,
+        webhookUrl: settings.evolutionWebhookUrl || settings.webhookUrl,
+        evolutionWebhookUrl: settings.evolutionWebhookUrl || settings.webhookUrl,
+        evolutionTimeoutMs: settings.evolutionTimeoutMs,
+        evolutionRetryEnabled: settings.evolutionRetryEnabled,
+        evolutionRetryMax: settings.evolutionRetryMax,
+        evolutionRetryDelayMs: settings.evolutionRetryDelayMs,
         autoLinkTickets: settings.autoLinkTickets,
         n8nWebhookUrl: settings.n8nWebhookUrl,
         n8nBaseUrl: settings.n8nBaseUrl,
@@ -401,7 +364,7 @@ export default function SettingsPage() {
           baseUrl: settings.evolutionBaseUrl,
           apiKey: settings.evolutionApiKey,
           instance: settings.evolutionInstance,
-          webhookUrl: settings.webhookUrl,
+          webhookUrl: settings.evolutionWebhookUrl || settings.webhookUrl,
           autoLinkTickets: settings.autoLinkTickets,
           n8nWebhookUrl: settings.n8nWebhookUrl
         })
@@ -474,7 +437,7 @@ export default function SettingsPage() {
                 </Field>
                 <Field>
                   Webhook (entrada)
-                  <Input placeholder="https://seu-dominio/api/chat/webhook" value={settings.webhookUrl} onChange={(e) => update({ webhookUrl: e.target.value })} />
+                  <Input placeholder="https://seu-dominio/api/chat/webhook" value={settings.evolutionWebhookUrl || settings.webhookUrl} onChange={(e) => update({ webhookUrl: e.target.value, evolutionWebhookUrl: e.target.value })} />
                 </Field>
               </FormGrid>
 
