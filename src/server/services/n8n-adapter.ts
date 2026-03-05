@@ -37,27 +37,17 @@ function buildUrl(base: string, pathOrUrl: string) {
   return `${normalizedBase}${normalizedPath}`;
 }
 
-function isWebhookUrl(url: string) {
-  return /\/webhook(?:-test)?\//i.test(url);
+function normalizeWebhookUrl(url: string) {
+  return url.replace("/webhook-test/", "/webhook/");
 }
 
-async function requestN8n(pathOrUrl: string, config?: WhatsAppRuntimeConfig | null, init?: RequestInit) {
-  const base = resolveN8nBase(config);
-  if (!base && !isAbsoluteUrl(pathOrUrl)) {
-    throw new Error("n8n não configurado. Defina n8nBaseUrl nas configurações.");
-  }
-
-  const url = buildUrl(base, pathOrUrl);
-  const apiKey = config?.n8nApiKey || process.env.N8N_CHAT_API_KEY;
-  const method = (init?.method || "GET").toUpperCase();
-  const effectiveMethod = isWebhookUrl(url) && method === "GET" ? "POST" : method;
-
+async function performN8nRequest(url: string, apiKey: string | undefined, init?: RequestInit) {
   const response = await fetch(url, {
     ...init,
     method: effectiveMethod,
     headers: {
       "Content-Type": "application/json",
-      ...(apiKey ? { "X-N8N-API-KEY": apiKey } : {}),
+      ...(apiKey ? { Authorization: `Bearer ${apiKey}`, "X-N8N-API-KEY": apiKey } : {}),
       ...init?.headers
     }
   });
@@ -68,6 +58,32 @@ async function requestN8n(pathOrUrl: string, config?: WhatsAppRuntimeConfig | nu
     throw new Error(json?.message || json?.error || `n8n request failed (${response.status})`);
   }
   return json;
+}
+
+async function requestN8n(pathOrUrl: string, config?: WhatsAppRuntimeConfig | null, init?: RequestInit) {
+  const base = resolveN8nBase(config);
+  if (!base && !isAbsoluteUrl(pathOrUrl)) {
+    throw new Error("n8n não configurado. Defina n8nBaseUrl nas configurações.");
+  }
+
+  const url = buildUrl(base, pathOrUrl);
+  const apiKey = config?.n8nApiKey || process.env.N8N_CHAT_API_KEY;
+
+  try {
+    return await performN8nRequest(url, apiKey, init);
+  } catch (error: any) {
+    const normalized = normalizeWebhookUrl(url);
+    const shouldRetryWithProdWebhook =
+      normalized !== url &&
+      String(error?.message || "").toLowerCase().includes("webhook") &&
+      String(error?.message || "").toLowerCase().includes("not registered");
+
+    if (shouldRetryWithProdWebhook) {
+      return performN8nRequest(normalized, apiKey, init);
+    }
+
+    throw error;
+  }
 }
 
 export function isN8nConfigured(config?: WhatsAppRuntimeConfig | null) {
@@ -127,16 +143,31 @@ export async function fetchMessagesFromN8n(input: {
 
 export async function sendMessageToN8n(payload: Record<string, unknown>, config?: WhatsAppRuntimeConfig | null) {
   if (!isN8nConfigured(config)) return null;
+  const path = resolvePath(config, "send");
 
-  // Prioriza o Webhook URL se estiver configurado, pois é o ponto de entrada explícito
-  const webhook = resolveWebhook(config);
-  const relPath = resolvePath(config, "send");
-  const path = webhook ? buildUrl(webhook, relPath) : relPath;
+  try {
+    return await requestN8n(path, config, {
+      method: "POST",
+      body: JSON.stringify(payload)
+    });
+  } catch (error: any) {
+    const webhook = resolveWebhook(config);
+    const isWebhookRouteIssue = String(error?.message || "").toLowerCase().includes("not registered");
 
-  return requestN8n(path, config, {
-    method: "POST",
-    body: JSON.stringify(payload)
-  });
+    if (webhook && isWebhookRouteIssue) {
+      return requestN8n(webhook, config, {
+        method: "POST",
+        body: JSON.stringify({
+          type: "chat.message.send.request",
+          source: "ticketbr-chat",
+          occurredAt: new Date().toISOString(),
+          data: payload
+        })
+      });
+    }
+
+    throw error;
+  }
 }
 
 export async function emitChatEventToN8n(event: ChatEventPayload, config?: WhatsAppRuntimeConfig | null) {

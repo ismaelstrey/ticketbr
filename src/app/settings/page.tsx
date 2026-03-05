@@ -7,7 +7,46 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { useToast } from "@/context/ToastContext";
 
-type TabKey = "evolution" | "n8n";
+type TabKey = "general" | "evolution" | "n8n" | "contactsSync" | "notifications";
+
+interface IntegrationSettings {
+  evolutionBaseUrl: string;
+  evolutionApiKey: string;
+  evolutionInstance: string;
+  webhookUrl: string;
+  autoLinkTickets: boolean;
+  n8nWebhookUrl: string;
+  n8nBaseUrl: string;
+  n8nApiKey: string;
+  n8nConversationsPath: string;
+  n8nMessagesPath: string;
+  n8nSendPath: string;
+}
+
+interface SyncedContact {
+  id: string;
+  remoteJid: string;
+  pushName: string | null;
+  profilePicUrl: string | null;
+  createdAt: string;
+  updatedAt: string;
+  instanceId: string | null;
+}
+
+const storageKey = "ticketbr:settings:integrations";
+const defaults: IntegrationSettings = {
+  evolutionBaseUrl: "",
+  evolutionApiKey: "",
+  evolutionInstance: "",
+  webhookUrl: "",
+  autoLinkTickets: true,
+  n8nWebhookUrl: "",
+  n8nBaseUrl: "",
+  n8nApiKey: "",
+  n8nConversationsPath: "/conversations",
+  n8nMessagesPath: "/messages",
+  n8nSendPath: "/messages/send"
+};
 
 const Shell = styled.div`
   min-height: 100vh;
@@ -88,134 +127,35 @@ const Info = styled.p`
   font-size: 0.9rem;
 `;
 
-const StatusRow = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  flex-wrap: wrap;
+const ResultBox = styled.pre`
   margin-top: 0.75rem;
-`;
-
-const Pill = styled.span<{ $tone: "neutral" | "success" | "error" | "warning" }>`
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  border-radius: 999px;
-  padding: 0.25rem 0.55rem;
-  font-weight: 700;
-  font-size: 0.8rem;
-  border: 1px solid
-    ${({ $tone }) =>
-      $tone === "success"
-        ? "#16a34a"
-        : $tone === "error"
-          ? "#dc2626"
-          : $tone === "warning"
-            ? "#d97706"
-            : "#9ca3af"};
-  background:
-    ${({ $tone }) =>
-      $tone === "success"
-        ? "#dcfce7"
-        : $tone === "error"
-          ? "#fee2e2"
-          : $tone === "warning"
-            ? "#ffedd5"
-            : "#f3f4f6"};
-  color:
-    ${({ $tone }) =>
-      $tone === "success"
-        ? "#14532d"
-        : $tone === "error"
-          ? "#7f1d1d"
-          : $tone === "warning"
-            ? "#7c2d12"
-            : "#374151"};
-`;
-
-const HistoryList = styled.div`
-  margin-top: 0.85rem;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  overflow: hidden;
-`;
-
-const HistoryHeader = styled.div`
-  padding: 0.7rem 0.9rem;
   background: #f9fafb;
-  border-bottom: 1px solid #e5e7eb;
-  font-weight: 800;
-  color: #111827;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 0.75rem;
+  font-size: 0.8rem;
+  overflow-x: auto;
 `;
 
-const HistoryItem = styled.div`
-  padding: 0.7rem 0.9rem;
-  display: grid;
-  grid-template-columns: 140px 90px 1fr;
-  gap: 0.75rem;
-  border-bottom: 1px solid #f3f4f6;
+const ContactsTable = styled.table`
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.9rem;
 
-  @media (max-width: 900px) {
-    grid-template-columns: 1fr;
+  th,
+  td {
+    border-bottom: 1px solid #e5e7eb;
+    text-align: left;
+    padding: 0.55rem;
+    font-size: 0.84rem;
+    vertical-align: top;
+  }
+
+  th {
+    color: #374151;
+    font-weight: 700;
   }
 `;
-
-interface IntegrationSettings {
-  evolutionBaseUrl: string;
-  evolutionApiKey: string;
-  evolutionInstance: string;
-  evolutionWebhookUrl: string;
-  evolutionTimeoutMs: string;
-  evolutionRetryEnabled: boolean;
-  evolutionRetryMax: string;
-  evolutionRetryDelayMs: string;
-  evolutionLogEnabled: boolean;
-
-  n8nBaseUrl: string;
-  n8nApiKey: string;
-  n8nWebhookUrl: string;
-  n8nTimeoutMs: string;
-  n8nRetryEnabled: boolean;
-  n8nRetryMax: string;
-  n8nRetryDelayMs: string;
-  n8nLogEnabled: boolean;
-}
-
-type SaveState = "idle" | "saving" | "saved" | "error";
-
-type TestResult = {
-  ok: boolean;
-  message: string;
-  statusCode?: number;
-  latencyMs?: number;
-  testedAt: string;
-};
-
-const storageKey = "ticketbr:settings:integrations";
-const historyEvolutionKey = "ticketbr:settings:integrations:test-history:evolution";
-const historyN8nKey = "ticketbr:settings:integrations:test-history:n8n";
-
-const defaultSettings: IntegrationSettings = {
-  evolutionBaseUrl: "",
-  evolutionApiKey: "",
-  evolutionInstance: "",
-  evolutionWebhookUrl: "",
-  evolutionTimeoutMs: "15000",
-  evolutionRetryEnabled: true,
-  evolutionRetryMax: "2",
-  evolutionRetryDelayMs: "750",
-  evolutionLogEnabled: true,
-
-  n8nBaseUrl: "",
-  n8nApiKey: "",
-  n8nWebhookUrl: "",
-  n8nTimeoutMs: "15000",
-  n8nRetryEnabled: true,
-  n8nRetryMax: "2",
-  n8nRetryDelayMs: "750",
-  n8nLogEnabled: true
-};
 
 function safeJsonParse<T>(raw: string | null): T | null {
   if (!raw) return null;
@@ -276,30 +216,56 @@ function writeHistory(key: string, entry: TestResult) {
 
 export default function SettingsPage() {
   const { showToast } = useToast();
-  const [activeTab, setActiveTab] = useState<TabKey>("evolution");
-  const [settings, setSettings] = useState<IntegrationSettings>(defaultSettings);
-  const [saveState, setSaveState] = useState<SaveState>("idle");
-  const [testing, setTesting] = useState(false);
-  const [lastTest, setLastTest] = useState<TestResult | null>(null);
-  const [historyEvolution, setHistoryEvolution] = useState<TestResult[]>([]);
-  const [historyN8n, setHistoryN8n] = useState<TestResult[]>([]);
-  const hydratedRef = useRef(false);
-  const lastSavedAtRef = useRef<number>(0);
+  const [activeTab, setActiveTab] = useState<TabKey>("general");
+  const [settings, setSettings] = useState<IntegrationSettings>(defaults);
+
+  const [testingApi, setTestingApi] = useState(false);
+  const [testingN8n, setTestingN8n] = useState(false);
+  const [syncingContacts, setSyncingContacts] = useState(false);
+  const [loadingContacts, setLoadingContacts] = useState(false);
+
+  const [n8nTestResult, setN8nTestResult] = useState<unknown>(null);
+  const [contactsSyncResult, setContactsSyncResult] = useState<unknown>(null);
+  const [contacts, setContacts] = useState<SyncedContact[]>([]);
+
+  const [loadingQr, setLoadingQr] = useState(false);
+  const [qrCode, setQrCode] = useState<string | null>(null);
+  const [pairingCode, setPairingCode] = useState<string | null>(null);
+  const [connectionStatus, setConnectionStatus] = useState<string>("desconhecido");
 
   const tabs = useMemo(
     () => [
+      { key: "general" as const, label: "Geral" },
       { key: "evolution" as const, label: "Evolution API" },
-      { key: "n8n" as const, label: "N8N" }
+      { key: "n8n" as const, label: "N8N" },
+      { key: "contactsSync" as const, label: "Sincronizar Contatos" },
+      { key: "notifications" as const, label: "Notificações" }
     ],
     []
   );
 
+  const update = (patch: Partial<IntegrationSettings>) => setSettings((curr) => ({ ...curr, ...patch }));
+
+  const loadSyncedContacts = async () => {
+    try {
+      setLoadingContacts(true);
+      const res = await fetch("/api/settings/contacts?limit=500");
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error || "Erro ao carregar contatos sincronizados");
+      setContacts(Array.isArray(json?.data) ? json.data : []);
+    } catch (error: any) {
+      showToast(error?.message ?? "Falha ao carregar contatos sincronizados", "error");
+    } finally {
+      setLoadingContacts(false);
+    }
+  };
+
   useEffect(() => {
     try {
-      const saved = safeJsonParse<IntegrationSettings>(localStorage.getItem(storageKey));
-      if (saved) setSettings((curr) => ({ ...curr, ...saved }));
+      const saved = localStorage.getItem(storageKey);
+      if (saved) setSettings((curr) => ({ ...curr, ...(JSON.parse(saved) as IntegrationSettings) }));
     } catch {
-      // keep defaults
+      // ignore
     }
 
     fetch("/api/settings/whatsapp/config")
@@ -310,37 +276,24 @@ export default function SettingsPage() {
             ...curr,
             evolutionBaseUrl: json.data.baseUrl ?? curr.evolutionBaseUrl,
             evolutionInstance: json.data.instance ?? curr.evolutionInstance,
-            evolutionWebhookUrl: json.data.webhookUrl ?? curr.evolutionWebhookUrl,
-            evolutionTimeoutMs: json.data.evolutionTimeoutMs ? String(json.data.evolutionTimeoutMs) : curr.evolutionTimeoutMs,
-            evolutionRetryEnabled: json.data.evolutionRetryEnabled ?? curr.evolutionRetryEnabled,
-            evolutionRetryMax: json.data.evolutionRetryMax ? String(json.data.evolutionRetryMax) : curr.evolutionRetryMax,
-            evolutionRetryDelayMs: json.data.evolutionRetryDelayMs ? String(json.data.evolutionRetryDelayMs) : curr.evolutionRetryDelayMs,
-            evolutionLogEnabled: json.data.evolutionLogEnabled ?? curr.evolutionLogEnabled,
-
-            n8nBaseUrl: json.data.n8nBaseUrl ?? curr.n8nBaseUrl,
+            webhookUrl: json.data.webhookUrl ?? curr.webhookUrl,
+            autoLinkTickets: typeof json.data.autoLinkTickets === "boolean" ? json.data.autoLinkTickets : curr.autoLinkTickets,
             n8nWebhookUrl: json.data.n8nWebhookUrl ?? curr.n8nWebhookUrl,
-            n8nTimeoutMs: json.data.n8nTimeoutMs ? String(json.data.n8nTimeoutMs) : curr.n8nTimeoutMs,
-            n8nRetryEnabled: json.data.n8nRetryEnabled ?? curr.n8nRetryEnabled,
-            n8nRetryMax: json.data.n8nRetryMax ? String(json.data.n8nRetryMax) : curr.n8nRetryMax,
-            n8nRetryDelayMs: json.data.n8nRetryDelayMs ? String(json.data.n8nRetryDelayMs) : curr.n8nRetryDelayMs,
-            n8nLogEnabled: json.data.n8nLogEnabled ?? curr.n8nLogEnabled
+            n8nBaseUrl: json.data.n8nBaseUrl ?? curr.n8nBaseUrl,
+            n8nConversationsPath: json.data.n8nConversationsPath ?? curr.n8nConversationsPath,
+            n8nMessagesPath: json.data.n8nMessagesPath ?? curr.n8nMessagesPath,
+            n8nSendPath: json.data.n8nSendPath ?? curr.n8nSendPath
           }));
         }
       })
       .catch(() => undefined);
 
-    setHistoryEvolution(readHistory(historyEvolutionKey));
-    setHistoryN8n(readHistory(historyN8nKey));
-    hydratedRef.current = true;
+    loadSyncedContacts().catch(() => undefined);
   }, []);
-
-  const updateSettings = (patch: Partial<IntegrationSettings>) => {
-    setSettings((curr) => ({ ...curr, ...patch }));
-    setSaveState("idle");
-  };
 
   const saveSettings = async () => {
     localStorage.setItem(storageKey, JSON.stringify(settings));
+
     const res = await fetch("/api/settings/whatsapp/config", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -348,67 +301,92 @@ export default function SettingsPage() {
         baseUrl: settings.evolutionBaseUrl,
         apiKey: settings.evolutionApiKey,
         instance: settings.evolutionInstance,
-        webhookUrl: settings.evolutionWebhookUrl,
-
-        evolutionTimeoutMs: Number(settings.evolutionTimeoutMs),
-        evolutionRetryEnabled: settings.evolutionRetryEnabled,
-        evolutionRetryMax: Number(settings.evolutionRetryMax),
-        evolutionRetryDelayMs: Number(settings.evolutionRetryDelayMs),
-        evolutionLogEnabled: settings.evolutionLogEnabled,
-
+        webhookUrl: settings.webhookUrl,
+        autoLinkTickets: settings.autoLinkTickets,
+        n8nWebhookUrl: settings.n8nWebhookUrl,
         n8nBaseUrl: settings.n8nBaseUrl,
         n8nApiKey: settings.n8nApiKey,
-        n8nWebhookUrl: settings.n8nWebhookUrl,
-
-        n8nTimeoutMs: Number(settings.n8nTimeoutMs),
-        n8nRetryEnabled: settings.n8nRetryEnabled,
-        n8nRetryMax: Number(settings.n8nRetryMax),
-        n8nRetryDelayMs: Number(settings.n8nRetryDelayMs),
-        n8nLogEnabled: settings.n8nLogEnabled
+        n8nConversationsPath: settings.n8nConversationsPath,
+        n8nMessagesPath: settings.n8nMessagesPath,
+        n8nSendPath: settings.n8nSendPath
       })
     });
 
     const json = await res.json();
-    if (!res.ok) {
-      throw new Error(json?.error || "Erro ao salvar configuração");
-    }
+    if (!res.ok) throw new Error(json?.error || "Erro ao salvar configuração");
+
+    showToast("Configurações salvas.", "success");
   };
 
-  const autoSaveIfReady = async () => {
-    const evo = validateEvolution(settings);
-    const n8n = validateN8n(settings);
-    const hasAnyValid = evo.isValid || n8n.isValid;
-    if (!hasAnyValid) return;
-
+  const testSystemApi = async () => {
     try {
-      setSaveState("saving");
-      await saveSettings();
-      setSaveState("saved");
-      const now = Date.now();
-      if (now - lastSavedAtRef.current > 6000) {
-        lastSavedAtRef.current = now;
-        showToast("Configurações salvas automaticamente.", "success");
-      }
+      setTestingApi(true);
+      const res = await fetch("/api/health");
+      if (!res.ok) throw new Error("Healthcheck falhou");
+      showToast("API online.", "success");
     } catch (error: any) {
-      setSaveState("error");
+      showToast(error?.message ?? "Falha ao testar API", "error");
+    } finally {
+      setTestingApi(false);
     }
   };
 
-  useEffect(() => {
-    if (!hydratedRef.current) return;
-    const handle = window.setTimeout(() => {
-      autoSaveIfReady().catch(() => undefined);
-    }, 900);
-    return () => window.clearTimeout(handle);
-  }, [settings]);
-
-  const runConnectionTest = async () => {
-    const activeValidation = activeTab === "evolution" ? validateEvolution(settings) : validateN8n(settings);
-    if (!activeValidation.isValid) {
-      showToast("Corrija os campos obrigatórios antes de testar.", "error");
-      return;
+  const testN8n = async () => {
+    try {
+      setTestingN8n(true);
+      setN8nTestResult(null);
+      const res = await fetch("/api/settings/n8n/test", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          n8nBaseUrl: settings.n8nBaseUrl,
+          n8nApiKey: settings.n8nApiKey,
+          n8nWebhookUrl: settings.n8nWebhookUrl,
+          n8nConversationsPath: settings.n8nConversationsPath,
+          n8nMessagesPath: settings.n8nMessagesPath,
+          n8nSendPath: settings.n8nSendPath
+        })
+      });
+      const json = await res.json();
+      setN8nTestResult(json);
+      if (!res.ok) throw new Error(json?.error || "Falha no teste do N8N");
+      showToast("Comunicação com n8n OK.", "success");
+    } catch (error: any) {
+      showToast(error?.message ?? "Falha ao testar N8N", "error");
+    } finally {
+      setTestingN8n(false);
     }
+  };
 
+  const syncContacts = async () => {
+    try {
+      setSyncingContacts(true);
+      setContactsSyncResult(null);
+
+      const res = await fetch("/api/settings/contacts/sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          n8nBaseUrl: settings.n8nBaseUrl,
+          n8nApiKey: settings.n8nApiKey,
+          n8nWebhookUrl: settings.n8nWebhookUrl
+        })
+      });
+
+      const json = await res.json();
+      setContactsSyncResult(json);
+      if (!res.ok) throw new Error(json?.error || "Falha ao sincronizar contatos");
+
+      await loadSyncedContacts();
+      showToast("Contatos sincronizados com sucesso.", "success");
+    } catch (error: any) {
+      showToast(error?.message ?? "Erro ao sincronizar contatos", "error");
+    } finally {
+      setSyncingContacts(false);
+    }
+  };
+
+  const loadQr = async () => {
     try {
       setTesting(true);
       setLastTest(null);
@@ -420,33 +398,21 @@ export default function SettingsPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          baseUrl: activeTab === "evolution" ? settings.evolutionBaseUrl : settings.n8nBaseUrl,
-          apiKey: activeTab === "evolution" ? settings.evolutionApiKey : settings.n8nApiKey,
-          timeoutMs: activeTab === "evolution" ? Number(settings.evolutionTimeoutMs) : Number(settings.n8nTimeoutMs),
-          retryEnabled: activeTab === "evolution" ? settings.evolutionRetryEnabled : settings.n8nRetryEnabled,
-          retryMax: activeTab === "evolution" ? Number(settings.evolutionRetryMax) : Number(settings.n8nRetryMax),
-          retryDelayMs: activeTab === "evolution" ? Number(settings.evolutionRetryDelayMs) : Number(settings.n8nRetryDelayMs),
-          logEnabled: activeTab === "evolution" ? settings.evolutionLogEnabled : settings.n8nLogEnabled
+          baseUrl: settings.evolutionBaseUrl,
+          apiKey: settings.evolutionApiKey,
+          instance: settings.evolutionInstance,
+          webhookUrl: settings.webhookUrl,
+          autoLinkTickets: settings.autoLinkTickets,
+          n8nWebhookUrl: settings.n8nWebhookUrl
         })
       });
 
-      const json = await res.json().catch(() => ({}));
-      const result: TestResult = {
-        ok: Boolean(json?.ok),
-        message: String(json?.message ?? (res.ok ? "Conexão testada com sucesso." : "Falha ao testar conexão.")),
-        statusCode: typeof json?.statusCode === "number" ? json.statusCode : res.status,
-        latencyMs: typeof json?.latencyMs === "number" ? json.latencyMs : undefined,
-        testedAt: new Date().toISOString()
-      };
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error || "Falha ao carregar QR Code");
 
-      setLastTest(result);
-
-      const historyKey = activeTab === "evolution" ? historyEvolutionKey : historyN8nKey;
-      writeHistory(historyKey, result);
-      if (activeTab === "evolution") setHistoryEvolution(readHistory(historyEvolutionKey));
-      else setHistoryN8n(readHistory(historyN8nKey));
-
-      showToast(result.message, result.ok ? "success" : "error");
+      setConnectionStatus(String(json?.data?.status?.instance?.state || json?.data?.status?.state || "desconhecido"));
+      setQrCode(typeof json?.data?.qrCode === "string" ? json.data.qrCode : null);
+      setPairingCode(typeof json?.data?.pairingCode === "string" ? json.data.pairingCode : null);
     } catch (error: any) {
       const result: TestResult = {
         ok: false,
@@ -468,9 +434,7 @@ export default function SettingsPage() {
       <Main>
         <Card>
           <h1 style={{ margin: "0 0 0.35rem" }}>Configurações de Integração</h1>
-          <Info>
-            Configure Evolution API e N8N com autenticação via API Key, payloads em JSON e headers padrão: Evolution usa header <strong>apikey</strong> e N8N usa <strong>X-N8N-API-KEY</strong>.
-          </Info>
+          <Info>Evolution API, N8N e sincronização de contatos WhatsApp em abas separadas.</Info>
 
           <Tabs>
             {tabs.map((tab) => (
@@ -482,314 +446,144 @@ export default function SettingsPage() {
 
           {activeTab === "evolution" && (
             <div>
-              <h3>Integração: Evolution API</h3>
-              <Info>
-                Padrão de credencial compatível com n8n-nodes-evolution-api: URL do servidor + API Key no header <strong>apikey</strong>. O teste de conexão executa um GET em <strong>/instance/fetchInstances</strong>.
-              </Info>
+              <h3>Geral</h3>
+              <Info>Valide a API local antes de testar integrações externas.</Info>
+              <Footer>
+                <Button variant="ghost" onClick={testSystemApi} disabled={testingApi}>
+                  {testingApi ? "Testando..." : "Testar API"}
+                </Button>
+              </Footer>
+            </div>
+          )}
 
+          {activeTab === "evolution" && (
+            <div>
+              <h3>Integração: Evolution API</h3>
               <FormGrid>
                 <Field>
-                  URL do serviço
-                  <Input
-                    placeholder="https://evolution.suaempresa.com"
-                    value={settings.evolutionBaseUrl}
-                    onChange={(e) => updateSettings({ evolutionBaseUrl: e.target.value })}
-                  />
-                  <FieldHint>Ex.: https://api.exemplo.com (sem / no final).</FieldHint>
-                  {currentValidation.errors.evolutionBaseUrl ? <FieldError>{currentValidation.errors.evolutionBaseUrl}</FieldError> : null}
+                  URL base
+                  <Input placeholder="https://evo.exemplo.com" value={settings.evolutionBaseUrl} onChange={(e) => update({ evolutionBaseUrl: e.target.value })} />
                 </Field>
-
+                <Field>
+                  Instância
+                  <Input placeholder="ticketbr" value={settings.evolutionInstance} onChange={(e) => update({ evolutionInstance: e.target.value })} />
+                </Field>
                 <Field>
                   API Key
-                  <Input
-                    type="password"
-                    placeholder="••••••••••"
-                    value={settings.evolutionApiKey}
-                    onChange={(e) => updateSettings({ evolutionApiKey: e.target.value })}
-                  />
-                  <FieldHint>Enviada no header apikey (não é exibida após salvar).</FieldHint>
-                  {currentValidation.errors.evolutionApiKey ? <FieldError>{currentValidation.errors.evolutionApiKey}</FieldError> : null}
+                  <Input type="password" value={settings.evolutionApiKey} onChange={(e) => update({ evolutionApiKey: e.target.value })} />
                 </Field>
-
-                <Field>
-                  Nome da instância
-                  <Input
-                    placeholder="ticketbr-instance"
-                    value={settings.evolutionInstance}
-                    onChange={(e) => updateSettings({ evolutionInstance: e.target.value })}
-                  />
-                  {currentValidation.errors.evolutionInstance ? <FieldError>{currentValidation.errors.evolutionInstance}</FieldError> : null}
-                </Field>
-
                 <Field>
                   Webhook (entrada)
-                  <Input
-                    placeholder="https://seu-dominio.com/api/chat/webhook"
-                    value={settings.evolutionWebhookUrl}
-                    onChange={(e) => updateSettings({ evolutionWebhookUrl: e.target.value })}
-                  />
-                  <FieldHint>Endpoint que a Evolution chamará para eventos/mensagens.</FieldHint>
-                  {currentValidation.errors.evolutionWebhookUrl ? <FieldError>{currentValidation.errors.evolutionWebhookUrl}</FieldError> : null}
-                </Field>
-
-                <Field>
-                  Timeout (ms)
-                  <Input
-                    inputMode="numeric"
-                    placeholder="15000"
-                    value={settings.evolutionTimeoutMs}
-                    onChange={(e) => updateSettings({ evolutionTimeoutMs: e.target.value })}
-                  />
-                  {currentValidation.errors.evolutionTimeoutMs ? <FieldError>{currentValidation.errors.evolutionTimeoutMs}</FieldError> : null}
-                </Field>
-
-                <Field>
-                  Logs de comunicação
-                  <label style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                    <input
-                      type="checkbox"
-                      checked={settings.evolutionLogEnabled}
-                      onChange={(e) => updateSettings({ evolutionLogEnabled: e.target.checked })}
-                    />
-                    Habilitar
-                  </label>
-                  <FieldHint>Registra histórico de testes localmente para diagnóstico.</FieldHint>
-                </Field>
-
-                <Field>
-                  Retry automático
-                  <label style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                    <input
-                      type="checkbox"
-                      checked={settings.evolutionRetryEnabled}
-                      onChange={(e) => updateSettings({ evolutionRetryEnabled: e.target.checked })}
-                    />
-                    Habilitar
-                  </label>
-                </Field>
-
-                <Field>
-                  Máx. tentativas
-                  <Input
-                    inputMode="numeric"
-                    placeholder="2"
-                    value={settings.evolutionRetryMax}
-                    onChange={(e) => updateSettings({ evolutionRetryMax: e.target.value })}
-                    disabled={!settings.evolutionRetryEnabled}
-                  />
-                  {currentValidation.errors.evolutionRetryMax ? <FieldError>{currentValidation.errors.evolutionRetryMax}</FieldError> : null}
-                </Field>
-
-                <Field>
-                  Atraso entre tentativas (ms)
-                  <Input
-                    inputMode="numeric"
-                    placeholder="750"
-                    value={settings.evolutionRetryDelayMs}
-                    onChange={(e) => updateSettings({ evolutionRetryDelayMs: e.target.value })}
-                    disabled={!settings.evolutionRetryEnabled}
-                  />
-                  {currentValidation.errors.evolutionRetryDelayMs ? <FieldError>{currentValidation.errors.evolutionRetryDelayMs}</FieldError> : null}
+                  <Input placeholder="https://seu-dominio/api/chat/webhook" value={settings.webhookUrl} onChange={(e) => update({ webhookUrl: e.target.value })} />
                 </Field>
               </FormGrid>
 
-              <StatusRow>
-                <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
-                  <Pill $tone={saveState === "saved" ? "success" : saveState === "saving" ? "warning" : saveState === "error" ? "error" : "neutral"}>
-                    {saveState === "saved"
-                      ? "Salvo"
-                      : saveState === "saving"
-                        ? "Salvando..."
-                        : saveState === "error"
-                          ? "Falha ao salvar"
-                          : "Não salvo"}
-                  </Pill>
-                  {lastTest ? (
-                    <Pill $tone={lastTest.ok ? "success" : "error"}>
-                      {lastTest.ok ? "Teste OK" : "Teste com erro"}
-                      {typeof lastTest.latencyMs === "number" ? ` • ${lastTest.latencyMs}ms` : ""}
-                    </Pill>
-                  ) : null}
-                </div>
+              <label style={{ display: "flex", gap: 8, marginTop: 12 }}>
+                <input type="checkbox" checked={settings.autoLinkTickets} onChange={(e) => update({ autoLinkTickets: e.target.checked })} />
+                Associar automaticamente conversas a tickets
+              </label>
 
-                <Footer style={{ marginTop: 0 }}>
-                  <Button variant="ghost" onClick={runConnectionTest} disabled={testing || !currentValidation.isValid}>
-                    {testing ? "Testando..." : "Testar Conexão"}
-                  </Button>
-                </Footer>
-              </StatusRow>
+              <Footer>
+                <Button variant="save" onClick={() => saveSettings().catch((error) => showToast(error.message, "error"))}>Salvar Evolution</Button>
+                <Button variant="primary" onClick={loadQr} disabled={loadingQr}>{loadingQr ? "Carregando QR..." : "Gerar/Atualizar QR"}</Button>
+              </Footer>
 
-              <HistoryList>
-                <HistoryHeader>Histórico de testes (Evolution)</HistoryHeader>
-                {historyEvolution.length === 0 ? (
-                  <div style={{ padding: "0.8rem 0.9rem", color: "#6b7280" }}>Nenhum teste executado ainda.</div>
-                ) : (
-                  historyEvolution.map((item) => (
-                    <HistoryItem key={`${item.testedAt}-${item.ok ? "ok" : "err"}`}>
-                      <div style={{ color: "#6b7280" }}>{new Date(item.testedAt).toLocaleString()}</div>
-                      <div>
-                        <Pill $tone={item.ok ? "success" : "error"}>{item.ok ? "OK" : "ERRO"}</Pill>
-                      </div>
-                      <div style={{ color: "#111827" }}>
-                        {item.message}
-                        {typeof item.statusCode === "number" ? ` (HTTP ${item.statusCode})` : ""}
-                      </div>
-                    </HistoryItem>
-                  ))
-                )}
-              </HistoryList>
+              <div style={{ marginTop: 16, border: "1px solid #e5e7eb", borderRadius: 12, padding: 12 }}>
+                <strong>Status:</strong> {connectionStatus}
+                {pairingCode ? <p><strong>Código:</strong> {pairingCode}</p> : null}
+                {qrCode ? <img src={qrCode} alt="QR Code do WhatsApp" style={{ width: 280, maxWidth: "100%", border: "1px solid #e5e7eb", borderRadius: 8 }} /> : null}
+              </div>
             </div>
           )}
 
           {activeTab === "n8n" && (
             <div>
               <h3>Integração: N8N</h3>
-              <Info>
-                Quando informada, a API Key é enviada no header <strong>X-N8N-API-KEY</strong>. Sem API Key, o teste valida <strong>/healthz/readiness</strong>; com API Key, valida <strong>/api/v1/workflows</strong>.
-              </Info>
+              <Info>Configure API do n8n e caminhos usados pelo chat. Para produção, prefira /webhook.</Info>
 
               <FormGrid>
                 <Field>
                   URL do serviço
-                  <Input
-                    placeholder="https://n8n.suaempresa.com"
-                    value={settings.n8nBaseUrl}
-                    onChange={(e) => updateSettings({ n8nBaseUrl: e.target.value })}
-                  />
-                  <FieldHint>Ex.: https://n8n.exemplo.com (sem / no final).</FieldHint>
-                  {currentValidation.errors.n8nBaseUrl ? <FieldError>{currentValidation.errors.n8nBaseUrl}</FieldError> : null}
+                  <Input placeholder="https://n8n.exemplo.com" value={settings.n8nBaseUrl} onChange={(e) => update({ n8nBaseUrl: e.target.value })} />
                 </Field>
-
                 <Field>
                   API Key
-                  <Input
-                    type="password"
-                    placeholder="••••••••••"
-                    value={settings.n8nApiKey}
-                    onChange={(e) => updateSettings({ n8nApiKey: e.target.value })}
-                  />
-                  <FieldHint>
-                    Opcional. Se informada, será enviada no header X-N8N-API-KEY. Sem API Key, o teste valida somente o endpoint /healthz/readiness.
-                  </FieldHint>
+                  <Input type="password" value={settings.n8nApiKey} onChange={(e) => update({ n8nApiKey: e.target.value })} />
                 </Field>
-
                 <Field>
-                  Webhook (entrada)
-                  <Input
-                    placeholder="https://n8n.seudominio/webhook/ticketbr-chat"
-                    value={settings.n8nWebhookUrl}
-                    onChange={(e) => updateSettings({ n8nWebhookUrl: e.target.value })}
-                  />
-                  <FieldHint>Endpoint no N8N para receber eventos do TicketBR.</FieldHint>
-                  {currentValidation.errors.n8nWebhookUrl ? <FieldError>{currentValidation.errors.n8nWebhookUrl}</FieldError> : null}
+                  Webhook de eventos
+                  <Input placeholder="https://n8n.exemplo.com/webhook/messages" value={settings.n8nWebhookUrl} onChange={(e) => update({ n8nWebhookUrl: e.target.value })} />
                 </Field>
-
                 <Field>
-                  Timeout (ms)
-                  <Input
-                    inputMode="numeric"
-                    placeholder="15000"
-                    value={settings.n8nTimeoutMs}
-                    onChange={(e) => updateSettings({ n8nTimeoutMs: e.target.value })}
-                  />
-                  {currentValidation.errors.n8nTimeoutMs ? <FieldError>{currentValidation.errors.n8nTimeoutMs}</FieldError> : null}
+                  Path conversa (GET)
+                  <Input value={settings.n8nConversationsPath} onChange={(e) => update({ n8nConversationsPath: e.target.value })} />
                 </Field>
-
                 <Field>
-                  Logs de comunicação
-                  <label style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                    <input
-                      type="checkbox"
-                      checked={settings.n8nLogEnabled}
-                      onChange={(e) => updateSettings({ n8nLogEnabled: e.target.checked })}
-                    />
-                    Habilitar
-                  </label>
-                  <FieldHint>Registra histórico de testes localmente para diagnóstico.</FieldHint>
+                  Path mensagens (GET)
+                  <Input value={settings.n8nMessagesPath} onChange={(e) => update({ n8nMessagesPath: e.target.value })} />
                 </Field>
-
                 <Field>
-                  Retry automático
-                  <label style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                    <input
-                      type="checkbox"
-                      checked={settings.n8nRetryEnabled}
-                      onChange={(e) => updateSettings({ n8nRetryEnabled: e.target.checked })}
-                    />
-                    Habilitar
-                  </label>
-                </Field>
-
-                <Field>
-                  Máx. tentativas
-                  <Input
-                    inputMode="numeric"
-                    placeholder="2"
-                    value={settings.n8nRetryMax}
-                    onChange={(e) => updateSettings({ n8nRetryMax: e.target.value })}
-                    disabled={!settings.n8nRetryEnabled}
-                  />
-                  {currentValidation.errors.n8nRetryMax ? <FieldError>{currentValidation.errors.n8nRetryMax}</FieldError> : null}
-                </Field>
-
-                <Field>
-                  Atraso entre tentativas (ms)
-                  <Input
-                    inputMode="numeric"
-                    placeholder="750"
-                    value={settings.n8nRetryDelayMs}
-                    onChange={(e) => updateSettings({ n8nRetryDelayMs: e.target.value })}
-                    disabled={!settings.n8nRetryEnabled}
-                  />
-                  {currentValidation.errors.n8nRetryDelayMs ? <FieldError>{currentValidation.errors.n8nRetryDelayMs}</FieldError> : null}
+                  Path envio (POST)
+                  <Input value={settings.n8nSendPath} onChange={(e) => update({ n8nSendPath: e.target.value })} />
                 </Field>
               </FormGrid>
 
-              <StatusRow>
-                <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
-                  <Pill $tone={saveState === "saved" ? "success" : saveState === "saving" ? "warning" : saveState === "error" ? "error" : "neutral"}>
-                    {saveState === "saved"
-                      ? "Salvo"
-                      : saveState === "saving"
-                        ? "Salvando..."
-                        : saveState === "error"
-                          ? "Falha ao salvar"
-                          : "Não salvo"}
-                  </Pill>
-                  {lastTest ? (
-                    <Pill $tone={lastTest.ok ? "success" : "error"}>
-                      {lastTest.ok ? "Teste OK" : "Teste com erro"}
-                      {typeof lastTest.latencyMs === "number" ? ` • ${lastTest.latencyMs}ms` : ""}
-                    </Pill>
+              <Footer>
+                <Button variant="save" onClick={() => saveSettings().catch((error) => showToast(error.message, "error"))}>Salvar N8N</Button>
+                <Button variant="ghost" onClick={testN8n} disabled={testingN8n}>{testingN8n ? "Testando..." : "Testar comunicação com N8N"}</Button>
+              </Footer>
+
+              {n8nTestResult ? <ResultBox>{JSON.stringify(n8nTestResult, null, 2)}</ResultBox> : null}
+            </div>
+          )}
+
+          {activeTab === "contactsSync" && (
+            <div>
+              <h3>Sincronização de contatos WhatsApp</h3>
+              <Info>
+                Esta ação chama o endpoint do n8n baseado na sua configuração e adiciona <code>/todos/contatos</code> para buscar todos os contatos e salvar na base local.
+              </Info>
+
+              <Footer>
+                <Button variant="save" onClick={() => saveSettings().catch((error) => showToast(error.message, "error"))}>Salvar configurações</Button>
+                <Button variant="primary" onClick={syncContacts} disabled={syncingContacts}>{syncingContacts ? "Sincronizando..." : "Sincronizar contatos"}</Button>
+                <Button variant="ghost" onClick={loadSyncedContacts} disabled={loadingContacts}>{loadingContacts ? "Carregando..." : "Atualizar lista"}</Button>
+              </Footer>
+
+              {contactsSyncResult ? <ResultBox>{JSON.stringify(contactsSyncResult, null, 2)}</ResultBox> : null}
+
+              <ContactsTable>
+                <thead>
+                  <tr>
+                    <th>Nome</th>
+                    <th>remoteJid</th>
+                    <th>instanceId</th>
+                    <th>Atualizado</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {contacts.map((contact) => (
+                    <tr key={contact.id}>
+                      <td>{contact.pushName || "Sem nome"}</td>
+                      <td>{contact.remoteJid}</td>
+                      <td>{contact.instanceId || "-"}</td>
+                      <td>{new Date(contact.updatedAt).toLocaleString("pt-BR")}</td>
+                    </tr>
+                  ))}
+                  {!contacts.length ? (
+                    <tr>
+                      <td colSpan={4} style={{ color: "#6b7280" }}>Nenhum contato sincronizado ainda.</td>
+                    </tr>
                   ) : null}
-                </div>
+                </tbody>
+              </ContactsTable>
+            </div>
+          )}
 
-                <Footer style={{ marginTop: 0 }}>
-                  <Button variant="ghost" onClick={runConnectionTest} disabled={testing || !currentValidation.isValid}>
-                    {testing ? "Testando..." : "Testar Conexão"}
-                  </Button>
-                </Footer>
-              </StatusRow>
-
-              <HistoryList>
-                <HistoryHeader>Histórico de testes (N8N)</HistoryHeader>
-                {historyN8n.length === 0 ? (
-                  <div style={{ padding: "0.8rem 0.9rem", color: "#6b7280" }}>Nenhum teste executado ainda.</div>
-                ) : (
-                  historyN8n.map((item) => (
-                    <HistoryItem key={`${item.testedAt}-${item.ok ? "ok" : "err"}`}>
-                      <div style={{ color: "#6b7280" }}>{new Date(item.testedAt).toLocaleString()}</div>
-                      <div>
-                        <Pill $tone={item.ok ? "success" : "error"}>{item.ok ? "OK" : "ERRO"}</Pill>
-                      </div>
-                      <div style={{ color: "#111827" }}>
-                        {item.message}
-                        {typeof item.statusCode === "number" ? ` (HTTP ${item.statusCode})` : ""}
-                      </div>
-                    </HistoryItem>
-                  ))
-                )}
-              </HistoryList>
+          {activeTab === "n8n" && (
+            <div>
+              <h3>Notificações</h3>
+              <Info>Espaço reservado para alertas.</Info>
             </div>
           )}
         </Card>
