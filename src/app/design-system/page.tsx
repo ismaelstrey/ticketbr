@@ -2,6 +2,8 @@
 
 import React, { useState } from "react";
 import styled from "styled-components";
+import { AppShellContainer, MainContent } from "@/components/layout/AppShell";
+import { Sidebar } from "@/components/layout/Sidebar";
 import { Button } from "@/components/ui/Button";
 import { Input, Select, Textarea } from "@/components/ui/Input";
 import { Card } from "@/components/ui/Card";
@@ -79,6 +81,9 @@ export default function DesignSystemPage() {
   const [inputValue, setInputValue] = useState("");
 
   return (
+    <AppShellContainer>
+      <Sidebar />
+      <MainContent>
     <Container>
       <div>
         <h1 style={{ fontSize: "2rem", fontWeight: "800", color: "#111827", marginBottom: "0.5rem" }}>
@@ -196,5 +201,7 @@ export default function DesignSystemPage() {
         </Modal>
       </Section>
     </Container>
+      </MainContent>
+    </AppShellContainer>
   );
 }

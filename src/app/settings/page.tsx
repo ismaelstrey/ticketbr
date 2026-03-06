@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
+import { AppShellContainer, MainContent } from "@/components/layout/AppShell";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -58,20 +59,6 @@ const defaults: IntegrationSettings = {
   n8nMessagesPath: "/messages",
   n8nSendPath: "/messages/send"
 };
-
-const Shell = styled.div`
-  min-height: 100vh;
-  background: #f3f4f6;
-`;
-
-const Main = styled.main`
-  margin-left: 260px;
-  padding: 1rem;
-
-  @media (max-width: 1024px) {
-    margin-left: 64px;
-  }
-`;
 
 const Card = styled.section`
   background: #fff;
@@ -388,9 +375,9 @@ export default function SettingsPage() {
   
 
   return (
-    <Shell>
+    <AppShellContainer>
       <Sidebar />
-      <Main>
+      <MainContent>
         <Card>
           <h1 style={{ margin: "0 0 0.35rem" }}>Configurações de Integração</h1>
           <Info>Evolution API, N8N e sincronização de contatos WhatsApp em abas separadas.</Info>
@@ -552,7 +539,7 @@ export default function SettingsPage() {
             </div>
           )}
         </Card>
-      </Main>
-    </Shell>
+      </MainContent>
+    </AppShellContainer>
   );
 }

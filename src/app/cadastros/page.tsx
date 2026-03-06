@@ -2,6 +2,8 @@
 
 import React from "react";
 import styled from "styled-components";
+import { AppShellContainer, MainContent } from "@/components/layout/AppShell";
+import { Sidebar } from "@/components/layout/Sidebar";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { useRouter } from "next/navigation";
@@ -30,6 +32,9 @@ export default function CadastrosPage() {
   const router = useRouter();
 
   return (
+    <AppShellContainer>
+      <Sidebar />
+      <MainContent>
     <Page>
       <Title>Cadastros</Title>
       <Grid>
@@ -56,6 +61,8 @@ export default function CadastrosPage() {
         </Card>
       </Grid>
     </Page>
+      </MainContent>
+    </AppShellContainer>
   );
 }
 
