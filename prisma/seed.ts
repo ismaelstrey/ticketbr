@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { PrismaClient } from "./generated/client";
+import { PrismaClient, TicketStatus, TicketPriority, TicketEventType } from "./generated/client";
 import { PrismaPostgresAdapter } from "@prisma/adapter-ppg";
 import bcrypt from "bcryptjs";
 
@@ -14,7 +14,7 @@ const prisma = new PrismaClient({ adapter });
 async function main() {
   console.log('Start seeding ...')
 
-  // Seed Tipo_Ticket
+  // 1. Seed Tipo_Ticket
   const ticketTypes = [
     {
       nome: 'Incidente',
@@ -42,20 +42,31 @@ async function main() {
     },
   ]
 
+  const createdTypes: Record<string, any> = {};
+
   for (const t of ticketTypes) {
     const type = await prisma.tipo_Ticket.upsert({
       where: { nome: t.nome },
-      update: {},
+      update: {
+        descricao: t.descricao,
+        sla_horas: t.sla_horas,
+        prioridade_default: t.prioridade_default
+      },
       create: t,
     })
+    createdTypes[t.nome] = type;
     console.log(`Created/Updated Ticket Type: ${type.nome}`)
 
-    // Seed Categories for this type
+    // 2. Seed Categories for this type
     let categories: string[] = []
     if (t.nome === 'Incidente') {
       categories = ['Hardware', 'Software', 'Rede', 'Segurança']
     } else if (t.nome === 'Solicitação de Serviço') {
       categories = ['Acesso', 'Instalação', 'Dúvida', 'Equipamento']
+    } else if (t.nome === 'Problema') {
+      categories = ['Recorrente', 'Performance', 'Integridade']
+    } else if (t.nome === 'Mudança') {
+      categories = ['Infraestrutura', 'Aplicação', 'Processo']
     }
 
     for (const catName of categories) {
@@ -66,7 +77,9 @@ async function main() {
             nome: catName,
           },
         },
-        update: {},
+        update: {
+          descricao: `Categoria ${catName} para ${t.nome}`
+        },
         create: {
           nome: catName,
           descricao: `Categoria ${catName} para ${t.nome}`,
@@ -77,7 +90,7 @@ async function main() {
     }
   }
 
-  // Seed User (Legacy - for Login)
+  // 3. Seed User (Legacy - for Login compatibility if needed)
   const hashedPassword = await bcrypt.hash('admin123', 10)
   const user = await prisma.user.upsert({
     where: { email: 'admin@ticketbr.com' },
@@ -93,11 +106,11 @@ async function main() {
   })
   console.log(`Created/Updated User (Legacy): ${user.email}`)
 
-  // Seed Operador (Admin)
+  // 4. Seed Operador (Admin)
   const admin = await prisma.operador.upsert({
     where: { email: 'admin@ticketbr.com' },
     update: {
-      senha_hash: hashedPassword, // Using same hash for consistency
+      senha_hash: hashedPassword,
     },
     create: {
       nome: 'Administrador',
@@ -111,11 +124,12 @@ async function main() {
   })
   console.log(`Created/Updated Operator: ${admin.nome}`)
 
-  // Seed Mesa de Trabalho
+  // 5. Seed Mesa de Trabalho
   const mesa = await prisma.mesa_Trabalho.upsert({
-    where: { id: 'mesa-n1-default' }, // using fixed ID for simplicity in upsert if possible, but ID is cuid. 
-    // We can't upsert by ID easily if it's random. Let's try finding by name first or just create if empty.
-    update: {},
+    where: { id: 'mesa-n1-default' },
+    update: {
+        responsavel_id: admin.id
+    },
     create: {
       id: 'mesa-n1-default',
       nome: 'Nível 1 - Geral',
@@ -127,7 +141,7 @@ async function main() {
   })
   console.log(`Created/Updated Workbench: ${mesa.nome}`)
 
-  // Seed Solicitantes (Clientes)
+  // 6. Seed Solicitantes (Clientes)
   const requesters = [
     {
       razao_social: 'Empresa A Ltda',
@@ -155,14 +169,76 @@ async function main() {
     }
   ]
 
+  const createdRequesters: any[] = [];
+
   for (const r of requesters) {
-    await prisma.solicitante.upsert({
+    const req = await prisma.solicitante.upsert({
       where: { cnpj: r.cnpj },
       update: {},
       create: r
     })
-    console.log(`Created/Updated Requester: ${r.nome_fantasia}`)
+    createdRequesters.push(req);
+    console.log(`Created/Updated Requester: ${req.nome_fantasia}`)
   }
+
+  // 7. Seed Tickets (Exemplos)
+  // Ensure we have at least one type and requester
+  if (createdTypes['Incidente'] && createdRequesters.length > 0) {
+      const incidenteType = createdTypes['Incidente'];
+      const requester = createdRequesters[0];
+      
+      // Fetch a category
+      const category = await prisma.categoria_Ticket.findFirst({
+          where: { tipo_ticket_id: incidenteType.id, nome: 'Software' }
+      });
+
+      if (category) {
+        // Create a Ticket
+        // Check if ticket already exists to avoid duplicates on re-seed (optional, usually seed cleans or adds)
+        // Here we just create one if none exist for this requester to demo
+        const existingTicket = await prisma.ticket.findFirst({
+            where: { solicitante_id: requester.id, subject: 'Erro ao acessar sistema ERP' }
+        });
+
+        if (!existingTicket) {
+            const ticket = await prisma.ticket.create({
+                data: {
+                    subject: 'Erro ao acessar sistema ERP',
+                    description: 'Usuário relata erro 500 ao tentar login no módulo financeiro.',
+                    status: TicketStatus.TODO,
+                    priority: TicketPriority.HIGH,
+                    solicitante_id: requester.id,
+                    tipo_ticket_id: incidenteType.id,
+                    categoria_id: category.id,
+                    mesa_trabalho_id: mesa.id,
+                    operador_id: admin.id,
+                    // Legacy fields for compatibility
+                    requester: requester.nome_fantasia,
+                    operator: admin.nome,
+                    ticketType: incidenteType.nome,
+                    category: category.nome,
+                    workbench: mesa.nome,
+                    
+                    events: {
+                        create: [
+                            {
+                                type: TicketEventType.CREATED,
+                                title: 'Ticket Criado',
+                                description: 'Ticket criado via Seed',
+                                author: 'System'
+                            }
+                        ]
+                    }
+                }
+            });
+            console.log(`Created Ticket: #${ticket.number} - ${ticket.subject}`);
+        } else {
+            console.log(`Ticket already exists: #${existingTicket.number}`);
+        }
+      }
+  }
+
+  console.log('Seeding finished.')
 }
 
 main()
