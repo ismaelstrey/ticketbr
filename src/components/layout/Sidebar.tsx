@@ -177,8 +177,18 @@ const MobileOverlay = styled.div<{ $isVisible: boolean }>`
   background: rgba(0, 0, 0, 0.5);
   z-index: 90;
   display: ${({ $isVisible }) => ($isVisible ? "block" : "none")};
-  
+
   @media (min-width: ${({ theme }) => theme.breakpoints.tablet}) {
+    display: none;
+  }
+`;
+
+const SidebarSpacer = styled.div<{ $isExpanded: boolean }>`
+  width: ${({ $isExpanded }) => ($isExpanded ? "260px" : "64px")};
+  transition: width 0.3s ease-in-out;
+  flex-shrink: 0;
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
     display: none;
   }
 `;
@@ -346,23 +356,7 @@ export function Sidebar() {
   return (
     <>
       <MobileOverlay $isVisible={isExpanded} onClick={() => setIsExpanded(false)} />
-      {/* Spacer is only for desktop, on mobile sidebar is overlay */}
-      <div 
-        style={{ 
-          width: isExpanded ? '260px' : '64px', 
-          transition: 'width 0.3s ease-in-out', 
-          flexShrink: 0,
-          display: 'block'
-        }} 
-        className="sidebar-spacer" 
-      />
-      <style jsx>{`
-        @media (max-width: 768px) {
-          .sidebar-spacer {
-            display: none !important;
-          }
-        }
-      `}</style>
+      <SidebarSpacer $isExpanded={isExpanded} />
       <SidebarContainer $isExpanded={isExpanded}>
         <SidebarHeader $isExpanded={isExpanded}>
           <Logo $isExpanded={isExpanded}>TicketBR</Logo>

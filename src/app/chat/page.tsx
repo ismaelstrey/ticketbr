@@ -2,31 +2,24 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
+import { AppShellContainer, MainContent } from "@/components/layout/AppShell";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Button } from "@/components/ui/Button";
 import { Input, Select, Textarea } from "@/components/ui/Input";
 import { useToast } from "@/context/ToastContext";
 import { ChatContact, ChatMessage, ChatTicketLink } from "@/types/chat";
 
-const Shell = styled.div`
-  min-height: 100vh;
-  background: #ece5dd;
-`;
-
-const Main = styled.main`
-  margin-left: 260px;
-  padding: 0.75rem;
-
-  @media (max-width: 1024px) {
-    margin-left: 64px;
-  }
+const ChatMain = styled(MainContent)`
+  padding: 0;
+  height: 100vh;
 `;
 
 const Frame = styled.div`
-  height: calc(100vh - 1.5rem);
+  width: 100%;
+  height: 100vh;
   background: #fff;
-  border: 1px solid #d7d7d7;
-  border-radius: 10px;
+  border: none;
+  border-radius: 0;
   overflow: hidden;
   display: grid;
   grid-template-columns: 380px 1fr;
@@ -350,9 +343,9 @@ export default function ChatPage() {
   }
 
   return (
-    <Shell>
+    <AppShellContainer>
       <Sidebar />
-      <Main>
+      <ChatMain>
         <Frame>
           <SidebarPane>
             <TopBar>
@@ -461,7 +454,7 @@ export default function ChatPage() {
             </Footer>
           </ChatPane>
         </Frame>
-      </Main>
-    </Shell>
+      </ChatMain>
+    </AppShellContainer>
   );
 }
