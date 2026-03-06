@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
+import { AppShellContainer, MainContent } from "@/components/layout/AppShell";
+import { Sidebar } from "@/components/layout/Sidebar";
 import { DataTable, Column } from "@/components/ui/DataTable";
 import { Modal } from "@/components/ui/Modal";
 import { OperatorForm } from "@/components/forms/OperatorForm";
@@ -46,6 +48,9 @@ export default function OperadorPage() {
   ];
 
   return (
+    <AppShellContainer>
+      <Sidebar />
+      <MainContent>
     <div style={{ padding: "1rem", height: "100%" }}>
       <DataTable
         title="Operadores"
@@ -71,5 +76,7 @@ export default function OperadorPage() {
         />
       </Modal>
     </div>
+      </MainContent>
+    </AppShellContainer>
   );
 }

@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
+import { AppShellContainer, MainContent } from "@/components/layout/AppShell";
+import { Sidebar } from "@/components/layout/Sidebar";
 import { DataTable, Column } from "@/components/ui/DataTable";
 import { Modal } from "@/components/ui/Modal";
 import { UserForm } from "@/components/forms/UserForm";
@@ -42,6 +44,9 @@ export default function UserPage() {
   ];
 
   return (
+    <AppShellContainer>
+      <Sidebar />
+      <MainContent>
     <div style={{ padding: "1rem", height: "100%" }}>
       <DataTable
         title="Usuários do Sistema"
@@ -67,5 +72,7 @@ export default function UserPage() {
         />
       </Modal>
     </div>
+      </MainContent>
+    </AppShellContainer>
   );
 }

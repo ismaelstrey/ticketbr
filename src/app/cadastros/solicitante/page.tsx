@@ -2,6 +2,8 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
+import { AppShellContainer, MainContent } from "@/components/layout/AppShell";
+import { Sidebar } from "@/components/layout/Sidebar";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Modal } from "@/components/ui/Modal";
@@ -267,6 +269,9 @@ export default function SolicitantePage() {
   };
 
   return (
+    <AppShellContainer>
+      <Sidebar />
+      <MainContent>
     <Page>
       <Header>
         <Title>Solicitantes</Title>
@@ -430,5 +435,7 @@ export default function SolicitantePage() {
         />
       </Modal>
     </Page>
+      </MainContent>
+    </AppShellContainer>
   );
 }
