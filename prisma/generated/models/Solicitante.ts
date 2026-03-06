@@ -254,6 +254,7 @@ export type SolicitanteWhereInput = {
   created_by?: Prisma.StringNullableFilter<"Solicitante"> | string | null
   updated_by?: Prisma.StringNullableFilter<"Solicitante"> | string | null
   deleted_at?: Prisma.DateTimeNullableFilter<"Solicitante"> | Date | string | null
+  funcionarios?: Prisma.FuncionarioListRelationFilter
   tickets?: Prisma.TicketListRelationFilter
 }
 
@@ -272,6 +273,7 @@ export type SolicitanteOrderByWithRelationInput = {
   created_by?: Prisma.SortOrderInput | Prisma.SortOrder
   updated_by?: Prisma.SortOrderInput | Prisma.SortOrder
   deleted_at?: Prisma.SortOrderInput | Prisma.SortOrder
+  funcionarios?: Prisma.FuncionarioOrderByRelationAggregateInput
   tickets?: Prisma.TicketOrderByRelationAggregateInput
 }
 
@@ -293,6 +295,7 @@ export type SolicitanteWhereUniqueInput = Prisma.AtLeast<{
   created_by?: Prisma.StringNullableFilter<"Solicitante"> | string | null
   updated_by?: Prisma.StringNullableFilter<"Solicitante"> | string | null
   deleted_at?: Prisma.DateTimeNullableFilter<"Solicitante"> | Date | string | null
+  funcionarios?: Prisma.FuncionarioListRelationFilter
   tickets?: Prisma.TicketListRelationFilter
 }, "id" | "cnpj">
 
@@ -351,6 +354,7 @@ export type SolicitanteCreateInput = {
   created_by?: string | null
   updated_by?: string | null
   deleted_at?: Date | string | null
+  funcionarios?: Prisma.FuncionarioCreateNestedManyWithoutSolicitanteInput
   tickets?: Prisma.TicketCreateNestedManyWithoutSolicitanteInput
 }
 
@@ -369,6 +373,7 @@ export type SolicitanteUncheckedCreateInput = {
   created_by?: string | null
   updated_by?: string | null
   deleted_at?: Date | string | null
+  funcionarios?: Prisma.FuncionarioUncheckedCreateNestedManyWithoutSolicitanteInput
   tickets?: Prisma.TicketUncheckedCreateNestedManyWithoutSolicitanteInput
 }
 
@@ -387,6 +392,7 @@ export type SolicitanteUpdateInput = {
   created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   updated_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  funcionarios?: Prisma.FuncionarioUpdateManyWithoutSolicitanteNestedInput
   tickets?: Prisma.TicketUpdateManyWithoutSolicitanteNestedInput
 }
 
@@ -405,6 +411,7 @@ export type SolicitanteUncheckedUpdateInput = {
   created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   updated_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  funcionarios?: Prisma.FuncionarioUncheckedUpdateManyWithoutSolicitanteNestedInput
   tickets?: Prisma.TicketUncheckedUpdateManyWithoutSolicitanteNestedInput
 }
 
@@ -510,6 +517,11 @@ export type SolicitanteMinOrderByAggregateInput = {
   deleted_at?: Prisma.SortOrder
 }
 
+export type SolicitanteScalarRelationFilter = {
+  is?: Prisma.SolicitanteWhereInput
+  isNot?: Prisma.SolicitanteWhereInput
+}
+
 export type SolicitanteNullableScalarRelationFilter = {
   is?: Prisma.SolicitanteWhereInput | null
   isNot?: Prisma.SolicitanteWhereInput | null
@@ -519,12 +531,22 @@ export type BoolFieldUpdateOperationsInput = {
   set?: boolean
 }
 
-export type NullableStringFieldUpdateOperationsInput = {
-  set?: string | null
-}
-
 export type NullableDateTimeFieldUpdateOperationsInput = {
   set?: Date | string | null
+}
+
+export type SolicitanteCreateNestedOneWithoutFuncionariosInput = {
+  create?: Prisma.XOR<Prisma.SolicitanteCreateWithoutFuncionariosInput, Prisma.SolicitanteUncheckedCreateWithoutFuncionariosInput>
+  connectOrCreate?: Prisma.SolicitanteCreateOrConnectWithoutFuncionariosInput
+  connect?: Prisma.SolicitanteWhereUniqueInput
+}
+
+export type SolicitanteUpdateOneRequiredWithoutFuncionariosNestedInput = {
+  create?: Prisma.XOR<Prisma.SolicitanteCreateWithoutFuncionariosInput, Prisma.SolicitanteUncheckedCreateWithoutFuncionariosInput>
+  connectOrCreate?: Prisma.SolicitanteCreateOrConnectWithoutFuncionariosInput
+  upsert?: Prisma.SolicitanteUpsertWithoutFuncionariosInput
+  connect?: Prisma.SolicitanteWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.SolicitanteUpdateToOneWithWhereWithoutFuncionariosInput, Prisma.SolicitanteUpdateWithoutFuncionariosInput>, Prisma.SolicitanteUncheckedUpdateWithoutFuncionariosInput>
 }
 
 export type SolicitanteCreateNestedOneWithoutTicketsInput = {
@@ -543,6 +565,94 @@ export type SolicitanteUpdateOneWithoutTicketsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.SolicitanteUpdateToOneWithWhereWithoutTicketsInput, Prisma.SolicitanteUpdateWithoutTicketsInput>, Prisma.SolicitanteUncheckedUpdateWithoutTicketsInput>
 }
 
+export type SolicitanteCreateWithoutFuncionariosInput = {
+  id?: string
+  razao_social: string
+  nome_fantasia: string
+  cnpj: string
+  email: string
+  telefone: string
+  endereco_completo: string
+  data_cadastro?: Date | string
+  status?: boolean
+  created_at?: Date | string
+  updated_at?: Date | string
+  created_by?: string | null
+  updated_by?: string | null
+  deleted_at?: Date | string | null
+  tickets?: Prisma.TicketCreateNestedManyWithoutSolicitanteInput
+}
+
+export type SolicitanteUncheckedCreateWithoutFuncionariosInput = {
+  id?: string
+  razao_social: string
+  nome_fantasia: string
+  cnpj: string
+  email: string
+  telefone: string
+  endereco_completo: string
+  data_cadastro?: Date | string
+  status?: boolean
+  created_at?: Date | string
+  updated_at?: Date | string
+  created_by?: string | null
+  updated_by?: string | null
+  deleted_at?: Date | string | null
+  tickets?: Prisma.TicketUncheckedCreateNestedManyWithoutSolicitanteInput
+}
+
+export type SolicitanteCreateOrConnectWithoutFuncionariosInput = {
+  where: Prisma.SolicitanteWhereUniqueInput
+  create: Prisma.XOR<Prisma.SolicitanteCreateWithoutFuncionariosInput, Prisma.SolicitanteUncheckedCreateWithoutFuncionariosInput>
+}
+
+export type SolicitanteUpsertWithoutFuncionariosInput = {
+  update: Prisma.XOR<Prisma.SolicitanteUpdateWithoutFuncionariosInput, Prisma.SolicitanteUncheckedUpdateWithoutFuncionariosInput>
+  create: Prisma.XOR<Prisma.SolicitanteCreateWithoutFuncionariosInput, Prisma.SolicitanteUncheckedCreateWithoutFuncionariosInput>
+  where?: Prisma.SolicitanteWhereInput
+}
+
+export type SolicitanteUpdateToOneWithWhereWithoutFuncionariosInput = {
+  where?: Prisma.SolicitanteWhereInput
+  data: Prisma.XOR<Prisma.SolicitanteUpdateWithoutFuncionariosInput, Prisma.SolicitanteUncheckedUpdateWithoutFuncionariosInput>
+}
+
+export type SolicitanteUpdateWithoutFuncionariosInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  razao_social?: Prisma.StringFieldUpdateOperationsInput | string
+  nome_fantasia?: Prisma.StringFieldUpdateOperationsInput | string
+  cnpj?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  telefone?: Prisma.StringFieldUpdateOperationsInput | string
+  endereco_completo?: Prisma.StringFieldUpdateOperationsInput | string
+  data_cadastro?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  updated_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tickets?: Prisma.TicketUpdateManyWithoutSolicitanteNestedInput
+}
+
+export type SolicitanteUncheckedUpdateWithoutFuncionariosInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  razao_social?: Prisma.StringFieldUpdateOperationsInput | string
+  nome_fantasia?: Prisma.StringFieldUpdateOperationsInput | string
+  cnpj?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  telefone?: Prisma.StringFieldUpdateOperationsInput | string
+  endereco_completo?: Prisma.StringFieldUpdateOperationsInput | string
+  data_cadastro?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  updated_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tickets?: Prisma.TicketUncheckedUpdateManyWithoutSolicitanteNestedInput
+}
+
 export type SolicitanteCreateWithoutTicketsInput = {
   id?: string
   razao_social: string
@@ -558,6 +668,7 @@ export type SolicitanteCreateWithoutTicketsInput = {
   created_by?: string | null
   updated_by?: string | null
   deleted_at?: Date | string | null
+  funcionarios?: Prisma.FuncionarioCreateNestedManyWithoutSolicitanteInput
 }
 
 export type SolicitanteUncheckedCreateWithoutTicketsInput = {
@@ -575,6 +686,7 @@ export type SolicitanteUncheckedCreateWithoutTicketsInput = {
   created_by?: string | null
   updated_by?: string | null
   deleted_at?: Date | string | null
+  funcionarios?: Prisma.FuncionarioUncheckedCreateNestedManyWithoutSolicitanteInput
 }
 
 export type SolicitanteCreateOrConnectWithoutTicketsInput = {
@@ -608,6 +720,7 @@ export type SolicitanteUpdateWithoutTicketsInput = {
   created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   updated_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  funcionarios?: Prisma.FuncionarioUpdateManyWithoutSolicitanteNestedInput
 }
 
 export type SolicitanteUncheckedUpdateWithoutTicketsInput = {
@@ -625,6 +738,7 @@ export type SolicitanteUncheckedUpdateWithoutTicketsInput = {
   created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   updated_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  funcionarios?: Prisma.FuncionarioUncheckedUpdateManyWithoutSolicitanteNestedInput
 }
 
 
@@ -633,10 +747,12 @@ export type SolicitanteUncheckedUpdateWithoutTicketsInput = {
  */
 
 export type SolicitanteCountOutputType = {
+  funcionarios: number
   tickets: number
 }
 
 export type SolicitanteCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  funcionarios?: boolean | SolicitanteCountOutputTypeCountFuncionariosArgs
   tickets?: boolean | SolicitanteCountOutputTypeCountTicketsArgs
 }
 
@@ -648,6 +764,13 @@ export type SolicitanteCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.
    * Select specific fields to fetch from the SolicitanteCountOutputType
    */
   select?: Prisma.SolicitanteCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * SolicitanteCountOutputType without action
+ */
+export type SolicitanteCountOutputTypeCountFuncionariosArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.FuncionarioWhereInput
 }
 
 /**
@@ -673,6 +796,7 @@ export type SolicitanteSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   created_by?: boolean
   updated_by?: boolean
   deleted_at?: boolean
+  funcionarios?: boolean | Prisma.Solicitante$funcionariosArgs<ExtArgs>
   tickets?: boolean | Prisma.Solicitante$ticketsArgs<ExtArgs>
   _count?: boolean | Prisma.SolicitanteCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["solicitante"]>
@@ -730,6 +854,7 @@ export type SolicitanteSelectScalar = {
 
 export type SolicitanteOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "razao_social" | "nome_fantasia" | "cnpj" | "email" | "telefone" | "endereco_completo" | "data_cadastro" | "status" | "created_at" | "updated_at" | "created_by" | "updated_by" | "deleted_at", ExtArgs["result"]["solicitante"]>
 export type SolicitanteInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  funcionarios?: boolean | Prisma.Solicitante$funcionariosArgs<ExtArgs>
   tickets?: boolean | Prisma.Solicitante$ticketsArgs<ExtArgs>
   _count?: boolean | Prisma.SolicitanteCountOutputTypeDefaultArgs<ExtArgs>
 }
@@ -739,6 +864,7 @@ export type SolicitanteIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.
 export type $SolicitantePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Solicitante"
   objects: {
+    funcionarios: Prisma.$FuncionarioPayload<ExtArgs>[]
     tickets: Prisma.$TicketPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -1150,6 +1276,7 @@ readonly fields: SolicitanteFieldRefs;
  */
 export interface Prisma__SolicitanteClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  funcionarios<T extends Prisma.Solicitante$funcionariosArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Solicitante$funcionariosArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FuncionarioPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   tickets<T extends Prisma.Solicitante$ticketsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Solicitante$ticketsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TicketPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1579,6 +1706,30 @@ export type SolicitanteDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.I
    * Limit how many Solicitantes to delete.
    */
   limit?: number
+}
+
+/**
+ * Solicitante.funcionarios
+ */
+export type Solicitante$funcionariosArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Funcionario
+   */
+  select?: Prisma.FuncionarioSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Funcionario
+   */
+  omit?: Prisma.FuncionarioOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.FuncionarioInclude<ExtArgs> | null
+  where?: Prisma.FuncionarioWhereInput
+  orderBy?: Prisma.FuncionarioOrderByWithRelationInput | Prisma.FuncionarioOrderByWithRelationInput[]
+  cursor?: Prisma.FuncionarioWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.FuncionarioScalarFieldEnum | Prisma.FuncionarioScalarFieldEnum[]
 }
 
 /**

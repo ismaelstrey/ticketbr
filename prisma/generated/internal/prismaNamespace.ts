@@ -386,6 +386,7 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 export const ModelName = {
   User: 'User',
   Solicitante: 'Solicitante',
+  Funcionario: 'Funcionario',
   Tipo_Ticket: 'Tipo_Ticket',
   Categoria_Ticket: 'Categoria_Ticket',
   Mesa_Trabalho: 'Mesa_Trabalho',
@@ -407,7 +408,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "solicitante" | "tipo_Ticket" | "categoria_Ticket" | "mesa_Trabalho" | "operador" | "ticket" | "ticketEvent"
+    modelProps: "user" | "solicitante" | "funcionario" | "tipo_Ticket" | "categoria_Ticket" | "mesa_Trabalho" | "operador" | "ticket" | "ticketEvent"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -556,6 +557,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.SolicitanteCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.SolicitanteCountAggregateOutputType> | number
+        }
+      }
+    }
+    Funcionario: {
+      payload: Prisma.$FuncionarioPayload<ExtArgs>
+      fields: Prisma.FuncionarioFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.FuncionarioFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FuncionarioPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.FuncionarioFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FuncionarioPayload>
+        }
+        findFirst: {
+          args: Prisma.FuncionarioFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FuncionarioPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.FuncionarioFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FuncionarioPayload>
+        }
+        findMany: {
+          args: Prisma.FuncionarioFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FuncionarioPayload>[]
+        }
+        create: {
+          args: Prisma.FuncionarioCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FuncionarioPayload>
+        }
+        createMany: {
+          args: Prisma.FuncionarioCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.FuncionarioCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FuncionarioPayload>[]
+        }
+        delete: {
+          args: Prisma.FuncionarioDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FuncionarioPayload>
+        }
+        update: {
+          args: Prisma.FuncionarioUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FuncionarioPayload>
+        }
+        deleteMany: {
+          args: Prisma.FuncionarioDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.FuncionarioUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.FuncionarioUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FuncionarioPayload>[]
+        }
+        upsert: {
+          args: Prisma.FuncionarioUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FuncionarioPayload>
+        }
+        aggregate: {
+          args: Prisma.FuncionarioAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateFuncionario>
+        }
+        groupBy: {
+          args: Prisma.FuncionarioGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FuncionarioGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.FuncionarioCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FuncionarioCountAggregateOutputType> | number
         }
       }
     }
@@ -1048,6 +1123,11 @@ export const UserScalarFieldEnum = {
   name: 'name',
   password: 'password',
   role: 'role',
+  whatsappId: 'whatsappId',
+  remoteJid: 'remoteJid',
+  pushName: 'pushName',
+  profilePicUrl: 'profilePicUrl',
+  instanceId: 'instanceId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -1073,6 +1153,25 @@ export const SolicitanteScalarFieldEnum = {
 } as const
 
 export type SolicitanteScalarFieldEnum = (typeof SolicitanteScalarFieldEnum)[keyof typeof SolicitanteScalarFieldEnum]
+
+
+export const FuncionarioScalarFieldEnum = {
+  id: 'id',
+  solicitante_id: 'solicitante_id',
+  userId: 'userId',
+  nome: 'nome',
+  email: 'email',
+  telefone: 'telefone',
+  whatsappId: 'whatsappId',
+  remoteJid: 'remoteJid',
+  pushName: 'pushName',
+  profilePicUrl: 'profilePicUrl',
+  instanceId: 'instanceId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type FuncionarioScalarFieldEnum = (typeof FuncionarioScalarFieldEnum)[keyof typeof FuncionarioScalarFieldEnum]
 
 
 export const Tipo_TicketScalarFieldEnum = {
@@ -1164,6 +1263,7 @@ export const TicketScalarFieldEnum = {
   priority: 'priority',
   operator: 'operator',
   operatorId: 'operatorId',
+  createdByUserId: 'createdByUserId',
   contact: 'contact',
   ticketType: 'ticketType',
   category: 'category',
@@ -1478,6 +1578,7 @@ export type PrismaClientOptions = ({
 export type GlobalOmitConfig = {
   user?: Prisma.UserOmit
   solicitante?: Prisma.SolicitanteOmit
+  funcionario?: Prisma.FuncionarioOmit
   tipo_Ticket?: Prisma.Tipo_TicketOmit
   categoria_Ticket?: Prisma.Categoria_TicketOmit
   mesa_Trabalho?: Prisma.Mesa_TrabalhoOmit

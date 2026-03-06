@@ -44,8 +44,15 @@ model User {
   name      String
   password  String   @default("default_hash")
   role      Role     @default(AGENT)
+  whatsappId     String?  @unique
+  remoteJid      String?  @db.Text
+  pushName       String?
+  profilePicUrl  String?  @db.Text
+  instanceId     String?
+  funcionario    Funcionario?
   tickets   Ticket[] @relation("OperatorTickets")
   events    TicketEvent[]
+  createdTickets Ticket[] @relation("TicketCreatedBy")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -68,10 +75,38 @@ model Solicitante {
   updated_by       String?
   deleted_at       DateTime?
 
+  funcionarios     Funcionario[]
   tickets          Ticket[]
 
   @@index([cnpj])
   @@index([email])
+  @@index([telefone])
+}
+
+model Funcionario {
+  id             String      @id @default(cuid())
+  solicitante_id String
+  solicitante    Solicitante @relation(fields: [solicitante_id], references: [id], onDelete: Restrict)
+
+  userId         String      @unique
+  user           User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  nome           String      @db.VarChar(255)
+  email          String?     @db.VarChar(255)
+  telefone       String      @db.VarChar(20)
+
+  whatsappId     String?     @unique
+  remoteJid      String?     @db.Text
+  pushName       String?
+  profilePicUrl  String?     @db.Text
+  instanceId     String?
+
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  @@unique([solicitante_id, telefone])
+  @@index([solicitante_id])
+  @@index([telefone])
 }
 
 model Tipo_Ticket {
@@ -192,6 +227,9 @@ model Ticket {
   // Relation to User model (Legacy)
   operatorId    String?
   operatorUser  User?          @relation("OperatorTickets", fields: [operatorId], references: [id])
+
+  createdByUserId String?
+  createdByUser   User?        @relation("TicketCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
   
   contact       String?
   ticketType    String? // Legacy string field
@@ -216,6 +254,8 @@ model Ticket {
   @@index([status])
   @@index([priority])
   @@index([createdAt])
+  @@index([solicitante_id])
+  @@index([createdByUserId])
 }
 
 model TicketEvent {

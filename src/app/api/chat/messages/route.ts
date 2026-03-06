@@ -3,15 +3,20 @@ import { appendMessage, listMessages } from "@/server/services/chat-memory";
 import { evolutionIsConfigured, fetchMessagesFromEvolution, sendMediaToEvolution, sendTextToEvolution } from "@/server/services/evolution-service";
 import { resolveWhatsAppConfig } from "@/server/services/whatsapp-settings";
 import { emitChatEventToN8n, fetchMessagesFromN8n, isN8nConfigured, sendMessageToN8n } from "@/server/services/n8n-adapter";
+import { toE164 } from "@/lib/phone-utils";
 
 function normalizePhone(input?: string) {
-  return (input ?? "").replace(/\D/g, "");
+  if (!input) return "";
+  // Tenta normalizar para E.164 (com DDI do Brasil se faltar)
+  const e164 = toE164(input, "BR");
+  // Remove o + e caracteres não numéricos para enviar apenas números
+  return (e164 ?? input).replace(/\D/g, "");
 }
 
 export async function GET(request: NextRequest) {
   const contactId = request.nextUrl.searchParams.get("contactId") ?? "";
   const channel = (request.nextUrl.searchParams.get("channel") ?? "whatsapp") as "whatsapp" | "email";
-  const contactPhone = normalizePhone(request.nextUrl.searchParams.get("contactPhone") ?? "");
+  const contactPhone = normalizePhone(request.nextUrl.searchParams.get("contactPhone") ?? request.nextUrl.searchParams.get("phone") ?? "");
 
   try {
     const config = await resolveWhatsAppConfig(request);

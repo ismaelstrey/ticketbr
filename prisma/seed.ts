@@ -238,6 +238,44 @@ async function main() {
       }
   }
 
+  // 8. Seed Funcionario (Exemplo vinculado a Solicitante)
+  if (createdRequesters.length > 0) {
+    const requester = createdRequesters[0]; // Empresa A
+    
+    // Create User for Funcionario
+    const funcHashedPassword = await bcrypt.hash('func123', 10);
+    const funcUser = await prisma.user.upsert({
+      where: { email: 'func@empresaa.com' },
+      update: { password: funcHashedPassword },
+      create: {
+        email: 'func@empresaa.com',
+        name: 'Funcionário A',
+        password: funcHashedPassword,
+        role: 'CUSTOMER', // Assuming new role for limited access
+        pushName: 'Funcionario A WhatsApp',
+        remoteJid: '5511999990001@s.whatsapp.net'
+      }
+    });
+    console.log(`Created/Updated User (Funcionario): ${funcUser.email}`);
+
+    // Create Funcionario linked to Solicitante and User
+    const funcionario = await prisma.funcionario.upsert({
+      where: { userId: funcUser.id },
+      update: {},
+      create: {
+        solicitante_id: requester.id,
+        userId: funcUser.id,
+        nome: 'Funcionário A',
+        email: 'func@empresaa.com',
+        telefone: '11999990001',
+        whatsappId: '5511999990001@s.whatsapp.net',
+        pushName: 'Funcionario A WhatsApp',
+        remoteJid: '5511999990001@s.whatsapp.net'
+      }
+    });
+    console.log(`Created/Updated Funcionario: ${funcionario.nome} linked to ${requester.nome_fantasia}`);
+  }
+
   console.log('Seeding finished.')
 }
 

@@ -53,6 +53,7 @@ export const AnyNull = runtime.AnyNull
 export const ModelName = {
   User: 'User',
   Solicitante: 'Solicitante',
+  Funcionario: 'Funcionario',
   Tipo_Ticket: 'Tipo_Ticket',
   Categoria_Ticket: 'Categoria_Ticket',
   Mesa_Trabalho: 'Mesa_Trabalho',
@@ -83,6 +84,11 @@ export const UserScalarFieldEnum = {
   name: 'name',
   password: 'password',
   role: 'role',
+  whatsappId: 'whatsappId',
+  remoteJid: 'remoteJid',
+  pushName: 'pushName',
+  profilePicUrl: 'profilePicUrl',
+  instanceId: 'instanceId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -108,6 +114,25 @@ export const SolicitanteScalarFieldEnum = {
 } as const
 
 export type SolicitanteScalarFieldEnum = (typeof SolicitanteScalarFieldEnum)[keyof typeof SolicitanteScalarFieldEnum]
+
+
+export const FuncionarioScalarFieldEnum = {
+  id: 'id',
+  solicitante_id: 'solicitante_id',
+  userId: 'userId',
+  nome: 'nome',
+  email: 'email',
+  telefone: 'telefone',
+  whatsappId: 'whatsappId',
+  remoteJid: 'remoteJid',
+  pushName: 'pushName',
+  profilePicUrl: 'profilePicUrl',
+  instanceId: 'instanceId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type FuncionarioScalarFieldEnum = (typeof FuncionarioScalarFieldEnum)[keyof typeof FuncionarioScalarFieldEnum]
 
 
 export const Tipo_TicketScalarFieldEnum = {
@@ -199,6 +224,7 @@ export const TicketScalarFieldEnum = {
   priority: 'priority',
   operator: 'operator',
   operatorId: 'operatorId',
+  createdByUserId: 'createdByUserId',
   contact: 'contact',
   ticketType: 'ticketType',
   category: 'category',

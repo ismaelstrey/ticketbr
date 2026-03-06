@@ -30,6 +30,11 @@ export type UserMinAggregateOutputType = {
   name: string | null
   password: string | null
   role: $Enums.Role | null
+  whatsappId: string | null
+  remoteJid: string | null
+  pushName: string | null
+  profilePicUrl: string | null
+  instanceId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -40,6 +45,11 @@ export type UserMaxAggregateOutputType = {
   name: string | null
   password: string | null
   role: $Enums.Role | null
+  whatsappId: string | null
+  remoteJid: string | null
+  pushName: string | null
+  profilePicUrl: string | null
+  instanceId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -50,6 +60,11 @@ export type UserCountAggregateOutputType = {
   name: number
   password: number
   role: number
+  whatsappId: number
+  remoteJid: number
+  pushName: number
+  profilePicUrl: number
+  instanceId: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -62,6 +77,11 @@ export type UserMinAggregateInputType = {
   name?: true
   password?: true
   role?: true
+  whatsappId?: true
+  remoteJid?: true
+  pushName?: true
+  profilePicUrl?: true
+  instanceId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -72,6 +92,11 @@ export type UserMaxAggregateInputType = {
   name?: true
   password?: true
   role?: true
+  whatsappId?: true
+  remoteJid?: true
+  pushName?: true
+  profilePicUrl?: true
+  instanceId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -82,6 +107,11 @@ export type UserCountAggregateInputType = {
   name?: true
   password?: true
   role?: true
+  whatsappId?: true
+  remoteJid?: true
+  pushName?: true
+  profilePicUrl?: true
+  instanceId?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -165,6 +195,11 @@ export type UserGroupByOutputType = {
   name: string
   password: string
   role: $Enums.Role
+  whatsappId: string | null
+  remoteJid: string | null
+  pushName: string | null
+  profilePicUrl: string | null
+  instanceId: string | null
   createdAt: Date
   updatedAt: Date
   _count: UserCountAggregateOutputType | null
@@ -196,10 +231,17 @@ export type UserWhereInput = {
   name?: Prisma.StringFilter<"User"> | string
   password?: Prisma.StringFilter<"User"> | string
   role?: Prisma.EnumRoleFilter<"User"> | $Enums.Role
+  whatsappId?: Prisma.StringNullableFilter<"User"> | string | null
+  remoteJid?: Prisma.StringNullableFilter<"User"> | string | null
+  pushName?: Prisma.StringNullableFilter<"User"> | string | null
+  profilePicUrl?: Prisma.StringNullableFilter<"User"> | string | null
+  instanceId?: Prisma.StringNullableFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
+  funcionario?: Prisma.XOR<Prisma.FuncionarioNullableScalarRelationFilter, Prisma.FuncionarioWhereInput> | null
   tickets?: Prisma.TicketListRelationFilter
   events?: Prisma.TicketEventListRelationFilter
+  createdTickets?: Prisma.TicketListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -208,26 +250,40 @@ export type UserOrderByWithRelationInput = {
   name?: Prisma.SortOrder
   password?: Prisma.SortOrder
   role?: Prisma.SortOrder
+  whatsappId?: Prisma.SortOrderInput | Prisma.SortOrder
+  remoteJid?: Prisma.SortOrderInput | Prisma.SortOrder
+  pushName?: Prisma.SortOrderInput | Prisma.SortOrder
+  profilePicUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  instanceId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  funcionario?: Prisma.FuncionarioOrderByWithRelationInput
   tickets?: Prisma.TicketOrderByRelationAggregateInput
   events?: Prisma.TicketEventOrderByRelationAggregateInput
+  createdTickets?: Prisma.TicketOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
   id?: string
   email?: string
+  whatsappId?: string
   AND?: Prisma.UserWhereInput | Prisma.UserWhereInput[]
   OR?: Prisma.UserWhereInput[]
   NOT?: Prisma.UserWhereInput | Prisma.UserWhereInput[]
   name?: Prisma.StringFilter<"User"> | string
   password?: Prisma.StringFilter<"User"> | string
   role?: Prisma.EnumRoleFilter<"User"> | $Enums.Role
+  remoteJid?: Prisma.StringNullableFilter<"User"> | string | null
+  pushName?: Prisma.StringNullableFilter<"User"> | string | null
+  profilePicUrl?: Prisma.StringNullableFilter<"User"> | string | null
+  instanceId?: Prisma.StringNullableFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
+  funcionario?: Prisma.XOR<Prisma.FuncionarioNullableScalarRelationFilter, Prisma.FuncionarioWhereInput> | null
   tickets?: Prisma.TicketListRelationFilter
   events?: Prisma.TicketEventListRelationFilter
-}, "id" | "email">
+  createdTickets?: Prisma.TicketListRelationFilter
+}, "id" | "email" | "whatsappId">
 
 export type UserOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -235,6 +291,11 @@ export type UserOrderByWithAggregationInput = {
   name?: Prisma.SortOrder
   password?: Prisma.SortOrder
   role?: Prisma.SortOrder
+  whatsappId?: Prisma.SortOrderInput | Prisma.SortOrder
+  remoteJid?: Prisma.SortOrderInput | Prisma.SortOrder
+  pushName?: Prisma.SortOrderInput | Prisma.SortOrder
+  profilePicUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  instanceId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.UserCountOrderByAggregateInput
@@ -251,6 +312,11 @@ export type UserScalarWhereWithAggregatesInput = {
   name?: Prisma.StringWithAggregatesFilter<"User"> | string
   password?: Prisma.StringWithAggregatesFilter<"User"> | string
   role?: Prisma.EnumRoleWithAggregatesFilter<"User"> | $Enums.Role
+  whatsappId?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  remoteJid?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  pushName?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  profilePicUrl?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  instanceId?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
 }
@@ -261,10 +327,17 @@ export type UserCreateInput = {
   name: string
   password?: string
   role?: $Enums.Role
+  whatsappId?: string | null
+  remoteJid?: string | null
+  pushName?: string | null
+  profilePicUrl?: string | null
+  instanceId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  funcionario?: Prisma.FuncionarioCreateNestedOneWithoutUserInput
   tickets?: Prisma.TicketCreateNestedManyWithoutOperatorUserInput
   events?: Prisma.TicketEventCreateNestedManyWithoutAuthorUserInput
+  createdTickets?: Prisma.TicketCreateNestedManyWithoutCreatedByUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -273,10 +346,17 @@ export type UserUncheckedCreateInput = {
   name: string
   password?: string
   role?: $Enums.Role
+  whatsappId?: string | null
+  remoteJid?: string | null
+  pushName?: string | null
+  profilePicUrl?: string | null
+  instanceId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  funcionario?: Prisma.FuncionarioUncheckedCreateNestedOneWithoutUserInput
   tickets?: Prisma.TicketUncheckedCreateNestedManyWithoutOperatorUserInput
   events?: Prisma.TicketEventUncheckedCreateNestedManyWithoutAuthorUserInput
+  createdTickets?: Prisma.TicketUncheckedCreateNestedManyWithoutCreatedByUserInput
 }
 
 export type UserUpdateInput = {
@@ -285,10 +365,17 @@ export type UserUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  whatsappId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  remoteJid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pushName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profilePicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  instanceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  funcionario?: Prisma.FuncionarioUpdateOneWithoutUserNestedInput
   tickets?: Prisma.TicketUpdateManyWithoutOperatorUserNestedInput
   events?: Prisma.TicketEventUpdateManyWithoutAuthorUserNestedInput
+  createdTickets?: Prisma.TicketUpdateManyWithoutCreatedByUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -297,10 +384,17 @@ export type UserUncheckedUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  whatsappId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  remoteJid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pushName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profilePicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  instanceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  funcionario?: Prisma.FuncionarioUncheckedUpdateOneWithoutUserNestedInput
   tickets?: Prisma.TicketUncheckedUpdateManyWithoutOperatorUserNestedInput
   events?: Prisma.TicketEventUncheckedUpdateManyWithoutAuthorUserNestedInput
+  createdTickets?: Prisma.TicketUncheckedUpdateManyWithoutCreatedByUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -309,6 +403,11 @@ export type UserCreateManyInput = {
   name: string
   password?: string
   role?: $Enums.Role
+  whatsappId?: string | null
+  remoteJid?: string | null
+  pushName?: string | null
+  profilePicUrl?: string | null
+  instanceId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -319,6 +418,11 @@ export type UserUpdateManyMutationInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  whatsappId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  remoteJid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pushName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profilePicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  instanceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -329,6 +433,11 @@ export type UserUncheckedUpdateManyInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  whatsappId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  remoteJid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pushName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profilePicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  instanceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -339,6 +448,11 @@ export type UserCountOrderByAggregateInput = {
   name?: Prisma.SortOrder
   password?: Prisma.SortOrder
   role?: Prisma.SortOrder
+  whatsappId?: Prisma.SortOrder
+  remoteJid?: Prisma.SortOrder
+  pushName?: Prisma.SortOrder
+  profilePicUrl?: Prisma.SortOrder
+  instanceId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -349,6 +463,11 @@ export type UserMaxOrderByAggregateInput = {
   name?: Prisma.SortOrder
   password?: Prisma.SortOrder
   role?: Prisma.SortOrder
+  whatsappId?: Prisma.SortOrder
+  remoteJid?: Prisma.SortOrder
+  pushName?: Prisma.SortOrder
+  profilePicUrl?: Prisma.SortOrder
+  instanceId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -359,8 +478,18 @@ export type UserMinOrderByAggregateInput = {
   name?: Prisma.SortOrder
   password?: Prisma.SortOrder
   role?: Prisma.SortOrder
+  whatsappId?: Prisma.SortOrder
+  remoteJid?: Prisma.SortOrder
+  pushName?: Prisma.SortOrder
+  profilePicUrl?: Prisma.SortOrder
+  instanceId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type UserScalarRelationFilter = {
+  is?: Prisma.UserWhereInput
+  isNot?: Prisma.UserWhereInput
 }
 
 export type UserNullableScalarRelationFilter = {
@@ -376,13 +505,37 @@ export type EnumRoleFieldUpdateOperationsInput = {
   set?: $Enums.Role
 }
 
+export type NullableStringFieldUpdateOperationsInput = {
+  set?: string | null
+}
+
 export type DateTimeFieldUpdateOperationsInput = {
   set?: Date | string
+}
+
+export type UserCreateNestedOneWithoutFuncionarioInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutFuncionarioInput, Prisma.UserUncheckedCreateWithoutFuncionarioInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutFuncionarioInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutFuncionarioNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutFuncionarioInput, Prisma.UserUncheckedCreateWithoutFuncionarioInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutFuncionarioInput
+  upsert?: Prisma.UserUpsertWithoutFuncionarioInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutFuncionarioInput, Prisma.UserUpdateWithoutFuncionarioInput>, Prisma.UserUncheckedUpdateWithoutFuncionarioInput>
 }
 
 export type UserCreateNestedOneWithoutTicketsInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutTicketsInput, Prisma.UserUncheckedCreateWithoutTicketsInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutTicketsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserCreateNestedOneWithoutCreatedTicketsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCreatedTicketsInput, Prisma.UserUncheckedCreateWithoutCreatedTicketsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCreatedTicketsInput
   connect?: Prisma.UserWhereUniqueInput
 }
 
@@ -394,6 +547,16 @@ export type UserUpdateOneWithoutTicketsNestedInput = {
   delete?: Prisma.UserWhereInput | boolean
   connect?: Prisma.UserWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutTicketsInput, Prisma.UserUpdateWithoutTicketsInput>, Prisma.UserUncheckedUpdateWithoutTicketsInput>
+}
+
+export type UserUpdateOneWithoutCreatedTicketsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCreatedTicketsInput, Prisma.UserUncheckedCreateWithoutCreatedTicketsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCreatedTicketsInput
+  upsert?: Prisma.UserUpsertWithoutCreatedTicketsInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutCreatedTicketsInput, Prisma.UserUpdateWithoutCreatedTicketsInput>, Prisma.UserUncheckedUpdateWithoutCreatedTicketsInput>
 }
 
 export type UserCreateNestedOneWithoutEventsInput = {
@@ -412,15 +575,110 @@ export type UserUpdateOneWithoutEventsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutEventsInput, Prisma.UserUpdateWithoutEventsInput>, Prisma.UserUncheckedUpdateWithoutEventsInput>
 }
 
+export type UserCreateWithoutFuncionarioInput = {
+  id?: string
+  email: string
+  name: string
+  password?: string
+  role?: $Enums.Role
+  whatsappId?: string | null
+  remoteJid?: string | null
+  pushName?: string | null
+  profilePicUrl?: string | null
+  instanceId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tickets?: Prisma.TicketCreateNestedManyWithoutOperatorUserInput
+  events?: Prisma.TicketEventCreateNestedManyWithoutAuthorUserInput
+  createdTickets?: Prisma.TicketCreateNestedManyWithoutCreatedByUserInput
+}
+
+export type UserUncheckedCreateWithoutFuncionarioInput = {
+  id?: string
+  email: string
+  name: string
+  password?: string
+  role?: $Enums.Role
+  whatsappId?: string | null
+  remoteJid?: string | null
+  pushName?: string | null
+  profilePicUrl?: string | null
+  instanceId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tickets?: Prisma.TicketUncheckedCreateNestedManyWithoutOperatorUserInput
+  events?: Prisma.TicketEventUncheckedCreateNestedManyWithoutAuthorUserInput
+  createdTickets?: Prisma.TicketUncheckedCreateNestedManyWithoutCreatedByUserInput
+}
+
+export type UserCreateOrConnectWithoutFuncionarioInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutFuncionarioInput, Prisma.UserUncheckedCreateWithoutFuncionarioInput>
+}
+
+export type UserUpsertWithoutFuncionarioInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutFuncionarioInput, Prisma.UserUncheckedUpdateWithoutFuncionarioInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutFuncionarioInput, Prisma.UserUncheckedCreateWithoutFuncionarioInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutFuncionarioInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutFuncionarioInput, Prisma.UserUncheckedUpdateWithoutFuncionarioInput>
+}
+
+export type UserUpdateWithoutFuncionarioInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  whatsappId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  remoteJid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pushName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profilePicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  instanceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tickets?: Prisma.TicketUpdateManyWithoutOperatorUserNestedInput
+  events?: Prisma.TicketEventUpdateManyWithoutAuthorUserNestedInput
+  createdTickets?: Prisma.TicketUpdateManyWithoutCreatedByUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutFuncionarioInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  whatsappId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  remoteJid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pushName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profilePicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  instanceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tickets?: Prisma.TicketUncheckedUpdateManyWithoutOperatorUserNestedInput
+  events?: Prisma.TicketEventUncheckedUpdateManyWithoutAuthorUserNestedInput
+  createdTickets?: Prisma.TicketUncheckedUpdateManyWithoutCreatedByUserNestedInput
+}
+
 export type UserCreateWithoutTicketsInput = {
   id?: string
   email: string
   name: string
   password?: string
   role?: $Enums.Role
+  whatsappId?: string | null
+  remoteJid?: string | null
+  pushName?: string | null
+  profilePicUrl?: string | null
+  instanceId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  funcionario?: Prisma.FuncionarioCreateNestedOneWithoutUserInput
   events?: Prisma.TicketEventCreateNestedManyWithoutAuthorUserInput
+  createdTickets?: Prisma.TicketCreateNestedManyWithoutCreatedByUserInput
 }
 
 export type UserUncheckedCreateWithoutTicketsInput = {
@@ -429,14 +687,62 @@ export type UserUncheckedCreateWithoutTicketsInput = {
   name: string
   password?: string
   role?: $Enums.Role
+  whatsappId?: string | null
+  remoteJid?: string | null
+  pushName?: string | null
+  profilePicUrl?: string | null
+  instanceId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  funcionario?: Prisma.FuncionarioUncheckedCreateNestedOneWithoutUserInput
   events?: Prisma.TicketEventUncheckedCreateNestedManyWithoutAuthorUserInput
+  createdTickets?: Prisma.TicketUncheckedCreateNestedManyWithoutCreatedByUserInput
 }
 
 export type UserCreateOrConnectWithoutTicketsInput = {
   where: Prisma.UserWhereUniqueInput
   create: Prisma.XOR<Prisma.UserCreateWithoutTicketsInput, Prisma.UserUncheckedCreateWithoutTicketsInput>
+}
+
+export type UserCreateWithoutCreatedTicketsInput = {
+  id?: string
+  email: string
+  name: string
+  password?: string
+  role?: $Enums.Role
+  whatsappId?: string | null
+  remoteJid?: string | null
+  pushName?: string | null
+  profilePicUrl?: string | null
+  instanceId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  funcionario?: Prisma.FuncionarioCreateNestedOneWithoutUserInput
+  tickets?: Prisma.TicketCreateNestedManyWithoutOperatorUserInput
+  events?: Prisma.TicketEventCreateNestedManyWithoutAuthorUserInput
+}
+
+export type UserUncheckedCreateWithoutCreatedTicketsInput = {
+  id?: string
+  email: string
+  name: string
+  password?: string
+  role?: $Enums.Role
+  whatsappId?: string | null
+  remoteJid?: string | null
+  pushName?: string | null
+  profilePicUrl?: string | null
+  instanceId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  funcionario?: Prisma.FuncionarioUncheckedCreateNestedOneWithoutUserInput
+  tickets?: Prisma.TicketUncheckedCreateNestedManyWithoutOperatorUserInput
+  events?: Prisma.TicketEventUncheckedCreateNestedManyWithoutAuthorUserInput
+}
+
+export type UserCreateOrConnectWithoutCreatedTicketsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutCreatedTicketsInput, Prisma.UserUncheckedCreateWithoutCreatedTicketsInput>
 }
 
 export type UserUpsertWithoutTicketsInput = {
@@ -456,9 +762,16 @@ export type UserUpdateWithoutTicketsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  whatsappId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  remoteJid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pushName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profilePicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  instanceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  funcionario?: Prisma.FuncionarioUpdateOneWithoutUserNestedInput
   events?: Prisma.TicketEventUpdateManyWithoutAuthorUserNestedInput
+  createdTickets?: Prisma.TicketUpdateManyWithoutCreatedByUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTicketsInput = {
@@ -467,8 +780,62 @@ export type UserUncheckedUpdateWithoutTicketsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  whatsappId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  remoteJid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pushName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profilePicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  instanceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  funcionario?: Prisma.FuncionarioUncheckedUpdateOneWithoutUserNestedInput
+  events?: Prisma.TicketEventUncheckedUpdateManyWithoutAuthorUserNestedInput
+  createdTickets?: Prisma.TicketUncheckedUpdateManyWithoutCreatedByUserNestedInput
+}
+
+export type UserUpsertWithoutCreatedTicketsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutCreatedTicketsInput, Prisma.UserUncheckedUpdateWithoutCreatedTicketsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutCreatedTicketsInput, Prisma.UserUncheckedCreateWithoutCreatedTicketsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutCreatedTicketsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutCreatedTicketsInput, Prisma.UserUncheckedUpdateWithoutCreatedTicketsInput>
+}
+
+export type UserUpdateWithoutCreatedTicketsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  whatsappId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  remoteJid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pushName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profilePicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  instanceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  funcionario?: Prisma.FuncionarioUpdateOneWithoutUserNestedInput
+  tickets?: Prisma.TicketUpdateManyWithoutOperatorUserNestedInput
+  events?: Prisma.TicketEventUpdateManyWithoutAuthorUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutCreatedTicketsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  whatsappId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  remoteJid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pushName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profilePicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  instanceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  funcionario?: Prisma.FuncionarioUncheckedUpdateOneWithoutUserNestedInput
+  tickets?: Prisma.TicketUncheckedUpdateManyWithoutOperatorUserNestedInput
   events?: Prisma.TicketEventUncheckedUpdateManyWithoutAuthorUserNestedInput
 }
 
@@ -478,9 +845,16 @@ export type UserCreateWithoutEventsInput = {
   name: string
   password?: string
   role?: $Enums.Role
+  whatsappId?: string | null
+  remoteJid?: string | null
+  pushName?: string | null
+  profilePicUrl?: string | null
+  instanceId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  funcionario?: Prisma.FuncionarioCreateNestedOneWithoutUserInput
   tickets?: Prisma.TicketCreateNestedManyWithoutOperatorUserInput
+  createdTickets?: Prisma.TicketCreateNestedManyWithoutCreatedByUserInput
 }
 
 export type UserUncheckedCreateWithoutEventsInput = {
@@ -489,9 +863,16 @@ export type UserUncheckedCreateWithoutEventsInput = {
   name: string
   password?: string
   role?: $Enums.Role
+  whatsappId?: string | null
+  remoteJid?: string | null
+  pushName?: string | null
+  profilePicUrl?: string | null
+  instanceId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  funcionario?: Prisma.FuncionarioUncheckedCreateNestedOneWithoutUserInput
   tickets?: Prisma.TicketUncheckedCreateNestedManyWithoutOperatorUserInput
+  createdTickets?: Prisma.TicketUncheckedCreateNestedManyWithoutCreatedByUserInput
 }
 
 export type UserCreateOrConnectWithoutEventsInput = {
@@ -516,9 +897,16 @@ export type UserUpdateWithoutEventsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  whatsappId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  remoteJid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pushName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profilePicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  instanceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  funcionario?: Prisma.FuncionarioUpdateOneWithoutUserNestedInput
   tickets?: Prisma.TicketUpdateManyWithoutOperatorUserNestedInput
+  createdTickets?: Prisma.TicketUpdateManyWithoutCreatedByUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutEventsInput = {
@@ -527,9 +915,16 @@ export type UserUncheckedUpdateWithoutEventsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  whatsappId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  remoteJid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pushName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profilePicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  instanceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  funcionario?: Prisma.FuncionarioUncheckedUpdateOneWithoutUserNestedInput
   tickets?: Prisma.TicketUncheckedUpdateManyWithoutOperatorUserNestedInput
+  createdTickets?: Prisma.TicketUncheckedUpdateManyWithoutCreatedByUserNestedInput
 }
 
 
@@ -540,11 +935,13 @@ export type UserUncheckedUpdateWithoutEventsInput = {
 export type UserCountOutputType = {
   tickets: number
   events: number
+  createdTickets: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tickets?: boolean | UserCountOutputTypeCountTicketsArgs
   events?: boolean | UserCountOutputTypeCountEventsArgs
+  createdTickets?: boolean | UserCountOutputTypeCountCreatedTicketsArgs
 }
 
 /**
@@ -571,6 +968,13 @@ export type UserCountOutputTypeCountEventsArgs<ExtArgs extends runtime.Types.Ext
   where?: Prisma.TicketEventWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountCreatedTicketsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.TicketWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -578,10 +982,17 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   name?: boolean
   password?: boolean
   role?: boolean
+  whatsappId?: boolean
+  remoteJid?: boolean
+  pushName?: boolean
+  profilePicUrl?: boolean
+  instanceId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  funcionario?: boolean | Prisma.User$funcionarioArgs<ExtArgs>
   tickets?: boolean | Prisma.User$ticketsArgs<ExtArgs>
   events?: boolean | Prisma.User$eventsArgs<ExtArgs>
+  createdTickets?: boolean | Prisma.User$createdTicketsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -591,6 +1002,11 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   name?: boolean
   password?: boolean
   role?: boolean
+  whatsappId?: boolean
+  remoteJid?: boolean
+  pushName?: boolean
+  profilePicUrl?: boolean
+  instanceId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["user"]>
@@ -601,6 +1017,11 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   name?: boolean
   password?: boolean
   role?: boolean
+  whatsappId?: boolean
+  remoteJid?: boolean
+  pushName?: boolean
+  profilePicUrl?: boolean
+  instanceId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["user"]>
@@ -611,14 +1032,21 @@ export type UserSelectScalar = {
   name?: boolean
   password?: boolean
   role?: boolean
+  whatsappId?: boolean
+  remoteJid?: boolean
+  pushName?: boolean
+  profilePicUrl?: boolean
+  instanceId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "name" | "password" | "role" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "name" | "password" | "role" | "whatsappId" | "remoteJid" | "pushName" | "profilePicUrl" | "instanceId" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  funcionario?: boolean | Prisma.User$funcionarioArgs<ExtArgs>
   tickets?: boolean | Prisma.User$ticketsArgs<ExtArgs>
   events?: boolean | Prisma.User$eventsArgs<ExtArgs>
+  createdTickets?: boolean | Prisma.User$createdTicketsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -627,8 +1055,10 @@ export type UserIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
 export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "User"
   objects: {
+    funcionario: Prisma.$FuncionarioPayload<ExtArgs> | null
     tickets: Prisma.$TicketPayload<ExtArgs>[]
     events: Prisma.$TicketEventPayload<ExtArgs>[]
+    createdTickets: Prisma.$TicketPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -636,6 +1066,11 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     name: string
     password: string
     role: $Enums.Role
+    whatsappId: string | null
+    remoteJid: string | null
+    pushName: string | null
+    profilePicUrl: string | null
+    instanceId: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["user"]>
@@ -1032,8 +1467,10 @@ readonly fields: UserFieldRefs;
  */
 export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  funcionario<T extends Prisma.User$funcionarioArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$funcionarioArgs<ExtArgs>>): Prisma.Prisma__FuncionarioClient<runtime.Types.Result.GetResult<Prisma.$FuncionarioPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   tickets<T extends Prisma.User$ticketsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$ticketsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TicketPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   events<T extends Prisma.User$eventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$eventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TicketEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  createdTickets<T extends Prisma.User$createdTicketsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$createdTicketsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TicketPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1068,6 +1505,11 @@ export interface UserFieldRefs {
   readonly name: Prisma.FieldRef<"User", 'String'>
   readonly password: Prisma.FieldRef<"User", 'String'>
   readonly role: Prisma.FieldRef<"User", 'Role'>
+  readonly whatsappId: Prisma.FieldRef<"User", 'String'>
+  readonly remoteJid: Prisma.FieldRef<"User", 'String'>
+  readonly pushName: Prisma.FieldRef<"User", 'String'>
+  readonly profilePicUrl: Prisma.FieldRef<"User", 'String'>
+  readonly instanceId: Prisma.FieldRef<"User", 'String'>
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"User", 'DateTime'>
 }
@@ -1458,6 +1900,25 @@ export type UserDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Internal
 }
 
 /**
+ * User.funcionario
+ */
+export type User$funcionarioArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Funcionario
+   */
+  select?: Prisma.FuncionarioSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Funcionario
+   */
+  omit?: Prisma.FuncionarioOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.FuncionarioInclude<ExtArgs> | null
+  where?: Prisma.FuncionarioWhereInput
+}
+
+/**
  * User.tickets
  */
 export type User$ticketsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1503,6 +1964,30 @@ export type User$eventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
   take?: number
   skip?: number
   distinct?: Prisma.TicketEventScalarFieldEnum | Prisma.TicketEventScalarFieldEnum[]
+}
+
+/**
+ * User.createdTickets
+ */
+export type User$createdTicketsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Ticket
+   */
+  select?: Prisma.TicketSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Ticket
+   */
+  omit?: Prisma.TicketOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TicketInclude<ExtArgs> | null
+  where?: Prisma.TicketWhereInput
+  orderBy?: Prisma.TicketOrderByWithRelationInput | Prisma.TicketOrderByWithRelationInput[]
+  cursor?: Prisma.TicketWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.TicketScalarFieldEnum | Prisma.TicketScalarFieldEnum[]
 }
 
 /**

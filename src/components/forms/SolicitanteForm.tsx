@@ -4,8 +4,9 @@ import React, { useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 import { Button } from "@/components/ui/Button";
 import { Input, Textarea } from "@/components/ui/Input";
+import { PhoneInput } from "@/components/ui/PhoneInput";
 import { formatCpfCnpj, onlyDigits, validateCnpj, validateCpf } from "@/lib/cpfCnpj";
-import { formatPhone } from "@/lib/phone";
+import { isValidPhoneNumber } from "libphonenumber-js";
 
 const Form = styled.form`
   display: flex;
@@ -80,7 +81,7 @@ export function SolicitanteForm({ initialData, onSubmit, onCancel, loading }: Pr
         nome: initialData.nome_fantasia ?? "",
         cpfCnpj: formatCpfCnpj(initialData.cnpj ?? ""),
         email: initialData.email ?? "",
-        telefone: formatPhone(initialData.telefone ?? ""),
+        telefone: initialData.telefone ? (initialData.telefone.startsWith("+") ? initialData.telefone : `+${initialData.telefone}`) : "",
         enderecoCompleto: initialData.endereco_completo ?? "",
       });
       setTouched({});
@@ -115,8 +116,11 @@ export function SolicitanteForm({ initialData, onSubmit, onCancel, loading }: Pr
     if (!values.email.trim()) e.email = "Informe o e-mail.";
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email.trim())) e.email = "E-mail inválido.";
 
-    const phoneDigits = onlyDigits(values.telefone);
-    if (phoneDigits.length < 10) e.telefone = "Informe um telefone válido.";
+    if (!values.telefone) {
+      e.telefone = "Informe o telefone.";
+    } else if (!isValidPhoneNumber(values.telefone)) {
+      e.telefone = "Telefone inválido ou formato incorreto.";
+    }
 
     if (!values.enderecoCompleto.trim() || values.enderecoCompleto.trim().length < 5) e.enderecoCompleto = "Informe o endereço completo.";
 
@@ -140,7 +144,7 @@ export function SolicitanteForm({ initialData, onSubmit, onCancel, loading }: Pr
       nome: values.nome.trim(),
       cpfCnpj: onlyDigits(values.cpfCnpj),
       email: values.email.trim(),
-      telefone: onlyDigits(values.telefone),
+      telefone: values.telefone,
       enderecoCompleto: values.enderecoCompleto.trim(),
     });
   };
@@ -195,16 +199,16 @@ export function SolicitanteForm({ initialData, onSubmit, onCancel, loading }: Pr
         </Field>
 
         <Field>
-          <Label htmlFor="solicitante-telefone">Telefone</Label>
-          <Input
+          <Label htmlFor="solicitante-telefone">Telefone (WhatsApp)</Label>
+          <PhoneInput
             id="solicitante-telefone"
-            inputMode="tel"
+            name="telefone"
             value={values.telefone}
-            onChange={(e) => handleChange("telefone", formatPhone(e.target.value))}
+            onChange={(val) => handleChange("telefone", val)}
             onBlur={() => markTouched("telefone")}
-            required
-            aria-invalid={touched.telefone && !!errors.telefone}
-            aria-describedby={errors.telefone ? "solicitante-telefone-err" : undefined}
+            disabled={loading}
+            error={touched.telefone ? errors.telefone : undefined}
+            showWhatsAppButton={true}
           />
           {touched.telefone && errors.telefone && <ErrorText id="solicitante-telefone-err">{errors.telefone}</ErrorText>}
         </Field>

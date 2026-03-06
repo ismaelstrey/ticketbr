@@ -21,6 +21,7 @@ interface IntegrationSettings {
   evolutionRetryDelayMs: string;
   autoLinkTickets: boolean;
   n8nWebhookUrl: string;
+  n8nUseTestWebhook: boolean;
   n8nBaseUrl: string;
   n8nApiKey: string;
   n8nConversationsPath: string;
@@ -38,7 +39,6 @@ interface SyncedContact {
   instanceId: string | null;
 }
 
-const storageKey = "ticketbr:settings:integrations";
 const defaults: IntegrationSettings = {
   evolutionBaseUrl: "",
   evolutionApiKey: "",
@@ -51,6 +51,7 @@ const defaults: IntegrationSettings = {
   evolutionRetryDelayMs: "750",
   autoLinkTickets: true,
   n8nWebhookUrl: "",
+  n8nUseTestWebhook: false,
   n8nBaseUrl: "",
   n8nApiKey: "",
   n8nConversationsPath: "/conversations",
@@ -214,13 +215,6 @@ export default function SettingsPage() {
   };
 
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(storageKey);
-      if (saved) setSettings((curr) => ({ ...curr, ...(JSON.parse(saved) as IntegrationSettings) }));
-    } catch {
-      // ignore
-    }
-
     fetch("/api/settings/whatsapp/config")
       .then((res) => res.json())
       .then((json) => {
@@ -237,7 +231,12 @@ export default function SettingsPage() {
             evolutionRetryDelayMs: String(json.data.evolutionRetryDelayMs ?? curr.evolutionRetryDelayMs),
             autoLinkTickets: typeof json.data.autoLinkTickets === "boolean" ? json.data.autoLinkTickets : curr.autoLinkTickets,
             n8nWebhookUrl: json.data.n8nWebhookUrl ?? curr.n8nWebhookUrl,
+            n8nUseTestWebhook: typeof json.data.n8nUseTestWebhook === "boolean" ? json.data.n8nUseTestWebhook : curr.n8nUseTestWebhook,
             n8nBaseUrl: json.data.n8nBaseUrl ?? curr.n8nBaseUrl,
+            // Preencher apiKey apenas se não estiver mascarada ou se for input do usuário
+            // Mas aqui vem mascarada do backend (apiKeyMasked)
+            evolutionApiKey: json.data.apiKeyMasked ?? curr.evolutionApiKey,
+            n8nApiKey: json.data.n8nApiKeyMasked ?? curr.n8nApiKey,
             n8nConversationsPath: json.data.n8nConversationsPath ?? curr.n8nConversationsPath,
             n8nMessagesPath: json.data.n8nMessagesPath ?? curr.n8nMessagesPath,
             n8nSendPath: json.data.n8nSendPath ?? curr.n8nSendPath
@@ -250,7 +249,7 @@ export default function SettingsPage() {
   }, []);
 
   const saveSettings = async () => {
-    localStorage.setItem(storageKey, JSON.stringify(settings));
+    // Removed localStorage.setItem(storageKey, JSON.stringify(settings));
 
     const res = await fetch("/api/settings/whatsapp/config", {
       method: "POST",
@@ -267,6 +266,7 @@ export default function SettingsPage() {
         evolutionRetryDelayMs: settings.evolutionRetryDelayMs,
         autoLinkTickets: settings.autoLinkTickets,
         n8nWebhookUrl: settings.n8nWebhookUrl,
+        n8nUseTestWebhook: settings.n8nUseTestWebhook,
         n8nBaseUrl: settings.n8nBaseUrl,
         n8nApiKey: settings.n8nApiKey,
         n8nConversationsPath: settings.n8nConversationsPath,
@@ -305,6 +305,7 @@ export default function SettingsPage() {
           n8nBaseUrl: settings.n8nBaseUrl,
           n8nApiKey: settings.n8nApiKey,
           n8nWebhookUrl: settings.n8nWebhookUrl,
+          n8nUseTestWebhook: settings.n8nUseTestWebhook,
           n8nConversationsPath: settings.n8nConversationsPath,
           n8nMessagesPath: settings.n8nMessagesPath,
           n8nSendPath: settings.n8nSendPath
@@ -332,7 +333,8 @@ export default function SettingsPage() {
         body: JSON.stringify({
           n8nBaseUrl: settings.n8nBaseUrl,
           n8nApiKey: settings.n8nApiKey,
-          n8nWebhookUrl: settings.n8nWebhookUrl
+          n8nWebhookUrl: settings.n8nWebhookUrl,
+          n8nUseTestWebhook: settings.n8nUseTestWebhook
         })
       });
 
@@ -364,7 +366,8 @@ export default function SettingsPage() {
           instance: settings.evolutionInstance,
           webhookUrl: settings.evolutionWebhookUrl || settings.webhookUrl,
           autoLinkTickets: settings.autoLinkTickets,
-          n8nWebhookUrl: settings.n8nWebhookUrl
+          n8nWebhookUrl: settings.n8nWebhookUrl,
+          n8nUseTestWebhook: settings.n8nUseTestWebhook
         })
       });
 
@@ -470,6 +473,12 @@ export default function SettingsPage() {
                   Webhook de eventos
                   <Input placeholder="https://n8n.exemplo.com/webhook/messages" value={settings.n8nWebhookUrl} onChange={(e) => update({ n8nWebhookUrl: e.target.value })} />
                 </Field>
+
+                <label style={{ display: "flex", gap: 8, marginTop: 4, gridColumn: "1 / -1" }}>
+                  <input type="checkbox" checked={settings.n8nUseTestWebhook} onChange={(e) => update({ n8nUseTestWebhook: e.target.checked })} />
+                  Usar Webhook de Teste (substitui /webhook/ por /webhook-test/)
+                </label>
+
                 <Field>
                   Path conversa (GET)
                   <Input value={settings.n8nConversationsPath} onChange={(e) => update({ n8nConversationsPath: e.target.value })} />
@@ -497,7 +506,7 @@ export default function SettingsPage() {
             <div>
               <h3>Sincronização de contatos WhatsApp</h3>
               <Info>
-                Esta ação chama o endpoint do n8n baseado na sua configuração e adiciona <code>/todos/contatos</code> para buscar todos os contatos e salvar na base local.
+                Esta ação chama o endpoint do n8n baseado na sua configuração e adiciona <code>{settings.n8nUseTestWebhook ? "/webhook-test" : "/webhook"}/todos/contatos</code> para buscar todos os contatos e salvar na base local.
               </Info>
 
               <Footer>
@@ -536,7 +545,7 @@ export default function SettingsPage() {
             </div>
           )}
 
-          {activeTab === "n8n" && (
+          {activeTab === "notifications" && (
             <div>
               <h3>Notificações</h3>
               <Info>Espaço reservado para alertas.</Info>

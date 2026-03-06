@@ -20,6 +20,7 @@ export interface WhatsAppRuntimeConfig {
 
   // n8n automation hub
   n8nWebhookUrl?: string;
+  n8nUseTestWebhook?: boolean;
   n8nBaseUrl?: string;
   n8nApiKey?: string;
   n8nConversationsPath?: string;
@@ -70,6 +71,7 @@ export function normalizeWhatsAppConfig(input: unknown): WhatsAppRuntimeConfig |
     evolutionWebhookUrl: String(raw.evolutionWebhookUrl ?? raw.webhookUrl ?? "").trim() || undefined,
     autoLinkTickets: raw.autoLinkTickets === undefined ? undefined : Boolean(raw.autoLinkTickets),
     n8nWebhookUrl: String(raw.n8nWebhookUrl ?? "").trim() || undefined,
+    n8nUseTestWebhook: raw.n8nUseTestWebhook === undefined ? undefined : Boolean(raw.n8nUseTestWebhook),
 
     evolutionTimeoutMs: toNumberOrUndefined(evolutionTimeoutMsRaw),
     evolutionRetryEnabled: raw.evolutionRetryEnabled === undefined ? undefined : Boolean(raw.evolutionRetryEnabled),
@@ -157,9 +159,12 @@ export async function saveWhatsAppConfigToDatabase(config: WhatsAppRuntimeConfig
 }
 
 export async function resolveWhatsAppConfig(request: NextRequest, bodyConfig?: WhatsAppRuntimeConfig | null) {
-  const requestConfig = bodyConfig ?? getWhatsAppConfigFromRequest(request);
-  if (requestConfig) return requestConfig;
-  return getWhatsAppConfigFromDatabase();
+  // Prioritize Database to ensure single source of truth
+  const dbConfig = await getWhatsAppConfigFromDatabase();
+  if (dbConfig) return dbConfig;
+
+  // Fallback to request/cookie if DB is empty
+  return bodyConfig ?? getWhatsAppConfigFromRequest(request);
 }
 
 export function sanitizeWhatsAppConfig(config: WhatsAppRuntimeConfig) {

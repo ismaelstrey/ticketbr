@@ -10,6 +10,7 @@
  */
 export type * from './models/User'
 export type * from './models/Solicitante'
+export type * from './models/Funcionario'
 export type * from './models/Tipo_Ticket'
 export type * from './models/Categoria_Ticket'
 export type * from './models/Mesa_Trabalho'

@@ -1,5 +1,6 @@
 import { ChatContact, ChatMessage } from "@/types/chat";
 import { WhatsAppRuntimeConfig } from "@/server/services/whatsapp-settings";
+import { toE164 } from "@/lib/phone-utils";
 
 export interface ChatEventPayload {
   type: string;
@@ -9,7 +10,13 @@ export interface ChatEventPayload {
 }
 
 function resolveWebhook(config?: WhatsAppRuntimeConfig | null) {
-  return config?.n8nWebhookUrl || process.env.N8N_CHAT_WEBHOOK_URL || "";
+  const url = config?.n8nWebhookUrl || process.env.N8N_CHAT_WEBHOOK_URL || "";
+  
+  if (config?.n8nUseTestWebhook) {
+    return url.replace("/webhook/", "/webhook-test/");
+  }
+  
+  return url.replace("/webhook-test/", "/webhook/");
 }
 
 function resolveN8nBase(config?: WhatsAppRuntimeConfig | null) {
@@ -27,7 +34,11 @@ function isAbsoluteUrl(value: string) {
 }
 
 function normalizePhone(value?: string) {
-  return (value ?? "").replace(/\D/g, "");
+  if (!value) return "";
+  // Tenta normalizar para E.164 (com DDI do Brasil se faltar)
+  const e164 = toE164(value, "BR");
+  // Remove o + e caracteres não numéricos para enviar apenas números
+  return (e164 ?? value).replace(/\D/g, "");
 }
 
 function buildUrl(base: string, pathOrUrl: string) {

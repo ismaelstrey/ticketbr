@@ -28,6 +28,11 @@ export type User = Prisma.UserModel
  */
 export type Solicitante = Prisma.SolicitanteModel
 /**
+ * Model Funcionario
+ * 
+ */
+export type Funcionario = Prisma.FuncionarioModel
+/**
  * Model Tipo_Ticket
  * 
  */
