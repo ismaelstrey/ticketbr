@@ -10,23 +10,29 @@ import { ChatContact, ChatMessage, ChatTicketLink } from "@/types/chat";
 
 const Shell = styled.div`
   min-height: 100vh;
+  width: 100%;
   background: #ece5dd;
+  overflow: hidden;
 `;
 
 const Main = styled.main`
+  width: calc(100vw - 260px);
+  height: 100vh;
   margin-left: 260px;
-  padding: 0.75rem;
+  padding: 0;
 
   @media (max-width: 1024px) {
+    width: calc(100vw - 64px);
     margin-left: 64px;
   }
 `;
 
 const Frame = styled.div`
-  height: calc(100vh - 1.5rem);
+  width: 100%;
+  height: 100vh;
   background: #fff;
-  border: 1px solid #d7d7d7;
-  border-radius: 10px;
+  border: none;
+  border-radius: 0;
   overflow: hidden;
   display: grid;
   grid-template-columns: 380px 1fr;
