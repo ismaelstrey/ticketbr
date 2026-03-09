@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
 import { Input } from "@/components/ui/Input";
 import { useToast } from "@/context/ToastContext";
+import { FiEdit2 } from "react-icons/fi";
 
 type Solicitante = {
   id: string;
@@ -112,6 +113,7 @@ export default function SolicitanteDetalhesPage() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [editingFuncionario, setEditingFuncionario] = useState<Funcionario | null>(null);
   const [form, setForm] = useState({
     nome: "",
     email: "",
@@ -151,19 +153,24 @@ export default function SolicitanteDetalhesPage() {
     if (params?.id) fetchOne();
   }, [params?.id]);
 
-  const handleCreateFuncionario = async () => {
+  const handleSubmitFuncionario = async () => {
     try {
       setSaving(true);
-      const res = await fetch(`/api/solicitantes/${params.id}/funcionarios`, {
-        method: "POST",
+      const endpoint = editingFuncionario
+        ? `/api/solicitantes/${params.id}/funcionarios/${editingFuncionario.id}`
+        : `/api/solicitantes/${params.id}/funcionarios`;
+
+      const res = await fetch(endpoint, {
+        method: editingFuncionario ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error || "Erro ao cadastrar funcionário");
 
-      showToast("Funcionário vinculado ao solicitante com sucesso.", "success");
+      showToast(editingFuncionario ? "Funcionário atualizado com sucesso." : "Funcionário vinculado ao solicitante com sucesso.", "success");
       setIsModalOpen(false);
+      setEditingFuncionario(null);
       setForm({ nome: "", email: "", telefone: "", whatsappNumber: "", password: "" });
       await loadFuncionarios(params.id);
     } catch (err: any) {
@@ -171,6 +178,25 @@ export default function SolicitanteDetalhesPage() {
     } finally {
       setSaving(false);
     }
+  };
+
+
+  const handleOpenEdit = (funcionario: Funcionario) => {
+    setEditingFuncionario(funcionario);
+    setForm({
+      nome: funcionario.nome || "",
+      email: funcionario.email || "",
+      telefone: funcionario.telefone || "",
+      whatsappNumber: funcionario.whatsappContact?.remoteJid || funcionario.remoteJid || "",
+      password: "",
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleOpenCreate = () => {
+    setEditingFuncionario(null);
+    setForm({ nome: "", email: "", telefone: "", whatsappNumber: "", password: "" });
+    setIsModalOpen(true);
   };
 
   return (
@@ -182,7 +208,7 @@ export default function SolicitanteDetalhesPage() {
             <div style={{ display: "flex", justifyContent: "space-between", gap: "0.8rem", marginBottom: "1rem", flexWrap: "wrap" }}>
               <h2 style={{ margin: 0 }}>Detalhes do Solicitante</h2>
               <div style={{ display: "flex", gap: "0.6rem", flexWrap: "wrap" }}>
-                <Button variant="primary" onClick={() => setIsModalOpen(true)}>Adicionar Funcionário</Button>
+                <Button variant="primary" onClick={handleOpenCreate}>Adicionar Funcionário</Button>
                 <Button variant="ghost" onClick={() => router.push("/cadastros/solicitante")}>Voltar</Button>
               </div>
             </div>
@@ -219,12 +245,13 @@ export default function SolicitanteDetalhesPage() {
                   <th>WhatsApp</th>
                   <th>Usuário</th>
                   <th>Criado em</th>
+                  <th>Ações</th>
                 </tr>
               </thead>
               <tbody>
                 {funcionarios.length === 0 ? (
                   <tr>
-                    <td colSpan={6} style={{ color: "#6b7280" }}>Nenhum funcionário vinculado.</td>
+                    <td colSpan={7} style={{ color: "#6b7280" }}>Nenhum funcionário vinculado.</td>
                   </tr>
                 ) : (
                   funcionarios.map((f) => (
@@ -235,6 +262,16 @@ export default function SolicitanteDetalhesPage() {
                       <td>{f.whatsappContact?.remoteJid || f.remoteJid || "Não vinculado"}</td>
                       <td>{f.user?.email || "-"}</td>
                       <td>{new Date(f.createdAt).toLocaleString("pt-BR")}</td>
+                      <td>
+                        <button
+                          type="button"
+                          onClick={() => handleOpenEdit(f)}
+                          style={{ border: "1px solid #d1d5db", background: "#fff", borderRadius: 8, padding: "0.3rem 0.45rem", cursor: "pointer" }}
+                          aria-label={`Editar ${f.nome}`}
+                        >
+                          <FiEdit2 aria-hidden="true" />
+                        </button>
+                      </td>
                     </tr>
                   ))
                 )}
@@ -242,7 +279,7 @@ export default function SolicitanteDetalhesPage() {
             </FuncionarioTable>
           </Card>
 
-          <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Adicionar funcionário ao solicitante">
+          <Modal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); setEditingFuncionario(null); }} title={editingFuncionario ? "Editar funcionário" : "Adicionar funcionário ao solicitante"}>
             <div style={{ display: "grid", gap: "0.75rem" }}>
               <Input
                 placeholder="Nome"
@@ -265,16 +302,18 @@ export default function SolicitanteDetalhesPage() {
                 value={form.whatsappNumber}
                 onChange={(e) => setForm((prev) => ({ ...prev, whatsappNumber: e.target.value }))}
               />
-              <Input
-                placeholder="Senha inicial (opcional)"
-                type="password"
-                value={form.password}
-                onChange={(e) => setForm((prev) => ({ ...prev, password: e.target.value }))}
-              />
+              {!editingFuncionario && (
+                <Input
+                  placeholder="Senha inicial (opcional)"
+                  type="password"
+                  value={form.password}
+                  onChange={(e) => setForm((prev) => ({ ...prev, password: e.target.value }))}
+                />
+              )}
               <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.6rem" }}>
                 <Button variant="ghost" onClick={() => setIsModalOpen(false)} disabled={saving}>Cancelar</Button>
-                <Button variant="primary" onClick={handleCreateFuncionario} disabled={saving}>
-                  {saving ? "Salvando..." : "Salvar funcionário"}
+                <Button variant="primary" onClick={handleSubmitFuncionario} disabled={saving}>
+                  {saving ? "Salvando..." : editingFuncionario ? "Salvar alterações" : "Salvar funcionário"}
                 </Button>
               </div>
             </div>
