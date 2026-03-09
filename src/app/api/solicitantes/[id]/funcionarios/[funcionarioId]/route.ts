@@ -69,14 +69,14 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
           ...(parsed.data.nome ? { nome: parsed.data.nome } : {}),
           ...(parsed.data.email ? { email: parsed.data.email } : {}),
           ...(parsed.data.telefone ? { telefone: phone } : {}),
-          ...(whatsappContact && canUseWhatsappRelation
+          ...(whatsappContact
             ? {
-                whatsappContactId: whatsappContact.id,
                 remoteJid: whatsappContact.remoteJid,
                 pushName: whatsappContact.pushName,
                 profilePicUrl: whatsappContact.profilePicUrl,
                 instanceId: whatsappContact.instanceId,
                 whatsappId: whatsappContact.id,
+                ...(canUseWhatsappRelation ? { whatsappContactId: whatsappContact.id } : {}),
               }
             : {}),
         },

@@ -143,14 +143,14 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
           nome: parsed.data.nome,
           email: parsed.data.email,
           telefone: normalizedPhone,
-          ...(whatsappContact && canUseWhatsappRelation
+          ...(whatsappContact
             ? {
-                whatsappContactId: whatsappContact.id,
                 remoteJid: whatsappContact.remoteJid,
                 pushName: whatsappContact.pushName,
                 profilePicUrl: whatsappContact.profilePicUrl,
                 instanceId: whatsappContact.instanceId,
                 whatsappId: whatsappContact.id,
+                ...(canUseWhatsappRelation ? { whatsappContactId: whatsappContact.id } : {}),
               }
             : {}),
         },
