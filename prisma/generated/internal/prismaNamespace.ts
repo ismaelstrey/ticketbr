@@ -385,6 +385,7 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 
 export const ModelName = {
   User: 'User',
+  WhatsAppContact: 'WhatsAppContact',
   Solicitante: 'Solicitante',
   Funcionario: 'Funcionario',
   Tipo_Ticket: 'Tipo_Ticket',
@@ -408,7 +409,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "solicitante" | "funcionario" | "tipo_Ticket" | "categoria_Ticket" | "mesa_Trabalho" | "operador" | "ticket" | "ticketEvent"
+    modelProps: "user" | "whatsAppContact" | "solicitante" | "funcionario" | "tipo_Ticket" | "categoria_Ticket" | "mesa_Trabalho" | "operador" | "ticket" | "ticketEvent"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -483,6 +484,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.UserCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.UserCountAggregateOutputType> | number
+        }
+      }
+    }
+    WhatsAppContact: {
+      payload: Prisma.$WhatsAppContactPayload<ExtArgs>
+      fields: Prisma.WhatsAppContactFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.WhatsAppContactFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WhatsAppContactPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.WhatsAppContactFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WhatsAppContactPayload>
+        }
+        findFirst: {
+          args: Prisma.WhatsAppContactFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WhatsAppContactPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.WhatsAppContactFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WhatsAppContactPayload>
+        }
+        findMany: {
+          args: Prisma.WhatsAppContactFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WhatsAppContactPayload>[]
+        }
+        create: {
+          args: Prisma.WhatsAppContactCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WhatsAppContactPayload>
+        }
+        createMany: {
+          args: Prisma.WhatsAppContactCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.WhatsAppContactCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WhatsAppContactPayload>[]
+        }
+        delete: {
+          args: Prisma.WhatsAppContactDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WhatsAppContactPayload>
+        }
+        update: {
+          args: Prisma.WhatsAppContactUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WhatsAppContactPayload>
+        }
+        deleteMany: {
+          args: Prisma.WhatsAppContactDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.WhatsAppContactUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.WhatsAppContactUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WhatsAppContactPayload>[]
+        }
+        upsert: {
+          args: Prisma.WhatsAppContactUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WhatsAppContactPayload>
+        }
+        aggregate: {
+          args: Prisma.WhatsAppContactAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateWhatsAppContact>
+        }
+        groupBy: {
+          args: Prisma.WhatsAppContactGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.WhatsAppContactGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.WhatsAppContactCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.WhatsAppContactCountAggregateOutputType> | number
         }
       }
     }
@@ -1135,6 +1210,20 @@ export const UserScalarFieldEnum = {
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
 
 
+export const WhatsAppContactScalarFieldEnum = {
+  id: 'id',
+  remoteJid: 'remoteJid',
+  pushName: 'pushName',
+  profilePicUrl: 'profilePicUrl',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  instanceId: 'instanceId',
+  syncedAt: 'syncedAt'
+} as const
+
+export type WhatsAppContactScalarFieldEnum = (typeof WhatsAppContactScalarFieldEnum)[keyof typeof WhatsAppContactScalarFieldEnum]
+
+
 export const SolicitanteScalarFieldEnum = {
   id: 'id',
   razao_social: 'razao_social',
@@ -1577,6 +1666,7 @@ export type PrismaClientOptions = ({
 }
 export type GlobalOmitConfig = {
   user?: Prisma.UserOmit
+  whatsAppContact?: Prisma.WhatsAppContactOmit
   solicitante?: Prisma.SolicitanteOmit
   funcionario?: Prisma.FuncionarioOmit
   tipo_Ticket?: Prisma.Tipo_TicketOmit
