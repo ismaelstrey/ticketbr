@@ -23,6 +23,11 @@ export * from './enums';
  */
 export type User = Prisma.UserModel
 /**
+ * Model WhatsAppContact
+ * 
+ */
+export type WhatsAppContact = Prisma.WhatsAppContactModel
+/**
  * Model Solicitante
  * 
  */
