@@ -52,6 +52,7 @@ export const AnyNull = runtime.AnyNull
 
 export const ModelName = {
   User: 'User',
+  WhatsAppContact: 'WhatsAppContact',
   Solicitante: 'Solicitante',
   Funcionario: 'Funcionario',
   Tipo_Ticket: 'Tipo_Ticket',
@@ -96,6 +97,20 @@ export const UserScalarFieldEnum = {
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
 
 
+export const WhatsAppContactScalarFieldEnum = {
+  id: 'id',
+  remoteJid: 'remoteJid',
+  pushName: 'pushName',
+  profilePicUrl: 'profilePicUrl',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  instanceId: 'instanceId',
+  syncedAt: 'syncedAt'
+} as const
+
+export type WhatsAppContactScalarFieldEnum = (typeof WhatsAppContactScalarFieldEnum)[keyof typeof WhatsAppContactScalarFieldEnum]
+
+
 export const SolicitanteScalarFieldEnum = {
   id: 'id',
   razao_social: 'razao_social',
@@ -128,6 +143,7 @@ export const FuncionarioScalarFieldEnum = {
   pushName: 'pushName',
   profilePicUrl: 'profilePicUrl',
   instanceId: 'instanceId',
+  whatsappContactId: 'whatsappContactId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

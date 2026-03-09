@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import styled from "styled-components";
 import { AppShellContainer, MainContent } from "@/components/layout/AppShell";
 import { Sidebar } from "@/components/layout/Sidebar";
@@ -8,7 +9,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Modal } from "@/components/ui/Modal";
 import { SolicitanteForm } from "@/components/forms/SolicitanteForm";
-import { FiEdit2, FiPlus, FiSearch, FiTrash2 } from "react-icons/fi";
+import { FiEdit2, FiEye, FiPlus, FiSearch, FiTrash2 } from "react-icons/fi";
 import { useToast } from "@/context/ToastContext";
 
 const Page = styled.div`
@@ -162,6 +163,7 @@ export default function SolicitantePage() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { showToast } = useToast();
+  const router = useRouter();
   const [editingItem, setEditingItem] = useState<any | null>(null);
 
   const totalPages = useMemo(() => Math.max(1, Math.ceil(total / pageSize)), [total, pageSize]);
@@ -222,6 +224,10 @@ export default function SolicitantePage() {
   const handleEdit = (item: any) => {
     setEditingItem(item);
     setIsModalOpen(true);
+  };
+
+  const handleDetails = (item: any) => {
+    router.push(`/cadastros/solicitante/${item.id}`);
   };
 
   const handleDelete = async (item: any) => {
@@ -343,6 +349,22 @@ export default function SolicitantePage() {
                     <Td>{new Date(item.data_cadastro).toLocaleDateString("pt-BR")}</Td>
                     <Td style={{ textAlign: "right" }}>
                       <div style={{ display: "inline-flex", gap: "0.4rem" }}>
+                        <button
+                          type="button"
+                          aria-label={`Detalhes de ${item.nome_fantasia}`}
+                          onClick={() => handleDetails(item)}
+                          disabled={loading}
+                          style={{
+                            border: "1px solid #bfdbfe",
+                            background: "#eff6ff",
+                            color: "#1d4ed8",
+                            borderRadius: 8,
+                            padding: "0.35rem 0.5rem",
+                            cursor: "pointer",
+                          }}
+                        >
+                          <FiEye aria-hidden="true" />
+                        </button>
                         <button
                           type="button"
                           aria-label={`Editar ${item.nome_fantasia}`}
