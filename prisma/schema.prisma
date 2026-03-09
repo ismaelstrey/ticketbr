@@ -57,6 +57,21 @@ model User {
   updatedAt DateTime @updatedAt
 }
 
+model WhatsAppContact {
+  id            String   @id
+  remoteJid     String   @map("remote_jid") @db.Text
+  pushName      String?  @map("push_name")
+  profilePicUrl String?  @map("profile_pic_url") @db.Text
+  createdAt     DateTime @map("created_at")
+  updatedAt     DateTime @map("updated_at")
+  instanceId    String?  @map("instance_id")
+  syncedAt      DateTime @default(now()) @map("synced_at")
+
+  @@index([remoteJid])
+  @@index([instanceId])
+  @@map("whatsapp_contacts")
+}
+
 model Solicitante {
   id               String   @id @default(cuid())
   razao_social     String   @db.VarChar(255)
