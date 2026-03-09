@@ -9,6 +9,7 @@
  * 🟢 You can import this file directly.
  */
 export type * from './models/User'
+export type * from './models/WhatsAppContact'
 export type * from './models/Solicitante'
 export type * from './models/Funcionario'
 export type * from './models/Tipo_Ticket'
