@@ -221,6 +221,7 @@ const menuItems: MenuItemType[] = [
     ]
   },
   { label: "Design System", icon: FiLayers, path: "/design-system" },
+  { label: "Contatos WhatsApp", icon: FiUsers, path: "/whatsapp-contatos" },
   { label: "Configurações", icon: FiSettings, path: "/settings" },
 ];
 
