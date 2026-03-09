@@ -15,6 +15,22 @@ function normalizePhone(value: string) {
   return value.replace(/\D/g, "");
 }
 
+async function hasWhatsappContactColumn() {
+  const rows = await prisma.$queryRawUnsafe<Array<{ exists: boolean }>>(
+    `
+      SELECT EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_schema = 'public'
+          AND table_name IN ('Funcionario', 'funcionario')
+          AND column_name = 'whatsapp_contact_id'
+      ) AS exists
+    `
+  );
+
+  return Boolean(rows?.[0]?.exists);
+}
+
 async function findWhatsAppContactByPhone(phone: string) {
   const normalized = normalizePhone(phone);
   if (!normalized) return null;
@@ -28,6 +44,7 @@ async function findWhatsAppContactByPhone(phone: string) {
 export async function GET(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
+    const canUseWhatsappRelation = await hasWhatsappContactColumn();
 
     const solicitante = await prisma.solicitante.findFirst({ where: { id, status: true } });
     if (!solicitante) {
@@ -36,27 +53,39 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ id: st
 
     const funcionarios = await prisma.funcionario.findMany({
       where: { solicitante_id: id },
-      include: {
-        user: {
-          select: {
-            id: true,
-            email: true,
-            name: true,
-            role: true,
-            createdAt: true,
+      include: canUseWhatsappRelation
+        ? {
+            user: {
+              select: {
+                id: true,
+                email: true,
+                name: true,
+                role: true,
+                createdAt: true,
+              },
+            },
+            whatsappContact: {
+              select: {
+                id: true,
+                remoteJid: true,
+                pushName: true,
+                profilePicUrl: true,
+                instanceId: true,
+                updatedAt: true,
+              },
+            },
+          }
+        : {
+            user: {
+              select: {
+                id: true,
+                email: true,
+                name: true,
+                role: true,
+                createdAt: true,
+              },
+            },
           },
-        },
-        whatsappContact: {
-          select: {
-            id: true,
-            remoteJid: true,
-            pushName: true,
-            profilePicUrl: true,
-            instanceId: true,
-            updatedAt: true,
-          },
-        },
-      },
       orderBy: { createdAt: "desc" },
     });
 
@@ -70,6 +99,7 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ id: st
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
+    const canUseWhatsappRelation = await hasWhatsappContactColumn();
     const body = await request.json();
 
     const parsed = CreateFuncionarioSchema.safeParse(body);
@@ -113,7 +143,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
           nome: parsed.data.nome,
           email: parsed.data.email,
           telefone: normalizedPhone,
-          ...(whatsappContact
+          ...(whatsappContact && canUseWhatsappRelation
             ? {
                 whatsappContactId: whatsappContact.id,
                 remoteJid: whatsappContact.remoteJid,
@@ -124,9 +154,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
               }
             : {}),
         },
-        include: {
-          whatsappContact: true,
-        },
+        include: canUseWhatsappRelation ? { whatsappContact: true } : undefined,
       });
 
       return { user, funcionario };
