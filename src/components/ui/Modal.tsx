@@ -50,7 +50,7 @@ const Header = styled.div`
     padding: 0;
     display: flex;
     align-items: center;
-    
+
     &:hover {
       color: #333;
     }
@@ -70,17 +70,22 @@ interface ModalProps {
 }
 
 export function Modal({ isOpen, onClose, title, children }: ModalProps) {
-  if (!isOpen) return null;
-
   const titleId = useId();
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const onCloseRef = useRef(onClose);
 
   useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
 
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") onCloseRef.current();
     };
 
     window.addEventListener("keydown", onKeyDown);
@@ -90,12 +95,14 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
       window.removeEventListener("keydown", onKeyDown);
       document.body.style.overflow = prevOverflow;
     };
-  }, [onClose]);
+  }, [isOpen]);
+
+  if (!isOpen) return null;
 
   return (
     <Overlay
       onMouseDown={(e) => {
-        if (e.target === e.currentTarget) onClose();
+        if (e.target === e.currentTarget) onCloseRef.current();
       }}
     >
       <ModalContainer
@@ -107,13 +114,11 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
       >
         <Header>
           <h2 id={titleId}>{title}</h2>
-          <button onClick={onClose} aria-label="Fechar modal">
+          <button onClick={() => onCloseRef.current()} aria-label="Fechar modal">
             <FiX aria-hidden="true" />
           </button>
         </Header>
-        <Content>
-          {children}
-        </Content>
+        <Content>{children}</Content>
       </ModalContainer>
     </Overlay>
   );
