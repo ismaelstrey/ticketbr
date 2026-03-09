@@ -6,6 +6,9 @@ import styled from "styled-components";
 import { AppShellContainer, MainContent } from "@/components/layout/AppShell";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Button } from "@/components/ui/Button";
+import { Modal } from "@/components/ui/Modal";
+import { Input } from "@/components/ui/Input";
+import { useToast } from "@/context/ToastContext";
 
 type Solicitante = {
   id: string;
@@ -19,13 +22,27 @@ type Solicitante = {
   status: boolean;
   created_at: string;
   updated_at: string;
-  created_by: string | null;
-  updated_by: string | null;
   deleted_at: string | null;
+};
+
+type Funcionario = {
+  id: string;
+  nome: string;
+  email: string | null;
+  telefone: string;
+  createdAt: string;
+  user: {
+    id: string;
+    email: string;
+    role: string;
+  };
 };
 
 const Wrapper = styled.div`
   padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 `;
 
 const Card = styled.section`
@@ -63,21 +80,60 @@ const Value = styled.div`
   word-break: break-word;
 `;
 
+const FuncionarioTable = styled.table`
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.75rem;
+
+  th,
+  td {
+    border-bottom: 1px solid #e5e7eb;
+    text-align: left;
+    padding: 0.55rem;
+    font-size: 0.86rem;
+  }
+`;
+
 export default function SolicitanteDetalhesPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
+  const { showToast } = useToast();
+
   const [data, setData] = useState<Solicitante | null>(null);
+  const [funcionarios, setFuncionarios] = useState<Funcionario[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState({
+    nome: "",
+    email: "",
+    telefone: "",
+    password: "",
+  });
+
+  const loadFuncionarios = async (id: string) => {
+    const res = await fetch(`/api/solicitantes/${id}/funcionarios`);
+    const json = await res.json();
+    if (!res.ok) throw new Error(json?.error || "Erro ao carregar funcionários");
+    setFuncionarios(Array.isArray(json?.data) ? json.data : []);
+  };
 
   useEffect(() => {
     const fetchOne = async () => {
       try {
         setLoading(true);
+        setError(null);
+
         const res = await fetch(`/api/solicitantes/${params.id}`);
         const json = await res.json();
         if (!res.ok) throw new Error(json?.error || "Erro ao carregar solicitante");
         setData(json.data || null);
+
+        if (params?.id) {
+          await loadFuncionarios(params.id);
+        }
       } catch (err: any) {
         setError(err?.message || "Erro ao carregar solicitante");
       } finally {
@@ -88,6 +144,28 @@ export default function SolicitanteDetalhesPage() {
     if (params?.id) fetchOne();
   }, [params?.id]);
 
+  const handleCreateFuncionario = async () => {
+    try {
+      setSaving(true);
+      const res = await fetch(`/api/solicitantes/${params.id}/funcionarios`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error || "Erro ao cadastrar funcionário");
+
+      showToast("Funcionário vinculado ao solicitante com sucesso.", "success");
+      setIsModalOpen(false);
+      setForm({ nome: "", email: "", telefone: "", password: "" });
+      await loadFuncionarios(params.id);
+    } catch (err: any) {
+      showToast(err?.message || "Erro ao cadastrar funcionário", "error");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <AppShellContainer>
       <Sidebar />
@@ -96,7 +174,10 @@ export default function SolicitanteDetalhesPage() {
           <Card>
             <div style={{ display: "flex", justifyContent: "space-between", gap: "0.8rem", marginBottom: "1rem", flexWrap: "wrap" }}>
               <h2 style={{ margin: 0 }}>Detalhes do Solicitante</h2>
-              <Button variant="ghost" onClick={() => router.push("/cadastros/solicitante")}>Voltar</Button>
+              <div style={{ display: "flex", gap: "0.6rem", flexWrap: "wrap" }}>
+                <Button variant="primary" onClick={() => setIsModalOpen(true)}>Adicionar Funcionário</Button>
+                <Button variant="ghost" onClick={() => router.push("/cadastros/solicitante")}>Voltar</Button>
+              </div>
             </div>
 
             {loading && <p>Carregando...</p>}
@@ -119,6 +200,71 @@ export default function SolicitanteDetalhesPage() {
               </Grid>
             )}
           </Card>
+
+          <Card>
+            <h3 style={{ marginTop: 0 }}>Funcionários vinculados</h3>
+            <FuncionarioTable>
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>E-mail</th>
+                  <th>Telefone</th>
+                  <th>Usuário</th>
+                  <th>Criado em</th>
+                </tr>
+              </thead>
+              <tbody>
+                {funcionarios.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} style={{ color: "#6b7280" }}>Nenhum funcionário vinculado.</td>
+                  </tr>
+                ) : (
+                  funcionarios.map((f) => (
+                    <tr key={f.id}>
+                      <td>{f.nome}</td>
+                      <td>{f.email || "-"}</td>
+                      <td>{f.telefone}</td>
+                      <td>{f.user?.email || "-"}</td>
+                      <td>{new Date(f.createdAt).toLocaleString("pt-BR")}</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </FuncionarioTable>
+          </Card>
+
+          <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Adicionar funcionário ao solicitante">
+            <div style={{ display: "grid", gap: "0.75rem" }}>
+              <Input
+                placeholder="Nome"
+                value={form.nome}
+                onChange={(e) => setForm((prev) => ({ ...prev, nome: e.target.value }))}
+              />
+              <Input
+                placeholder="E-mail"
+                type="email"
+                value={form.email}
+                onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
+              />
+              <Input
+                placeholder="Telefone"
+                value={form.telefone}
+                onChange={(e) => setForm((prev) => ({ ...prev, telefone: e.target.value }))}
+              />
+              <Input
+                placeholder="Senha inicial (opcional)"
+                type="password"
+                value={form.password}
+                onChange={(e) => setForm((prev) => ({ ...prev, password: e.target.value }))}
+              />
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.6rem" }}>
+                <Button variant="ghost" onClick={() => setIsModalOpen(false)} disabled={saving}>Cancelar</Button>
+                <Button variant="primary" onClick={handleCreateFuncionario} disabled={saving}>
+                  {saving ? "Salvando..." : "Salvar funcionário"}
+                </Button>
+              </div>
+            </div>
+          </Modal>
         </Wrapper>
       </MainContent>
     </AppShellContainer>
