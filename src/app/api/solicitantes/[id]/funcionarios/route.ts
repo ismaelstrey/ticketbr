@@ -7,8 +7,23 @@ const CreateFuncionarioSchema = z.object({
   nome: z.string().min(2, "Nome é obrigatório"),
   email: z.string().email("E-mail inválido"),
   telefone: z.string().min(8, "Telefone é obrigatório"),
+  whatsappNumber: z.string().optional(),
   password: z.string().min(6, "Senha deve ter pelo menos 6 caracteres").optional(),
 });
+
+function normalizePhone(value: string) {
+  return value.replace(/\D/g, "");
+}
+
+async function findWhatsAppContactByPhone(phone: string) {
+  const normalized = normalizePhone(phone);
+  if (!normalized) return null;
+
+  return prisma.whatsAppContact.findFirst({
+    where: { remoteJid: { contains: normalized } },
+    orderBy: { updatedAt: "desc" },
+  });
+}
 
 export async function GET(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -29,6 +44,16 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ id: st
             name: true,
             role: true,
             createdAt: true,
+          },
+        },
+        whatsappContact: {
+          select: {
+            id: true,
+            remoteJid: true,
+            pushName: true,
+            profilePicUrl: true,
+            instanceId: true,
+            updatedAt: true,
           },
         },
       },
@@ -57,8 +82,11 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       return NextResponse.json({ error: "Solicitante não encontrado" }, { status: 404 });
     }
 
-    const normalizedPhone = parsed.data.telefone.replace(/\D/g, "");
+    const normalizedPhone = normalizePhone(parsed.data.telefone);
+    const normalizedWhatsPhone = normalizePhone(parsed.data.whatsappNumber || parsed.data.telefone);
     const passwordHash = await bcrypt.hash(parsed.data.password || "mudar123", 10);
+
+    const whatsappContact = await findWhatsAppContactByPhone(normalizedWhatsPhone);
 
     const result = await prisma.$transaction(async (tx) => {
       const user = await tx.user.create({
@@ -67,6 +95,14 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
           email: parsed.data.email,
           password: passwordHash,
           role: "CUSTOMER",
+          ...(whatsappContact
+            ? {
+                remoteJid: whatsappContact.remoteJid,
+                pushName: whatsappContact.pushName,
+                profilePicUrl: whatsappContact.profilePicUrl,
+                instanceId: whatsappContact.instanceId,
+              }
+            : {}),
         },
       });
 
@@ -77,6 +113,19 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
           nome: parsed.data.nome,
           email: parsed.data.email,
           telefone: normalizedPhone,
+          ...(whatsappContact
+            ? {
+                whatsappContactId: whatsappContact.id,
+                remoteJid: whatsappContact.remoteJid,
+                pushName: whatsappContact.pushName,
+                profilePicUrl: whatsappContact.profilePicUrl,
+                instanceId: whatsappContact.instanceId,
+                whatsappId: whatsappContact.id,
+              }
+            : {}),
+        },
+        include: {
+          whatsappContact: true,
         },
       });
 
@@ -89,7 +138,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     if (error?.code === "P2002") {
       return NextResponse.json(
-        { error: "Já existe cadastro com este e-mail ou telefone para este solicitante." },
+        { error: "Já existe cadastro com este e-mail, telefone ou WhatsApp." },
         { status: 409 }
       );
     }

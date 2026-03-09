@@ -206,6 +206,7 @@ export type WhatsAppContactWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"WhatsAppContact"> | Date | string
   instanceId?: Prisma.StringNullableFilter<"WhatsAppContact"> | string | null
   syncedAt?: Prisma.DateTimeFilter<"WhatsAppContact"> | Date | string
+  funcionarios?: Prisma.FuncionarioListRelationFilter
 }
 
 export type WhatsAppContactOrderByWithRelationInput = {
@@ -217,6 +218,7 @@ export type WhatsAppContactOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   instanceId?: Prisma.SortOrderInput | Prisma.SortOrder
   syncedAt?: Prisma.SortOrder
+  funcionarios?: Prisma.FuncionarioOrderByRelationAggregateInput
 }
 
 export type WhatsAppContactWhereUniqueInput = Prisma.AtLeast<{
@@ -231,6 +233,7 @@ export type WhatsAppContactWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"WhatsAppContact"> | Date | string
   instanceId?: Prisma.StringNullableFilter<"WhatsAppContact"> | string | null
   syncedAt?: Prisma.DateTimeFilter<"WhatsAppContact"> | Date | string
+  funcionarios?: Prisma.FuncionarioListRelationFilter
 }, "id">
 
 export type WhatsAppContactOrderByWithAggregationInput = {
@@ -270,6 +273,7 @@ export type WhatsAppContactCreateInput = {
   updatedAt: Date | string
   instanceId?: string | null
   syncedAt?: Date | string
+  funcionarios?: Prisma.FuncionarioCreateNestedManyWithoutWhatsappContactInput
 }
 
 export type WhatsAppContactUncheckedCreateInput = {
@@ -281,6 +285,7 @@ export type WhatsAppContactUncheckedCreateInput = {
   updatedAt: Date | string
   instanceId?: string | null
   syncedAt?: Date | string
+  funcionarios?: Prisma.FuncionarioUncheckedCreateNestedManyWithoutWhatsappContactInput
 }
 
 export type WhatsAppContactUpdateInput = {
@@ -292,6 +297,7 @@ export type WhatsAppContactUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   instanceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   syncedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  funcionarios?: Prisma.FuncionarioUpdateManyWithoutWhatsappContactNestedInput
 }
 
 export type WhatsAppContactUncheckedUpdateInput = {
@@ -303,6 +309,7 @@ export type WhatsAppContactUncheckedUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   instanceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   syncedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  funcionarios?: Prisma.FuncionarioUncheckedUpdateManyWithoutWhatsappContactNestedInput
 }
 
 export type WhatsAppContactCreateManyInput = {
@@ -371,6 +378,116 @@ export type WhatsAppContactMinOrderByAggregateInput = {
   syncedAt?: Prisma.SortOrder
 }
 
+export type WhatsAppContactNullableScalarRelationFilter = {
+  is?: Prisma.WhatsAppContactWhereInput | null
+  isNot?: Prisma.WhatsAppContactWhereInput | null
+}
+
+export type WhatsAppContactCreateNestedOneWithoutFuncionariosInput = {
+  create?: Prisma.XOR<Prisma.WhatsAppContactCreateWithoutFuncionariosInput, Prisma.WhatsAppContactUncheckedCreateWithoutFuncionariosInput>
+  connectOrCreate?: Prisma.WhatsAppContactCreateOrConnectWithoutFuncionariosInput
+  connect?: Prisma.WhatsAppContactWhereUniqueInput
+}
+
+export type WhatsAppContactUpdateOneWithoutFuncionariosNestedInput = {
+  create?: Prisma.XOR<Prisma.WhatsAppContactCreateWithoutFuncionariosInput, Prisma.WhatsAppContactUncheckedCreateWithoutFuncionariosInput>
+  connectOrCreate?: Prisma.WhatsAppContactCreateOrConnectWithoutFuncionariosInput
+  upsert?: Prisma.WhatsAppContactUpsertWithoutFuncionariosInput
+  disconnect?: Prisma.WhatsAppContactWhereInput | boolean
+  delete?: Prisma.WhatsAppContactWhereInput | boolean
+  connect?: Prisma.WhatsAppContactWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.WhatsAppContactUpdateToOneWithWhereWithoutFuncionariosInput, Prisma.WhatsAppContactUpdateWithoutFuncionariosInput>, Prisma.WhatsAppContactUncheckedUpdateWithoutFuncionariosInput>
+}
+
+export type WhatsAppContactCreateWithoutFuncionariosInput = {
+  id: string
+  remoteJid: string
+  pushName?: string | null
+  profilePicUrl?: string | null
+  createdAt: Date | string
+  updatedAt: Date | string
+  instanceId?: string | null
+  syncedAt?: Date | string
+}
+
+export type WhatsAppContactUncheckedCreateWithoutFuncionariosInput = {
+  id: string
+  remoteJid: string
+  pushName?: string | null
+  profilePicUrl?: string | null
+  createdAt: Date | string
+  updatedAt: Date | string
+  instanceId?: string | null
+  syncedAt?: Date | string
+}
+
+export type WhatsAppContactCreateOrConnectWithoutFuncionariosInput = {
+  where: Prisma.WhatsAppContactWhereUniqueInput
+  create: Prisma.XOR<Prisma.WhatsAppContactCreateWithoutFuncionariosInput, Prisma.WhatsAppContactUncheckedCreateWithoutFuncionariosInput>
+}
+
+export type WhatsAppContactUpsertWithoutFuncionariosInput = {
+  update: Prisma.XOR<Prisma.WhatsAppContactUpdateWithoutFuncionariosInput, Prisma.WhatsAppContactUncheckedUpdateWithoutFuncionariosInput>
+  create: Prisma.XOR<Prisma.WhatsAppContactCreateWithoutFuncionariosInput, Prisma.WhatsAppContactUncheckedCreateWithoutFuncionariosInput>
+  where?: Prisma.WhatsAppContactWhereInput
+}
+
+export type WhatsAppContactUpdateToOneWithWhereWithoutFuncionariosInput = {
+  where?: Prisma.WhatsAppContactWhereInput
+  data: Prisma.XOR<Prisma.WhatsAppContactUpdateWithoutFuncionariosInput, Prisma.WhatsAppContactUncheckedUpdateWithoutFuncionariosInput>
+}
+
+export type WhatsAppContactUpdateWithoutFuncionariosInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  remoteJid?: Prisma.StringFieldUpdateOperationsInput | string
+  pushName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profilePicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  instanceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  syncedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type WhatsAppContactUncheckedUpdateWithoutFuncionariosInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  remoteJid?: Prisma.StringFieldUpdateOperationsInput | string
+  pushName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profilePicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  instanceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  syncedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+
+/**
+ * Count Type WhatsAppContactCountOutputType
+ */
+
+export type WhatsAppContactCountOutputType = {
+  funcionarios: number
+}
+
+export type WhatsAppContactCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  funcionarios?: boolean | WhatsAppContactCountOutputTypeCountFuncionariosArgs
+}
+
+/**
+ * WhatsAppContactCountOutputType without action
+ */
+export type WhatsAppContactCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the WhatsAppContactCountOutputType
+   */
+  select?: Prisma.WhatsAppContactCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * WhatsAppContactCountOutputType without action
+ */
+export type WhatsAppContactCountOutputTypeCountFuncionariosArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.FuncionarioWhereInput
+}
 
 
 export type WhatsAppContactSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -382,6 +499,8 @@ export type WhatsAppContactSelect<ExtArgs extends runtime.Types.Extensions.Inter
   updatedAt?: boolean
   instanceId?: boolean
   syncedAt?: boolean
+  funcionarios?: boolean | Prisma.WhatsAppContact$funcionariosArgs<ExtArgs>
+  _count?: boolean | Prisma.WhatsAppContactCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["whatsAppContact"]>
 
 export type WhatsAppContactSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -418,10 +537,18 @@ export type WhatsAppContactSelectScalar = {
 }
 
 export type WhatsAppContactOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "remoteJid" | "pushName" | "profilePicUrl" | "createdAt" | "updatedAt" | "instanceId" | "syncedAt", ExtArgs["result"]["whatsAppContact"]>
+export type WhatsAppContactInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  funcionarios?: boolean | Prisma.WhatsAppContact$funcionariosArgs<ExtArgs>
+  _count?: boolean | Prisma.WhatsAppContactCountOutputTypeDefaultArgs<ExtArgs>
+}
+export type WhatsAppContactIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type WhatsAppContactIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
 
 export type $WhatsAppContactPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "WhatsAppContact"
-  objects: {}
+  objects: {
+    funcionarios: Prisma.$FuncionarioPayload<ExtArgs>[]
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     remoteJid: string
@@ -825,6 +952,7 @@ readonly fields: WhatsAppContactFieldRefs;
  */
 export interface Prisma__WhatsAppContactClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  funcionarios<T extends Prisma.WhatsAppContact$funcionariosArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.WhatsAppContact$funcionariosArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FuncionarioPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -879,6 +1007,10 @@ export type WhatsAppContactFindUniqueArgs<ExtArgs extends runtime.Types.Extensio
    */
   omit?: Prisma.WhatsAppContactOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WhatsAppContactInclude<ExtArgs> | null
+  /**
    * Filter, which WhatsAppContact to fetch.
    */
   where: Prisma.WhatsAppContactWhereUniqueInput
@@ -897,6 +1029,10 @@ export type WhatsAppContactFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.E
    */
   omit?: Prisma.WhatsAppContactOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WhatsAppContactInclude<ExtArgs> | null
+  /**
    * Filter, which WhatsAppContact to fetch.
    */
   where: Prisma.WhatsAppContactWhereUniqueInput
@@ -914,6 +1050,10 @@ export type WhatsAppContactFindFirstArgs<ExtArgs extends runtime.Types.Extension
    * Omit specific fields from the WhatsAppContact
    */
   omit?: Prisma.WhatsAppContactOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WhatsAppContactInclude<ExtArgs> | null
   /**
    * Filter, which WhatsAppContact to fetch.
    */
@@ -963,6 +1103,10 @@ export type WhatsAppContactFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Ex
    */
   omit?: Prisma.WhatsAppContactOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WhatsAppContactInclude<ExtArgs> | null
+  /**
    * Filter, which WhatsAppContact to fetch.
    */
   where?: Prisma.WhatsAppContactWhereInput
@@ -1011,6 +1155,10 @@ export type WhatsAppContactFindManyArgs<ExtArgs extends runtime.Types.Extensions
    */
   omit?: Prisma.WhatsAppContactOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WhatsAppContactInclude<ExtArgs> | null
+  /**
    * Filter, which WhatsAppContacts to fetch.
    */
   where?: Prisma.WhatsAppContactWhereInput
@@ -1053,6 +1201,10 @@ export type WhatsAppContactCreateArgs<ExtArgs extends runtime.Types.Extensions.I
    * Omit specific fields from the WhatsAppContact
    */
   omit?: Prisma.WhatsAppContactOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WhatsAppContactInclude<ExtArgs> | null
   /**
    * The data needed to create a WhatsAppContact.
    */
@@ -1101,6 +1253,10 @@ export type WhatsAppContactUpdateArgs<ExtArgs extends runtime.Types.Extensions.I
    * Omit specific fields from the WhatsAppContact
    */
   omit?: Prisma.WhatsAppContactOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WhatsAppContactInclude<ExtArgs> | null
   /**
    * The data needed to update a WhatsAppContact.
    */
@@ -1168,6 +1324,10 @@ export type WhatsAppContactUpsertArgs<ExtArgs extends runtime.Types.Extensions.I
    */
   omit?: Prisma.WhatsAppContactOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WhatsAppContactInclude<ExtArgs> | null
+  /**
    * The filter to search for the WhatsAppContact to update in case it exists.
    */
   where: Prisma.WhatsAppContactWhereUniqueInput
@@ -1194,6 +1354,10 @@ export type WhatsAppContactDeleteArgs<ExtArgs extends runtime.Types.Extensions.I
    */
   omit?: Prisma.WhatsAppContactOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WhatsAppContactInclude<ExtArgs> | null
+  /**
    * Filter which WhatsAppContact to delete.
    */
   where: Prisma.WhatsAppContactWhereUniqueInput
@@ -1214,6 +1378,30 @@ export type WhatsAppContactDeleteManyArgs<ExtArgs extends runtime.Types.Extensio
 }
 
 /**
+ * WhatsAppContact.funcionarios
+ */
+export type WhatsAppContact$funcionariosArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Funcionario
+   */
+  select?: Prisma.FuncionarioSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Funcionario
+   */
+  omit?: Prisma.FuncionarioOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.FuncionarioInclude<ExtArgs> | null
+  where?: Prisma.FuncionarioWhereInput
+  orderBy?: Prisma.FuncionarioOrderByWithRelationInput | Prisma.FuncionarioOrderByWithRelationInput[]
+  cursor?: Prisma.FuncionarioWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.FuncionarioScalarFieldEnum | Prisma.FuncionarioScalarFieldEnum[]
+}
+
+/**
  * WhatsAppContact without action
  */
 export type WhatsAppContactDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1225,4 +1413,8 @@ export type WhatsAppContactDefaultArgs<ExtArgs extends runtime.Types.Extensions.
    * Omit specific fields from the WhatsAppContact
    */
   omit?: Prisma.WhatsAppContactOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WhatsAppContactInclude<ExtArgs> | null
 }

@@ -59,6 +59,7 @@ model User {
 
 model WhatsAppContact {
   id            String   @id
+  funcionarios   Funcionario[]
   remoteJid     String   @map("remote_jid") @db.Text
   pushName      String?  @map("push_name")
   profilePicUrl String?  @map("profile_pic_url") @db.Text
@@ -110,11 +111,13 @@ model Funcionario {
   email          String?     @db.VarChar(255)
   telefone       String      @db.VarChar(20)
 
-  whatsappId     String?     @unique
-  remoteJid      String?     @db.Text
-  pushName       String?
-  profilePicUrl  String?     @db.Text
-  instanceId     String?
+  whatsappId       String?          @unique
+  remoteJid        String?          @db.Text
+  pushName         String?
+  profilePicUrl    String?          @db.Text
+  instanceId       String?
+  whatsappContactId String?         @map("whatsapp_contact_id")
+  whatsappContact  WhatsAppContact? @relation(fields: [whatsappContactId], references: [id], onDelete: SetNull)
 
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
@@ -122,6 +125,7 @@ model Funcionario {
   @@unique([solicitante_id, telefone])
   @@index([solicitante_id])
   @@index([telefone])
+  @@index([whatsappContactId])
 }
 
 model Tipo_Ticket {

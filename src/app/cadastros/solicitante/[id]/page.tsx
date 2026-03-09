@@ -30,12 +30,18 @@ type Funcionario = {
   nome: string;
   email: string | null;
   telefone: string;
+  remoteJid?: string | null;
   createdAt: string;
   user: {
     id: string;
     email: string;
     role: string;
   };
+  whatsappContact?: {
+    id: string;
+    remoteJid: string;
+    pushName: string | null;
+  } | null;
 };
 
 const Wrapper = styled.div`
@@ -110,6 +116,7 @@ export default function SolicitanteDetalhesPage() {
     nome: "",
     email: "",
     telefone: "",
+    whatsappNumber: "",
     password: "",
   });
 
@@ -157,7 +164,7 @@ export default function SolicitanteDetalhesPage() {
 
       showToast("Funcionário vinculado ao solicitante com sucesso.", "success");
       setIsModalOpen(false);
-      setForm({ nome: "", email: "", telefone: "", password: "" });
+      setForm({ nome: "", email: "", telefone: "", whatsappNumber: "", password: "" });
       await loadFuncionarios(params.id);
     } catch (err: any) {
       showToast(err?.message || "Erro ao cadastrar funcionário", "error");
@@ -209,6 +216,7 @@ export default function SolicitanteDetalhesPage() {
                   <th>Nome</th>
                   <th>E-mail</th>
                   <th>Telefone</th>
+                  <th>WhatsApp</th>
                   <th>Usuário</th>
                   <th>Criado em</th>
                 </tr>
@@ -216,7 +224,7 @@ export default function SolicitanteDetalhesPage() {
               <tbody>
                 {funcionarios.length === 0 ? (
                   <tr>
-                    <td colSpan={5} style={{ color: "#6b7280" }}>Nenhum funcionário vinculado.</td>
+                    <td colSpan={6} style={{ color: "#6b7280" }}>Nenhum funcionário vinculado.</td>
                   </tr>
                 ) : (
                   funcionarios.map((f) => (
@@ -224,6 +232,7 @@ export default function SolicitanteDetalhesPage() {
                       <td>{f.nome}</td>
                       <td>{f.email || "-"}</td>
                       <td>{f.telefone}</td>
+                      <td>{f.whatsappContact?.remoteJid || f.remoteJid || "Não vinculado"}</td>
                       <td>{f.user?.email || "-"}</td>
                       <td>{new Date(f.createdAt).toLocaleString("pt-BR")}</td>
                     </tr>
@@ -250,6 +259,11 @@ export default function SolicitanteDetalhesPage() {
                 placeholder="Telefone"
                 value={form.telefone}
                 onChange={(e) => setForm((prev) => ({ ...prev, telefone: e.target.value }))}
+              />
+              <Input
+                placeholder="Celular com WhatsApp (ex: 5511999999999)"
+                value={form.whatsappNumber}
+                onChange={(e) => setForm((prev) => ({ ...prev, whatsappNumber: e.target.value }))}
               />
               <Input
                 placeholder="Senha inicial (opcional)"

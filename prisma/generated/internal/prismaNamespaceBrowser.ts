@@ -143,6 +143,7 @@ export const FuncionarioScalarFieldEnum = {
   pushName: 'pushName',
   profilePicUrl: 'profilePicUrl',
   instanceId: 'instanceId',
+  whatsappContactId: 'whatsappContactId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
