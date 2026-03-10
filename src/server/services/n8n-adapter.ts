@@ -26,7 +26,7 @@ function resolveN8nBase(config?: WhatsAppRuntimeConfig | null) {
 function resolvePath(config: WhatsAppRuntimeConfig | null | undefined, key: "conversations" | "messages" | "send") {
   if (key === "conversations") return config?.n8nConversationsPath || "/conversations";
   if (key === "messages") return config?.n8nMessagesPath || "/messages";
-  return config?.n8nSendPath || "/send";
+  return config?.n8nSendPath || "/messages/send";
 }
 
 function isAbsoluteUrl(value: string) {
@@ -62,8 +62,6 @@ async function performN8nRequest(url: string, apiKey: string | undefined, init?:
       ...init?.headers
     }
   });
-  console.log("Errro N8n",response)
-
   const json = await response.json().catch(() => ({}));
   if (!response.ok) {
     throw new Error(json?.message || json?.error || `n8n request failed (${response.status})`);
@@ -154,7 +152,9 @@ export async function fetchMessagesFromN8n(input: {
 
 export async function sendMessageToN8n(payload: Record<string, unknown>, config?: WhatsAppRuntimeConfig | null) {
   if (!isN8nConfigured(config)) return null;
-  const path = resolvePath(config, "send");
+  const relPath = resolvePath(config, "send");
+  const webhook = resolveWebhook(config);
+  const path = webhook ? buildUrl(webhook, relPath) : relPath;
 
   try {
     return await requestN8n(path, config, {
@@ -162,7 +162,6 @@ export async function sendMessageToN8n(payload: Record<string, unknown>, config?
       body: JSON.stringify(payload)
     });
   } catch (error: any) {
-    const webhook = resolveWebhook(config);
     const isWebhookRouteIssue = String(error?.message || "").toLowerCase().includes("not registered");
 
     if (webhook && isWebhookRouteIssue) {
