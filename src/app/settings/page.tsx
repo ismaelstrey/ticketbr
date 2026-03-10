@@ -57,7 +57,7 @@ const defaults: IntegrationSettings = {
   n8nApiKey: "",
   n8nConversationsPath: "/conversations",
   n8nMessagesPath: "/messages",
-  n8nSendPath: "/messages/send"
+  n8nSendPath: "/send"
 };
 
 const Card = styled.section`
@@ -458,7 +458,7 @@ export default function SettingsPage() {
                 </Field>
                 <Field>
                   Webhook de eventos
-                  <Input placeholder="https://n8n.exemplo.com/webhook/messages" value={settings.n8nWebhookUrl} onChange={(e) => update({ n8nWebhookUrl: e.target.value })} />
+                  <Input placeholder="https://n8n.exemplo.com/webhook/ticketbr-events" value={settings.n8nWebhookUrl} onChange={(e) => update({ n8nWebhookUrl: e.target.value })} />
                 </Field>
 
                 <label style={{ display: "flex", gap: 8, marginTop: 4, gridColumn: "1 / -1" }}>
