@@ -27,6 +27,20 @@ function normalizeText(value: unknown) {
   return trimmed || null;
 }
 
+function normalizePhone(value: string) {
+  return value.replace(/\D/g, "");
+}
+
+function extractJidPhone(remoteJid?: string | null) {
+  if (!remoteJid) return "";
+  return normalizePhone(remoteJid.split("@")[0] || "");
+}
+
+function isPhoneMatch(inputPhone: string, jidPhone: string) {
+  if (!inputPhone || !jidPhone) return false;
+  return jidPhone === inputPhone || jidPhone.endsWith(inputPhone) || inputPhone.endsWith(jidPhone);
+}
+
 export function resolveContactsEndpoint(config?: WhatsAppRuntimeConfig | null) {
   const webhookUrl = config?.n8nWebhookUrl?.trim() || "";
   const n8nBase = config?.n8nBaseUrl?.trim() || "";
@@ -108,13 +122,15 @@ function extractRawContacts(payload: unknown): unknown[] {
 }
 
 export async function findWhatsAppContactByPhone(phone: string): Promise<WhatsAppContactRecord | null> {
-  const normalizedPhone = phone.replace(/\D/g, "");
+  const normalizedPhone = normalizePhone(phone);
 
-  const row = await prisma.whatsAppContact.findFirst({
-    where: { remoteJid: { contains: normalizedPhone } },
-    orderBy: { updatedAt: "desc" }
+  const rows = await prisma.whatsAppContact.findMany({
+    where: { remoteJid: { contains: "@" } },
+    orderBy: { updatedAt: "desc" },
+    take: 2000
   });
 
+  const row = rows.find((item) => isPhoneMatch(normalizedPhone, extractJidPhone(item.remoteJid)));
   if (!row) return null;
 
   return {

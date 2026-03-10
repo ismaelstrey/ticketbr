@@ -13,6 +13,16 @@ function normalizePhone(value: string) {
   return value.replace(/\D/g, "");
 }
 
+function extractJidPhone(remoteJid?: string | null) {
+  if (!remoteJid) return "";
+  return normalizePhone(remoteJid.split("@")[0] || "");
+}
+
+function isPhoneMatch(inputPhone: string, jidPhone: string) {
+  if (!inputPhone || !jidPhone) return false;
+  return jidPhone === inputPhone || jidPhone.endsWith(inputPhone) || inputPhone.endsWith(jidPhone);
+}
+
 async function hasWhatsappContactColumn() {
   const rows = await prisma.$queryRawUnsafe<Array<{ exists: boolean }>>(
     `
@@ -33,10 +43,13 @@ async function findWhatsAppContactByPhone(phone?: string) {
   const normalized = normalizePhone(phone || "");
   if (!normalized) return null;
 
-  return prisma.whatsAppContact.findFirst({
-    where: { remoteJid: { contains: normalized } },
+  const candidates = await prisma.whatsAppContact.findMany({
+    where: { remoteJid: { contains: "@" } },
     orderBy: { updatedAt: "desc" },
+    take: 2000,
   });
+
+  return candidates.find((contact) => isPhoneMatch(normalized, extractJidPhone(contact.remoteJid))) || null;
 }
 
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string; funcionarioId: string }> }) {
