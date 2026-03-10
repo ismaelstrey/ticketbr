@@ -238,7 +238,24 @@ async function main() {
       }
   }
 
-  // 8. Seed Funcionario (Exemplo vinculado a Solicitante)
+  // 8. Seed WhatsAppContact
+  const waContact = await prisma.whatsAppContact.upsert({
+    where: { id: '5511999990001@s.whatsapp.net' },
+    update: {},
+    create: {
+      id: '5511999990001@s.whatsapp.net',
+      remoteJid: '5511999990001@s.whatsapp.net',
+      pushName: 'Funcionario A WhatsApp',
+      profilePicUrl: 'https://ui-avatars.com/api/?name=Funcionario+A',
+      instanceId: 'default',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      syncedAt: new Date(),
+    }
+  });
+  console.log(`Created/Updated WhatsAppContact: ${waContact.pushName}`);
+
+  // 9. Seed Funcionario (Exemplo vinculado a Solicitante)
   if (createdRequesters.length > 0) {
     const requester = createdRequesters[0]; // Empresa A
     
@@ -246,14 +263,20 @@ async function main() {
     const funcHashedPassword = await bcrypt.hash('func123', 10);
     const funcUser = await prisma.user.upsert({
       where: { email: 'func@empresaa.com' },
-      update: { password: funcHashedPassword },
+      update: { 
+        password: funcHashedPassword,
+        whatsappId: waContact.id,
+        remoteJid: waContact.remoteJid,
+        pushName: waContact.pushName
+      },
       create: {
         email: 'func@empresaa.com',
         name: 'Funcionário A',
         password: funcHashedPassword,
         role: 'CUSTOMER', // Assuming new role for limited access
-        pushName: 'Funcionario A WhatsApp',
-        remoteJid: '5511999990001@s.whatsapp.net'
+        whatsappId: waContact.id,
+        pushName: waContact.pushName,
+        remoteJid: waContact.remoteJid
       }
     });
     console.log(`Created/Updated User (Funcionario): ${funcUser.email}`);
@@ -261,16 +284,19 @@ async function main() {
     // Create Funcionario linked to Solicitante and User
     const funcionario = await prisma.funcionario.upsert({
       where: { userId: funcUser.id },
-      update: {},
+      update: {
+        whatsappContactId: waContact.id
+      },
       create: {
         solicitante_id: requester.id,
         userId: funcUser.id,
         nome: 'Funcionário A',
         email: 'func@empresaa.com',
         telefone: '11999990001',
-        whatsappId: '5511999990001@s.whatsapp.net',
-        pushName: 'Funcionario A WhatsApp',
-        remoteJid: '5511999990001@s.whatsapp.net'
+        whatsappId: waContact.id,
+        pushName: waContact.pushName,
+        remoteJid: waContact.remoteJid,
+        whatsappContactId: waContact.id
       }
     });
     console.log(`Created/Updated Funcionario: ${funcionario.nome} linked to ${requester.nome_fantasia}`);
