@@ -225,9 +225,14 @@ export default function ChatPage() {
       const companyPass = companyTab === "all" || (contact.company || "Sem empresa") === companyTab;
       const q = search.trim().toLowerCase();
       const searchPass = !q || contact.name.toLowerCase().includes(q) || (contact.company || "").toLowerCase().includes(q);
-      return companyPass && searchPass;
+
+      const channelPass = channel === "whatsapp"
+        ? Boolean(contact.hasWhatsApp)
+        : Boolean(contact.email && contact.email.trim());
+
+      return companyPass && searchPass && channelPass;
     });
-  }, [contacts, companyTab, search]);
+  }, [contacts, companyTab, search, channel]);
 
   async function loadBase() {
     const [contactsRes, ticketsRes] = await Promise.all([fetch("/api/chat/contacts"), fetch("/api/chat/tickets")]);
@@ -297,6 +302,19 @@ export default function ChatPage() {
     const timer = setInterval(() => loadMessages().catch(() => undefined), 5000);
     return () => clearInterval(timer);
   }, [contactId, channel, selectedContact?.phone, enableSound, enableAlert]);
+
+  useEffect(() => {
+    if (!filteredContacts.length) {
+      setContactId("");
+      return;
+    }
+
+    const stillVisible = filteredContacts.some((c) => c.id === contactId);
+    if (!stillVisible) {
+      setContactId(filteredContacts[0].id);
+      setConversationId(filteredContacts[0].conversationId || `whatsapp:${filteredContacts[0].id}`);
+    }
+  }, [filteredContacts, contactId]);
 
   async function requestBrowserAlertPermission() {
     if (!("Notification" in window)) {

@@ -48,29 +48,47 @@ export async function GET(request: NextRequest) {
   try {
     const config = await resolveWhatsAppConfig(request);
 
-    const contacts = await prisma.solicitante.findMany({
-      where: { status: true },
-      orderBy: { nome_fantasia: "asc" },
+    const funcionarios = await prisma.funcionario.findMany({
+      where: {
+        solicitante: {
+          status: true
+        }
+      },
+      orderBy: { nome: "asc" },
       select: {
         id: true,
-        nome_fantasia: true,
-        razao_social: true,
+        nome: true,
         email: true,
-        telefone: true
+        telefone: true,
+        remoteJid: true,
+        whatsappId: true,
+        solicitante: {
+          select: {
+            nome_fantasia: true,
+            razao_social: true
+          }
+        }
       }
     });
 
-    const baseContacts: ChatContact[] = contacts.map((c) => ({
-      id: c.id,
-      name: c.nome_fantasia,
-      company: c.razao_social,
-      email: c.email,
-      phone: c.telefone,
-      tags: inferTags(c.nome_fantasia),
-      conversationId: c.telefone ? `${onlyDigits(c.telefone)}@s.whatsapp.net` : undefined,
-      lastMessagePreview: undefined,
-      lastMessageAt: undefined
-    }));
+    const baseContacts: ChatContact[] = funcionarios.map((f) => {
+      const tags = inferTags(f.nome);
+      if (f.remoteJid || f.whatsappId) tags.push("WhatsApp");
+      if (f.email) tags.push("Email");
+
+      return {
+        id: f.id,
+        name: f.nome,
+        company: f.solicitante?.nome_fantasia || f.solicitante?.razao_social || "Sem empresa",
+        email: f.email ?? undefined,
+        phone: f.telefone,
+        tags,
+        hasWhatsApp: Boolean(f.remoteJid || f.whatsappId),
+        conversationId: f.remoteJid || (f.telefone ? `${onlyDigits(f.telefone)}@s.whatsapp.net` : undefined),
+        lastMessagePreview: undefined,
+        lastMessageAt: undefined
+      };
+    });
 
     const conversations = isN8nConfigured(config)
       ? await fetchConversationsFromN8n(config).catch((error) => {
@@ -101,18 +119,7 @@ export async function GET(request: NextRequest) {
         const currentTags = matched.tags ?? [];
         if (!currentTags.includes("WhatsApp")) currentTags.push("WhatsApp");
         matched.tags = currentTags;
-      } else {
-        baseContacts.push({
-          id: normalized.id,
-          name: normalized.name,
-          company: "Sem empresa",
-          phone: normalized.phone,
-          email: normalized.email,
-          tags: ["WhatsApp"],
-          conversationId: normalized.conversationId,
-          lastMessagePreview: normalized.lastMessagePreview,
-          lastMessageAt: normalized.lastMessageAt
-        });
+        matched.hasWhatsApp = true;
       }
     }
 

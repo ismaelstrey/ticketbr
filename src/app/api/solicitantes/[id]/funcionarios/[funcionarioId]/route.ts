@@ -41,31 +41,15 @@ async function hasWhatsappContactColumn() {
 
 async function findWhatsAppContactByPhone(phone?: string) {
   const normalized = normalizePhone(phone || "");
-  console.log(`[DEBUG-PUT] Searching WhatsApp contact for phone: "${phone}" -> normalized: "${normalized}"`);
-
   if (!normalized) return null;
 
-  // Try stricter search first (contains normalized)
-  let candidates = await prisma.whatsAppContact.findMany({
-    where: { remoteJid: { contains: normalized } },
-    take: 5,
+  const candidates = await prisma.whatsAppContact.findMany({
+    where: { remoteJid: { contains: "@" } },
+    orderBy: { updatedAt: "desc" },
+    take: 2000,
   });
-  console.log(`[DEBUG-PUT] Exact match candidates: ${candidates.length}`, candidates.map(c => c.remoteJid));
 
-  if (candidates.length === 0 && normalized.length > 8) {
-    // Try matching last 8 digits (to handle cases with/without country/area code variations)
-    const short = normalized.slice(-8);
-    console.log(`[DEBUG-PUT] No exact match. Trying suffix search with: "${short}"`);
-    candidates = await prisma.whatsAppContact.findMany({
-      where: { remoteJid: { contains: short } },
-      take: 10,
-    });
-    console.log(`[DEBUG-PUT] Suffix match candidates: ${candidates.length}`, candidates.map(c => c.remoteJid));
-  }
-
-  const match = candidates.find((contact) => isPhoneMatch(normalized, extractJidPhone(contact.remoteJid)));
-  console.log(`[DEBUG-PUT] Final match:`, match?.remoteJid || "None");
-  return match || null;
+  return candidates.find((contact) => isPhoneMatch(normalized, extractJidPhone(contact.remoteJid))) || null;
 }
 
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string; funcionarioId: string }> }) {
@@ -78,31 +62,26 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ error: "Erro de validação", details: z.treeifyError(parsed.error) }, { status: 400 });
     }
 
-    const normalizedPhone = normalizePhone(parsed.data.telefone);
-    const normalizedWhatsPhone = normalizePhone(parsed.data.whatsappNumber || parsed.data.telefone);
+    const canUseWhatsappRelation = await hasWhatsappContactColumn();
 
-    // Verificar se existe outro funcionário com mesmo email/telefone
-    if (parsed.data.email) {
-      const existing = await prisma.funcionario.findFirst({
-        where: {
-          email: parsed.data.email,
-          id: { not: funcionarioId },
-        },
-      });
-      if (existing) {
-        return NextResponse.json({ error: "E-mail já está em uso por outro funcionário." }, { status: 409 });
-      }
+    const existing = await prisma.funcionario.findFirst({
+      where: { id: funcionarioId, solicitante_id: id },
+    });
+
+    if (!existing) {
+      return NextResponse.json({ error: "Funcionário não encontrado para este solicitante" }, { status: 404 });
     }
 
-    const whatsappContact = await findWhatsAppContactByPhone(normalizedWhatsPhone);
+    const phone = parsed.data.telefone ? normalizePhone(parsed.data.telefone) : existing.telefone;
+    const whatsappContact = await findWhatsAppContactByPhone(parsed.data.whatsappNumber || phone);
 
-    const result = await prisma.$transaction(async (tx) => {
+    const updated = await prisma.$transaction(async (tx) => {
       const funcionario = await tx.funcionario.update({
-        where: { id: funcionarioId, solicitante_id: id },
+        where: { id: funcionarioId },
         data: {
-          nome: parsed.data.nome,
-          email: parsed.data.email,
-          telefone: normalizedPhone,
+          ...(parsed.data.nome ? { nome: parsed.data.nome } : {}),
+          ...(parsed.data.email ? { email: parsed.data.email } : {}),
+          ...(parsed.data.telefone ? { telefone: phone } : {}),
           ...(whatsappContact
             ? {
                 remoteJid: whatsappContact.remoteJid,
@@ -110,39 +89,37 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
                 profilePicUrl: whatsappContact.profilePicUrl,
                 instanceId: whatsappContact.instanceId,
                 whatsappId: whatsappContact.id,
-                whatsappContactId: whatsappContact.id,
+                ...(canUseWhatsappRelation ? { whatsappContactId: whatsappContact.id } : {}),
               }
             : {}),
         },
-        include: { user: true, whatsappContact: true },
       });
 
-      // Atualizar user associado se necessário
-      if (funcionario.userId) {
-        await tx.user.update({
-          where: { id: funcionario.userId },
-          data: {
-            name: parsed.data.nome,
-            email: parsed.data.email,
-            ...(whatsappContact
-              ? {
-                  remoteJid: whatsappContact.remoteJid,
-                  pushName: whatsappContact.pushName,
-                  profilePicUrl: whatsappContact.profilePicUrl,
-                  instanceId: whatsappContact.instanceId,
-                  whatsappId: whatsappContact.id,
-                }
-              : {}),
-          },
-        });
-      }
+      await tx.user.update({
+        where: { id: existing.userId },
+        data: {
+          ...(parsed.data.nome ? { name: parsed.data.nome } : {}),
+          ...(parsed.data.email ? { email: parsed.data.email } : {}),
+          ...(whatsappContact
+            ? {
+                remoteJid: whatsappContact.remoteJid,
+                pushName: whatsappContact.pushName,
+                profilePicUrl: whatsappContact.profilePicUrl,
+                instanceId: whatsappContact.instanceId,
+              }
+            : {}),
+        },
+      });
 
       return funcionario;
     });
 
-    return NextResponse.json({ data: result });
+    return NextResponse.json({ data: updated });
   } catch (error: any) {
     console.error("Error updating funcionario:", error);
+    if (error?.code === "P2002") {
+      return NextResponse.json({ error: "Já existe cadastro com este e-mail/telefone." }, { status: 409 });
+    }
     return NextResponse.json({ error: error?.message || "Erro ao atualizar funcionário" }, { status: 500 });
   }
 }

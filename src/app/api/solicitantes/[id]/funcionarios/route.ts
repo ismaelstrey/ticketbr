@@ -43,36 +43,21 @@ async function hasWhatsappContactColumn() {
 
 async function findWhatsAppContactByPhone(phone: string) {
   const normalized = normalizePhone(phone);
-  console.log(`[DEBUG] Searching WhatsApp contact for phone: "${phone}" -> normalized: "${normalized}"`);
-  
   if (!normalized) return null;
 
-  // Try stricter search first (contains normalized)
-  let candidates = await prisma.whatsAppContact.findMany({
-    where: { remoteJid: { contains: normalized } },
-    take: 5,
+  const candidates = await prisma.whatsAppContact.findMany({
+    where: { remoteJid: { contains: "@" } },
+    orderBy: { updatedAt: "desc" },
+    take: 2000,
   });
-  console.log(`[DEBUG] Exact match candidates: ${candidates.length}`, candidates.map(c => c.remoteJid));
 
-  if (candidates.length === 0 && normalized.length > 8) {
-    // Try matching last 8 digits (to handle cases with/without country/area code variations)
-    const short = normalized.slice(-8);
-    console.log(`[DEBUG] No exact match. Trying suffix search with: "${short}"`);
-    candidates = await prisma.whatsAppContact.findMany({
-      where: { remoteJid: { contains: short } },
-      take: 10,
-    });
-    console.log(`[DEBUG] Suffix match candidates: ${candidates.length}`, candidates.map(c => c.remoteJid));
-  }
-
-  const match = candidates.find((contact) => isPhoneMatch(normalized, extractJidPhone(contact.remoteJid)));
-  console.log(`[DEBUG] Final match:`, match?.remoteJid || "None");
-  return match || null;
+  return candidates.find((contact) => isPhoneMatch(normalized, extractJidPhone(contact.remoteJid))) || null;
 }
 
 export async function GET(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
+    const canUseWhatsappRelation = await hasWhatsappContactColumn();
 
     const solicitante = await prisma.solicitante.findFirst({ where: { id, status: true } });
     if (!solicitante) {
@@ -81,27 +66,39 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ id: st
 
     const funcionarios = await prisma.funcionario.findMany({
       where: { solicitante_id: id },
-      include: {
-        user: {
-          select: {
-            id: true,
-            email: true,
-            name: true,
-            role: true,
-            createdAt: true,
+      include: canUseWhatsappRelation
+        ? {
+            user: {
+              select: {
+                id: true,
+                email: true,
+                name: true,
+                role: true,
+                createdAt: true,
+              },
+            },
+            whatsappContact: {
+              select: {
+                id: true,
+                remoteJid: true,
+                pushName: true,
+                profilePicUrl: true,
+                instanceId: true,
+                updatedAt: true,
+              },
+            },
+          }
+        : {
+            user: {
+              select: {
+                id: true,
+                email: true,
+                name: true,
+                role: true,
+                createdAt: true,
+              },
+            },
           },
-        },
-        whatsappContact: {
-          select: {
-            id: true,
-            remoteJid: true,
-            pushName: true,
-            profilePicUrl: true,
-            instanceId: true,
-            updatedAt: true,
-          },
-        },
-      },
       orderBy: { createdAt: "desc" },
     });
 
@@ -115,6 +112,7 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ id: st
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
+    const canUseWhatsappRelation = await hasWhatsappContactColumn();
     const body = await request.json();
 
     const parsed = CreateFuncionarioSchema.safeParse(body);
@@ -165,11 +163,11 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
                 profilePicUrl: whatsappContact.profilePicUrl,
                 instanceId: whatsappContact.instanceId,
                 whatsappId: whatsappContact.id,
-                whatsappContactId: whatsappContact.id,
+                ...(canUseWhatsappRelation ? { whatsappContactId: whatsappContact.id } : {}),
               }
             : {}),
         },
-        include: { whatsappContact: true },
+        include: canUseWhatsappRelation ? { whatsappContact: true } : undefined,
       });
 
       return { user, funcionario };
