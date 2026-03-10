@@ -36,6 +36,7 @@ export type FuncionarioMinAggregateOutputType = {
   pushName: string | null
   profilePicUrl: string | null
   instanceId: string | null
+  whatsappContactId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -52,6 +53,7 @@ export type FuncionarioMaxAggregateOutputType = {
   pushName: string | null
   profilePicUrl: string | null
   instanceId: string | null
+  whatsappContactId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -68,6 +70,7 @@ export type FuncionarioCountAggregateOutputType = {
   pushName: number
   profilePicUrl: number
   instanceId: number
+  whatsappContactId: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -86,6 +89,7 @@ export type FuncionarioMinAggregateInputType = {
   pushName?: true
   profilePicUrl?: true
   instanceId?: true
+  whatsappContactId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -102,6 +106,7 @@ export type FuncionarioMaxAggregateInputType = {
   pushName?: true
   profilePicUrl?: true
   instanceId?: true
+  whatsappContactId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -118,6 +123,7 @@ export type FuncionarioCountAggregateInputType = {
   pushName?: true
   profilePicUrl?: true
   instanceId?: true
+  whatsappContactId?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -207,6 +213,7 @@ export type FuncionarioGroupByOutputType = {
   pushName: string | null
   profilePicUrl: string | null
   instanceId: string | null
+  whatsappContactId: string | null
   createdAt: Date
   updatedAt: Date
   _count: FuncionarioCountAggregateOutputType | null
@@ -244,10 +251,12 @@ export type FuncionarioWhereInput = {
   pushName?: Prisma.StringNullableFilter<"Funcionario"> | string | null
   profilePicUrl?: Prisma.StringNullableFilter<"Funcionario"> | string | null
   instanceId?: Prisma.StringNullableFilter<"Funcionario"> | string | null
+  whatsappContactId?: Prisma.StringNullableFilter<"Funcionario"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Funcionario"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Funcionario"> | Date | string
   solicitante?: Prisma.XOR<Prisma.SolicitanteScalarRelationFilter, Prisma.SolicitanteWhereInput>
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  whatsappContact?: Prisma.XOR<Prisma.WhatsAppContactNullableScalarRelationFilter, Prisma.WhatsAppContactWhereInput> | null
 }
 
 export type FuncionarioOrderByWithRelationInput = {
@@ -262,10 +271,12 @@ export type FuncionarioOrderByWithRelationInput = {
   pushName?: Prisma.SortOrderInput | Prisma.SortOrder
   profilePicUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   instanceId?: Prisma.SortOrderInput | Prisma.SortOrder
+  whatsappContactId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   solicitante?: Prisma.SolicitanteOrderByWithRelationInput
   user?: Prisma.UserOrderByWithRelationInput
+  whatsappContact?: Prisma.WhatsAppContactOrderByWithRelationInput
 }
 
 export type FuncionarioWhereUniqueInput = Prisma.AtLeast<{
@@ -284,10 +295,12 @@ export type FuncionarioWhereUniqueInput = Prisma.AtLeast<{
   pushName?: Prisma.StringNullableFilter<"Funcionario"> | string | null
   profilePicUrl?: Prisma.StringNullableFilter<"Funcionario"> | string | null
   instanceId?: Prisma.StringNullableFilter<"Funcionario"> | string | null
+  whatsappContactId?: Prisma.StringNullableFilter<"Funcionario"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Funcionario"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Funcionario"> | Date | string
   solicitante?: Prisma.XOR<Prisma.SolicitanteScalarRelationFilter, Prisma.SolicitanteWhereInput>
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  whatsappContact?: Prisma.XOR<Prisma.WhatsAppContactNullableScalarRelationFilter, Prisma.WhatsAppContactWhereInput> | null
 }, "id" | "userId" | "whatsappId" | "solicitante_id_telefone">
 
 export type FuncionarioOrderByWithAggregationInput = {
@@ -302,6 +315,7 @@ export type FuncionarioOrderByWithAggregationInput = {
   pushName?: Prisma.SortOrderInput | Prisma.SortOrder
   profilePicUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   instanceId?: Prisma.SortOrderInput | Prisma.SortOrder
+  whatsappContactId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.FuncionarioCountOrderByAggregateInput
@@ -324,6 +338,7 @@ export type FuncionarioScalarWhereWithAggregatesInput = {
   pushName?: Prisma.StringNullableWithAggregatesFilter<"Funcionario"> | string | null
   profilePicUrl?: Prisma.StringNullableWithAggregatesFilter<"Funcionario"> | string | null
   instanceId?: Prisma.StringNullableWithAggregatesFilter<"Funcionario"> | string | null
+  whatsappContactId?: Prisma.StringNullableWithAggregatesFilter<"Funcionario"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Funcionario"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Funcionario"> | Date | string
 }
@@ -342,6 +357,7 @@ export type FuncionarioCreateInput = {
   updatedAt?: Date | string
   solicitante: Prisma.SolicitanteCreateNestedOneWithoutFuncionariosInput
   user: Prisma.UserCreateNestedOneWithoutFuncionarioInput
+  whatsappContact?: Prisma.WhatsAppContactCreateNestedOneWithoutFuncionariosInput
 }
 
 export type FuncionarioUncheckedCreateInput = {
@@ -356,6 +372,7 @@ export type FuncionarioUncheckedCreateInput = {
   pushName?: string | null
   profilePicUrl?: string | null
   instanceId?: string | null
+  whatsappContactId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -374,6 +391,7 @@ export type FuncionarioUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   solicitante?: Prisma.SolicitanteUpdateOneRequiredWithoutFuncionariosNestedInput
   user?: Prisma.UserUpdateOneRequiredWithoutFuncionarioNestedInput
+  whatsappContact?: Prisma.WhatsAppContactUpdateOneWithoutFuncionariosNestedInput
 }
 
 export type FuncionarioUncheckedUpdateInput = {
@@ -388,6 +406,7 @@ export type FuncionarioUncheckedUpdateInput = {
   pushName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profilePicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   instanceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  whatsappContactId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -404,6 +423,7 @@ export type FuncionarioCreateManyInput = {
   pushName?: string | null
   profilePicUrl?: string | null
   instanceId?: string | null
+  whatsappContactId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -434,6 +454,7 @@ export type FuncionarioUncheckedUpdateManyInput = {
   pushName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profilePicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   instanceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  whatsappContactId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -470,6 +491,7 @@ export type FuncionarioCountOrderByAggregateInput = {
   pushName?: Prisma.SortOrder
   profilePicUrl?: Prisma.SortOrder
   instanceId?: Prisma.SortOrder
+  whatsappContactId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -486,6 +508,7 @@ export type FuncionarioMaxOrderByAggregateInput = {
   pushName?: Prisma.SortOrder
   profilePicUrl?: Prisma.SortOrder
   instanceId?: Prisma.SortOrder
+  whatsappContactId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -502,6 +525,7 @@ export type FuncionarioMinOrderByAggregateInput = {
   pushName?: Prisma.SortOrder
   profilePicUrl?: Prisma.SortOrder
   instanceId?: Prisma.SortOrder
+  whatsappContactId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -536,6 +560,48 @@ export type FuncionarioUncheckedUpdateOneWithoutUserNestedInput = {
   delete?: Prisma.FuncionarioWhereInput | boolean
   connect?: Prisma.FuncionarioWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.FuncionarioUpdateToOneWithWhereWithoutUserInput, Prisma.FuncionarioUpdateWithoutUserInput>, Prisma.FuncionarioUncheckedUpdateWithoutUserInput>
+}
+
+export type FuncionarioCreateNestedManyWithoutWhatsappContactInput = {
+  create?: Prisma.XOR<Prisma.FuncionarioCreateWithoutWhatsappContactInput, Prisma.FuncionarioUncheckedCreateWithoutWhatsappContactInput> | Prisma.FuncionarioCreateWithoutWhatsappContactInput[] | Prisma.FuncionarioUncheckedCreateWithoutWhatsappContactInput[]
+  connectOrCreate?: Prisma.FuncionarioCreateOrConnectWithoutWhatsappContactInput | Prisma.FuncionarioCreateOrConnectWithoutWhatsappContactInput[]
+  createMany?: Prisma.FuncionarioCreateManyWhatsappContactInputEnvelope
+  connect?: Prisma.FuncionarioWhereUniqueInput | Prisma.FuncionarioWhereUniqueInput[]
+}
+
+export type FuncionarioUncheckedCreateNestedManyWithoutWhatsappContactInput = {
+  create?: Prisma.XOR<Prisma.FuncionarioCreateWithoutWhatsappContactInput, Prisma.FuncionarioUncheckedCreateWithoutWhatsappContactInput> | Prisma.FuncionarioCreateWithoutWhatsappContactInput[] | Prisma.FuncionarioUncheckedCreateWithoutWhatsappContactInput[]
+  connectOrCreate?: Prisma.FuncionarioCreateOrConnectWithoutWhatsappContactInput | Prisma.FuncionarioCreateOrConnectWithoutWhatsappContactInput[]
+  createMany?: Prisma.FuncionarioCreateManyWhatsappContactInputEnvelope
+  connect?: Prisma.FuncionarioWhereUniqueInput | Prisma.FuncionarioWhereUniqueInput[]
+}
+
+export type FuncionarioUpdateManyWithoutWhatsappContactNestedInput = {
+  create?: Prisma.XOR<Prisma.FuncionarioCreateWithoutWhatsappContactInput, Prisma.FuncionarioUncheckedCreateWithoutWhatsappContactInput> | Prisma.FuncionarioCreateWithoutWhatsappContactInput[] | Prisma.FuncionarioUncheckedCreateWithoutWhatsappContactInput[]
+  connectOrCreate?: Prisma.FuncionarioCreateOrConnectWithoutWhatsappContactInput | Prisma.FuncionarioCreateOrConnectWithoutWhatsappContactInput[]
+  upsert?: Prisma.FuncionarioUpsertWithWhereUniqueWithoutWhatsappContactInput | Prisma.FuncionarioUpsertWithWhereUniqueWithoutWhatsappContactInput[]
+  createMany?: Prisma.FuncionarioCreateManyWhatsappContactInputEnvelope
+  set?: Prisma.FuncionarioWhereUniqueInput | Prisma.FuncionarioWhereUniqueInput[]
+  disconnect?: Prisma.FuncionarioWhereUniqueInput | Prisma.FuncionarioWhereUniqueInput[]
+  delete?: Prisma.FuncionarioWhereUniqueInput | Prisma.FuncionarioWhereUniqueInput[]
+  connect?: Prisma.FuncionarioWhereUniqueInput | Prisma.FuncionarioWhereUniqueInput[]
+  update?: Prisma.FuncionarioUpdateWithWhereUniqueWithoutWhatsappContactInput | Prisma.FuncionarioUpdateWithWhereUniqueWithoutWhatsappContactInput[]
+  updateMany?: Prisma.FuncionarioUpdateManyWithWhereWithoutWhatsappContactInput | Prisma.FuncionarioUpdateManyWithWhereWithoutWhatsappContactInput[]
+  deleteMany?: Prisma.FuncionarioScalarWhereInput | Prisma.FuncionarioScalarWhereInput[]
+}
+
+export type FuncionarioUncheckedUpdateManyWithoutWhatsappContactNestedInput = {
+  create?: Prisma.XOR<Prisma.FuncionarioCreateWithoutWhatsappContactInput, Prisma.FuncionarioUncheckedCreateWithoutWhatsappContactInput> | Prisma.FuncionarioCreateWithoutWhatsappContactInput[] | Prisma.FuncionarioUncheckedCreateWithoutWhatsappContactInput[]
+  connectOrCreate?: Prisma.FuncionarioCreateOrConnectWithoutWhatsappContactInput | Prisma.FuncionarioCreateOrConnectWithoutWhatsappContactInput[]
+  upsert?: Prisma.FuncionarioUpsertWithWhereUniqueWithoutWhatsappContactInput | Prisma.FuncionarioUpsertWithWhereUniqueWithoutWhatsappContactInput[]
+  createMany?: Prisma.FuncionarioCreateManyWhatsappContactInputEnvelope
+  set?: Prisma.FuncionarioWhereUniqueInput | Prisma.FuncionarioWhereUniqueInput[]
+  disconnect?: Prisma.FuncionarioWhereUniqueInput | Prisma.FuncionarioWhereUniqueInput[]
+  delete?: Prisma.FuncionarioWhereUniqueInput | Prisma.FuncionarioWhereUniqueInput[]
+  connect?: Prisma.FuncionarioWhereUniqueInput | Prisma.FuncionarioWhereUniqueInput[]
+  update?: Prisma.FuncionarioUpdateWithWhereUniqueWithoutWhatsappContactInput | Prisma.FuncionarioUpdateWithWhereUniqueWithoutWhatsappContactInput[]
+  updateMany?: Prisma.FuncionarioUpdateManyWithWhereWithoutWhatsappContactInput | Prisma.FuncionarioUpdateManyWithWhereWithoutWhatsappContactInput[]
+  deleteMany?: Prisma.FuncionarioScalarWhereInput | Prisma.FuncionarioScalarWhereInput[]
 }
 
 export type FuncionarioCreateNestedManyWithoutSolicitanteInput = {
@@ -593,6 +659,7 @@ export type FuncionarioCreateWithoutUserInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   solicitante: Prisma.SolicitanteCreateNestedOneWithoutFuncionariosInput
+  whatsappContact?: Prisma.WhatsAppContactCreateNestedOneWithoutFuncionariosInput
 }
 
 export type FuncionarioUncheckedCreateWithoutUserInput = {
@@ -606,6 +673,7 @@ export type FuncionarioUncheckedCreateWithoutUserInput = {
   pushName?: string | null
   profilePicUrl?: string | null
   instanceId?: string | null
+  whatsappContactId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -639,6 +707,7 @@ export type FuncionarioUpdateWithoutUserInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   solicitante?: Prisma.SolicitanteUpdateOneRequiredWithoutFuncionariosNestedInput
+  whatsappContact?: Prisma.WhatsAppContactUpdateOneWithoutFuncionariosNestedInput
 }
 
 export type FuncionarioUncheckedUpdateWithoutUserInput = {
@@ -652,8 +721,87 @@ export type FuncionarioUncheckedUpdateWithoutUserInput = {
   pushName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profilePicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   instanceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  whatsappContactId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type FuncionarioCreateWithoutWhatsappContactInput = {
+  id?: string
+  nome: string
+  email?: string | null
+  telefone: string
+  whatsappId?: string | null
+  remoteJid?: string | null
+  pushName?: string | null
+  profilePicUrl?: string | null
+  instanceId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  solicitante: Prisma.SolicitanteCreateNestedOneWithoutFuncionariosInput
+  user: Prisma.UserCreateNestedOneWithoutFuncionarioInput
+}
+
+export type FuncionarioUncheckedCreateWithoutWhatsappContactInput = {
+  id?: string
+  solicitante_id: string
+  userId: string
+  nome: string
+  email?: string | null
+  telefone: string
+  whatsappId?: string | null
+  remoteJid?: string | null
+  pushName?: string | null
+  profilePicUrl?: string | null
+  instanceId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type FuncionarioCreateOrConnectWithoutWhatsappContactInput = {
+  where: Prisma.FuncionarioWhereUniqueInput
+  create: Prisma.XOR<Prisma.FuncionarioCreateWithoutWhatsappContactInput, Prisma.FuncionarioUncheckedCreateWithoutWhatsappContactInput>
+}
+
+export type FuncionarioCreateManyWhatsappContactInputEnvelope = {
+  data: Prisma.FuncionarioCreateManyWhatsappContactInput | Prisma.FuncionarioCreateManyWhatsappContactInput[]
+  skipDuplicates?: boolean
+}
+
+export type FuncionarioUpsertWithWhereUniqueWithoutWhatsappContactInput = {
+  where: Prisma.FuncionarioWhereUniqueInput
+  update: Prisma.XOR<Prisma.FuncionarioUpdateWithoutWhatsappContactInput, Prisma.FuncionarioUncheckedUpdateWithoutWhatsappContactInput>
+  create: Prisma.XOR<Prisma.FuncionarioCreateWithoutWhatsappContactInput, Prisma.FuncionarioUncheckedCreateWithoutWhatsappContactInput>
+}
+
+export type FuncionarioUpdateWithWhereUniqueWithoutWhatsappContactInput = {
+  where: Prisma.FuncionarioWhereUniqueInput
+  data: Prisma.XOR<Prisma.FuncionarioUpdateWithoutWhatsappContactInput, Prisma.FuncionarioUncheckedUpdateWithoutWhatsappContactInput>
+}
+
+export type FuncionarioUpdateManyWithWhereWithoutWhatsappContactInput = {
+  where: Prisma.FuncionarioScalarWhereInput
+  data: Prisma.XOR<Prisma.FuncionarioUpdateManyMutationInput, Prisma.FuncionarioUncheckedUpdateManyWithoutWhatsappContactInput>
+}
+
+export type FuncionarioScalarWhereInput = {
+  AND?: Prisma.FuncionarioScalarWhereInput | Prisma.FuncionarioScalarWhereInput[]
+  OR?: Prisma.FuncionarioScalarWhereInput[]
+  NOT?: Prisma.FuncionarioScalarWhereInput | Prisma.FuncionarioScalarWhereInput[]
+  id?: Prisma.StringFilter<"Funcionario"> | string
+  solicitante_id?: Prisma.StringFilter<"Funcionario"> | string
+  userId?: Prisma.StringFilter<"Funcionario"> | string
+  nome?: Prisma.StringFilter<"Funcionario"> | string
+  email?: Prisma.StringNullableFilter<"Funcionario"> | string | null
+  telefone?: Prisma.StringFilter<"Funcionario"> | string
+  whatsappId?: Prisma.StringNullableFilter<"Funcionario"> | string | null
+  remoteJid?: Prisma.StringNullableFilter<"Funcionario"> | string | null
+  pushName?: Prisma.StringNullableFilter<"Funcionario"> | string | null
+  profilePicUrl?: Prisma.StringNullableFilter<"Funcionario"> | string | null
+  instanceId?: Prisma.StringNullableFilter<"Funcionario"> | string | null
+  whatsappContactId?: Prisma.StringNullableFilter<"Funcionario"> | string | null
+  createdAt?: Prisma.DateTimeFilter<"Funcionario"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"Funcionario"> | Date | string
 }
 
 export type FuncionarioCreateWithoutSolicitanteInput = {
@@ -669,6 +817,7 @@ export type FuncionarioCreateWithoutSolicitanteInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutFuncionarioInput
+  whatsappContact?: Prisma.WhatsAppContactCreateNestedOneWithoutFuncionariosInput
 }
 
 export type FuncionarioUncheckedCreateWithoutSolicitanteInput = {
@@ -682,6 +831,7 @@ export type FuncionarioUncheckedCreateWithoutSolicitanteInput = {
   pushName?: string | null
   profilePicUrl?: string | null
   instanceId?: string | null
+  whatsappContactId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -712,23 +862,68 @@ export type FuncionarioUpdateManyWithWhereWithoutSolicitanteInput = {
   data: Prisma.XOR<Prisma.FuncionarioUpdateManyMutationInput, Prisma.FuncionarioUncheckedUpdateManyWithoutSolicitanteInput>
 }
 
-export type FuncionarioScalarWhereInput = {
-  AND?: Prisma.FuncionarioScalarWhereInput | Prisma.FuncionarioScalarWhereInput[]
-  OR?: Prisma.FuncionarioScalarWhereInput[]
-  NOT?: Prisma.FuncionarioScalarWhereInput | Prisma.FuncionarioScalarWhereInput[]
-  id?: Prisma.StringFilter<"Funcionario"> | string
-  solicitante_id?: Prisma.StringFilter<"Funcionario"> | string
-  userId?: Prisma.StringFilter<"Funcionario"> | string
-  nome?: Prisma.StringFilter<"Funcionario"> | string
-  email?: Prisma.StringNullableFilter<"Funcionario"> | string | null
-  telefone?: Prisma.StringFilter<"Funcionario"> | string
-  whatsappId?: Prisma.StringNullableFilter<"Funcionario"> | string | null
-  remoteJid?: Prisma.StringNullableFilter<"Funcionario"> | string | null
-  pushName?: Prisma.StringNullableFilter<"Funcionario"> | string | null
-  profilePicUrl?: Prisma.StringNullableFilter<"Funcionario"> | string | null
-  instanceId?: Prisma.StringNullableFilter<"Funcionario"> | string | null
-  createdAt?: Prisma.DateTimeFilter<"Funcionario"> | Date | string
-  updatedAt?: Prisma.DateTimeFilter<"Funcionario"> | Date | string
+export type FuncionarioCreateManyWhatsappContactInput = {
+  id?: string
+  solicitante_id: string
+  userId: string
+  nome: string
+  email?: string | null
+  telefone: string
+  whatsappId?: string | null
+  remoteJid?: string | null
+  pushName?: string | null
+  profilePicUrl?: string | null
+  instanceId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type FuncionarioUpdateWithoutWhatsappContactInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nome?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telefone?: Prisma.StringFieldUpdateOperationsInput | string
+  whatsappId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  remoteJid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pushName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profilePicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  instanceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  solicitante?: Prisma.SolicitanteUpdateOneRequiredWithoutFuncionariosNestedInput
+  user?: Prisma.UserUpdateOneRequiredWithoutFuncionarioNestedInput
+}
+
+export type FuncionarioUncheckedUpdateWithoutWhatsappContactInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  solicitante_id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  nome?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telefone?: Prisma.StringFieldUpdateOperationsInput | string
+  whatsappId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  remoteJid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pushName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profilePicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  instanceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type FuncionarioUncheckedUpdateManyWithoutWhatsappContactInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  solicitante_id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  nome?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telefone?: Prisma.StringFieldUpdateOperationsInput | string
+  whatsappId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  remoteJid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pushName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profilePicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  instanceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type FuncionarioCreateManySolicitanteInput = {
@@ -742,6 +937,7 @@ export type FuncionarioCreateManySolicitanteInput = {
   pushName?: string | null
   profilePicUrl?: string | null
   instanceId?: string | null
+  whatsappContactId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -759,6 +955,7 @@ export type FuncionarioUpdateWithoutSolicitanteInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutFuncionarioNestedInput
+  whatsappContact?: Prisma.WhatsAppContactUpdateOneWithoutFuncionariosNestedInput
 }
 
 export type FuncionarioUncheckedUpdateWithoutSolicitanteInput = {
@@ -772,6 +969,7 @@ export type FuncionarioUncheckedUpdateWithoutSolicitanteInput = {
   pushName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profilePicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   instanceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  whatsappContactId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -787,6 +985,7 @@ export type FuncionarioUncheckedUpdateManyWithoutSolicitanteInput = {
   pushName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profilePicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   instanceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  whatsappContactId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -805,10 +1004,12 @@ export type FuncionarioSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   pushName?: boolean
   profilePicUrl?: boolean
   instanceId?: boolean
+  whatsappContactId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   solicitante?: boolean | Prisma.SolicitanteDefaultArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  whatsappContact?: boolean | Prisma.Funcionario$whatsappContactArgs<ExtArgs>
 }, ExtArgs["result"]["funcionario"]>
 
 export type FuncionarioSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -823,10 +1024,12 @@ export type FuncionarioSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   pushName?: boolean
   profilePicUrl?: boolean
   instanceId?: boolean
+  whatsappContactId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   solicitante?: boolean | Prisma.SolicitanteDefaultArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  whatsappContact?: boolean | Prisma.Funcionario$whatsappContactArgs<ExtArgs>
 }, ExtArgs["result"]["funcionario"]>
 
 export type FuncionarioSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -841,10 +1044,12 @@ export type FuncionarioSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   pushName?: boolean
   profilePicUrl?: boolean
   instanceId?: boolean
+  whatsappContactId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   solicitante?: boolean | Prisma.SolicitanteDefaultArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  whatsappContact?: boolean | Prisma.Funcionario$whatsappContactArgs<ExtArgs>
 }, ExtArgs["result"]["funcionario"]>
 
 export type FuncionarioSelectScalar = {
@@ -859,22 +1064,26 @@ export type FuncionarioSelectScalar = {
   pushName?: boolean
   profilePicUrl?: boolean
   instanceId?: boolean
+  whatsappContactId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type FuncionarioOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "solicitante_id" | "userId" | "nome" | "email" | "telefone" | "whatsappId" | "remoteJid" | "pushName" | "profilePicUrl" | "instanceId" | "createdAt" | "updatedAt", ExtArgs["result"]["funcionario"]>
+export type FuncionarioOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "solicitante_id" | "userId" | "nome" | "email" | "telefone" | "whatsappId" | "remoteJid" | "pushName" | "profilePicUrl" | "instanceId" | "whatsappContactId" | "createdAt" | "updatedAt", ExtArgs["result"]["funcionario"]>
 export type FuncionarioInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   solicitante?: boolean | Prisma.SolicitanteDefaultArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  whatsappContact?: boolean | Prisma.Funcionario$whatsappContactArgs<ExtArgs>
 }
 export type FuncionarioIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   solicitante?: boolean | Prisma.SolicitanteDefaultArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  whatsappContact?: boolean | Prisma.Funcionario$whatsappContactArgs<ExtArgs>
 }
 export type FuncionarioIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   solicitante?: boolean | Prisma.SolicitanteDefaultArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  whatsappContact?: boolean | Prisma.Funcionario$whatsappContactArgs<ExtArgs>
 }
 
 export type $FuncionarioPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -882,6 +1091,7 @@ export type $FuncionarioPayload<ExtArgs extends runtime.Types.Extensions.Interna
   objects: {
     solicitante: Prisma.$SolicitantePayload<ExtArgs>
     user: Prisma.$UserPayload<ExtArgs>
+    whatsappContact: Prisma.$WhatsAppContactPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -895,6 +1105,7 @@ export type $FuncionarioPayload<ExtArgs extends runtime.Types.Extensions.Interna
     pushName: string | null
     profilePicUrl: string | null
     instanceId: string | null
+    whatsappContactId: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["funcionario"]>
@@ -1293,6 +1504,7 @@ export interface Prisma__FuncionarioClient<T, Null = never, ExtArgs extends runt
   readonly [Symbol.toStringTag]: "PrismaPromise"
   solicitante<T extends Prisma.SolicitanteDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SolicitanteDefaultArgs<ExtArgs>>): Prisma.Prisma__SolicitanteClient<runtime.Types.Result.GetResult<Prisma.$SolicitantePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  whatsappContact<T extends Prisma.Funcionario$whatsappContactArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Funcionario$whatsappContactArgs<ExtArgs>>): Prisma.Prisma__WhatsAppContactClient<runtime.Types.Result.GetResult<Prisma.$WhatsAppContactPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1333,6 +1545,7 @@ export interface FuncionarioFieldRefs {
   readonly pushName: Prisma.FieldRef<"Funcionario", 'String'>
   readonly profilePicUrl: Prisma.FieldRef<"Funcionario", 'String'>
   readonly instanceId: Prisma.FieldRef<"Funcionario", 'String'>
+  readonly whatsappContactId: Prisma.FieldRef<"Funcionario", 'String'>
   readonly createdAt: Prisma.FieldRef<"Funcionario", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Funcionario", 'DateTime'>
 }
@@ -1728,6 +1941,25 @@ export type FuncionarioDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.I
    * Limit how many Funcionarios to delete.
    */
   limit?: number
+}
+
+/**
+ * Funcionario.whatsappContact
+ */
+export type Funcionario$whatsappContactArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the WhatsAppContact
+   */
+  select?: Prisma.WhatsAppContactSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the WhatsAppContact
+   */
+  omit?: Prisma.WhatsAppContactOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WhatsAppContactInclude<ExtArgs> | null
+  where?: Prisma.WhatsAppContactWhereInput
 }
 
 /**
