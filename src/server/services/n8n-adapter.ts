@@ -26,7 +26,7 @@ function resolveN8nBase(config?: WhatsAppRuntimeConfig | null) {
 function resolvePath(config: WhatsAppRuntimeConfig | null | undefined, key: "conversations" | "messages" | "send") {
   if (key === "conversations") return config?.n8nConversationsPath || "/conversations";
   if (key === "messages") return config?.n8nMessagesPath || "/messages";
-  return config?.n8nSendPath || "/send";
+  return config?.n8nSendPath || "/messages/send";
 }
 
 function isAbsoluteUrl(value: string) {
