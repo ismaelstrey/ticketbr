@@ -94,3 +94,13 @@ export type TicketEvent = Prisma.TicketEventModel
  * 
  */
 export type ChatConversation = Prisma.ChatConversationModel
+/**
+ * Model Conversation
+ * 
+ */
+export type Conversation = Prisma.ConversationModel
+/**
+ * Model Message
+ * 
+ */
+export type Message = Prisma.MessageModel

@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import type { WhatsAppRuntimeConfig } from "@/server/services/whatsapp-settings";
+import { isN8nConfigured, requestN8nChatPath, resolvePath } from "@/server/services/n8n-adapter";
 
 export interface WhatsAppContactRecord {
   id: string;
@@ -11,39 +12,10 @@ export interface WhatsAppContactRecord {
   instanceId: string | null;
 }
 
-function isAbsoluteUrl(value: string) {
-  return /^https?:\/\//i.test(value);
-}
-
-function buildUrl(base: string, path: string) {
-  const normalizedBase = base.endsWith("/") ? base.slice(0, -1) : base;
-  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-  return `${normalizedBase}${normalizedPath}`;
-}
-
 function normalizeText(value: unknown) {
   if (typeof value !== "string") return null;
   const trimmed = value.trim();
   return trimmed || null;
-}
-
-function resolveContactsEndpoint(config?: WhatsAppRuntimeConfig | null) {
-  const webhookUrl = config?.n8nWebhookUrl?.trim() || "";
-  const n8nBase = config?.n8nBaseUrl?.trim() || "";
-
-  if (webhookUrl && isAbsoluteUrl(webhookUrl)) {
-    const webhookRoot = webhookUrl.replace(/\/[^/]+$/, "");
-    return buildUrl(webhookRoot, "/todos/contatos");
-  }
-
-  if (n8nBase && isAbsoluteUrl(n8nBase)) {
-    if (n8nBase.includes("/webhook") || n8nBase.includes("/webhook-test")) {
-      return buildUrl(n8nBase, "/todos/contatos");
-    }
-    return buildUrl(n8nBase, "/webhook-test/todos/contatos");
-  }
-
-  throw new Error("Integração n8n não configurada para sincronização de contatos.");
 }
 
 function mapIncomingContact(item: unknown): WhatsAppContactRecord | null {
@@ -165,21 +137,19 @@ export async function listSyncedWhatsAppContacts(limit = 300): Promise<WhatsAppC
 export async function syncWhatsAppContactsFromN8n(config?: WhatsAppRuntimeConfig | null) {
   await ensureWhatsContactsTable();
 
-  const endpoint = resolveContactsEndpoint(config);
-  const apiKey = config?.n8nApiKey || process.env.N8N_CHAT_API_KEY;
-
-  const response = await fetch(endpoint, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      ...(apiKey ? { "X-N8N-API-KEY": apiKey, Authorization: `Bearer ${apiKey}` } : {})
-    }
-  });
-
-  const payload = await response.json().catch(() => ({}));
-  if (!response.ok) {
-    throw new Error(payload?.message || payload?.error || `Falha ao consultar endpoint de contatos (${response.status})`);
+  if (!isN8nConfigured(config)) {
+    throw new Error("Integração n8n não configurada para sincronização de contatos.");
   }
+
+  // Assumindo que o path para contatos é /todos/contatos ou configurável
+  // Por padrão vamos usar uma convenção baseada nos webhooks se não houver config específica
+  // Ou podemos usar resolvePath se adicionarmos "contacts" ao whatsapp-settings.ts
+  // Como não temos "contacts" no settings, vamos usar a convenção de adicionar /todos/contatos ao webhook base
+  
+  // Mas como agora temos requestN8nChatPath que lida com a lógica de resolução, podemos tentar usar um caminho relativo.
+  // Vamos tentar "/todos/contatos" que parece ser o padrão do projeto
+  
+  const payload = await requestN8nChatPath("/todos/contatos", config, { method: "GET" });
 
   const rawList = Array.isArray(payload)
     ? payload
@@ -226,7 +196,7 @@ export async function syncWhatsAppContactsFromN8n(config?: WhatsAppRuntimeConfig
   }
 
   return {
-    endpoint,
+    endpoint: "/todos/contatos",
     totalReceived: rawList.length,
     totalSaved: contacts.length
   };

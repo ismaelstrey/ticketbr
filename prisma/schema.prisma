@@ -319,3 +319,39 @@ model ChatConversation {
   @@index([contactId, channel, closedAt])
   @@index([ticketId])
 }
+
+model Conversation {
+  id              String    @id @default(cuid()) // conversation_id
+  waChatId        String    @unique @map("wa_chat_id") // JID do WhatsApp
+  instance        String?
+  status          String    @default("open") // open, closed
+  botActive       Boolean   @default(true) @map("bot_active")
+  humanActive     Boolean   @default(false) @map("human_active")
+  assignedTo      String?   @map("assigned_to") // userId
+  lastMessageAt   DateTime? @map("last_message_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  messages        Message[]
+
+  @@map("conversations")
+}
+
+model Message {
+  id              String    @id @default(cuid())
+  waMessageId     String?   @unique @map("wa_message_id")
+  conversationId  String    @map("conversation_id")
+  conversation    Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  
+  direction       String    // in, out
+  type            String    // text, image, audio, etc.
+  body            String?   @db.Text // text or caption
+  mediaUrl        String?   @map("media_url")
+  mimetype        String?
+  status          String    @default("sent") // sent, delivered, read
+  
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  @@map("messages")
+}

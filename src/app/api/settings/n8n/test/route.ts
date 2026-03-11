@@ -28,53 +28,92 @@ export async function POST(request: NextRequest) {
       ...(apiKey ? { "X-N8N-API-KEY": apiKey, Authorization: `Bearer ${apiKey}` } : {})
     };
 
-    const candidates = apiKey
-      ? ["/api/v1/workflows?limit=1", "/healthz/readiness", "/healthz"]
-      : ["/healthz/readiness", "/healthz", "/api/v1/workflows?limit=1"];
+    // Validar não apenas health, mas também se os paths configurados existem (retornam algo diferente de 404)
+    // Se for POST, tentamos GET apenas para ver se a rota existe (geralmente 405 Method Not Allowed ou 401/403 se auth falhar)
+    // Se for GET, tentamos GET.
+    
+    const conversationsPath = config?.n8nConversationsPath || "/conversations";
+    const messagesPath = config?.n8nMessagesPath || "/messages";
+    const sendPath = config?.n8nSendPath || "/messages/send";
 
-    const attempts: Array<Record<string, unknown>> = [];
+    const pathsToTest = [
+      { path: "/healthz", method: "GET", description: "Healthcheck" },
+      { path: conversationsPath, method: "GET", description: "Conversations Path" },
+      { path: messagesPath, method: "GET", description: "Messages Path" },
+      // Para o sendPath, um GET geralmente retorna 404 se não existir ou 405 se existir mas só aceitar POST.
+      // Vamos tentar um GET e interpretar o resultado.
+      { path: sendPath, method: "GET", description: "Send Path (Check)" }
+    ];
 
-    for (const path of candidates) {
+    const results: Array<Record<string, unknown>> = [];
+    let overallSuccess = false;
+
+    for (const test of pathsToTest) {
       const start = Date.now();
-      const timer = withTimeout(15000);
+      const timer = withTimeout(10000); // 10s timeout
+      
       try {
-        const res = await fetch(`${baseUrl}${path}`, {
-          method: "GET",
+        const fullUrl = `${baseUrl}${test.path.startsWith("/") ? "" : "/"}${test.path}`;
+        const res = await fetch(fullUrl, {
+          method: test.method,
           headers,
           signal: timer.signal
         });
         timer.clear();
 
-        const bodyText = await res.text();
         const elapsedMs = Date.now() - start;
-        const payload = (() => {
-          try {
-            return JSON.parse(bodyText);
-          } catch {
-            return bodyText.slice(0, 300);
-          }
-        })();
+        const status = res.status;
+        
+        // Interpretação de sucesso:
+        // 2xx: Sucesso total
+        // 405: Rota existe, mas método errado (bom sinal para Send Path)
+        // 401/403: Rota existe, mas auth falhou (significa que o n8n está lá)
+        // 404: Rota não encontrada (ERRO)
+        
+        const isRouteValid = status !== 404;
+        const isAuthValid = status !== 401 && status !== 403;
+        
+        results.push({
+          path: test.path,
+          description: test.description,
+          status,
+          ok: res.ok,
+          validRoute: isRouteValid,
+          validAuth: isAuthValid,
+          elapsedMs
+        });
 
-        attempts.push({ path, status: res.status, ok: res.ok, elapsedMs });
-
-        if (res.ok) {
-          return NextResponse.json({
-            data: {
-              ok: true,
-              validatedPath: path,
-              elapsedMs,
-              attempts,
-              sample: payload
-            }
-          });
+        if (test.path === "/healthz" && res.ok) {
+            overallSuccess = true;
         }
+
       } catch (error: any) {
         timer.clear();
-        attempts.push({ path, ok: false, error: error?.message || "request failed" });
+        results.push({
+          path: test.path,
+          description: test.description,
+          ok: false,
+          error: error?.message || "Network error"
+        });
       }
     }
 
-    return NextResponse.json({ error: "Não foi possível validar comunicação com n8n", attempts }, { status: 502 });
+    // Consideramos sucesso se pelo menos o healthcheck passar.
+    // O frontend pode mostrar avisos se as rotas específicas falharem.
+    if (overallSuccess) {
+      return NextResponse.json({
+        data: {
+          ok: true,
+          results
+        }
+      });
+    }
+
+    return NextResponse.json({ 
+        error: "Falha na comunicação com n8n", 
+        details: results 
+    }, { status: 502 });
+
   } catch (error: any) {
     return NextResponse.json({ error: error?.message || "Erro ao testar integração n8n" }, { status: 500 });
   }

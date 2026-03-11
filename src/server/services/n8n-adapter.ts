@@ -22,7 +22,7 @@ function resolveN8nBase(config?: WhatsAppRuntimeConfig | null) {
   return config?.n8nBaseUrl || process.env.N8N_CHAT_BASE_URL || "";
 }
 
-function resolvePath(config: WhatsAppRuntimeConfig | null | undefined, key: "conversations" | "messages" | "send") {
+export function resolvePath(config: WhatsAppRuntimeConfig | null | undefined, key: "conversations" | "messages" | "send") {
   if (key === "conversations") return config?.n8nConversationsPath || "/conversations";
   if (key === "messages") return config?.n8nMessagesPath || "/messages";
   return config?.n8nSendPath || "/messages/send";
@@ -34,8 +34,7 @@ function isAbsoluteUrl(value: string) {
 
 function normalizePhone(value?: string) {
   if (!value) return "";
-  const e164 = toE164(value, "BR");
-  return (e164 ?? value).replace(/\D/g, "");
+  return value.replace(/\D/g, "");
 }
 
 function buildUrl(base: string, pathOrUrl: string) {
@@ -102,7 +101,7 @@ async function requestN8n(pathOrUrl: string, config?: WhatsAppRuntimeConfig | nu
   }
 }
 
-async function requestN8nChatPath(path: string, config: WhatsAppRuntimeConfig | null | undefined, init?: RequestInit) {
+export async function requestN8nChatPath(path: string, config: WhatsAppRuntimeConfig | null | undefined, init?: RequestInit) {
   if (isAbsoluteUrl(path)) {
     return requestN8n(path, config, init);
   }

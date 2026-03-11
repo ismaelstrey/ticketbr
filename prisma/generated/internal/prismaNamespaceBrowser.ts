@@ -61,7 +61,9 @@ export const ModelName = {
   Operador: 'Operador',
   Ticket: 'Ticket',
   TicketEvent: 'TicketEvent',
-  ChatConversation: 'ChatConversation'
+  ChatConversation: 'ChatConversation',
+  Conversation: 'Conversation',
+  Message: 'Message'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -293,6 +295,39 @@ export const ChatConversationScalarFieldEnum = {
 } as const
 
 export type ChatConversationScalarFieldEnum = (typeof ChatConversationScalarFieldEnum)[keyof typeof ChatConversationScalarFieldEnum]
+
+
+export const ConversationScalarFieldEnum = {
+  id: 'id',
+  waChatId: 'waChatId',
+  instance: 'instance',
+  status: 'status',
+  botActive: 'botActive',
+  humanActive: 'humanActive',
+  assignedTo: 'assignedTo',
+  lastMessageAt: 'lastMessageAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ConversationScalarFieldEnum = (typeof ConversationScalarFieldEnum)[keyof typeof ConversationScalarFieldEnum]
+
+
+export const MessageScalarFieldEnum = {
+  id: 'id',
+  waMessageId: 'waMessageId',
+  conversationId: 'conversationId',
+  direction: 'direction',
+  type: 'type',
+  body: 'body',
+  mediaUrl: 'mediaUrl',
+  mimetype: 'mimetype',
+  status: 'status',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MessageScalarFieldEnum = (typeof MessageScalarFieldEnum)[keyof typeof MessageScalarFieldEnum]
 
 
 export const SortOrder = {

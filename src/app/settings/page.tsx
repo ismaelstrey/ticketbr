@@ -1,64 +1,14 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 import { AppShellContainer, MainContent } from "@/components/layout/AppShell";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { useToast } from "@/context/ToastContext";
+import { useSettings } from "@/hooks/useSettings";
 
 type TabKey = "general" | "evolution" | "n8n" | "contactsSync" | "notifications";
-
-interface IntegrationSettings {
-  evolutionBaseUrl: string;
-  evolutionApiKey: string;
-  evolutionInstance: string;
-  webhookUrl: string;
-  evolutionWebhookUrl: string;
-  evolutionTimeoutMs: string;
-  evolutionRetryEnabled: boolean;
-  evolutionRetryMax: string;
-  evolutionRetryDelayMs: string;
-  autoLinkTickets: boolean;
-  n8nWebhookUrl: string;
-  n8nUseTestWebhook: boolean;
-  n8nBaseUrl: string;
-  n8nApiKey: string;
-  n8nConversationsPath: string;
-  n8nMessagesPath: string;
-  n8nSendPath: string;
-}
-
-interface SyncedContact {
-  id: string;
-  remoteJid: string;
-  pushName: string | null;
-  profilePicUrl: string | null;
-  createdAt: string;
-  updatedAt: string;
-  instanceId: string | null;
-}
-
-const defaults: IntegrationSettings = {
-  evolutionBaseUrl: "",
-  evolutionApiKey: "",
-  evolutionInstance: "",
-  webhookUrl: "",
-  evolutionWebhookUrl: "",
-  evolutionTimeoutMs: "15000",
-  evolutionRetryEnabled: true,
-  evolutionRetryMax: "2",
-  evolutionRetryDelayMs: "750",
-  autoLinkTickets: true,
-  n8nWebhookUrl: "",
-  n8nUseTestWebhook: false,
-  n8nBaseUrl: "",
-  n8nApiKey: "",
-  n8nConversationsPath: "/conversations",
-  n8nMessagesPath: "/messages",
-  n8nSendPath: "/send"
-};
 
 const Card = styled.section`
   background: #fff;
@@ -100,16 +50,6 @@ const Field = styled.label`
   gap: 0.4rem;
   color: #111827;
   font-size: 0.9rem;
-`;
-
-const FieldHint = styled.span`
-  color: #6b7280;
-  font-size: 0.82rem;
-`;
-
-const FieldError = styled.span`
-  color: #b91c1c;
-  font-size: 0.82rem;
 `;
 
 const Footer = styled.div`
@@ -156,23 +96,35 @@ const ContactsTable = styled.table`
 `;
 
 export default function SettingsPage() {
-  const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState<TabKey>("general");
-  const [settings, setSettings] = useState<IntegrationSettings>(defaults);
 
-  const [testingApi, setTestingApi] = useState(false);
-  const [testingN8n, setTestingN8n] = useState(false);
-  const [syncingContacts, setSyncingContacts] = useState(false);
-  const [loadingContacts, setLoadingContacts] = useState(false);
+  const {
+    settings,
+    updateSettings: update,
+    fetchSettings,
+    saveSettings,
+    testSystemApi,
+    testN8n,
+    syncContacts,
+    loadSyncedContacts,
+    loadQr,
+    testingApi,
+    testingN8n,
+    syncingContacts,
+    loadingContacts,
+    loadingQr,
+    n8nTestResult,
+    contactsSyncResult,
+    contacts,
+    qrCode,
+    pairingCode,
+    connectionStatus
+  } = useSettings();
 
-  const [n8nTestResult, setN8nTestResult] = useState<unknown>(null);
-  const [contactsSyncResult, setContactsSyncResult] = useState<unknown>(null);
-  const [contacts, setContacts] = useState<SyncedContact[]>([]);
-
-  const [loadingQr, setLoadingQr] = useState(false);
-  const [qrCode, setQrCode] = useState<string | null>(null);
-  const [pairingCode, setPairingCode] = useState<string | null>(null);
-  const [connectionStatus, setConnectionStatus] = useState<string>("desconhecido");
+  useEffect(() => {
+    fetchSettings();
+    loadSyncedContacts();
+  }, [fetchSettings, loadSyncedContacts]);
 
   const tabs = useMemo(
     () => [
@@ -184,195 +136,6 @@ export default function SettingsPage() {
     ],
     []
   );
-
-  const update = (patch: Partial<IntegrationSettings>) => setSettings((curr) => ({ ...curr, ...patch }));
-
-  const loadSyncedContacts = async () => {
-    try {
-      setLoadingContacts(true);
-      const res = await fetch("/api/settings/contacts?limit=500");
-      const json = await res.json();
-      if (!res.ok) throw new Error(json?.error || "Erro ao carregar contatos sincronizados");
-      setContacts(Array.isArray(json?.data) ? json.data : []);
-    } catch (error: any) {
-      showToast(error?.message ?? "Falha ao carregar contatos sincronizados", "error");
-    } finally {
-      setLoadingContacts(false);
-    }
-  };
-
-  useEffect(() => {
-    fetch("/api/settings/whatsapp/config")
-      .then((res) => res.json())
-      .then((json) => {
-        if (json?.data) {
-          setSettings((curr) => ({
-            ...curr,
-            evolutionBaseUrl: json.data.baseUrl ?? curr.evolutionBaseUrl,
-            evolutionInstance: json.data.instance ?? curr.evolutionInstance,
-            webhookUrl: json.data.webhookUrl ?? json.data.evolutionWebhookUrl ?? curr.webhookUrl,
-            evolutionWebhookUrl: json.data.evolutionWebhookUrl ?? json.data.webhookUrl ?? curr.evolutionWebhookUrl,
-            evolutionTimeoutMs: String(json.data.evolutionTimeoutMs ?? curr.evolutionTimeoutMs),
-            evolutionRetryEnabled: typeof json.data.evolutionRetryEnabled === "boolean" ? json.data.evolutionRetryEnabled : curr.evolutionRetryEnabled,
-            evolutionRetryMax: String(json.data.evolutionRetryMax ?? curr.evolutionRetryMax),
-            evolutionRetryDelayMs: String(json.data.evolutionRetryDelayMs ?? curr.evolutionRetryDelayMs),
-            autoLinkTickets: typeof json.data.autoLinkTickets === "boolean" ? json.data.autoLinkTickets : curr.autoLinkTickets,
-            n8nWebhookUrl: json.data.n8nWebhookUrl ?? curr.n8nWebhookUrl,
-            n8nUseTestWebhook: typeof json.data.n8nUseTestWebhook === "boolean" ? json.data.n8nUseTestWebhook : curr.n8nUseTestWebhook,
-            n8nBaseUrl: json.data.n8nBaseUrl ?? curr.n8nBaseUrl,
-            // Preencher apiKey apenas se não estiver mascarada ou se for input do usuário
-            // Mas aqui vem mascarada do backend (apiKeyMasked)
-            evolutionApiKey: json.data.apiKeyMasked ?? curr.evolutionApiKey,
-            n8nApiKey: json.data.n8nApiKeyMasked ?? curr.n8nApiKey,
-            n8nConversationsPath: json.data.n8nConversationsPath ?? curr.n8nConversationsPath,
-            n8nMessagesPath: json.data.n8nMessagesPath ?? curr.n8nMessagesPath,
-            n8nSendPath: json.data.n8nSendPath ?? curr.n8nSendPath
-          }));
-        }
-      })
-      .catch(() => undefined);
-
-    loadSyncedContacts().catch(() => undefined);
-  }, []);
-
-  const saveSettings = async () => {
-    // Removed localStorage.setItem(storageKey, JSON.stringify(settings));
-
-    const res = await fetch("/api/settings/whatsapp/config", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        baseUrl: settings.evolutionBaseUrl,
-        apiKey: settings.evolutionApiKey,
-        instance: settings.evolutionInstance,
-        webhookUrl: settings.evolutionWebhookUrl || settings.webhookUrl,
-        evolutionWebhookUrl: settings.evolutionWebhookUrl || settings.webhookUrl,
-        evolutionTimeoutMs: settings.evolutionTimeoutMs,
-        evolutionRetryEnabled: settings.evolutionRetryEnabled,
-        evolutionRetryMax: settings.evolutionRetryMax,
-        evolutionRetryDelayMs: settings.evolutionRetryDelayMs,
-        autoLinkTickets: settings.autoLinkTickets,
-        n8nWebhookUrl: settings.n8nWebhookUrl,
-        n8nUseTestWebhook: settings.n8nUseTestWebhook,
-        n8nBaseUrl: settings.n8nBaseUrl,
-        n8nApiKey: settings.n8nApiKey,
-        n8nConversationsPath: settings.n8nConversationsPath,
-        n8nMessagesPath: settings.n8nMessagesPath,
-        n8nSendPath: settings.n8nSendPath
-      })
-    });
-
-    const json = await res.json();
-    if (!res.ok) throw new Error(json?.error || "Erro ao salvar configuração");
-
-    showToast("Configurações salvas.", "success");
-  };
-
-  const testSystemApi = async () => {
-    try {
-      setTestingApi(true);
-      const res = await fetch("/api/health");
-      if (!res.ok) throw new Error("Healthcheck falhou");
-      showToast("API online.", "success");
-    } catch (error: any) {
-      showToast(error?.message ?? "Falha ao testar API", "error");
-    } finally {
-      setTestingApi(false);
-    }
-  };
-
-  const testN8n = async () => {
-    try {
-      setTestingN8n(true);
-      setN8nTestResult(null);
-      const res = await fetch("/api/settings/n8n/test", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          n8nBaseUrl: settings.n8nBaseUrl,
-          n8nApiKey: settings.n8nApiKey,
-          n8nWebhookUrl: settings.n8nWebhookUrl,
-          n8nUseTestWebhook: settings.n8nUseTestWebhook,
-          n8nConversationsPath: settings.n8nConversationsPath,
-          n8nMessagesPath: settings.n8nMessagesPath,
-          n8nSendPath: settings.n8nSendPath
-        })
-      });
-      const json = await res.json();
-      setN8nTestResult(json);
-      if (!res.ok) throw new Error(json?.error || "Falha no teste do N8N");
-      showToast("Comunicação com n8n OK.", "success");
-    } catch (error: any) {
-      showToast(error?.message ?? "Falha ao testar N8N", "error");
-    } finally {
-      setTestingN8n(false);
-    }
-  };
-
-  const syncContacts = async () => {
-    try {
-      setSyncingContacts(true);
-      setContactsSyncResult(null);
-
-      const res = await fetch("/api/settings/contacts/sync", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          n8nBaseUrl: settings.n8nBaseUrl,
-          n8nApiKey: settings.n8nApiKey,
-          n8nWebhookUrl: settings.n8nWebhookUrl,
-          n8nUseTestWebhook: settings.n8nUseTestWebhook
-        })
-      });
-
-      const json = await res.json();
-      setContactsSyncResult(json);
-      if (!res.ok) throw new Error(json?.error || "Falha ao sincronizar contatos");
-
-      await loadSyncedContacts();
-      showToast("Contatos sincronizados com sucesso.", "success");
-    } catch (error: any) {
-      showToast(error?.message ?? "Erro ao sincronizar contatos", "error");
-    } finally {
-      setSyncingContacts(false);
-    }
-  };
-
-  const loadQr = async () => {
-    try {
-      // compat: usa estados existentes em vez de aliases antigos (setTesting/setLastTest)
-      setTestingApi(true);
-      setN8nTestResult(null);
-      setLoadingQr(true);
-      const res = await fetch("/api/settings/whatsapp/qrcode", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          baseUrl: settings.evolutionBaseUrl,
-          apiKey: settings.evolutionApiKey,
-          instance: settings.evolutionInstance,
-          webhookUrl: settings.evolutionWebhookUrl || settings.webhookUrl,
-          autoLinkTickets: settings.autoLinkTickets,
-          n8nWebhookUrl: settings.n8nWebhookUrl,
-          n8nUseTestWebhook: settings.n8nUseTestWebhook
-        })
-      });
-
-      const json = await res.json();
-      if (!res.ok) throw new Error(json?.error || "Falha ao carregar QR Code");
-
-      setConnectionStatus(String(json?.data?.status?.instance?.state || json?.data?.status?.state || "desconhecido"));
-      setQrCode(typeof json?.data?.qrCode === "string" ? json.data.qrCode : null);
-      setPairingCode(typeof json?.data?.pairingCode === "string" ? json.data.pairingCode : null);
-    } catch (error: any) {
-      showToast(error?.message ?? "Falha ao testar conexão.", "error");
-    } finally {
-      setLoadingQr(false);
-      setTestingApi(false);
-    }
-  };
-
-  
 
   return (
     <AppShellContainer>
@@ -430,7 +193,7 @@ export default function SettingsPage() {
               </label>
 
               <Footer>
-                <Button variant="save" onClick={() => saveSettings().catch((error) => showToast(error.message, "error"))}>Salvar Evolution</Button>
+                <Button variant="save" onClick={() => saveSettings()}>Salvar Evolution</Button>
                 <Button variant="primary" onClick={loadQr} disabled={loadingQr}>{loadingQr ? "Carregando QR..." : "Gerar/Atualizar QR"}</Button>
               </Footer>
 
@@ -481,7 +244,7 @@ export default function SettingsPage() {
               </FormGrid>
 
               <Footer>
-                <Button variant="save" onClick={() => saveSettings().catch((error) => showToast(error.message, "error"))}>Salvar N8N</Button>
+                <Button variant="save" onClick={() => saveSettings()}>Salvar N8N</Button>
                 <Button variant="ghost" onClick={testN8n} disabled={testingN8n}>{testingN8n ? "Testando..." : "Testar comunicação com N8N"}</Button>
               </Footer>
 
@@ -497,7 +260,7 @@ export default function SettingsPage() {
               </Info>
 
               <Footer>
-                <Button variant="save" onClick={() => saveSettings().catch((error) => showToast(error.message, "error"))}>Salvar configurações</Button>
+                <Button variant="save" onClick={() => saveSettings()}>Salvar configurações</Button>
                 <Button variant="primary" onClick={syncContacts} disabled={syncingContacts}>{syncingContacts ? "Sincronizando..." : "Sincronizar contatos"}</Button>
                 <Button variant="ghost" onClick={loadSyncedContacts} disabled={loadingContacts}>{loadingContacts ? "Carregando..." : "Atualizar lista"}</Button>
               </Footer>
