@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 import { AppShellContainer, MainContent } from "@/components/layout/AppShell";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 import { useToast } from "@/context/ToastContext";
 
 interface SyncedContact {
@@ -32,6 +33,10 @@ const Header = styled.div`
   margin-bottom: 1rem;
 `;
 
+const SearchBar = styled.div`
+  margin-bottom: 0.9rem;
+`;
+
 const ContactsTable = styled.table`
   width: 100%;
   border-collapse: collapse;
@@ -51,6 +56,7 @@ export default function WhatsAppContatosPage() {
   const [syncing, setSyncing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [contacts, setContacts] = useState<SyncedContact[]>([]);
+  const [search, setSearch] = useState("");
 
   const loadContacts = async () => {
     try {
@@ -85,6 +91,18 @@ export default function WhatsAppContatosPage() {
     loadContacts().catch(() => undefined);
   }, []);
 
+  const filteredContacts = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    if (!query) return contacts;
+
+    return contacts.filter((contact) => {
+      const name = (contact.pushName || "").toLowerCase();
+      const remoteJid = (contact.remoteJid || "").toLowerCase();
+      const instanceId = (contact.instanceId || "").toLowerCase();
+      return name.includes(query) || remoteJid.includes(query) || instanceId.includes(query);
+    });
+  }, [contacts, search]);
+
   return (
     <AppShellContainer>
       <Sidebar />
@@ -105,22 +123,32 @@ export default function WhatsAppContatosPage() {
           {loading ? (
             <p>Carregando contatos...</p>
           ) : (
-            <ContactsTable>
-              <thead>
+            <>
+              <SearchBar>
+                <Input
+                  placeholder="Buscar por nome, WhatsApp ou instância"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+              </SearchBar>
+              <ContactsTable>
+                <thead>
                 <tr>
                   <th>Nome</th>
                   <th>WhatsApp</th>
                   <th>Instância</th>
                   <th>Atualizado em</th>
                 </tr>
-              </thead>
-              <tbody>
-                {contacts.length === 0 ? (
+                </thead>
+                <tbody>
+                {filteredContacts.length === 0 ? (
                   <tr>
-                    <td colSpan={4} style={{ color: "#6b7280" }}>Nenhum contato sincronizado.</td>
+                    <td colSpan={4} style={{ color: "#6b7280" }}>
+                      {contacts.length === 0 ? "Nenhum contato sincronizado." : "Nenhum contato encontrado para a busca."}
+                    </td>
                   </tr>
                 ) : (
-                  contacts.map((contact) => (
+                  filteredContacts.map((contact) => (
                     <tr key={contact.id}>
                       <td>{contact.pushName || "Sem nome"}</td>
                       <td>{contact.remoteJid}</td>
@@ -129,8 +157,9 @@ export default function WhatsAppContatosPage() {
                     </tr>
                   ))
                 )}
-              </tbody>
-            </ContactsTable>
+                </tbody>
+              </ContactsTable>
+            </>
           )}
         </Card>
       </MainContent>
