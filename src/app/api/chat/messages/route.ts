@@ -3,14 +3,9 @@ import { appendMessage, listMessages } from "@/server/services/chat-memory";
 import { evolutionIsConfigured, fetchMessagesFromEvolution, sendMediaToEvolution, sendTextToEvolution } from "@/server/services/evolution-service";
 import { resolveWhatsAppConfig } from "@/server/services/whatsapp-settings";
 import { emitChatEventToN8n, fetchMessagesFromN8n, isN8nConfigured, sendMessageToN8n } from "@/server/services/n8n-adapter";
-import { toE164 } from "@/lib/phone-utils";
 
 function normalizePhone(input?: string) {
-  if (!input) return "";
-  // Tenta normalizar para E.164 (com DDI do Brasil se faltar)
-  const e164 = toE164(input, "BR");
-  // Remove o + e caracteres não numéricos para enviar apenas números
-  return (e164 ?? input).replace(/\D/g, "");
+  return (input ?? "").replace(/\D/g, "");
 }
 
 export async function GET(request: NextRequest) {

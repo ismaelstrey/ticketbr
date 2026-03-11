@@ -20,9 +20,9 @@ export interface WhatsAppRuntimeConfig {
 
   // n8n automation hub
   n8nWebhookUrl?: string;
-  n8nUseTestWebhook?: boolean;
   n8nBaseUrl?: string;
   n8nApiKey?: string;
+  n8nUseTestWebhook?: boolean;
   n8nConversationsPath?: string;
   n8nMessagesPath?: string;
   n8nSendPath?: string;
@@ -159,12 +159,9 @@ export async function saveWhatsAppConfigToDatabase(config: WhatsAppRuntimeConfig
 }
 
 export async function resolveWhatsAppConfig(request: NextRequest, bodyConfig?: WhatsAppRuntimeConfig | null) {
-  // Prioritize Database to ensure single source of truth
-  const dbConfig = await getWhatsAppConfigFromDatabase();
-  if (dbConfig) return dbConfig;
-
-  // Fallback to request/cookie if DB is empty
-  return bodyConfig ?? getWhatsAppConfigFromRequest(request);
+  const requestConfig = bodyConfig ?? getWhatsAppConfigFromRequest(request);
+  if (requestConfig) return requestConfig;
+  return getWhatsAppConfigFromDatabase();
 }
 
 export function sanitizeWhatsAppConfig(config: WhatsAppRuntimeConfig) {
