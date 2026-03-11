@@ -60,7 +60,8 @@ export const ModelName = {
   Mesa_Trabalho: 'Mesa_Trabalho',
   Operador: 'Operador',
   Ticket: 'Ticket',
-  TicketEvent: 'TicketEvent'
+  TicketEvent: 'TicketEvent',
+  ChatConversation: 'ChatConversation'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -279,6 +280,21 @@ export const TicketEventScalarFieldEnum = {
 export type TicketEventScalarFieldEnum = (typeof TicketEventScalarFieldEnum)[keyof typeof TicketEventScalarFieldEnum]
 
 
+export const ChatConversationScalarFieldEnum = {
+  id: 'id',
+  contactId: 'contactId',
+  contactName: 'contactName',
+  channel: 'channel',
+  conversationId: 'conversationId',
+  ticketId: 'ticketId',
+  messages: 'messages',
+  closedAt: 'closedAt',
+  createdBy: 'createdBy'
+} as const
+
+export type ChatConversationScalarFieldEnum = (typeof ChatConversationScalarFieldEnum)[keyof typeof ChatConversationScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -293,6 +309,13 @@ export const NullableJsonNullValueInput = {
 } as const
 
 export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {

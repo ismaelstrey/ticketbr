@@ -41,3 +41,17 @@ export interface ChatTicketLink {
   createdAt: string;
   author?: string;
 }
+
+
+export interface ArchivedChatConversation {
+  id: string;
+  contactId: string;
+  contactName: string;
+  channel: ChatChannel;
+  conversationId: string;
+  ticketId?: string | null;
+  ticket?: { id: string; number: number; subject: string } | null;
+  messages: ChatMessage[];
+  closedAt: string;
+  createdBy?: string | null;
+}
