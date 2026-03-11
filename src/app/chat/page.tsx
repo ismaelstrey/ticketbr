@@ -117,6 +117,8 @@ const ChatPane = styled.section`
   display: grid;
   grid-template-rows: auto 1fr auto auto;
   background: #efeae2;
+  height: 100%;
+  overflow: hidden;
 `;
 
 const Header = styled.div`
@@ -132,10 +134,25 @@ const Header = styled.div`
 
 const MessageList = styled.div`
   padding: 1rem;
-  overflow: auto;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  
+  /* Scrollbar discreta */
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(0, 0, 0, 0.3);
+  }
 `;
 
 const Bubble = styled.div<{ $in?: boolean }>`
@@ -215,6 +232,7 @@ export default function ChatPage() {
   const [enableSound, setEnableSound] = useState(true);
   const [enableAlert, setEnableAlert] = useState(false);
   const lastMessageIdRef = useRef<string | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const selectedContact = useMemo(() => contacts.find((c) => c.id === contactId), [contacts, contactId]);
   const activeArchivedConversation = useMemo(() => archivedConversations.find((item) => item.id === activeArchivedId), [archivedConversations, activeArchivedId]);
@@ -321,6 +339,10 @@ export default function ChatPage() {
     const timer = setInterval(() => loadMessages().catch(() => undefined), 5000);
     return () => clearInterval(timer);
   }, [contactId, channel, selectedContact?.phone, enableSound, enableAlert, activeArchivedId]);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, activeArchivedConversation]);
 
   useEffect(() => {
     if (!filteredContacts.length) {
@@ -497,6 +519,7 @@ export default function ChatPage() {
                 </Bubble>
               ))}
               {!(activeArchivedConversation?.messages || messages).length && <small style={{ color: "#6b7280" }}>Nenhuma mensagem ainda.</small>}
+              <div ref={messagesEndRef} />
             </MessageList>
 
             {activeArchivedConversation ? (
@@ -509,7 +532,17 @@ export default function ChatPage() {
               </div>
             ) : (
               <Composer>
-                <Textarea placeholder="Digite uma mensagem" value={text} onChange={(e) => setText(e.target.value)} />
+                <Textarea
+                  placeholder="Digite uma mensagem (Enter para enviar, Ctrl+Enter para quebra de linha)"
+                  value={text}
+                  onChange={(e) => setText(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.ctrlKey && !e.shiftKey) {
+                      e.preventDefault();
+                      sendMessage().catch((error) => showToast(error.message, "error"));
+                    }
+                  }}
+                />
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                   <label style={{ cursor: "pointer" }}>
                     <input

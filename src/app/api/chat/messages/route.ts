@@ -66,62 +66,84 @@ export async function POST(request: NextRequest) {
     }
 
     const config = await resolveWhatsAppConfig(request);
-    const conversation = await chatService.findOrCreateConversation(contactId);
-    
-    // Salvar mensagem "sent" (ou "pending") no banco
     const waMessageId = `out_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
-    const savedMessage = await chatService.saveMessage({
-      waMessageId,
-      conversationId: conversation.id,
-      direction: "out",
-      type: attachment ? (attachment.type || "image") : "text",
-      body: text,
-      mediaUrl: null, // Será atualizado se tiver upload
-      mimetype: attachment?.mimeType || null,
-      status: "pending"
-    });
 
-    // Enviar para o provedor
-    if (isN8nConfigured(config)) {
-        // Enviar via N8N
-        await sendMessageToN8n({
-            number: contactId,
-            type: attachment ? "media" : "text",
-            text,
-            media: attachment,
-            idempotency_key: waMessageId
-        }, config);
-    } else if (evolutionIsConfigured(config)) {
-        // Fallback Evolution direto
-        const phone = normalizePhone(contactId);
-        if (attachment) {
-            await sendMediaToEvolution({
-                number: phone,
-                caption: text,
-                media: attachment.data, // base64 ou url
-                mimeType: attachment.mimeType,
-                fileName: attachment.name || "arquivo"
-            }, config);
-        } else {
-            await sendTextToEvolution(phone, text || "", config);
-        }
-    } else {
-        throw new Error("Nenhum provedor configurado (N8N ou Evolution)");
+    const n8nEnabled = isN8nConfigured(config);
+    const evolutionEnabled = evolutionIsConfigured(config);
+
+    if (!n8nEnabled && !evolutionEnabled) {
+      return NextResponse.json({ error: "WhatsApp não está configurado" }, { status: 400 });
     }
 
-    // Atualizar status para sent
-    await chatService.updateMessageStatus(waMessageId, "sent");
+    if (n8nEnabled) {
+      try {
+        await sendMessageToN8n({
+          number: contactId,
+          type: attachment ? "media" : "text",
+          text,
+          media: attachment,
+          idempotency_key: waMessageId,
+        }, config);
+      } catch (error: any) {
+        return NextResponse.json({ error: error?.message ?? "Falha ao enviar para N8N" }, { status: 502 });
+      }
+    } else if (evolutionEnabled) {
+      const phone = normalizePhone(contactId);
+      if (attachment) {
+        await sendMediaToEvolution({
+          number: phone,
+          caption: text,
+          media: attachment.data,
+          mimeType: attachment.mimeType,
+          fileName: attachment.name || "arquivo",
+        }, config);
+      } else {
+        await sendTextToEvolution(phone, text || "", config);
+      }
+    } else {
+      return NextResponse.json({ error: "WhatsApp não está configurado" }, { status: 400 });
+    }
 
-    return NextResponse.json({ 
-        data: {
+    const shouldPersist = Boolean(process.env.DATABASE_URL);
+    if (shouldPersist) {
+      const conversation = await chatService.findOrCreateConversation(contactId);
+      const savedMessage = await chatService.saveMessage({
+        waMessageId,
+        conversationId: conversation.id,
+        direction: "out",
+        type: attachment ? (attachment.type || "image") : "text",
+        body: text,
+        mediaUrl: null,
+        mimetype: attachment?.mimeType || null,
+        status: "sent",
+      });
+
+      return NextResponse.json(
+        {
+          data: {
             id: savedMessage.id,
             text: savedMessage.body,
             createdAt: savedMessage.createdAt,
             direction: "out",
-            status: "sent"
-        } 
-    });
+            status: "sent",
+          },
+        },
+        { status: 201 },
+      );
+    }
+
+    return NextResponse.json(
+      {
+        data: {
+          id: waMessageId,
+          text: text ?? null,
+          createdAt: new Date().toISOString(),
+          direction: "out",
+          status: "sent",
+        },
+      },
+      { status: 201 },
+    );
 
   } catch (error: any) {
     console.error("Error sending message:", error);

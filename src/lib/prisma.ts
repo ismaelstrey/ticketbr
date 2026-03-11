@@ -1,4 +1,4 @@
-import { PrismaClient, Prisma } from "../../prisma/generated/client";
+import { PrismaClient, Prisma } from "../../prisma/generated/client.ts";
 import { PrismaPostgresAdapter } from "@prisma/adapter-ppg";
 
 const prismaClientSingleton = () => {
@@ -19,8 +19,21 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClientSingleton | undefined;
 };
 
-export const prisma = globalForPrisma.prisma ?? prismaClientSingleton();
+const getPrisma = (): PrismaClientSingleton => {
+  const existing = globalForPrisma.prisma;
+  if (existing) return existing;
 
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+  const created = prismaClientSingleton();
+  if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = created;
+  return created;
+};
+
+export const prisma = new Proxy({} as PrismaClientSingleton, {
+  get(_target, prop) {
+    const client = getPrisma();
+    const value = (client as any)[prop as any];
+    return typeof value === "function" ? value.bind(client) : value;
+  },
+}) as PrismaClientSingleton;
 
 export { Prisma };

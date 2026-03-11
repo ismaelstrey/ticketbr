@@ -48,7 +48,7 @@ export const defaultSettings: IntegrationSettings = {
   n8nApiKey: "",
   n8nConversationsPath: "/conversations",
   n8nMessagesPath: "/messages",
-  n8nSendPath: "/messages/send"
+  n8nSendPath: "/send"
 };
 
 export function useSettings() {

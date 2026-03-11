@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     
     const conversationsPath = config?.n8nConversationsPath || "/conversations";
     const messagesPath = config?.n8nMessagesPath || "/messages";
-    const sendPath = config?.n8nSendPath || "/messages/send";
+    const sendPath = config?.n8nSendPath || "/send";
 
     const pathsToTest = [
       { path: "/healthz", method: "GET", description: "Healthcheck" },
