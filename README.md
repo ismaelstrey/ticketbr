@@ -1,6 +1,6 @@
 # TicketBR
 
-## Cadastros → Solicitantes
+## Cadastros \u2192 Solicitantes
 
 - Acesso: `/cadastros/solicitante`
 - Funcionalidades: listar, buscar, ordenar, paginar (10/25/50), criar, editar e excluir (soft delete via `status=false`).
@@ -18,14 +18,6 @@
 Observações:
 - CPF/CNPJ: aceita 11 (CPF) ou 14 (CNPJ) dígitos.
 - Operações dependem de sessão autenticada (cookie) quando o middleware estiver ativo.
-
-### Formatação de Telefones
-O sistema utiliza o padrão **E.164** para armazenamento e validação de números de telefone, garantindo compatibilidade com a API do WhatsApp Business.
-
-- **Formato**: `+<código_país><ddd><número>` (ex: `+5511999999999`).
-- **Validação**: O campo de telefone valida o número de acordo com as regras do país selecionado.
-- **Componente**: `PhoneInput` (src/components/ui/PhoneInput.tsx) gerencia a seleção de país, máscara e validação.
-- **Dependência**: `libphonenumber-js`.
 
 ## Testes
 

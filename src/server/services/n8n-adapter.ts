@@ -1,6 +1,5 @@
 import { ChatContact, ChatMessage } from "@/types/chat";
 import { WhatsAppRuntimeConfig } from "@/server/services/whatsapp-settings";
-import { toE164 } from "@/lib/phone-utils";
 
 export interface ChatEventPayload {
   type: string;
@@ -26,7 +25,7 @@ function resolveN8nBase(config?: WhatsAppRuntimeConfig | null) {
 function resolvePath(config: WhatsAppRuntimeConfig | null | undefined, key: "conversations" | "messages" | "send") {
   if (key === "conversations") return config?.n8nConversationsPath || "/conversations";
   if (key === "messages") return config?.n8nMessagesPath || "/messages";
-  return config?.n8nSendPath || "/send";
+  return config?.n8nSendPath || "/messages/send";
 }
 
 function isAbsoluteUrl(value: string) {
@@ -80,7 +79,11 @@ async function requestN8n(pathOrUrl: string, config?: WhatsAppRuntimeConfig | nu
   }
 
   const url = buildUrl(base, pathOrUrl);
-  const apiKey = config?.n8nApiKey || process.env.N8N_CHAT_API_KEY;
+  const apiKey =
+    config?.n8nApiKey ||
+    process.env.N8N_CHAT_API_KEY ||
+    process.env["X-N8N-API-KEY"] ||
+    process.env.N8N_API_KEY;
 
   try {
     return await performN8nRequest(url, apiKey, init);
