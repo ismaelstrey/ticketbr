@@ -33,7 +33,9 @@ function isAbsoluteUrl(value: string) {
 }
 
 function normalizePhone(value?: string) {
-  return (value ?? "").replace(/\D/g, "");
+  if (!value) return "";
+  const e164 = toE164(value, "BR");
+  return (e164 ?? value).replace(/\D/g, "");
 }
 
 function buildUrl(base: string, pathOrUrl: string) {

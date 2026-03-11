@@ -7,7 +7,7 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { Button } from "@/components/ui/Button";
 import { Input, Select, Textarea } from "@/components/ui/Input";
 import { useToast } from "@/context/ToastContext";
-import { ChatContact, ChatMessage, ChatTicketLink } from "@/types/chat";
+import { ArchivedChatConversation, ChatContact, ChatMessage, ChatTicketLink } from "@/types/chat";
 
 const ChatMain = styled(MainContent)`
   padding: 0;
@@ -201,6 +201,9 @@ export default function ChatPage() {
   const [tickets, setTickets] = useState<any[]>([]);
   const [links, setLinks] = useState<ChatTicketLink[]>([]);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [archivedConversations, setArchivedConversations] = useState<ArchivedChatConversation[]>([]);
+  const [activeArchivedId, setActiveArchivedId] = useState("");
+  const [savingConversation, setSavingConversation] = useState(false);
   const [contactId, setContactId] = useState("");
   const [channel, setChannel] = useState<"whatsapp" | "email">("whatsapp");
   const [search, setSearch] = useState("");
@@ -214,6 +217,7 @@ export default function ChatPage() {
   const lastMessageIdRef = useRef<string | null>(null);
 
   const selectedContact = useMemo(() => contacts.find((c) => c.id === contactId), [contacts, contactId]);
+  const activeArchivedConversation = useMemo(() => archivedConversations.find((item) => item.id === activeArchivedId), [archivedConversations, activeArchivedId]);
 
   const companyTabs = useMemo(() => {
     const companies = Array.from(new Set(contacts.map((c) => c.company || "Sem empresa")));
@@ -287,21 +291,36 @@ export default function ChatPage() {
     setLinks(Array.isArray(json.data) ? json.data : []);
   }
 
+  async function loadArchivedConversations() {
+    if (!contactId) {
+      setArchivedConversations([]);
+      return;
+    }
+
+    const params = new URLSearchParams({ contactId, channel });
+    const res = await fetch(`/api/chat/conversations?${params.toString()}`);
+    const json = await res.json();
+    if (!res.ok) throw new Error(json?.error || "Erro ao carregar conversas finalizadas");
+    setArchivedConversations(Array.isArray(json.data) ? json.data : []);
+  }
+
   useEffect(() => {
     loadBase().catch((error) => showToast(error.message, "error"));
   }, []);
 
   useEffect(() => {
     if (!contactId) return;
+    setActiveArchivedId("");
     loadMessages().catch((error) => showToast(error.message, "error"));
     loadLinks().catch((error) => showToast(error.message, "error"));
+    loadArchivedConversations().catch((error) => showToast(error.message, "error"));
   }, [contactId, channel]);
 
   useEffect(() => {
-    if (!contactId) return;
+    if (!contactId || activeArchivedId) return;
     const timer = setInterval(() => loadMessages().catch(() => undefined), 5000);
     return () => clearInterval(timer);
-  }, [contactId, channel, selectedContact?.phone, enableSound, enableAlert]);
+  }, [contactId, channel, selectedContact?.phone, enableSound, enableAlert, activeArchivedId]);
 
   useEffect(() => {
     if (!filteredContacts.length) {
@@ -342,6 +361,45 @@ export default function ChatPage() {
     setText("");
     setAttachment(null);
     await loadMessages();
+  }
+
+
+  async function finalizeConversation() {
+    if (!contactId) {
+      showToast("Selecione um contato para finalizar", "error");
+      return;
+    }
+
+    if (!messages.length) {
+      showToast("Não há mensagens para salvar nesta conversa", "error");
+      return;
+    }
+
+    setSavingConversation(true);
+    try {
+      const res = await fetch("/api/chat/conversations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contactId,
+          contactName: selectedContact?.name || "Contato",
+          channel,
+          conversationId: conversationId.trim() || `${channel}:${contactId}`,
+          ticketId: selectedTicket || undefined,
+          messages
+        })
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error || "Erro ao finalizar conversa");
+
+      showToast("Conversa finalizada e salva no histórico", "success");
+      await loadArchivedConversations();
+      if (json?.data?.id) {
+        setActiveArchivedId(String(json.data.id));
+      }
+    } finally {
+      setSavingConversation(false);
+    }
   }
 
   async function linkToTicket() {
@@ -422,11 +480,12 @@ export default function ChatPage() {
               <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
                 <label><input type="checkbox" checked={enableSound} onChange={(e) => setEnableSound(e.target.checked)} /> Som</label>
                 <Button variant="ghost" onClick={requestBrowserAlertPermission}>Ativar alerta</Button>
+                {activeArchivedConversation ? <Chip>Histórico</Chip> : null}
               </div>
             </Header>
 
             <MessageList>
-              {messages.map((message) => (
+              {(activeArchivedConversation?.messages || messages).map((message) => (
                 <Bubble key={message.id} $in={message.direction === "in"}>
                   {message.text ? <div>{message.text}</div> : null}
                   {message.attachment ? (
@@ -437,28 +496,38 @@ export default function ChatPage() {
                   <div style={{ marginTop: 4, fontSize: "0.7rem", opacity: 0.7 }}>{new Date(message.createdAt).toLocaleString("pt-BR")}</div>
                 </Bubble>
               ))}
-              {!messages.length && <small style={{ color: "#6b7280" }}>Nenhuma mensagem ainda.</small>}
+              {!(activeArchivedConversation?.messages || messages).length && <small style={{ color: "#6b7280" }}>Nenhuma mensagem ainda.</small>}
             </MessageList>
 
-            <Composer>
-              <Textarea placeholder="Digite uma mensagem" value={text} onChange={(e) => setText(e.target.value)} />
-              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                <label style={{ cursor: "pointer" }}>
-                  <input
-                    type="file"
-                    style={{ display: "none" }}
-                    onChange={async (event) => {
-                      const file = event.target.files?.[0];
-                      if (!file) return;
-                      const data = await toBase64(file);
-                      setAttachment({ name: file.name, mimeType: file.type || "application/octet-stream", data });
-                    }}
-                  />
-                  <Button variant="ghost" type="button">Anexar</Button>
-                </label>
-                <Button onClick={() => sendMessage().catch((error) => showToast(error.message, "error"))}>Enviar</Button>
+            {activeArchivedConversation ? (
+              <div style={{ background: "#f0f2f5", borderTop: "1px solid #d1d5db", padding: "0.6rem", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
+                <small style={{ color: "#4b5563" }}>
+                  Visualizando conversa finalizada em {new Date(activeArchivedConversation.closedAt).toLocaleString("pt-BR")}
+                  {activeArchivedConversation.ticket ? ` • Ticket #${activeArchivedConversation.ticket.number}` : ""}
+                </small>
+                <Button variant="ghost" onClick={() => setActiveArchivedId("")}>Voltar para conversa atual</Button>
               </div>
-            </Composer>
+            ) : (
+              <Composer>
+                <Textarea placeholder="Digite uma mensagem" value={text} onChange={(e) => setText(e.target.value)} />
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  <label style={{ cursor: "pointer" }}>
+                    <input
+                      type="file"
+                      style={{ display: "none" }}
+                      onChange={async (event) => {
+                        const file = event.target.files?.[0];
+                        if (!file) return;
+                        const data = await toBase64(file);
+                        setAttachment({ name: file.name, mimeType: file.type || "application/octet-stream", data });
+                      }}
+                    />
+                    <Button variant="ghost" type="button">Anexar</Button>
+                  </label>
+                  <Button onClick={() => sendMessage().catch((error) => showToast(error.message, "error"))}>Enviar</Button>
+                </div>
+              </Composer>
+            )}
 
             <Footer>
               <Select value={selectedTicket} onChange={(e) => setSelectedTicket(e.target.value)}>
@@ -469,6 +538,23 @@ export default function ChatPage() {
               </Select>
               <Input placeholder="ID da conversa" value={conversationId} onChange={(e) => setConversationId(e.target.value)} />
               <Button variant="save" onClick={() => linkToTicket().catch((error) => showToast(error.message, "error"))}>Associar</Button>
+
+              <Select value={activeArchivedId} onChange={(e) => setActiveArchivedId(e.target.value)}>
+                <option value="">Abrir conversa finalizada...</option>
+                {archivedConversations.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {new Date(item.closedAt).toLocaleString("pt-BR")} {item.ticket ? `• Ticket #${item.ticket.number}` : ""}
+                  </option>
+                ))}
+              </Select>
+              <div />
+              <Button
+                variant="ghost"
+                disabled={savingConversation || !contactId || !messages.length}
+                onClick={() => finalizeConversation().catch((error) => showToast(error.message, "error"))}
+              >
+                {savingConversation ? "Finalizando..." : "Finalizar conversa"}
+              </Button>
             </Footer>
           </ChatPane>
         </Frame>

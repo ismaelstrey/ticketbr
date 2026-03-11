@@ -269,6 +269,7 @@ model Ticket {
   deleted_at    DateTime?
 
   events        TicketEvent[]
+  chatConversations ChatConversation[]
 
   @@index([status])
   @@index([priority])
@@ -300,4 +301,21 @@ model TicketEvent {
 
   @@index([ticketId, createdAt])
   @@index([type])
+}
+
+
+model ChatConversation {
+  id           String   @id @default(cuid())
+  contactId    String
+  contactName  String
+  channel      String
+  conversationId String
+  ticketId     String?
+  ticket       Ticket?  @relation(fields: [ticketId], references: [id], onDelete: SetNull)
+  messages     Json
+  closedAt     DateTime @default(now())
+  createdBy    String?
+
+  @@index([contactId, channel, closedAt])
+  @@index([ticketId])
 }
