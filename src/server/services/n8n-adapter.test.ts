@@ -1,5 +1,15 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { sendMessageToN8n } from "./n8n-adapter";
+import { resolvePath, sendMessageToN8n } from "./n8n-adapter";
+
+describe("n8n-adapter resolvePath", () => {
+  it("retorna default para contacts se não configurado", () => {
+    expect(resolvePath({}, "contacts")).toBe("/todos/contatos");
+  });
+
+  it("retorna valor configurado para contacts", () => {
+    expect(resolvePath({ n8nContactsPath: "/custom/contacts" }, "contacts")).toBe("/custom/contacts");
+  });
+});
 
 describe("n8n-adapter sendMessageToN8n", () => {
   beforeEach(() => {

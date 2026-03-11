@@ -22,9 +22,10 @@ function resolveN8nBase(config?: WhatsAppRuntimeConfig | null) {
   return config?.n8nBaseUrl || process.env.N8N_CHAT_BASE_URL || "";
 }
 
-export function resolvePath(config: WhatsAppRuntimeConfig | null | undefined, key: "conversations" | "messages" | "send") {
+export function resolvePath(config: WhatsAppRuntimeConfig | null | undefined, key: "conversations" | "messages" | "send" | "contacts") {
   if (key === "conversations") return config?.n8nConversationsPath || "/conversations";
   if (key === "messages") return config?.n8nMessagesPath || "/messages";
+  if (key === "contacts") return config?.n8nContactsPath || "/todos/contatos";
   return config?.n8nSendPath || "/send";
 }
 
@@ -71,7 +72,7 @@ async function performN8nRequest(url: string, apiKey: string | undefined, init?:
   return json;
 }
 
-async function requestN8n(pathOrUrl: string, config?: WhatsAppRuntimeConfig | null, init?: RequestInit) {
+export async function requestN8n(pathOrUrl: string, config?: WhatsAppRuntimeConfig | null, init?: RequestInit) {
   const base = resolveN8nBase(config);
   if (!base && !isAbsoluteUrl(pathOrUrl)) {
     throw new Error("n8n não configurado. Defina n8nBaseUrl nas configurações.");

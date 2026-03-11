@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import type { WhatsAppRuntimeConfig } from "@/server/services/whatsapp-settings";
-import { isN8nConfigured, requestN8nChatPath, resolvePath } from "@/server/services/n8n-adapter";
+import { isN8nConfigured, requestN8n, requestN8nChatPath, resolvePath } from "@/server/services/n8n-adapter";
 
 export interface WhatsAppContactRecord {
   id: string;
@@ -141,15 +141,33 @@ export async function syncWhatsAppContactsFromN8n(config?: WhatsAppRuntimeConfig
     throw new Error("Integração n8n não configurada para sincronização de contatos.");
   }
 
-  // Assumindo que o path para contatos é /todos/contatos ou configurável
-  // Por padrão vamos usar uma convenção baseada nos webhooks se não houver config específica
-  // Ou podemos usar resolvePath se adicionarmos "contacts" ao whatsapp-settings.ts
-  // Como não temos "contacts" no settings, vamos usar a convenção de adicionar /todos/contatos ao webhook base
+  // Se n8nWebhookUrl estiver configurado, tentamos construir o endpoint dinâmico
+  // conforme solicitado: base do webhook + /wa/baileys/action/contacts
+  const webhookUrl = config?.n8nWebhookUrl || process.env.N8N_CHAT_WEBHOOK_URL;
   
-  // Mas como agora temos requestN8nChatPath que lida com a lógica de resolução, podemos tentar usar um caminho relativo.
-  // Vamos tentar "/todos/contatos" que parece ser o padrão do projeto
-  
-  const payload = await requestN8nChatPath("/todos/contatos", config, { method: "GET" });
+  let payload: any;
+  let usedEndpoint = "";
+
+  if (webhookUrl && webhookUrl.includes("/webhook")) {
+    // Extrai a base até /webhook (ex: https://n8n.strey.com.br/webhook)
+    // Se for /webhook-test, ajusta também.
+    const baseUrl = webhookUrl.split("/webhook")[0] + "/webhook";
+    usedEndpoint = `${baseUrl}/wa/baileys/action/contacts`;
+    
+    try {
+      // Usa requestN8n passando a URL completa construída
+      payload = await requestN8n(usedEndpoint, config, { method: "GET" });
+    } catch (error) {
+      console.warn(`Falha ao sincronizar via endpoint dinâmico (${usedEndpoint}), tentando fallback...`, error);
+      // Se falhar, faz fallback para a lógica padrão (n8nContactsPath ou /todos/contatos)
+    }
+  }
+
+  if (!payload) {
+     const relPath = resolvePath(config, "contacts");
+     usedEndpoint = relPath;
+     payload = await requestN8nChatPath(relPath, config, { method: "GET" });
+  }
 
   const rawList = Array.isArray(payload)
     ? payload
@@ -196,7 +214,7 @@ export async function syncWhatsAppContactsFromN8n(config?: WhatsAppRuntimeConfig
   }
 
   return {
-    endpoint: "/todos/contatos",
+    endpoint: usedEndpoint,
     totalReceived: rawList.length,
     totalSaved: contacts.length
   };

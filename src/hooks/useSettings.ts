@@ -19,6 +19,7 @@ export interface IntegrationSettings {
   n8nConversationsPath: string;
   n8nMessagesPath: string;
   n8nSendPath: string;
+  n8nContactsPath: string;
 }
 
 export interface SyncedContact {
@@ -48,7 +49,8 @@ export const defaultSettings: IntegrationSettings = {
   n8nApiKey: "",
   n8nConversationsPath: "/conversations",
   n8nMessagesPath: "/messages",
-  n8nSendPath: "/send"
+  n8nSendPath: "/send",
+  n8nContactsPath: "/todos/contatos"
 };
 
 export function useSettings() {
@@ -102,7 +104,8 @@ export function useSettings() {
           n8nApiKey: json.data.n8nApiKeyMasked ?? curr.n8nApiKey,
           n8nConversationsPath: json.data.n8nConversationsPath ?? curr.n8nConversationsPath,
           n8nMessagesPath: json.data.n8nMessagesPath ?? curr.n8nMessagesPath,
-          n8nSendPath: json.data.n8nSendPath ?? curr.n8nSendPath
+          n8nSendPath: json.data.n8nSendPath ?? curr.n8nSendPath,
+          n8nContactsPath: json.data.n8nContactsPath ?? curr.n8nContactsPath
         }));
       }
     } catch (error) {
@@ -134,7 +137,8 @@ export function useSettings() {
           n8nApiKey: settings.n8nApiKey,
           n8nConversationsPath: settings.n8nConversationsPath,
           n8nMessagesPath: settings.n8nMessagesPath,
-          n8nSendPath: settings.n8nSendPath
+          n8nSendPath: settings.n8nSendPath,
+          n8nContactsPath: settings.n8nContactsPath
         })
       });
 
@@ -215,7 +219,8 @@ export function useSettings() {
           n8nBaseUrl: settings.n8nBaseUrl,
           n8nApiKey: settings.n8nApiKey,
           n8nWebhookUrl: settings.n8nWebhookUrl,
-          n8nUseTestWebhook: settings.n8nUseTestWebhook
+          n8nUseTestWebhook: settings.n8nUseTestWebhook,
+          n8nContactsPath: settings.n8nContactsPath
         })
       });
 

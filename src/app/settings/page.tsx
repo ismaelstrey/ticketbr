@@ -241,6 +241,10 @@ export default function SettingsPage() {
                   Path envio (POST)
                   <Input value={settings.n8nSendPath} onChange={(e) => update({ n8nSendPath: e.target.value })} />
                 </Field>
+                <Field>
+                  Path contatos (GET)
+                  <Input value={settings.n8nContactsPath} onChange={(e) => update({ n8nContactsPath: e.target.value })} />
+                </Field>
               </FormGrid>
 
               <Footer>
@@ -256,7 +260,7 @@ export default function SettingsPage() {
             <div>
               <h3>Sincronização de contatos WhatsApp</h3>
               <Info>
-                Esta ação chama o endpoint do n8n baseado na sua configuração e adiciona <code>{settings.n8nUseTestWebhook ? "/webhook-test" : "/webhook"}/todos/contatos</code> para buscar todos os contatos e salvar na base local.
+                Esta ação chama o endpoint do n8n baseado na configuração do Webhook de Eventos + <code>/wa/baileys/action/contacts</code> (ou fallback para o path configurado) para buscar contatos.
               </Info>
 
               <Footer>

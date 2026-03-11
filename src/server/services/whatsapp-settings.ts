@@ -26,6 +26,7 @@ export interface WhatsAppRuntimeConfig {
   n8nConversationsPath?: string;
   n8nMessagesPath?: string;
   n8nSendPath?: string;
+  n8nContactsPath?: string;
 
   n8nTimeoutMs?: number;
   n8nRetryEnabled?: boolean;
@@ -84,6 +85,7 @@ export function normalizeWhatsAppConfig(input: unknown): WhatsAppRuntimeConfig |
     n8nConversationsPath: String(raw.n8nConversationsPath ?? "").trim() || undefined,
     n8nMessagesPath: String(raw.n8nMessagesPath ?? "").trim() || undefined,
     n8nSendPath: String(raw.n8nSendPath ?? "").trim() || undefined,
+    n8nContactsPath: String(raw.n8nContactsPath ?? "").trim() || undefined,
 
     n8nTimeoutMs: toNumberOrUndefined(n8nTimeoutMsRaw),
     n8nRetryEnabled: raw.n8nRetryEnabled === undefined ? undefined : Boolean(raw.n8nRetryEnabled),
