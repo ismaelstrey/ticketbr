@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { chatService, InboundPayload } from "@/server/services/chat-service";
+import { chatService } from "@/server/services/chat-service";
 
 export async function POST(req: NextRequest) {
   try {
