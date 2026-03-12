@@ -42,8 +42,41 @@ export async function POST(req: NextRequest) {
          // Se for array mas não tiver a estrutura esperada, tenta usar como se fosse o payload direto
          payload = rawItem;
       }
+    } else if (body && typeof body === "object") {
+      // Verifica se é um objeto único que contém raw.body.data (caso do log do usuário)
+      const messageData = body.raw?.body?.data;
+      
+      if (messageData && messageData.key) {
+         const messageContent = messageData.message?.conversation || 
+                                messageData.message?.extendedTextMessage?.text || 
+                                messageData.message?.imageMessage?.caption || 
+                                "";
+         
+         const messageType = messageData.messageType || "text";
+         
+         payload = {
+           provider: body.provider || "evolution",
+           mode: body.mode || "baileys",
+           event: body.event || "message",
+           instance: body.instance || "default",
+           wa_chat_id: messageData.key.remoteJid,
+           wa_message_id: messageData.key.id,
+           fromMe: messageData.key.fromMe,
+           pushName: messageData.pushName,
+           timestamp: messageData.messageTimestamp,
+           message: {
+             type: messageType,
+             text: messageContent,
+             caption: null,
+             media: null
+           },
+           raw: body
+         };
+      } else {
+        // Formato padrão esperado (objeto único sem aninhamento raw.body.data)
+        payload = body;
+      }
     } else {
-      // Formato padrão esperado (objeto único)
       payload = body;
     }
 
