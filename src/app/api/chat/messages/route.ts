@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
       }
     } else if (evolutionEnabled) {
       // Usa targetPhone (telefone limpo ou extraído do JID) também para Evolution
-      const phone = normalizePhone(targetPhone || contactId);
+      const phone = targetPhone || contactId;
       if (attachment) {
         await sendMediaToEvolution({
           number: phone,
