@@ -373,10 +373,18 @@ export default function ChatPage() {
 
   async function sendMessage() {
     if (!contactId || (!text.trim() && !attachment)) return;
+    const phone = selectedContact?.phone || (contactId.includes("@") ? contactId.split("@")[0] : contactId);
+
     const res = await fetch("/api/chat/messages", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ contactId, channel, text, contactPhone: selectedContact?.phone, attachment })
+      body: JSON.stringify({
+        contactId,
+        channel,
+        text,
+        contactPhone: phone, // Envia o telefone explicitamente
+        attachment
+      })
     });
     const json = await res.json();
     if (!res.ok) throw new Error(json?.error || "Erro ao enviar mensagem");

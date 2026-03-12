@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { contactId, text, attachment } = body; // contactId aqui é o JID (wa_chat_id)
+    const { contactId, text, attachment, contactPhone } = body; // contactId aqui é o JID (wa_chat_id)
 
     if (!contactId) {
       return NextResponse.json({ error: "contactId (JID) é obrigatório" }, { status: 400 });
@@ -75,10 +75,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "WhatsApp não está configurado" }, { status: 400 });
     }
 
+    // Resolve o número de telefone correto
+    // Se contactPhone vier no body, usa ele.
+    // Se contactId contiver @, é um JID, então extrai o número dele.
+    let targetPhone = contactPhone;
+    if (!targetPhone && contactId.includes("@")) {
+      targetPhone = contactId.split("@")[0];
+    } else if (!targetPhone) {
+        // Se ainda não tivermos o telefone e o contactId não for JID, assumimos que é o ID interno
+        // e tentamos limpar caracteres não numéricos se parecer um telefone
+        targetPhone = normalizePhone(contactId);
+    }
+
     if (n8nEnabled) {
       try {
         await sendMessageToN8n({
-          number: contactId,
+          number: targetPhone, // Usa o telefone resolvido
           type: attachment ? "media" : "text",
           text,
           media: attachment,
@@ -88,7 +100,8 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: error?.message ?? "Falha ao enviar para N8N" }, { status: 502 });
       }
     } else if (evolutionEnabled) {
-      const phone = normalizePhone(contactId);
+      // Usa targetPhone (telefone limpo ou extraído do JID) também para Evolution
+      const phone = normalizePhone(targetPhone || contactId);
       if (attachment) {
         await sendMediaToEvolution({
           number: phone,

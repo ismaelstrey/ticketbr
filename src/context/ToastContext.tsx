@@ -70,7 +70,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       {children}
       <ToastStack>
         {toasts.map((toast) => (
-          <ToastCard key={toast.id} $type={toast.type}>
+          <ToastCard key={toast.id} $type={toast.type} >
             {toast.message}
           </ToastCard>
         ))}
