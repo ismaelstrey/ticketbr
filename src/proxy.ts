@@ -19,7 +19,8 @@ const ADMIN_API_PREFIXES = [
 const PUBLIC_API_PATHS = [
   "/api/auth/login",
   "/api/health",
-  "/api/chat/webhook"
+  "/api/chat/webhook",
+   "/api/chat/inbound"
 ];
 
 const ALLOWED_CORS_ORIGINS = new Set(
