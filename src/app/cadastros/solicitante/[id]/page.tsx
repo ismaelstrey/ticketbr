@@ -53,10 +53,30 @@ const Wrapper = styled.div`
 `;
 
 const Card = styled.section`
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
+  background: ${({ theme }) => theme.colors.surfaceElevated};
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: 18px;
   padding: 1rem;
+  box-shadow: ${({ theme }) => theme.shadows.card};
+`;
+
+const CardHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  gap: 0.8rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+`;
+
+const CardTitle = styled.h2`
+  margin: 0;
+  color: ${({ theme }) => theme.colors.text.primary};
+`;
+
+const ActionRow = styled.div`
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
 `;
 
 const Grid = styled.div`
@@ -70,21 +90,31 @@ const Grid = styled.div`
 `;
 
 const Item = styled.div`
-  border: 1px solid #eef2f7;
-  border-radius: 10px;
-  padding: 0.7rem;
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  background: ${({ theme }) => theme.colors.surfaceAlt};
+  border-radius: 14px;
+  padding: 0.8rem;
 `;
 
 const Label = styled.div`
   font-size: 0.8rem;
-  color: #6b7280;
+  color: ${({ theme }) => theme.colors.text.muted};
   margin-bottom: 0.25rem;
 `;
 
 const Value = styled.div`
-  color: #111827;
+  color: ${({ theme }) => theme.colors.text.primary};
   font-weight: 600;
   word-break: break-word;
+`;
+
+const SectionTitle = styled.h3`
+  margin-top: 0;
+  color: ${({ theme }) => theme.colors.text.primary};
+`;
+
+const StatusText = styled.p<{ $tone?: "error" }>`
+  color: ${({ theme, $tone }) => ($tone === "error" ? theme.colors.status.warning : theme.colors.text.secondary)};
 `;
 
 const FuncionarioTable = styled.table`
@@ -94,11 +124,41 @@ const FuncionarioTable = styled.table`
 
   th,
   td {
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid ${({ theme }) => theme.colors.border};
     text-align: left;
     padding: 0.55rem;
     font-size: 0.86rem;
+    color: ${({ theme }) => theme.colors.text.secondary};
   }
+
+  th {
+    color: ${({ theme }) => theme.colors.text.primary};
+    background: ${({ theme }) => theme.colors.surfaceAlt};
+  }
+`;
+
+const EmptyRow = styled.td`
+  color: ${({ theme }) => theme.colors.text.muted};
+`;
+
+const EditButton = styled.button`
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  background: ${({ theme }) => theme.colors.surface};
+  color: ${({ theme }) => theme.colors.text.primary};
+  border-radius: 8px;
+  padding: 0.3rem 0.45rem;
+  cursor: pointer;
+`;
+
+const ModalForm = styled.div`
+  display: grid;
+  gap: 0.75rem;
+`;
+
+const ModalActions = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
 `;
 
 export default function SolicitanteDetalhesPage() {
@@ -119,7 +179,7 @@ export default function SolicitanteDetalhesPage() {
     email: "",
     telefone: "",
     whatsappNumber: "",
-    password: "",
+    password: ""
   });
 
   const loadFuncionarios = async (id: string) => {
@@ -163,7 +223,7 @@ export default function SolicitanteDetalhesPage() {
       const res = await fetch(endpoint, {
         method: editingFuncionario ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify(form)
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error || "Erro ao cadastrar funcionário");
@@ -180,7 +240,6 @@ export default function SolicitanteDetalhesPage() {
     }
   };
 
-
   const handleOpenEdit = (funcionario: Funcionario) => {
     setEditingFuncionario(funcionario);
     setForm({
@@ -188,7 +247,7 @@ export default function SolicitanteDetalhesPage() {
       email: funcionario.email || "",
       telefone: funcionario.telefone || "",
       whatsappNumber: funcionario.whatsappContact?.remoteJid || funcionario.remoteJid || "",
-      password: "",
+      password: ""
     });
     setIsModalOpen(true);
   };
@@ -205,16 +264,16 @@ export default function SolicitanteDetalhesPage() {
       <MainContent>
         <Wrapper>
           <Card>
-            <div style={{ display: "flex", justifyContent: "space-between", gap: "0.8rem", marginBottom: "1rem", flexWrap: "wrap" }}>
-              <h2 style={{ margin: 0 }}>Detalhes do Solicitante</h2>
-              <div style={{ display: "flex", gap: "0.6rem", flexWrap: "wrap" }}>
+            <CardHeader>
+              <CardTitle>Detalhes do Solicitante</CardTitle>
+              <ActionRow>
                 <Button variant="primary" onClick={handleOpenCreate}>Adicionar Funcionário</Button>
                 <Button variant="ghost" onClick={() => router.push("/cadastros/solicitante")}>Voltar</Button>
-              </div>
-            </div>
+              </ActionRow>
+            </CardHeader>
 
-            {loading && <p>Carregando...</p>}
-            {error && <p style={{ color: "#b91c1c" }}>{error}</p>}
+            {loading && <StatusText>Carregando...</StatusText>}
+            {error && <StatusText $tone="error">{error}</StatusText>}
 
             {!loading && !error && data && (
               <Grid>
@@ -235,7 +294,7 @@ export default function SolicitanteDetalhesPage() {
           </Card>
 
           <Card>
-            <h3 style={{ marginTop: 0 }}>Funcionários vinculados</h3>
+            <SectionTitle>Funcionários vinculados</SectionTitle>
             <FuncionarioTable>
               <thead>
                 <tr>
@@ -251,7 +310,7 @@ export default function SolicitanteDetalhesPage() {
               <tbody>
                 {funcionarios.length === 0 ? (
                   <tr>
-                    <td colSpan={7} style={{ color: "#6b7280" }}>Nenhum funcionário vinculado.</td>
+                    <EmptyRow colSpan={7}>Nenhum funcionário vinculado.</EmptyRow>
                   </tr>
                 ) : (
                   funcionarios.map((f) => (
@@ -263,14 +322,9 @@ export default function SolicitanteDetalhesPage() {
                       <td>{f.user?.email || "-"}</td>
                       <td>{new Date(f.createdAt).toLocaleString("pt-BR")}</td>
                       <td>
-                        <button
-                          type="button"
-                          onClick={() => handleOpenEdit(f)}
-                          style={{ border: "1px solid #d1d5db", background: "#fff", borderRadius: 8, padding: "0.3rem 0.45rem", cursor: "pointer" }}
-                          aria-label={`Editar ${f.nome}`}
-                        >
+                        <EditButton type="button" onClick={() => handleOpenEdit(f)} aria-label={`Editar ${f.nome}`}>
                           <FiEdit2 aria-hidden="true" />
-                        </button>
+                        </EditButton>
                       </td>
                     </tr>
                   ))
@@ -280,43 +334,21 @@ export default function SolicitanteDetalhesPage() {
           </Card>
 
           <Modal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); setEditingFuncionario(null); }} title={editingFuncionario ? "Editar funcionário" : "Adicionar funcionário ao solicitante"}>
-            <div style={{ display: "grid", gap: "0.75rem" }}>
-              <Input
-                placeholder="Nome"
-                value={form.nome}
-                onChange={(e) => setForm((prev) => ({ ...prev, nome: e.target.value }))}
-              />
-              <Input
-                placeholder="E-mail"
-                type="email"
-                value={form.email}
-                onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
-              />
-              <Input
-                placeholder="Telefone"
-                value={form.telefone}
-                onChange={(e) => setForm((prev) => ({ ...prev, telefone: e.target.value }))}
-              />
-              <Input
-                placeholder="Celular com WhatsApp (ex: 5511999999999)"
-                value={form.whatsappNumber}
-                onChange={(e) => setForm((prev) => ({ ...prev, whatsappNumber: e.target.value }))}
-              />
+            <ModalForm>
+              <Input placeholder="Nome" value={form.nome} onChange={(e) => setForm((prev) => ({ ...prev, nome: e.target.value }))} />
+              <Input placeholder="E-mail" type="email" value={form.email} onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))} />
+              <Input placeholder="Telefone" value={form.telefone} onChange={(e) => setForm((prev) => ({ ...prev, telefone: e.target.value }))} />
+              <Input placeholder="Celular com WhatsApp (ex: 5511999999999)" value={form.whatsappNumber} onChange={(e) => setForm((prev) => ({ ...prev, whatsappNumber: e.target.value }))} />
               {!editingFuncionario && (
-                <Input
-                  placeholder="Senha inicial (opcional)"
-                  type="password"
-                  value={form.password}
-                  onChange={(e) => setForm((prev) => ({ ...prev, password: e.target.value }))}
-                />
+                <Input placeholder="Senha inicial (opcional)" type="password" value={form.password} onChange={(e) => setForm((prev) => ({ ...prev, password: e.target.value }))} />
               )}
-              <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.6rem" }}>
+              <ModalActions>
                 <Button variant="ghost" onClick={() => setIsModalOpen(false)} disabled={saving}>Cancelar</Button>
                 <Button variant="primary" onClick={handleSubmitFuncionario} disabled={saving}>
                   {saving ? "Salvando..." : editingFuncionario ? "Salvar alterações" : "Salvar funcionário"}
                 </Button>
-              </div>
-            </div>
+              </ModalActions>
+            </ModalForm>
           </Modal>
         </Wrapper>
       </MainContent>
