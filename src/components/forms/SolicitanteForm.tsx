@@ -32,12 +32,12 @@ const Field = styled.div`
 const Label = styled.label`
   font-size: 0.85rem;
   font-weight: 700;
-  color: #374151;
+  color: ${({ theme }) => theme.colors.text.primary};
 `;
 
 const ErrorText = styled.div`
   font-size: 0.82rem;
-  color: #b91c1c;
+  color: ${({ theme }) => theme.colors.status.warning};
 `;
 
 const Actions = styled.div`

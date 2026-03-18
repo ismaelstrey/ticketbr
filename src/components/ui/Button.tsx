@@ -3,20 +3,20 @@ import React from "react";
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "primary" | "ghost" | "save" | "pill" | "danger";
-  pillIndex?: number; // For the gradient pills
+  pillIndex?: number;
 }
 
 const StyledButton = styled.button<{ $variant?: string; $pillIndex?: number }>`
-  border: none;
+  border: 1px solid transparent;
   border-radius: ${({ theme }) => theme.borderRadius.pill};
-  padding: 0.55rem 0.95rem;
+  padding: 0.62rem 1rem;
   font-weight: 700;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.35rem;
-  transition: opacity 0.2s ease, transform 0.1s ease;
+  transition: opacity 0.2s ease, transform 0.1s ease, background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 
   &:disabled {
     opacity: 0.6;
@@ -31,7 +31,8 @@ const StyledButton = styled.button<{ $variant?: string; $pillIndex?: number }>`
     switch ($variant) {
       case "ghost":
         return css`
-          background: #eceff5;
+          background: ${theme.colors.surfaceAlt};
+          border-color: ${theme.colors.border};
           color: ${theme.colors.text.primary};
         `;
       case "save":
@@ -41,33 +42,36 @@ const StyledButton = styled.button<{ $variant?: string; $pillIndex?: number }>`
         `;
       case "danger":
         return css`
-           background: transparent;
-           border: 1px solid ${theme.colors.border};
-           color: ${theme.colors.text.secondary};
-           
-           &:hover {
-             background: #f3f4f6;
-             color: #dc2626;
-             border-color: #d1d5db;
-           }
+          background: transparent;
+          border-color: ${theme.colors.border};
+          color: ${theme.colors.text.secondary};
+
+          &:hover {
+            background: ${theme.colors.surfaceAlt};
+            color: ${theme.colors.status.warning};
+            border-color: ${theme.colors.borderStrong};
+          }
         `;
-      case "pill":
-        // Logic for different gradients based on index (mimicking nth-child CSS)
-        let background = "linear-gradient(135deg, #4285ff, #3f62d4)"; // Default blue
-        
-        if ($pillIndex === 1) background = "linear-gradient(135deg, #27cd8e, #1fa267)"; // Green
-        if ($pillIndex === 2) background = "linear-gradient(135deg, #9b52d4, #7e3aa8)"; // Purple
-        if ($pillIndex && $pillIndex > 2) background = "linear-gradient(135deg, #4db0ff, #2f80d9)"; // Light Blue
+      case "pill": {
+        let background = "linear-gradient(135deg, #4285ff, #3f62d4)";
+        if ($pillIndex === 1) background = "linear-gradient(135deg, #27cd8e, #1fa267)";
+        if ($pillIndex === 2) background = "linear-gradient(135deg, #9b52d4, #7e3aa8)";
+        if ($pillIndex && $pillIndex > 2) background = "linear-gradient(135deg, #4db0ff, #2f80d9)";
 
         return css`
           color: white;
           background: ${background};
         `;
+      }
       case "primary":
       default:
         return css`
           background: ${theme.colors.primary};
-          color: white;
+          color: ${theme.colors.text.white};
+
+          &:hover {
+            background: ${theme.colors.primaryHover};
+          }
         `;
     }
   }}

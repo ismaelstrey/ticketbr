@@ -7,9 +7,10 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 
 const Container = styled.div`
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  background: ${({ theme }) => theme.colors.surfaceElevated};
+  border-radius: 18px;
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  box-shadow: ${({ theme }) => theme.shadows.card};
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -18,7 +19,7 @@ const Container = styled.div`
 
 const Header = styled.div`
   padding: 1rem 1.5rem;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.border};
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -29,7 +30,7 @@ const Header = styled.div`
 const Title = styled.h2`
   font-size: 1.25rem;
   font-weight: 600;
-  color: #111827;
+  color: ${({ theme }) => theme.colors.text.primary};
   margin: 0;
 `;
 
@@ -48,7 +49,7 @@ const SearchWrapper = styled.div`
     left: 10px;
     top: 50%;
     transform: translateY(-50%);
-    color: #9ca3af;
+    color: ${({ theme }) => theme.colors.text.muted};
   }
 
   input {
@@ -69,40 +70,41 @@ const Table = styled.table`
 
 const Th = styled.th`
   padding: 0.75rem 1.5rem;
-  background: #f9fafb;
-  color: #4b5563;
+  background: ${({ theme }) => theme.colors.surfaceAlt};
+  color: ${({ theme }) => theme.colors.text.secondary};
   font-weight: 600;
   font-size: 0.85rem;
   text-transform: uppercase;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.border};
   white-space: nowrap;
 `;
 
 const Td = styled.td`
   padding: 0.75rem 1.5rem;
-  border-bottom: 1px solid #e5e7eb;
-  color: #374151;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.border};
+  color: ${({ theme }) => theme.colors.text.secondary};
   font-size: 0.9rem;
 `;
 
 const ActionButton = styled.button<{ variant?: "edit" | "delete" }>`
   background: none;
-  border: none;
+  border: 1px solid ${({ theme, variant }) => (variant === "delete" ? `${theme.colors.status.warning}33` : theme.colors.border)};
   cursor: pointer;
   padding: 0.4rem;
-  border-radius: 4px;
-  color: ${({ variant }) => (variant === "delete" ? "#ef4444" : "#3b82f6")};
-  transition: background 0.2s;
+  border-radius: 10px;
+  color: ${({ theme, variant }) => (variant === "delete" ? theme.colors.status.warning : theme.colors.primary)};
+  transition: background 0.2s ease, border-color 0.2s ease;
 
   &:hover {
-    background: ${({ variant }) => (variant === "delete" ? "#fee2e2" : "#eff6ff")};
+    background: ${({ theme, variant }) => (variant === "delete" ? `${theme.colors.status.warning}14` : `${theme.colors.primary}12`)};
+    border-color: ${({ theme, variant }) => (variant === "delete" ? `${theme.colors.status.warning}55` : `${theme.colors.primary}44`)};
   }
 `;
 
 const EmptyState = styled.div`
   padding: 3rem;
   text-align: center;
-  color: #6b7280;
+  color: ${({ theme }) => theme.colors.text.muted};
   font-size: 0.95rem;
 `;
 
@@ -111,7 +113,13 @@ const LoadingOverlay = styled.div`
   justify-content: center;
   align-items: center;
   padding: 3rem;
-  color: #6b7280;
+  color: ${({ theme }) => theme.colors.text.muted};
+`;
+
+const ActionCell = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
 `;
 
 export interface Column<T> {
@@ -160,8 +168,8 @@ export function DataTable<T extends { id: string | number }>({
         <Actions>
           <SearchWrapper>
             <FiSearch />
-            <Input 
-              placeholder={searchPlaceholder} 
+            <Input
+              placeholder={searchPlaceholder}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -199,7 +207,7 @@ export function DataTable<T extends { id: string | number }>({
                   ))}
                   {(onEdit || onDelete) && (
                     <Td style={{ textAlign: "right" }}>
-                      <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.5rem" }}>
+                      <ActionCell>
                         {onEdit && (
                           <ActionButton variant="edit" onClick={() => onEdit(item)} title="Editar">
                             <FiEdit2 />
@@ -210,7 +218,7 @@ export function DataTable<T extends { id: string | number }>({
                             <FiTrash2 />
                           </ActionButton>
                         )}
-                      </div>
+                      </ActionCell>
                     </Td>
                   )}
                 </tr>

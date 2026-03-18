@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { AuthProvider } from "@/context/AuthContext";
 import { ToastProvider } from "@/context/ToastContext";
 import StyledComponentsRegistry from "@/lib/registry";
+import { GlobalChatButton } from "@/components/layout/GlobalChatButton";
 import { StyledComponentsProvider } from "@/styles/StyledComponentsProvider";
 
 const appUrl = "https://ticketbr.vercel.app";
@@ -34,7 +35,7 @@ export default function RootLayout({
         <StyledComponentsRegistry>
           <StyledComponentsProvider>
             <AuthProvider>
-              <ToastProvider>{children}</ToastProvider>
+              <ToastProvider>{children}<GlobalChatButton /></ToastProvider>
             </AuthProvider>
           </StyledComponentsProvider>
         </StyledComponentsRegistry>

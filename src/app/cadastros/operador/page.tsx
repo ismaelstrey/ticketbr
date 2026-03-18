@@ -1,12 +1,18 @@
 "use client";
 
 import React, { useState } from "react";
+import styled from "styled-components";
 import { AppShellContainer, MainContent } from "@/components/layout/AppShell";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { DataTable, Column } from "@/components/ui/DataTable";
 import { Modal } from "@/components/ui/Modal";
 import { OperatorForm } from "@/components/forms/OperatorForm";
 import { useCrud } from "@/hooks/useCrud";
+
+const Page = styled.div`
+  padding: 1rem;
+  height: 100%;
+`;
 
 export default function OperadorPage() {
   const { data, loading, create, update, remove } = useCrud<any>("/api/operators");
@@ -30,7 +36,7 @@ export default function OperadorPage() {
     } else {
       success = await create(formData);
     }
-    
+
     if (success) {
       setIsModalOpen(false);
     }
@@ -41,9 +47,9 @@ export default function OperadorPage() {
     { header: "Email", accessor: "email" },
     { header: "Matrícula", accessor: "matricula" },
     { header: "Perfil", accessor: "perfil" },
-    { 
-      header: "Mesa", 
-      accessor: (item) => item.mesa_trabalho?.nome || "-" 
+    {
+      header: "Mesa",
+      accessor: (item) => item.mesa_trabalho?.nome || "-"
     }
   ];
 
@@ -51,31 +57,22 @@ export default function OperadorPage() {
     <AppShellContainer>
       <Sidebar />
       <MainContent>
-    <div style={{ padding: "1rem", height: "100%" }}>
-      <DataTable
-        title="Operadores"
-        data={data}
-        columns={columns}
-        loading={loading}
-        onAdd={handleAdd}
-        onEdit={handleEdit}
-        onDelete={(item) => remove(item.id)}
-        searchPlaceholder="Buscar por nome ou email..."
-      />
+        <Page>
+          <DataTable
+            title="Operadores"
+            data={data}
+            columns={columns}
+            loading={loading}
+            onAdd={handleAdd}
+            onEdit={handleEdit}
+            onDelete={(item) => remove(item.id)}
+            searchPlaceholder="Buscar por nome ou email..."
+          />
 
-      <Modal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        title={editingItem ? "Editar Operador" : "Novo Operador"}
-      >
-        <OperatorForm
-          initialData={editingItem}
-          onSubmit={handleSubmit}
-          onCancel={() => setIsModalOpen(false)}
-          loading={loading}
-        />
-      </Modal>
-    </div>
+          <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingItem ? "Editar Operador" : "Novo Operador"}>
+            <OperatorForm initialData={editingItem} onSubmit={handleSubmit} onCancel={() => setIsModalOpen(false)} loading={loading} />
+          </Modal>
+        </Page>
       </MainContent>
     </AppShellContainer>
   );

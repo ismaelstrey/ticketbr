@@ -17,7 +17,7 @@ const FormGroup = styled.div`
   label {
     font-size: 0.85rem;
     font-weight: 600;
-    color: #374151;
+    color: ${({ theme }) => theme.colors.text.primary};
   }
 `;
 
