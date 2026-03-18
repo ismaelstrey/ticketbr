@@ -303,7 +303,6 @@ const menuItems: MenuItemType[] = [
       { label: "Abertos", path: "/tickets/open" }
     ]
   },
-  { label: "Chat", icon: FiUsers, path: "/chat" },
   { label: "Tarefas", icon: FiGrid, path: "/tasks" },
   { label: "Projetos", icon: FiBookOpen, path: "/projects" },
   { label: "Inventário", icon: FiWifi, path: "/inventory" },
