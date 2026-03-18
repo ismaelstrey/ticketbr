@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import styled from "styled-components";
 import { Button } from "@/components/ui/Button";
-import { Input, Select } from "@/components/ui/Input";
+import { Input } from "@/components/ui/Input";
 
 const FormContainer = styled.form`
   display: flex;
@@ -17,7 +17,7 @@ const FormGroup = styled.div`
   label {
     font-size: 0.85rem;
     font-weight: 600;
-    color: #374151;
+    color: ${({ theme }) => theme.colors.text.primary};
   }
 `;
 
