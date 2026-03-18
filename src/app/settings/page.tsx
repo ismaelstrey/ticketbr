@@ -6,15 +6,23 @@ import { AppShellContainer, MainContent } from "@/components/layout/AppShell";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { useThemeMode } from "@/context/ThemeModeContext";
 import { useSettings } from "@/hooks/useSettings";
 
 type TabKey = "general" | "evolution" | "n8n" | "contactsSync" | "notifications";
 
 const Card = styled.section`
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 1rem;
+  background: ${({ theme }) => theme.colors.surfaceElevated};
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  box-shadow: ${({ theme }) => theme.shadows.card};
+  border-radius: 24px;
+  padding: 1.25rem;
+  backdrop-filter: blur(18px);
+`;
+
+const PageTitle = styled.h1`
+  margin: 0 0 0.35rem;
+  color: ${({ theme }) => theme.colors.text.primary};
 `;
 
 const Tabs = styled.div`
@@ -25,13 +33,19 @@ const Tabs = styled.div`
 `;
 
 const TabButton = styled.button<{ $active?: boolean }>`
-  border: 1px solid ${({ $active }) => ($active ? "#2563eb" : "#d1d5db")};
-  background: ${({ $active }) => ($active ? "#dbeafe" : "#fff")};
-  color: ${({ $active }) => ($active ? "#1d4ed8" : "#374151")};
+  border: 1px solid ${({ theme, $active }) => ($active ? theme.colors.primary : theme.colors.border)};
+  background: ${({ theme, $active }) => ($active ? `${theme.colors.primary}22` : theme.colors.surface)};
+  color: ${({ theme, $active }) => ($active ? theme.colors.primary : theme.colors.text.secondary)};
   border-radius: 999px;
-  padding: 0.45rem 0.8rem;
-  font-weight: 600;
+  padding: 0.5rem 0.9rem;
+  font-weight: 700;
   cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: ${({ theme }) => theme.colors.primary};
+    color: ${({ theme }) => theme.colors.primary};
+  }
 `;
 
 const FormGrid = styled.div`
@@ -48,7 +62,7 @@ const Field = styled.label`
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
-  color: #111827;
+  color: ${({ theme }) => theme.colors.text.primary};
   font-size: 0.9rem;
 `;
 
@@ -61,16 +75,18 @@ const Footer = styled.div`
 
 const Info = styled.p`
   margin: 0 0 1rem;
-  color: #6b7280;
-  font-size: 0.9rem;
+  color: ${({ theme }) => theme.colors.text.secondary};
+  font-size: 0.92rem;
+  line-height: 1.55;
 `;
 
 const ResultBox = styled.pre`
   margin-top: 0.75rem;
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  padding: 0.75rem;
+  background: ${({ theme }) => theme.colors.surfaceAlt};
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  color: ${({ theme }) => theme.colors.text.secondary};
+  border-radius: 16px;
+  padding: 0.9rem;
   font-size: 0.8rem;
   overflow-x: auto;
 `;
@@ -79,24 +95,97 @@ const ContactsTable = styled.table`
   width: 100%;
   border-collapse: collapse;
   margin-top: 0.9rem;
+  background: ${({ theme }) => theme.colors.surface};
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: 18px;
+  overflow: hidden;
 
   th,
   td {
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid ${({ theme }) => theme.colors.border};
     text-align: left;
-    padding: 0.55rem;
+    padding: 0.7rem;
     font-size: 0.84rem;
     vertical-align: top;
+    color: ${({ theme }) => theme.colors.text.secondary};
   }
 
   th {
-    color: #374151;
+    color: ${({ theme }) => theme.colors.text.primary};
     font-weight: 700;
+    background: ${({ theme }) => theme.colors.surfaceAlt};
   }
+`;
+
+const ToggleCard = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.1rem;
+  border-radius: 20px;
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  background: linear-gradient(135deg, ${({ theme }) => theme.colors.surfaceAlt}, ${({ theme }) => theme.colors.surface});
+`;
+
+const ToggleContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+`;
+
+const ToggleTitle = styled.strong`
+  color: ${({ theme }) => theme.colors.text.primary};
+  font-size: 0.96rem;
+`;
+
+const ToggleDescription = styled.span`
+  color: ${({ theme }) => theme.colors.text.secondary};
+  font-size: 0.88rem;
+`;
+
+const ThemeSwitch = styled.button<{ $active: boolean }>`
+  width: 68px;
+  height: 38px;
+  border: 1px solid ${({ theme }) => theme.colors.borderStrong};
+  background: ${({ theme, $active }) => ($active ? `${theme.colors.primary}22` : theme.colors.surface)};
+  border-radius: 999px;
+  padding: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: ${({ $active }) => ($active ? "flex-end" : "flex-start")};
+  transition: all 0.25s ease;
+
+  span {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: ${({ theme, $active }) => ($active ? theme.colors.primary : theme.colors.surfaceAlt)};
+    color: ${({ theme }) => theme.colors.text.primary};
+    box-shadow: ${({ theme }) => theme.shadows.card};
+    font-size: 0.9rem;
+  }
+`;
+
+const StatusPanel = styled.div`
+  margin-top: 16px;
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  background: ${({ theme }) => theme.colors.surfaceAlt};
+  border-radius: 20px;
+  padding: 12px;
+  color: ${({ theme }) => theme.colors.text.secondary};
+`;
+
+const EmptyCell = styled.td`
+  color: ${({ theme }) => theme.colors.text.muted} !important;
 `;
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<TabKey>("general");
+  const { isDark, toggleMode } = useThemeMode();
 
   const {
     settings,
@@ -142,8 +231,8 @@ export default function SettingsPage() {
       <Sidebar />
       <MainContent>
         <Card>
-          <h1 style={{ margin: "0 0 0.35rem" }}>Configurações de Integração</h1>
-          <Info>Evolution API, N8N e sincronização de contatos WhatsApp em abas separadas.</Info>
+          <PageTitle>Configurações de Integração</PageTitle>
+          <Info>Evolution API, N8N, contatos WhatsApp e preferências visuais em um painel unificado.</Info>
 
           <Tabs>
             {tabs.map((tab) => (
@@ -153,10 +242,29 @@ export default function SettingsPage() {
             ))}
           </Tabs>
 
-          {activeTab === "evolution" && (
+          {activeTab === "general" && (
             <div>
-              <h3>Geral</h3>
-              <Info>Valide a API local antes de testar integrações externas.</Info>
+              <h3>Preferências da interface</h3>
+              <Info>Ative o dark mode para aplicar contraste reforçado, superfícies mais elegantes e melhor leitura em toda a aplicação.</Info>
+
+              <ToggleCard>
+                <ToggleContent>
+                  <ToggleTitle>Dark mode global</ToggleTitle>
+                  <ToggleDescription>
+                    Alterna todos os elementos do sistema entre uma paleta clara e uma paleta escura com contraste bem definido.
+                  </ToggleDescription>
+                </ToggleContent>
+                <ThemeSwitch
+                  type="button"
+                  $active={isDark}
+                  onClick={toggleMode}
+                  aria-label={isDark ? "Desativar dark mode" : "Ativar dark mode"}
+                  aria-pressed={isDark}
+                >
+                  <span>{isDark ? "🌙" : "☀️"}</span>
+                </ThemeSwitch>
+              </ToggleCard>
+
               <Footer>
                 <Button variant="ghost" onClick={testSystemApi} disabled={testingApi}>
                   {testingApi ? "Testando..." : "Testar API"}
@@ -187,7 +295,7 @@ export default function SettingsPage() {
                 </Field>
               </FormGrid>
 
-              <label style={{ display: "flex", gap: 8, marginTop: 12 }}>
+              <label style={{ display: "flex", gap: 8, marginTop: 12, color: "inherit" }}>
                 <input type="checkbox" checked={settings.autoLinkTickets} onChange={(e) => update({ autoLinkTickets: e.target.checked })} />
                 Associar automaticamente conversas a tickets
               </label>
@@ -197,11 +305,11 @@ export default function SettingsPage() {
                 <Button variant="primary" onClick={loadQr} disabled={loadingQr}>{loadingQr ? "Carregando QR..." : "Gerar/Atualizar QR"}</Button>
               </Footer>
 
-              <div style={{ marginTop: 16, border: "1px solid #e5e7eb", borderRadius: 12, padding: 12 }}>
+              <StatusPanel>
                 <strong>Status:</strong> {connectionStatus}
                 {pairingCode ? <p><strong>Código:</strong> {pairingCode}</p> : null}
-                {qrCode ? <img src={qrCode} alt="QR Code do WhatsApp" style={{ width: 280, maxWidth: "100%", border: "1px solid #e5e7eb", borderRadius: 8 }} /> : null}
-              </div>
+                {qrCode ? <img src={qrCode} alt="QR Code do WhatsApp" style={{ width: 280, maxWidth: "100%", border: "1px solid rgba(148,163,184,0.2)", borderRadius: 8, marginTop: 12 }} /> : null}
+              </StatusPanel>
             </div>
           )}
 
@@ -224,7 +332,7 @@ export default function SettingsPage() {
                   <Input placeholder="https://n8n.exemplo.com/webhook/ticketbr-events" value={settings.n8nWebhookUrl} onChange={(e) => update({ n8nWebhookUrl: e.target.value })} />
                 </Field>
 
-                <label style={{ display: "flex", gap: 8, marginTop: 4, gridColumn: "1 / -1" }}>
+                <label style={{ display: "flex", gap: 8, marginTop: 4, gridColumn: "1 / -1", color: "inherit" }}>
                   <input type="checkbox" checked={settings.n8nUseTestWebhook} onChange={(e) => update({ n8nUseTestWebhook: e.target.checked })} />
                   Usar Webhook de Teste (substitui /webhook/ por /webhook-test/)
                 </label>
@@ -291,7 +399,7 @@ export default function SettingsPage() {
                   ))}
                   {!contacts.length ? (
                     <tr>
-                      <td colSpan={4} style={{ color: "#6b7280" }}>Nenhum contato sincronizado ainda.</td>
+                      <EmptyCell colSpan={4}>Nenhum contato sincronizado ainda.</EmptyCell>
                     </tr>
                   ) : null}
                 </tbody>
