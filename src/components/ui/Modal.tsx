@@ -7,7 +7,8 @@ import { FiX } from "react-icons/fi";
 const Overlay = styled.div`
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: ${({ theme }) => theme.colors.overlay};
+  backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -16,20 +17,22 @@ const Overlay = styled.div`
 `;
 
 const ModalContainer = styled.div`
-  background: #fff;
-  border-radius: 8px;
+  background: ${({ theme }) => theme.colors.surfaceElevated};
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: 20px;
   width: 100%;
   max-width: 600px;
   max-height: 90vh;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  box-shadow: ${({ theme }) => theme.shadows.hover};
   overflow: hidden;
+  color: ${({ theme }) => theme.colors.text.primary};
 `;
 
 const Header = styled.div`
   padding: 1rem 1.5rem;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.border};
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -37,7 +40,7 @@ const Header = styled.div`
   h2 {
     font-size: 1.1rem;
     font-weight: 700;
-    color: #333;
+    color: ${({ theme }) => theme.colors.text.primary};
     margin: 0;
   }
 
@@ -45,14 +48,14 @@ const Header = styled.div`
     background: none;
     border: none;
     cursor: pointer;
-    color: #666;
+    color: ${({ theme }) => theme.colors.text.muted};
     font-size: 1.2rem;
     padding: 0;
     display: flex;
     align-items: center;
 
     &:hover {
-      color: #333;
+      color: ${({ theme }) => theme.colors.text.primary};
     }
   }
 `;

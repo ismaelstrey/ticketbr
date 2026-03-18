@@ -17,12 +17,13 @@ const ChatMain = styled(MainContent)`
 const Frame = styled.div`
   width: 100%;
   height: 100vh;
-  background: #fff;
+  background: ${({ theme }) => theme.colors.surfaceElevated};
   border: none;
   border-radius: 0;
   overflow: hidden;
   display: grid;
   grid-template-columns: 380px 1fr;
+  color: ${({ theme }) => theme.colors.text.primary};
 
   @media (max-width: 1024px) {
     grid-template-columns: 1fr;
@@ -31,37 +32,48 @@ const Frame = styled.div`
 `;
 
 const SidebarPane = styled.aside`
-  border-right: 1px solid #e5e7eb;
+  border-right: 1px solid ${({ theme }) => theme.colors.border};
   display: grid;
   grid-template-rows: auto auto auto 1fr;
-  background: #f8f9fa;
+  background: linear-gradient(180deg, ${({ theme }) => theme.colors.surfaceAlt}, ${({ theme }) => theme.colors.surface});
 `;
 
 const TopBar = styled.div`
   padding: 0.75rem;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.border};
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 0.75rem;
+`;
+
+const SearchWrap = styled.div`
+  padding: 0.6rem 0.75rem;
 `;
 
 const Tabs = styled.div`
   padding: 0.6rem 0.75rem;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.border};
   display: flex;
   gap: 0.4rem;
   overflow: auto;
 `;
 
 const TabButton = styled.button<{ $active?: boolean }>`
-  border: 1px solid ${({ $active }) => ($active ? "#22c55e" : "#d1d5db")};
-  background: ${({ $active }) => ($active ? "#dcfce7" : "#fff")};
-  color: ${({ $active }) => ($active ? "#166534" : "#374151")};
-  padding: 0.35rem 0.65rem;
+  border: 1px solid ${({ theme, $active }) => ($active ? theme.colors.primary : theme.colors.border)};
+  background: ${({ theme, $active }) => ($active ? `${theme.colors.primary}22` : theme.colors.surface)};
+  color: ${({ theme, $active }) => ($active ? theme.colors.primary : theme.colors.text.secondary)};
+  padding: 0.4rem 0.7rem;
   border-radius: 999px;
   cursor: pointer;
   font-size: 0.82rem;
   white-space: nowrap;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: ${({ theme }) => theme.colors.primary};
+    color: ${({ theme }) => theme.colors.primary};
+  }
 `;
 
 const ContactList = styled.div`
@@ -71,30 +83,59 @@ const ContactList = styled.div`
 const ContactItem = styled.button<{ $active?: boolean }>`
   width: 100%;
   border: none;
-  border-bottom: 1px solid #eceff1;
-  background: ${({ $active }) => ($active ? "#ebf8ff" : "#fff")};
-  padding: 0.65rem 0.75rem;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.border};
+  background: ${({ theme, $active }) => ($active ? `${theme.colors.primary}14` : "transparent")};
+  padding: 0.75rem;
   display: grid;
   grid-template-columns: 44px 1fr auto;
   gap: 0.55rem;
   text-align: left;
   cursor: pointer;
+  transition: background 0.2s ease;
 
   &:hover {
-    background: #f3f4f6;
+    background: ${({ theme }) => theme.colors.surfaceAlt};
   }
 `;
 
 const Avatar = styled.div`
   width: 42px;
   height: 42px;
-  border-radius: 50%;
-  background: #c7d2fe;
-  color: #312e81;
+  border-radius: 14px;
+  background: linear-gradient(135deg, ${({ theme }) => theme.colors.primary}, ${({ theme }) => theme.colors.status.purple});
+  color: ${({ theme }) => theme.colors.text.white};
   display: grid;
   place-items: center;
   font-weight: 700;
   font-size: 0.9rem;
+`;
+
+const ContactBody = styled.div`
+  min-width: 0;
+`;
+
+const ContactName = styled.div`
+  font-weight: 700;
+  color: ${({ theme }) => theme.colors.text.primary};
+`;
+
+const ContactMeta = styled.div`
+  color: ${({ theme }) => theme.colors.text.muted};
+  font-size: 0.78rem;
+`;
+
+const ContactPreview = styled.div`
+  color: ${({ theme }) => theme.colors.text.secondary};
+  font-size: 0.77rem;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
+
+const ContactTime = styled.small`
+  color: ${({ theme }) => theme.colors.text.muted};
+  font-size: 0.75rem;
 `;
 
 const Chips = styled.div`
@@ -106,30 +147,50 @@ const Chips = styled.div`
 
 const Chip = styled.span`
   font-size: 0.7rem;
-  background: #ecfeff;
-  border: 1px solid #a5f3fc;
-  color: #0f766e;
-  padding: 0.1rem 0.35rem;
+  background: ${({ theme }) => `${theme.colors.status.info}18`};
+  border: 1px solid ${({ theme }) => `${theme.colors.status.info}40`};
+  color: ${({ theme }) => theme.colors.status.info};
+  padding: 0.12rem 0.4rem;
   border-radius: 999px;
 `;
 
 const ChatPane = styled.section`
   display: grid;
   grid-template-rows: auto 1fr auto auto;
-  background: #efeae2;
+  background:
+    radial-gradient(circle at top, rgba(255, 255, 255, 0.04), transparent 30%),
+    ${({ theme }) => theme.colors.background};
   height: 100%;
   overflow: hidden;
 `;
 
 const Header = styled.div`
-  background: #f0f2f5;
-  border-bottom: 1px solid #d1d5db;
-  padding: 0.6rem 0.85rem;
+  background: ${({ theme }) => theme.colors.surfaceElevated};
+  border-bottom: 1px solid ${({ theme }) => theme.colors.border};
+  padding: 0.75rem 0.9rem;
   display: flex;
   justify-content: space-between;
   gap: 0.75rem;
   align-items: center;
   flex-wrap: wrap;
+  backdrop-filter: blur(16px);
+`;
+
+const HeaderTitle = styled.strong`
+  color: ${({ theme }) => theme.colors.text.primary};
+`;
+
+const HeaderSubtitle = styled.div`
+  font-size: 0.8rem;
+  color: ${({ theme }) => theme.colors.text.muted};
+`;
+
+const HeaderActions = styled.div`
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  color: ${({ theme }) => theme.colors.text.secondary};
 `;
 
 const MessageList = styled.div`
@@ -138,45 +199,79 @@ const MessageList = styled.div`
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  
-  /* Scrollbar discreta */
+
   &::-webkit-scrollbar {
     width: 6px;
   }
+
   &::-webkit-scrollbar-track {
     background: transparent;
   }
+
   &::-webkit-scrollbar-thumb {
-    background-color: rgba(0, 0, 0, 0.2);
-    border-radius: 3px;
+    background-color: ${({ theme }) => theme.colors.borderStrong};
+    border-radius: 999px;
   }
+
   &::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(0, 0, 0, 0.3);
+    background-color: ${({ theme }) => theme.colors.text.muted};
   }
 `;
 
 const Bubble = styled.div<{ $in?: boolean }>`
   align-self: ${({ $in }) => ($in ? "flex-start" : "flex-end")};
-  background: ${({ $in }) => ($in ? "#fff" : "#dcf8c6")};
-  border-radius: 8px;
-  padding: 0.45rem 0.6rem;
+  background: ${({ theme, $in }) => ($in ? theme.colors.surface : `${theme.colors.primary}22`)};
+  color: ${({ theme }) => theme.colors.text.primary};
+  border: 1px solid ${({ theme, $in }) => ($in ? theme.colors.border : `${theme.colors.primary}35`)};
+  border-radius: 16px;
+  padding: 0.6rem 0.75rem;
   max-width: 72%;
-  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.12);
+  box-shadow: ${({ theme }) => theme.shadows.card};
+`;
+
+const MessageMeta = styled.div`
+  margin-top: 4px;
+  font-size: 0.7rem;
+  color: ${({ theme }) => theme.colors.text.muted};
+`;
+
+const EmptyState = styled.small`
+  color: ${({ theme }) => theme.colors.text.muted};
 `;
 
 const Composer = styled.div`
-  background: #f0f2f5;
-  border-top: 1px solid #d1d5db;
-  padding: 0.6rem;
+  background: ${({ theme }) => theme.colors.surfaceElevated};
+  border-top: 1px solid ${({ theme }) => theme.colors.border};
+  padding: 0.75rem;
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 0.5rem;
 `;
 
+const ComposerActions = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+`;
+
+const ArchiveBanner = styled.div`
+  background: ${({ theme }) => theme.colors.surfaceElevated};
+  border-top: 1px solid ${({ theme }) => theme.colors.border};
+  padding: 0.75rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+`;
+
+const ArchiveText = styled.small`
+  color: ${({ theme }) => theme.colors.text.secondary};
+`;
+
 const Footer = styled.div`
-  background: #fff;
-  border-top: 1px solid #e5e7eb;
-  padding: 0.6rem;
+  background: ${({ theme }) => theme.colors.surface};
+  border-top: 1px solid ${({ theme }) => theme.colors.border};
+  padding: 0.75rem;
   display: grid;
   grid-template-columns: 1fr 1fr auto;
   gap: 0.45rem;
@@ -258,6 +353,7 @@ export default function ChatPage() {
 
   async function loadBase() {
     const [contactsRes, ticketsRes] = await Promise.all([fetch("/api/chat/contacts"), fetch("/api/chat/tickets")]);
+
     const contactsJson = await contactsRes.json();
     const ticketsJson = await ticketsRes.json();
 
@@ -382,7 +478,7 @@ export default function ChatPage() {
         contactId,
         channel,
         text,
-        contactPhone: phone, // Envia o telefone explicitamente
+        contactPhone: phone,
         attachment
       })
     });
@@ -392,7 +488,6 @@ export default function ChatPage() {
     setAttachment(null);
     await loadMessages();
   }
-
 
   async function finalizeConversation() {
     if (!contactId) {
@@ -461,9 +556,9 @@ export default function ChatPage() {
                 <option value="email">E-mail</option>
               </Select>
             </TopBar>
-            <div style={{ padding: "0.6rem 0.75rem" }}>
+            <SearchWrap>
               <Input placeholder="Buscar contato ou empresa" value={search} onChange={(e) => setSearch(e.target.value)} />
-            </div>
+            </SearchWrap>
             <Tabs>
               {companyTabs.map((tab) => (
                 <TabButton key={tab} $active={companyTab === tab} onClick={() => setCompanyTab(tab)}>
@@ -486,15 +581,15 @@ export default function ChatPage() {
                     }}
                   >
                     <Avatar>{contact.name.slice(0, 2).toUpperCase()}</Avatar>
-                    <div>
-                      <div style={{ fontWeight: 700 }}>{contact.name}</div>
-                      <div style={{ color: "#6b7280", fontSize: "0.78rem" }}>{contact.company || "Sem empresa"}</div>
-                      <div style={{ color: "#4b5563", fontSize: "0.77rem", marginTop: 2 }}>{lastPreview}</div>
+                    <ContactBody>
+                      <ContactName>{contact.name}</ContactName>
+                      <ContactMeta>{contact.company || "Sem empresa"}</ContactMeta>
+                      <ContactPreview>{lastPreview}</ContactPreview>
                       <Chips>
                         {(contact.tags || []).map((tag) => <Chip key={tag}>{tag}</Chip>)}
                       </Chips>
-                    </div>
-                    <small style={{ color: "#6b7280" }}>{lastAt ? lastAt.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }) : ""}</small>
+                    </ContactBody>
+                    <ContactTime>{lastAt ? lastAt.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }) : ""}</ContactTime>
                   </ContactItem>
                 );
               })}
@@ -504,14 +599,14 @@ export default function ChatPage() {
           <ChatPane>
             <Header>
               <div>
-                <strong>{selectedContact?.name ?? "Selecione um contato"}</strong>
-                <div style={{ fontSize: "0.8rem", color: "#6b7280" }}>{selectedContact?.company || selectedContact?.phone || selectedContact?.email || ""}</div>
+                <HeaderTitle>{selectedContact?.name ?? "Selecione um contato"}</HeaderTitle>
+                <HeaderSubtitle>{selectedContact?.company || selectedContact?.phone || selectedContact?.email || ""}</HeaderSubtitle>
               </div>
-              <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+              <HeaderActions>
                 <label><input type="checkbox" checked={enableSound} onChange={(e) => setEnableSound(e.target.checked)} /> Som</label>
                 <Button variant="ghost" onClick={requestBrowserAlertPermission}>Ativar alerta</Button>
                 {activeArchivedConversation ? <Chip>Histórico</Chip> : null}
-              </div>
+              </HeaderActions>
             </Header>
 
             <MessageList>
@@ -523,21 +618,21 @@ export default function ChatPage() {
                       📎 {message.attachment.name}
                     </a>
                   ) : null}
-                  <div style={{ marginTop: 4, fontSize: "0.7rem", opacity: 0.7 }}>{new Date(message.createdAt).toLocaleString("pt-BR")}</div>
+                  <MessageMeta>{new Date(message.createdAt).toLocaleString("pt-BR")}</MessageMeta>
                 </Bubble>
               ))}
-              {!(activeArchivedConversation?.messages || messages).length && <small style={{ color: "#6b7280" }}>Nenhuma mensagem ainda.</small>}
+              {!(activeArchivedConversation?.messages || messages).length && <EmptyState>Nenhuma mensagem ainda.</EmptyState>}
               <div ref={messagesEndRef} />
             </MessageList>
 
             {activeArchivedConversation ? (
-              <div style={{ background: "#f0f2f5", borderTop: "1px solid #d1d5db", padding: "0.6rem", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
-                <small style={{ color: "#4b5563" }}>
+              <ArchiveBanner>
+                <ArchiveText>
                   Visualizando conversa finalizada em {new Date(activeArchivedConversation.closedAt).toLocaleString("pt-BR")}
                   {activeArchivedConversation.ticket ? ` • Ticket #${activeArchivedConversation.ticket.number}` : ""}
-                </small>
+                </ArchiveText>
                 <Button variant="ghost" onClick={() => setActiveArchivedId("")}>Voltar para conversa atual</Button>
-              </div>
+              </ArchiveBanner>
             ) : (
               <Composer>
                 <Textarea
@@ -551,7 +646,7 @@ export default function ChatPage() {
                     }
                   }}
                 />
-                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                <ComposerActions>
                   <label style={{ cursor: "pointer" }}>
                     <input
                       type="file"
@@ -566,7 +661,7 @@ export default function ChatPage() {
                     <Button variant="ghost" type="button">Anexar</Button>
                   </label>
                   <Button onClick={() => sendMessage().catch((error) => showToast(error.message, "error"))}>Enviar</Button>
-                </div>
+                </ComposerActions>
               </Composer>
             )}
 
