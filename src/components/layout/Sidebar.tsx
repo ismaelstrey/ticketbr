@@ -25,11 +25,9 @@ const EXPANDED_WIDTH = "288px";
 const COLLAPSED_WIDTH = "84px";
 
 const SidebarContainer = styled.aside<{ $isExpanded: boolean }>`
-  --sidebar-surface: linear-gradient(180deg, #0f172a 0%, #111c34 55%, #13213f 100%);
-  --sidebar-border: rgba(148, 163, 184, 0.18);
-  background: var(--sidebar-surface);
+  background: ${({ theme }) => theme.colors.sidebar.background};
+  border-right: 1px solid ${({ theme }) => theme.colors.sidebar.border};
   backdrop-filter: blur(18px);
-  border-right: 1px solid var(--sidebar-border);
   box-shadow: 0 20px 45px rgba(15, 23, 42, 0.22);
   display: flex;
   flex-direction: column;
@@ -52,7 +50,7 @@ const SidebarContainer = styled.aside<{ $isExpanded: boolean }>`
   }
 
   &::-webkit-scrollbar-thumb {
-    background-color: rgba(148, 163, 184, 0.35);
+    background-color: ${({ theme }) => theme.colors.borderStrong};
     border-radius: 999px;
   }
 
@@ -85,7 +83,7 @@ const BrandMark = styled.div`
   border-radius: 16px;
   background: linear-gradient(135deg, #38bdf8 0%, #6366f1 55%, #8b5cf6 100%);
   box-shadow: 0 14px 28px rgba(99, 102, 241, 0.32);
-  color: #f8fafc;
+  color: ${({ theme }) => theme.colors.text.primary};
   display: grid;
   place-items: center;
   font-size: 1.15rem;
@@ -100,14 +98,14 @@ const BrandText = styled.div<{ $isExpanded: boolean }>`
 `;
 
 const BrandTitle = styled.span`
-  color: #f8fafc;
+  color: ${({ theme }) => theme.colors.text.primary};
   font-size: 1rem;
   font-weight: 700;
   letter-spacing: 0.01em;
 `;
 
 const BrandSubtitle = styled.span`
-  color: #94a3b8;
+  color: ${({ theme }) => theme.colors.sidebar.muted};
   font-size: 0.75rem;
   white-space: nowrap;
 `;
@@ -138,7 +136,7 @@ const SectionLabel = styled.span<{ $isExpanded: boolean }>`
   display: ${({ $isExpanded }) => ($isExpanded ? "block" : "none")};
   padding: 0 1.2rem;
   margin: 0.4rem 0 0.3rem;
-  color: #64748b;
+  color: ${({ theme }) => theme.colors.text.muted};
   font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.14em;
@@ -170,7 +168,7 @@ const MenuItem = styled.button<{ $isActive: boolean; $isExpanded: boolean }>`
   border: 1px solid ${({ $isActive }) => ($isActive ? "rgba(96, 165, 250, 0.3)" : "transparent")};
   border-radius: 18px;
   cursor: pointer;
-  color: ${({ $isActive }) => ($isActive ? "#f8fafc" : "#cbd5e1")};
+  color: ${({ $isActive, theme }) => ($isActive ? theme.colors.sidebar.activeText : theme.colors.text.secondary)};
   transition: all 0.22s ease;
   justify-content: ${({ $isExpanded }) => ($isExpanded ? "flex-start" : "center")};
   position: relative;
@@ -204,11 +202,11 @@ const IconWrap = styled.span<{ $isActive: boolean }>`
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: ${({ $isActive }) => ($isActive ? "#eff6ff" : "#93c5fd")};
-  background: ${({ $isActive }) =>
+  color: ${({ $isActive, theme }) => ($isActive ? theme.colors.text.white : theme.colors.sidebar.icon)};
+  background: ${({ $isActive, theme }) =>
     $isActive
       ? "linear-gradient(135deg, rgba(59, 130, 246, 0.95), rgba(99, 102, 241, 0.92))"
-      : "rgba(15, 23, 42, 0.55)"};
+      : theme.colors.surfaceAlt};
   box-shadow: ${({ $isActive }) =>
     $isActive ? "0 12px 24px rgba(59, 130, 246, 0.28)" : "inset 0 0 0 1px rgba(148, 163, 184, 0.1)"};
   transition: all 0.22s ease;
@@ -242,7 +240,7 @@ const ChevronIcon = styled.span<{ $isExpanded: boolean }>`
   display: ${({ $isExpanded }) => ($isExpanded ? "flex" : "none")};
   align-items: center;
   font-size: 1rem;
-  color: #94a3b8;
+  color: ${({ theme }) => theme.colors.text.muted};
   position: relative;
   z-index: 1;
 `;
@@ -257,7 +255,7 @@ const SubMenu = styled.div<{ $isOpen: boolean; $isExpanded: boolean }>`
 const SubMenuItem = styled.a<{ $isActive: boolean }>`
   display: block;
   padding: 0.68rem 0.8rem;
-  color: ${({ $isActive }) => ($isActive ? "#f8fafc" : "#94a3b8")};
+  color: ${({ $isActive, theme }) => ($isActive ? theme.colors.text.primary : theme.colors.text.muted)};
   font-size: 0.84rem;
   text-decoration: none;
   border-radius: 14px;
@@ -336,7 +334,7 @@ const menuItems: MenuItemType[] = [
 ];
 
 const UserSection = styled.div<{ $isExpanded: boolean }>`
-  border-top: 1px solid rgba(148, 163, 184, 0.12);
+  border-top: 1px solid ${({ theme }) => theme.colors.border};
   padding: 1rem 0.85rem 1.1rem;
   margin-top: auto;
   display: flex;
@@ -351,7 +349,7 @@ const UserInfo = styled.div<{ $isExpanded: boolean }>`
   padding: 0.75rem;
   border-radius: 18px;
   background: rgba(15, 23, 42, 0.38);
-  border: 1px solid rgba(148, 163, 184, 0.12);
+  border: 1px solid ${({ theme }) => theme.colors.border};
   justify-content: ${({ $isExpanded }) => ($isExpanded ? "flex-start" : "center")};
 `;
 
@@ -378,7 +376,7 @@ const UserDetails = styled.div<{ $isExpanded: boolean }>`
 `;
 
 const UserName = styled.span`
-  color: #f8fafc;
+  color: ${({ theme }) => theme.colors.text.primary};
   font-size: 0.92rem;
   font-weight: 600;
   white-space: nowrap;
@@ -387,7 +385,7 @@ const UserName = styled.span`
 `;
 
 const UserRole = styled.span`
-  color: #94a3b8;
+  color: ${({ theme }) => theme.colors.text.muted};
   font-size: 0.76rem;
   white-space: nowrap;
 `;

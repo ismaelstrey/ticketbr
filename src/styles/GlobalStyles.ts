@@ -2,7 +2,7 @@ import { createGlobalStyle } from "styled-components";
 
 export const GlobalStyles = createGlobalStyle`
   :root {
-    color-scheme: light;
+    color-scheme: ${({ theme }) => (theme.colors.background === "#020617" ? "dark" : "light")};
     font-family: Inter, system-ui, -apple-system, sans-serif;
   }
 
@@ -12,15 +12,26 @@ export const GlobalStyles = createGlobalStyle`
     padding: 0;
   }
 
+  html,
+  body {
+    min-height: 100%;
+  }
+
   body {
     margin: 0;
-    background: ${({ theme }) => theme.colors.background};
+    background:
+      ${({ theme }) => theme.colors.backgroundAccent},
+      ${({ theme }) => theme.colors.background};
     color: ${({ theme }) => theme.colors.text.primary};
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    transition: background 0.25s ease, color 0.25s ease;
   }
 
-  button {
+  button,
+  input,
+  select,
+  textarea {
     font-family: inherit;
   }
 
@@ -29,10 +40,14 @@ export const GlobalStyles = createGlobalStyle`
     text-decoration: none;
   }
 
-  /* Scrollbar customization if needed */
+  ::selection {
+    background: ${({ theme }) => theme.colors.primary}55;
+    color: ${({ theme }) => theme.colors.text.white};
+  }
+
   ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 10px;
+    height: 10px;
   }
 
   ::-webkit-scrollbar-track {
@@ -40,11 +55,15 @@ export const GlobalStyles = createGlobalStyle`
   }
 
   ::-webkit-scrollbar-thumb {
-    background: #ccc;
-    border-radius: 4px;
+    background: ${({ theme }) => theme.colors.borderStrong};
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: #bbb;
+    background: ${({ theme }) => theme.colors.text.muted};
+    border: 2px solid transparent;
+    background-clip: padding-box;
   }
 `;

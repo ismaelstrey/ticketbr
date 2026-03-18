@@ -1,43 +1,42 @@
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 
-export const Input = styled.input`
+const fieldStyles = css`
   border: 1px solid ${({ theme }) => theme.colors.border};
   border-radius: ${({ theme }) => theme.borderRadius.small};
-  padding: 0.55rem 0.65rem;
-  font-family: inherit;
-  width: 100%;
-  
-  &:focus {
-    outline: 2px solid ${({ theme }) => theme.colors.primary}33; /* 33 = 20% opacity */
-    border-color: ${({ theme }) => theme.colors.primary};
-  }
-`;
-
-export const Select = styled.select`
-  border: 1px solid ${({ theme }) => theme.colors.border};
-  border-radius: 10px;
-  padding: 0.55rem 0.7rem;
   background: ${({ theme }) => theme.colors.surface};
-  font-family: inherit;
-  cursor: pointer;
+  color: ${({ theme }) => theme.colors.text.primary};
+  transition: border-color 0.2s ease, outline 0.2s ease, background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+
+  &::placeholder {
+    color: ${({ theme }) => theme.colors.text.muted};
+  }
 
   &:focus {
     outline: 2px solid ${({ theme }) => theme.colors.primary}33;
     border-color: ${({ theme }) => theme.colors.primary};
+    box-shadow: 0 0 0 4px ${({ theme }) => theme.colors.primary}12;
   }
 `;
 
+export const Input = styled.input`
+  ${fieldStyles}
+  padding: 0.55rem 0.65rem;
+  font-family: inherit;
+  width: 100%;
+`;
+
+export const Select = styled.select`
+  ${fieldStyles}
+  padding: 0.55rem 0.7rem;
+  font-family: inherit;
+  cursor: pointer;
+`;
+
 export const Textarea = styled.textarea`
-  border: 1px solid ${({ theme }) => theme.colors.border};
-  border-radius: ${({ theme }) => theme.borderRadius.small};
+  ${fieldStyles}
   padding: 0.65rem;
   font-family: inherit;
   width: 100%;
   resize: vertical;
   min-height: 84px;
-
-  &:focus {
-    outline: 2px solid ${({ theme }) => theme.colors.primary}33;
-    border-color: ${({ theme }) => theme.colors.primary};
-  }
 `;
