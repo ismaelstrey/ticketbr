@@ -146,8 +146,8 @@ const SectionLabel = styled.span<{ $isExpanded: boolean }>`
 const MenuList = styled.nav`
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
-  padding: 0.5rem 0.75rem 1rem;
+  gap: 0.18rem;
+  padding: 0.35rem 0.55rem 0.85rem;
   flex: 1;
 `;
 
@@ -160,13 +160,10 @@ const MenuItem = styled.button<{ $isActive: boolean; $isExpanded: boolean }>`
   display: flex;
   align-items: center;
   width: 100%;
-  padding: 0.78rem 0.85rem;
-  background: ${({ $isActive }) =>
-    $isActive
-      ? "linear-gradient(135deg, rgba(59, 130, 246, 0.22), rgba(99, 102, 241, 0.2))"
-      : "transparent"};
-  border: 1px solid ${({ $isActive }) => ($isActive ? "rgba(96, 165, 250, 0.3)" : "transparent")};
-  border-radius: 18px;
+  padding: 0.62rem 0.72rem;
+  background: ${({ $isActive }) => ($isActive ? "rgba(59, 130, 246, 0.12)" : "transparent")};
+  border: 1px solid transparent;
+  border-radius: 10px;
   cursor: pointer;
   color: ${({ $isActive, theme }) => ($isActive ? theme.colors.sidebar.activeText : theme.colors.text.secondary)};
   transition: all 0.22s ease;
@@ -184,10 +181,9 @@ const MenuItem = styled.button<{ $isActive: boolean; $isExpanded: boolean }>`
   }
 
   &:hover {
-    background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(30, 64, 175, 0.18));
-    color: white;
-    border-color: rgba(96, 165, 250, 0.22);
-    transform: translateX(2px);
+    background: rgba(148, 163, 184, 0.1);
+    color: ${({ theme }) => theme.colors.text.primary};
+    transform: translateX(1px);
   }
 
   &:hover::before {
@@ -196,37 +192,33 @@ const MenuItem = styled.button<{ $isActive: boolean; $isExpanded: boolean }>`
 `;
 
 const IconWrap = styled.span<{ $isActive: boolean }>`
-  width: 38px;
-  height: 38px;
-  border-radius: 14px;
+  width: 24px;
+  height: 24px;
+  border-radius: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: ${({ $isActive, theme }) => ($isActive ? theme.colors.text.white : theme.colors.sidebar.icon)};
-  background: ${({ $isActive, theme }) =>
-    $isActive
-      ? "linear-gradient(135deg, rgba(59, 130, 246, 0.95), rgba(99, 102, 241, 0.92))"
-      : theme.colors.surfaceAlt};
-  box-shadow: ${({ $isActive }) =>
-    $isActive ? "0 12px 24px rgba(59, 130, 246, 0.28)" : "inset 0 0 0 1px rgba(148, 163, 184, 0.1)"};
+  color: ${({ $isActive, theme }) => ($isActive ? theme.colors.primary : theme.colors.text.muted)};
+  background: transparent;
+  box-shadow: none;
   transition: all 0.22s ease;
   position: relative;
   z-index: 1;
 
   ${MenuItem}:hover & {
-    background: linear-gradient(135deg, rgba(56, 189, 248, 0.92), rgba(99, 102, 241, 0.92));
-    color: #eff6ff;
-    box-shadow: 0 12px 24px rgba(56, 189, 248, 0.22);
+    background: transparent;
+    color: ${({ theme }) => theme.colors.primary};
+    box-shadow: none;
   }
 
   svg {
-    font-size: 1.05rem;
+    font-size: 1rem;
   }
 `;
 
 const MenuLabel = styled.span<{ $isExpanded: boolean }>`
-  margin-left: 0.9rem;
-  font-size: 0.94rem;
+  margin-left: 0.72rem;
+  font-size: 0.9rem;
   font-weight: 600;
   display: ${({ $isExpanded }) => ($isExpanded ? "block" : "none")};
   white-space: nowrap;
@@ -248,25 +240,24 @@ const ChevronIcon = styled.span<{ $isExpanded: boolean }>`
 const SubMenu = styled.div<{ $isOpen: boolean; $isExpanded: boolean }>`
   display: ${({ $isOpen, $isExpanded }) => ($isOpen && $isExpanded ? "flex" : "none")};
   flex-direction: column;
-  padding: 0.35rem 0 0 3.65rem;
-  gap: 0.25rem;
+  padding: 0.15rem 0 0 2.6rem;
+  gap: 0.15rem;
 `;
 
 const SubMenuItem = styled.a<{ $isActive: boolean }>`
   display: block;
-  padding: 0.68rem 0.8rem;
+  padding: 0.5rem 0.65rem;
   color: ${({ $isActive, theme }) => ($isActive ? theme.colors.text.primary : theme.colors.text.muted)};
   font-size: 0.84rem;
   text-decoration: none;
-  border-radius: 14px;
-  background: ${({ $isActive }) => ($isActive ? "rgba(59, 130, 246, 0.14)" : "transparent")};
-  border: 1px solid ${({ $isActive }) => ($isActive ? "rgba(96, 165, 250, 0.18)" : "transparent")};
+  border-radius: 10px;
+  background: ${({ $isActive }) => ($isActive ? "rgba(59, 130, 246, 0.1)" : "transparent")};
+  border: 1px solid transparent;
   transition: all 0.18s ease;
 
   &:hover {
-    color: white;
-    background: rgba(30, 41, 59, 0.78);
-    border-color: rgba(148, 163, 184, 0.14);
+    color: ${({ theme }) => theme.colors.text.primary};
+    background: rgba(148, 163, 184, 0.08);
   }
 `;
 
@@ -347,16 +338,16 @@ const UserInfo = styled.div<{ $isExpanded: boolean }>`
   align-items: center;
   gap: 0.85rem;
   padding: 0.75rem;
-  border-radius: 18px;
+  border-radius: 10px;
   background: rgba(15, 23, 42, 0.38);
   border: 1px solid ${({ theme }) => theme.colors.border};
   justify-content: ${({ $isExpanded }) => ($isExpanded ? "flex-start" : "center")};
 `;
 
 const UserAvatar = styled.div`
-  width: 38px;
-  height: 38px;
-  border-radius: 14px;
+  width: 24px;
+  height: 24px;
+  border-radius: 0;
   background: linear-gradient(135deg, #38bdf8, #8b5cf6);
   display: flex;
   align-items: center;
