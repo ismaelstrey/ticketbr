@@ -17,7 +17,7 @@ const FormGroup = styled.div`
   label {
     font-size: 0.85rem;
     font-weight: 600;
-    color: #374151;
+    color: ${({ theme }) => theme.colors.text.primary};
   }
 `;
 
@@ -46,7 +46,7 @@ export function OperatorForm({ initialData, onSubmit, onCancel, loading }: Opera
 
   useEffect(() => {
     if (initialData) {
-      setFormData({ ...initialData, senha: "" }); // Clear password on edit
+      setFormData({ ...initialData, senha: "" });
     }
   }, [initialData]);
 

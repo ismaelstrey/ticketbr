@@ -6,7 +6,7 @@ import styled from "styled-components";
 import { AppShellContainer, MainContent } from "@/components/layout/AppShell";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
+import { Input, Select } from "@/components/ui/Input";
 import { Modal } from "@/components/ui/Modal";
 import { SolicitanteForm } from "@/components/forms/SolicitanteForm";
 import { FiEdit2, FiEye, FiPlus, FiSearch, FiTrash2 } from "react-icons/fi";
@@ -31,7 +31,7 @@ const Title = styled.h1`
   margin: 0;
   font-size: 1.4rem;
   font-weight: 700;
-  color: #111827;
+  color: ${({ theme }) => theme.colors.text.primary};
 `;
 
 const RightActions = styled.div`
@@ -50,7 +50,7 @@ const SearchWrap = styled.div`
     left: 12px;
     top: 50%;
     transform: translateY(-50%);
-    color: #9ca3af;
+    color: ${({ theme }) => theme.colors.text.muted};
     pointer-events: none;
   }
 
@@ -61,10 +61,11 @@ const SearchWrap = styled.div`
 `;
 
 const TableWrap = styled.div`
-  background: #fff;
-  border-radius: 12px;
-  border: 1px solid #e5e7eb;
+  background: ${({ theme }) => theme.colors.surfaceElevated};
+  border-radius: 20px;
+  border: 1px solid ${({ theme }) => theme.colors.border};
   overflow: hidden;
+  box-shadow: ${({ theme }) => theme.shadows.card};
 `;
 
 const TableScroll = styled.div`
@@ -78,14 +79,14 @@ const Table = styled.table`
 `;
 
 const Th = styled.th`
-  background: #f9fafb;
-  color: #4b5563;
+  background: ${({ theme }) => theme.colors.surfaceAlt};
+  color: ${({ theme }) => theme.colors.text.secondary};
   font-weight: 700;
   font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 0.03em;
   padding: 0.75rem 1rem;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.border};
   white-space: nowrap;
 `;
 
@@ -103,8 +104,8 @@ const ThButton = styled.button`
 
 const Td = styled.td`
   padding: 0.75rem 1rem;
-  border-bottom: 1px solid #eef2f7;
-  color: #374151;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.border};
+  color: ${({ theme }) => theme.colors.text.secondary};
   font-size: 0.9rem;
   white-space: nowrap;
 `;
@@ -112,7 +113,7 @@ const Td = styled.td`
 const Empty = styled.div`
   padding: 2.5rem 1.25rem;
   text-align: center;
-  color: #6b7280;
+  color: ${({ theme }) => theme.colors.text.muted};
 `;
 
 const Footer = styled.div`
@@ -131,20 +132,49 @@ const Pager = styled.div`
   flex-wrap: wrap;
 `;
 
-const Select = styled.select`
-  border: 1px solid #d8dbe3;
-  border-radius: 8px;
-  padding: 0.45rem 0.55rem;
-  font: inherit;
-  background: #fff;
+const MetaText = styled.div`
+  color: ${({ theme }) => theme.colors.text.muted};
+  font-size: 0.9rem;
 `;
 
 const Message = styled.div<{ $type: "success" | "error" }>`
-  border: 1px solid ${({ $type }) => ($type === "success" ? "#bbf7d0" : "#fecaca")};
-  background: ${({ $type }) => ($type === "success" ? "#f0fdf4" : "#fef2f2")};
-  color: ${({ $type }) => ($type === "success" ? "#166534" : "#991b1b")};
-  border-radius: 10px;
+  border: 1px solid ${({ theme, $type }) => ($type === "success" ? `${theme.colors.status.success}55` : `${theme.colors.status.warning}55`)};
+  background: ${({ theme, $type }) => ($type === "success" ? `${theme.colors.status.success}18` : `${theme.colors.status.warning}16`)};
+  color: ${({ theme, $type }) => ($type === "success" ? theme.colors.status.success : theme.colors.status.warning)};
+  border-radius: 14px;
   padding: 0.65rem 0.8rem;
+`;
+
+const ActionsCell = styled.div`
+  display: inline-flex;
+  gap: 0.4rem;
+`;
+
+const IconButton = styled.button<{ $tone?: "info" | "neutral" | "danger" }>`
+  border: 1px solid ${({ theme, $tone }) =>
+    $tone === "info"
+      ? `${theme.colors.primary}44`
+      : $tone === "danger"
+        ? `${theme.colors.status.warning}44`
+        : theme.colors.border};
+  background: ${({ theme, $tone }) =>
+    $tone === "info"
+      ? `${theme.colors.primary}14`
+      : $tone === "danger"
+        ? `${theme.colors.status.warning}10`
+        : theme.colors.surface};
+  color: ${({ theme, $tone }) =>
+    $tone === "info"
+      ? theme.colors.primary
+      : $tone === "danger"
+        ? theme.colors.status.warning
+        : theme.colors.text.primary};
+  border-radius: 10px;
+  padding: 0.4rem 0.55rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 `;
 
 type SortBy = "nome_fantasia" | "cnpj" | "email" | "telefone" | "data_cadastro";
@@ -177,7 +207,7 @@ export default function SolicitantePage() {
         pageSize: String(pageSize),
         search,
         sortBy,
-        sortDir,
+        sortDir
       });
       const res = await fetch(`/api/solicitantes?${params.toString()}`);
       const json = await res.json();
@@ -258,7 +288,7 @@ export default function SolicitantePage() {
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(payload)
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error || "Falha ao salvar solicitante");
@@ -278,185 +308,126 @@ export default function SolicitantePage() {
     <AppShellContainer>
       <Sidebar />
       <MainContent>
-    <Page>
-      <Header>
-        <Title>Solicitantes</Title>
-        <RightActions>
-          <SearchWrap>
-            <FiSearch aria-hidden="true" />
-            <Input
-              aria-label="Buscar solicitantes"
-              placeholder="Buscar por nome ou CPF/CNPJ..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </SearchWrap>
-          <Button variant="primary" onClick={handleNew} disabled={loading}>
-            <FiPlus /> Novo Solicitante
-          </Button>
-        </RightActions>
-      </Header>
+        <Page>
+          <Header>
+            <Title>Solicitantes</Title>
+            <RightActions>
+              <SearchWrap>
+                <FiSearch aria-hidden="true" />
+                <Input
+                  aria-label="Buscar solicitantes"
+                  placeholder="Buscar por nome ou CPF/CNPJ..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+              </SearchWrap>
+              <Button variant="primary" onClick={handleNew} disabled={loading}>
+                <FiPlus /> Novo Solicitante
+              </Button>
+            </RightActions>
+          </Header>
 
-      {message && <Message $type={message.type}>{message.text}</Message>}
+          {message && <Message $type={message.type}>{message.text}</Message>}
 
-      <TableWrap>
-        <TableScroll>
-          <Table role="table" aria-busy={loading}>
-            <thead>
-              <tr>
-                <Th>
-                  <ThButton type="button" onClick={() => toggleSort("nome_fantasia")} aria-label="Ordenar por nome">
-                    Nome {sortBy === "nome_fantasia" ? (sortDir === "asc" ? "▲" : "▼") : ""}
-                  </ThButton>
-                </Th>
-                <Th>
-                  <ThButton type="button" onClick={() => toggleSort("cnpj")} aria-label="Ordenar por CPF/CNPJ">
-                    CPF/CNPJ {sortBy === "cnpj" ? (sortDir === "asc" ? "▲" : "▼") : ""}
-                  </ThButton>
-                </Th>
-                <Th>
-                  <ThButton type="button" onClick={() => toggleSort("email")} aria-label="Ordenar por e-mail">
-                    E-mail {sortBy === "email" ? (sortDir === "asc" ? "▲" : "▼") : ""}
-                  </ThButton>
-                </Th>
-                <Th>
-                  <ThButton type="button" onClick={() => toggleSort("telefone")} aria-label="Ordenar por telefone">
-                    Telefone {sortBy === "telefone" ? (sortDir === "asc" ? "▲" : "▼") : ""}
-                  </ThButton>
-                </Th>
-                <Th>
-                  <ThButton type="button" onClick={() => toggleSort("data_cadastro")} aria-label="Ordenar por data de cadastro">
-                    Cadastro {sortBy === "data_cadastro" ? (sortDir === "asc" ? "▲" : "▼") : ""}
-                  </ThButton>
-                </Th>
-                <Th style={{ textAlign: "right" }}>Ações</Th>
-              </tr>
-            </thead>
-            <tbody>
-              {!loading && data.length === 0 ? (
-                <tr>
-                  <td colSpan={6}>
-                    <Empty>Nenhum solicitante cadastrado.</Empty>
-                  </td>
-                </tr>
-              ) : (
-                data.map((item) => (
-                  <tr key={item.id}>
-                    <Td>{item.nome_fantasia}</Td>
-                    <Td>{item.cnpj}</Td>
-                    <Td>{item.email}</Td>
-                    <Td>{item.telefone}</Td>
-                    <Td>{new Date(item.data_cadastro).toLocaleDateString("pt-BR")}</Td>
-                    <Td style={{ textAlign: "right" }}>
-                      <div style={{ display: "inline-flex", gap: "0.4rem" }}>
-                        <button
-                          type="button"
-                          aria-label={`Detalhes de ${item.nome_fantasia}`}
-                          onClick={() => handleDetails(item)}
-                          disabled={loading}
-                          style={{
-                            border: "1px solid #bfdbfe",
-                            background: "#eff6ff",
-                            color: "#1d4ed8",
-                            borderRadius: 8,
-                            padding: "0.35rem 0.5rem",
-                            cursor: "pointer",
-                          }}
-                        >
-                          <FiEye aria-hidden="true" />
-                        </button>
-                        <button
-                          type="button"
-                          aria-label={`Editar ${item.nome_fantasia}`}
-                          onClick={() => handleEdit(item)}
-                          disabled={loading}
-                          style={{
-                            border: "1px solid #d1d5db",
-                            background: "#fff",
-                            borderRadius: 8,
-                            padding: "0.35rem 0.5rem",
-                            cursor: "pointer",
-                          }}
-                        >
-                          <FiEdit2 aria-hidden="true" />
-                        </button>
-                        <button
-                          type="button"
-                          aria-label={`Excluir ${item.nome_fantasia}`}
-                          onClick={() => handleDelete(item)}
-                          disabled={loading}
-                          style={{
-                            border: "1px solid #fecaca",
-                            background: "#fff",
-                            color: "#ef4444",
-                            borderRadius: 8,
-                            padding: "0.35rem 0.5rem",
-                            cursor: "pointer",
-                          }}
-                        >
-                          <FiTrash2 aria-hidden="true" />
-                        </button>
-                      </div>
-                    </Td>
+          <TableWrap>
+            <TableScroll>
+              <Table role="table" aria-busy={loading}>
+                <thead>
+                  <tr>
+                    <Th>
+                      <ThButton type="button" onClick={() => toggleSort("nome_fantasia")} aria-label="Ordenar por nome">
+                        Nome {sortBy === "nome_fantasia" ? (sortDir === "asc" ? "▲" : "▼") : ""}
+                      </ThButton>
+                    </Th>
+                    <Th>
+                      <ThButton type="button" onClick={() => toggleSort("cnpj")} aria-label="Ordenar por CPF/CNPJ">
+                        CPF/CNPJ {sortBy === "cnpj" ? (sortDir === "asc" ? "▲" : "▼") : ""}
+                      </ThButton>
+                    </Th>
+                    <Th>
+                      <ThButton type="button" onClick={() => toggleSort("email")} aria-label="Ordenar por e-mail">
+                        E-mail {sortBy === "email" ? (sortDir === "asc" ? "▲" : "▼") : ""}
+                      </ThButton>
+                    </Th>
+                    <Th>
+                      <ThButton type="button" onClick={() => toggleSort("telefone")} aria-label="Ordenar por telefone">
+                        Telefone {sortBy === "telefone" ? (sortDir === "asc" ? "▲" : "▼") : ""}
+                      </ThButton>
+                    </Th>
+                    <Th>
+                      <ThButton type="button" onClick={() => toggleSort("data_cadastro")} aria-label="Ordenar por data de cadastro">
+                        Cadastro {sortBy === "data_cadastro" ? (sortDir === "asc" ? "▲" : "▼") : ""}
+                      </ThButton>
+                    </Th>
+                    <Th style={{ textAlign: "right" }}>Ações</Th>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </Table>
-        </TableScroll>
+                </thead>
+                <tbody>
+                  {!loading && data.length === 0 ? (
+                    <tr>
+                      <td colSpan={6}>
+                        <Empty>Nenhum solicitante cadastrado.</Empty>
+                      </td>
+                    </tr>
+                  ) : (
+                    data.map((item) => (
+                      <tr key={item.id}>
+                        <Td>{item.nome_fantasia}</Td>
+                        <Td>{item.cnpj}</Td>
+                        <Td>{item.email}</Td>
+                        <Td>{item.telefone}</Td>
+                        <Td>{new Date(item.data_cadastro).toLocaleDateString("pt-BR")}</Td>
+                        <Td style={{ textAlign: "right" }}>
+                          <ActionsCell>
+                            <IconButton type="button" $tone="info" aria-label={`Detalhes de ${item.nome_fantasia}`} onClick={() => handleDetails(item)} disabled={loading}>
+                              <FiEye aria-hidden="true" />
+                            </IconButton>
+                            <IconButton type="button" $tone="neutral" aria-label={`Editar ${item.nome_fantasia}`} onClick={() => handleEdit(item)} disabled={loading}>
+                              <FiEdit2 aria-hidden="true" />
+                            </IconButton>
+                            <IconButton type="button" $tone="danger" aria-label={`Excluir ${item.nome_fantasia}`} onClick={() => handleDelete(item)} disabled={loading}>
+                              <FiTrash2 aria-hidden="true" />
+                            </IconButton>
+                          </ActionsCell>
+                        </Td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </Table>
+            </TableScroll>
 
-        <Footer>
-          <div style={{ color: "#6b7280", fontSize: "0.9rem" }}>
-            {loading ? "Carregando..." : `${total} registros`}
-          </div>
-          <Pager>
-            <span style={{ color: "#6b7280", fontSize: "0.9rem" }}>Por página</span>
-            <Select
-              aria-label="Itens por página"
-              value={pageSize}
-              onChange={(e) => {
-                setPageSize(Number(e.target.value));
-                setPage(1);
-              }}
-            >
-              <option value={10}>10</option>
-              <option value={25}>25</option>
-              <option value={50}>50</option>
-            </Select>
-            <Button
-              variant="ghost"
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={loading || page <= 1}
-            >
-              Anterior
-            </Button>
-            <span style={{ color: "#6b7280", fontSize: "0.9rem" }}>
-              {page} / {totalPages}
-            </span>
-            <Button
-              variant="ghost"
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              disabled={loading || page >= totalPages}
-            >
-              Próxima
-            </Button>
-          </Pager>
-        </Footer>
-      </TableWrap>
+            <Footer>
+              <MetaText>{loading ? "Carregando..." : `${total} registros`}</MetaText>
+              <Pager>
+                <MetaText as="span">Por página</MetaText>
+                <Select
+                  aria-label="Itens por página"
+                  value={pageSize}
+                  onChange={(e) => {
+                    setPageSize(Number(e.target.value));
+                    setPage(1);
+                  }}
+                >
+                  <option value={10}>10</option>
+                  <option value={25}>25</option>
+                  <option value={50}>50</option>
+                </Select>
+                <Button variant="ghost" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={loading || page <= 1}>
+                  Anterior
+                </Button>
+                <MetaText as="span">{page} / {totalPages}</MetaText>
+                <Button variant="ghost" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={loading || page >= totalPages}>
+                  Próxima
+                </Button>
+              </Pager>
+            </Footer>
+          </TableWrap>
 
-      <Modal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        title={editingItem ? "Editar Solicitante" : "Novo Solicitante"}
-      >
-        <SolicitanteForm
-          initialData={editingItem}
-          onCancel={() => setIsModalOpen(false)}
-          onSubmit={handleSubmit}
-          loading={loading}
-        />
-      </Modal>
-    </Page>
+          <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingItem ? "Editar Solicitante" : "Novo Solicitante"}>
+            <SolicitanteForm initialData={editingItem} onCancel={() => setIsModalOpen(false)} onSubmit={handleSubmit} loading={loading} />
+          </Modal>
+        </Page>
       </MainContent>
     </AppShellContainer>
   );
