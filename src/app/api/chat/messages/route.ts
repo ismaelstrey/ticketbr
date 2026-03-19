@@ -9,6 +9,12 @@ function normalizePhone(input?: string) {
   return (input ?? "").replace(/\D/g, "");
 }
 
+function maskPhone(value?: string) {
+  const digits = (value ?? "").replace(/\D/g, "");
+  if (digits.length <= 4) return digits;
+  return `${digits.slice(0, 2)}••••${digits.slice(-2)}`;
+}
+
 export async function GET(request: NextRequest) {
   try {
     const contactId = request.nextUrl.searchParams.get("contactId");
@@ -90,6 +96,17 @@ export async function POST(request: NextRequest) {
     }
 
     const provider = config?.whatsappProvider || (n8nEnabled ? "n8n" : evolutionEnabled ? "evolution" : "uazapi");
+    const debug = process.env.CHAT_ROUTING_DEBUG === "true";
+    if (debug) {
+      console.log("[chat-routing] outbound", {
+        waMessageId,
+        provider,
+        configProvider: config?.whatsappProvider ?? null,
+        providersEnabled: { n8nEnabled, evolutionEnabled, uazapiEnabled },
+        contactIdHasAt: String(contactId).includes("@"),
+        targetPhone: maskPhone(targetPhone)
+      });
+    }
 
     if (provider === "n8n") {
       if (!n8nEnabled) return NextResponse.json({ error: "Provider n8n selecionado, mas não está configurado" }, { status: 400 });

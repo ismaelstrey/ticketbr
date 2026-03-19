@@ -281,6 +281,7 @@ export default function SettingsPage() {
               </FormGrid>
 
               <Footer>
+                <Button variant="save" onClick={() => saveSettings()}>Salvar configurações</Button>
                 <Button variant="ghost" onClick={testSystemApi} disabled={testingApi}>
                   {testingApi ? "Testando..." : "Testar API"}
                 </Button>
