@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 import { AppShellContainer, MainContent } from "@/components/layout/AppShell";
@@ -78,6 +79,19 @@ const Info = styled.p`
   color: ${({ theme }) => theme.colors.text.secondary};
   font-size: 0.92rem;
   line-height: 1.55;
+`;
+
+const DocLink = styled(Link)`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: ${({ theme }) => theme.colors.primary};
+  font-weight: 700;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
 `;
 
 const ResultBox = styled.pre`
@@ -384,6 +398,10 @@ export default function SettingsPage() {
             <div>
               <h3>Integração: UAZAPI</h3>
               <Info>Configure a URL base e o token da instância (header token). Rotas administrativas usam admintoken.</Info>
+              <Info>
+                Para configurar o webhook UAZAPI, eventos aceitos e evitar loops de mensagens, consulte a{' '}
+                <DocLink href="/docs/integrations/uazapi" target="_blank" rel="noreferrer">documentação da integração UAZAPI</DocLink>.
+              </Info>
 
               <FormGrid>
                 <Field>
