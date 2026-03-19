@@ -255,7 +255,7 @@ export async function syncWhatsAppContactsFromUazapi(config?: WhatsAppRuntimeCon
   const statusPayload = await requestUazapi({ pathOrUrl: "/instance/status", method: "GET" }, config).catch(() => null);
   const instanceId = normalizeText((statusPayload as any)?.instance?.id) || normalizeText((statusPayload as any)?.instance?.name) || null;
 
-  const rawList = Array.isArray(payload)
+  const rawList: unknown[] = Array.isArray(payload)
     ? payload
     : Array.isArray(payload?.contacts)
       ? payload.contacts
@@ -263,7 +263,7 @@ export async function syncWhatsAppContactsFromUazapi(config?: WhatsAppRuntimeCon
         ? payload.data
         : [];
 
-  const contacts = rawList.map((item) => mapUazapiContact(item, instanceId)).filter(Boolean) as WhatsAppContactRecord[];
+  const contacts = rawList.map((item: unknown) => mapUazapiContact(item, instanceId)).filter(Boolean) as WhatsAppContactRecord[];
   await persistContacts(contacts);
 
   return {
