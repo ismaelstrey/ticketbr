@@ -7,13 +7,11 @@ import { useAuth } from "@/context/AuthContext";
 import {
   FiHome,
   FiGrid,
-  FiList,
   FiUsers,
   FiBookOpen,
   FiWifi,
   FiZap,
   FiSettings,
-  FiMenu,
   FiChevronDown,
   FiChevronRight,
   FiLogOut,
@@ -75,6 +73,7 @@ const Brand = styled.div<{ $isExpanded: boolean }>`
   gap: 0.85rem;
   min-width: 0;
   opacity: ${({ $isExpanded }) => ($isExpanded ? 1 : 0.96)};
+  cursor: pointer;
 `;
 
 const BrandMark = styled.div`
@@ -108,28 +107,6 @@ const BrandSubtitle = styled.span`
   color: ${({ theme }) => theme.colors.sidebar.muted};
   font-size: 0.75rem;
   white-space: nowrap;
-`;
-
-const ToggleButton = styled.button<{ $isExpanded: boolean }>`
-  background: rgba(15, 23, 42, 0.35);
-  border: 1px solid rgba(148, 163, 184, 0.18);
-  color: ${({ $isExpanded }) => ($isExpanded ? "#e2e8f0" : "#94a3b8")};
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 38px;
-  height: 38px;
-  padding: 0;
-  border-radius: 12px;
-  flex-shrink: 0;
-  transition: all 0.2s ease;
-
-  &:hover {
-    color: white;
-    background: rgba(59, 130, 246, 0.18);
-    border-color: rgba(96, 165, 250, 0.35);
-  }
 `;
 
 const SectionLabel = styled.span<{ $isExpanded: boolean }>`
@@ -293,16 +270,6 @@ interface MenuItemType {
 
 const menuItems: MenuItemType[] = [
   { label: "Dashboards", icon: FiHome, path: "/" },
-  {
-    label: "Tickets",
-    icon: FiList,
-    path: "/tickets",
-    subItems: [
-      { label: "Todos os Tickets", path: "/tickets" },
-      { label: "Meus Tickets", path: "/tickets/me" },
-      { label: "Abertos", path: "/tickets/open" }
-    ]
-  },
   { label: "Tarefas", icon: FiGrid, path: "/tasks" },
   { label: "Projetos", icon: FiBookOpen, path: "/projects" },
   { label: "Inventário", icon: FiWifi, path: "/inventory" },
@@ -444,8 +411,6 @@ export function Sidebar() {
     }
   };
 
-  const toggleSidebar = () => setIsExpanded((prev) => !prev);
-
   const toggleSubMenu = (label: string) => {
     if (!isExpanded) {
       setIsExpanded(true);
@@ -482,16 +447,13 @@ export function Sidebar() {
         onMouseLeave={handleDesktopCollapse}
       >
         <SidebarHeader $isExpanded={isExpanded}>
-          <Brand $isExpanded={isExpanded}>
+          <Brand $isExpanded={isExpanded} onClick={() => router.push("/")}>
             <BrandMark>T</BrandMark>
             <BrandText $isExpanded={isExpanded}>
               <BrandTitle>TicketBR</BrandTitle>
               <BrandSubtitle>Atalhos inteligentes</BrandSubtitle>
             </BrandText>
-          </Brand>
-          <ToggleButton $isExpanded={isExpanded} onClick={toggleSidebar} aria-label="Alternar menu lateral">
-            <FiMenu />
-          </ToggleButton>
+          </Brand>         
         </SidebarHeader>
 
         <SectionLabel $isExpanded={isExpanded}>Navegação</SectionLabel>
