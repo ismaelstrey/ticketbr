@@ -46,3 +46,43 @@ export async function getUazapiQrCode(input?: { phone?: string }, config?: Whats
     raw: payload
   };
 }
+
+
+export async function fetchConversationsFromUazapi(config?: WhatsAppRuntimeConfig | null) {
+  const payload = await requestUazapi(
+    {
+      pathOrUrl: "/chat/find",
+      method: "POST",
+      body: {
+        sort: "-wa_lastMsgTimestamp",
+        limit: 300,
+        offset: 0,
+        wa_isGroup: false
+      }
+    },
+    config
+  );
+
+  const chats = Array.isArray((payload as any)?.chats)
+    ? (payload as any).chats
+    : Array.isArray((payload as any)?.data)
+      ? (payload as any).data
+      : Array.isArray(payload)
+        ? payload
+        : [];
+
+  return chats.map((item: any) => {
+    const phone = onlyDigits(item.phone || item.wa_chatid || item.wa_chatid || "");
+    return {
+      id: String(item.id || item.wa_chatid || `wa:${phone}`),
+      name: String(item.name || item.wa_contactName || item.wa_name || phone || "Contato"),
+      phone: phone || undefined,
+      email: typeof item.lead_email === "string" ? item.lead_email : undefined,
+      company: undefined,
+      tags: Array.isArray(item.lead_tags) ? item.lead_tags.map(String) : ["uazapi"],
+      conversationId: String(item.wa_chatid || item.id || ""),
+      lastMessagePreview: typeof item.wa_lastMessageTextVote === "string" ? item.wa_lastMessageTextVote : undefined,
+      lastMessageAt: item.wa_lastMsgTimestamp ? new Date(Number(item.wa_lastMsgTimestamp)).toISOString() : undefined
+    };
+  });
+}
