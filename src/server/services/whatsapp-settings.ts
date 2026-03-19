@@ -2,6 +2,8 @@ import type { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 export interface WhatsAppRuntimeConfig {
+  whatsappProvider?: "n8n" | "evolution" | "uazapi";
+
   // Evolution (opcional quando fluxo é n8n-first)
   baseUrl?: string;
   apiKey?: string;
@@ -33,6 +35,19 @@ export interface WhatsAppRuntimeConfig {
   n8nRetryMax?: number;
   n8nRetryDelayMs?: number;
   n8nLogEnabled?: boolean;
+
+  // UAZAPI
+  uazapiBaseUrl?: string;
+  uazapiSubdomain?: "free" | "api";
+  uazapiToken?: string;
+  uazapiAdminToken?: string;
+  uazapiTransport?: "rest" | "sse" | "websocket" | "graphql";
+
+  uazapiTimeoutMs?: number;
+  uazapiRetryEnabled?: boolean;
+  uazapiRetryMax?: number;
+  uazapiRetryDelayMs?: number;
+  uazapiLogEnabled?: boolean;
 }
 
 export const WHATSAPP_CONFIG_COOKIE = "ticketbr_whatsapp_cfg";
@@ -50,6 +65,24 @@ export function normalizeWhatsAppConfig(input: unknown): WhatsAppRuntimeConfig |
   if (!input || typeof input !== "object") return null;
   const raw = input as Record<string, unknown>;
 
+  const toProviderOrUndefined = (value: unknown) => {
+    const v = String(value ?? "").trim();
+    if (v === "n8n" || v === "evolution" || v === "uazapi") return v;
+    return undefined;
+  };
+
+  const toUazapiSubdomainOrUndefined = (value: unknown) => {
+    const v = String(value ?? "").trim();
+    if (v === "free" || v === "api") return v;
+    return undefined;
+  };
+
+  const toUazapiTransportOrUndefined = (value: unknown) => {
+    const v = String(value ?? "").trim();
+    if (v === "rest" || v === "sse" || v === "websocket" || v === "graphql") return v;
+    return undefined;
+  };
+
   const toNumberOrUndefined = (value: unknown) => {
     if (value === undefined || value === null || value === "") return undefined;
     const n = typeof value === "number" ? value : Number(value);
@@ -64,7 +97,12 @@ export function normalizeWhatsAppConfig(input: unknown): WhatsAppRuntimeConfig |
   const n8nRetryMaxRaw = raw.n8nRetryMax ?? undefined;
   const n8nRetryDelayMsRaw = raw.n8nRetryDelayMs ?? undefined;
 
+  const uazapiTimeoutMsRaw = raw.uazapiTimeoutMs ?? undefined;
+  const uazapiRetryMaxRaw = raw.uazapiRetryMax ?? undefined;
+  const uazapiRetryDelayMsRaw = raw.uazapiRetryDelayMs ?? undefined;
+
   const config: WhatsAppRuntimeConfig = {
+    whatsappProvider: toProviderOrUndefined(raw.whatsappProvider),
     baseUrl: String(raw.baseUrl ?? raw.evolutionBaseUrl ?? "").trim() || undefined,
     apiKey: String(raw.apiKey ?? raw.evolutionApiKey ?? "").trim() || undefined,
     instance: String(raw.instance ?? raw.evolutionInstance ?? "").trim() || undefined,
@@ -91,14 +129,27 @@ export function normalizeWhatsAppConfig(input: unknown): WhatsAppRuntimeConfig |
     n8nRetryEnabled: raw.n8nRetryEnabled === undefined ? undefined : Boolean(raw.n8nRetryEnabled),
     n8nRetryMax: toNumberOrUndefined(n8nRetryMaxRaw),
     n8nRetryDelayMs: toNumberOrUndefined(n8nRetryDelayMsRaw),
-    n8nLogEnabled: raw.n8nLogEnabled === undefined ? undefined : Boolean(raw.n8nLogEnabled)
+    n8nLogEnabled: raw.n8nLogEnabled === undefined ? undefined : Boolean(raw.n8nLogEnabled),
+
+    uazapiBaseUrl: String(raw.uazapiBaseUrl ?? "").trim() || undefined,
+    uazapiSubdomain: toUazapiSubdomainOrUndefined(raw.uazapiSubdomain),
+    uazapiToken: String(raw.uazapiToken ?? "").trim() || undefined,
+    uazapiAdminToken: String(raw.uazapiAdminToken ?? "").trim() || undefined,
+    uazapiTransport: toUazapiTransportOrUndefined(raw.uazapiTransport),
+
+    uazapiTimeoutMs: toNumberOrUndefined(uazapiTimeoutMsRaw),
+    uazapiRetryEnabled: raw.uazapiRetryEnabled === undefined ? undefined : Boolean(raw.uazapiRetryEnabled),
+    uazapiRetryMax: toNumberOrUndefined(uazapiRetryMaxRaw),
+    uazapiRetryDelayMs: toNumberOrUndefined(uazapiRetryDelayMsRaw),
+    uazapiLogEnabled: raw.uazapiLogEnabled === undefined ? undefined : Boolean(raw.uazapiLogEnabled)
   };
 
 
   const hasEvolution = Boolean(config.baseUrl && config.apiKey && config.instance);
   const hasN8n = Boolean(config.n8nWebhookUrl || config.n8nBaseUrl);
+  const hasUazapi = Boolean((config.uazapiBaseUrl || config.uazapiSubdomain) && config.uazapiToken);
 
-  if (!hasEvolution && !hasN8n) {
+  if (!hasEvolution && !hasN8n && !hasUazapi) {
     return null;
   }
 
@@ -176,7 +227,15 @@ export function sanitizeWhatsAppConfig(config: WhatsAppRuntimeConfig) {
     n8nApiKeyMasked: config.n8nApiKey
       ? (config.n8nApiKey.length > 8 ? `${config.n8nApiKey.slice(0, 4)}••••${config.n8nApiKey.slice(-4)}` : "••••")
       : undefined,
+    uazapiTokenMasked: config.uazapiToken
+      ? (config.uazapiToken.length > 8 ? `${config.uazapiToken.slice(0, 4)}••••${config.uazapiToken.slice(-4)}` : "••••")
+      : undefined,
+    uazapiAdminTokenMasked: config.uazapiAdminToken
+      ? (config.uazapiAdminToken.length > 8 ? `${config.uazapiAdminToken.slice(0, 4)}••••${config.uazapiAdminToken.slice(-4)}` : "••••")
+      : undefined,
     apiKey: undefined,
-    n8nApiKey: undefined
+    n8nApiKey: undefined,
+    uazapiToken: undefined,
+    uazapiAdminToken: undefined
   };
 }

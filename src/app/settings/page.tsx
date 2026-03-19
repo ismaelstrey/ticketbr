@@ -5,11 +5,11 @@ import styled from "styled-components";
 import { AppShellContainer, MainContent } from "@/components/layout/AppShell";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
+import { Input, Select } from "@/components/ui/Input";
 import { useThemeMode } from "@/context/ThemeModeContext";
 import { useSettings } from "@/hooks/useSettings";
 
-type TabKey = "general" | "evolution" | "n8n" | "contactsSync" | "notifications";
+type TabKey = "general" | "evolution" | "n8n" | "uazapi" | "contactsSync" | "notifications";
 
 const Card = styled.section`
   background: ${({ theme }) => theme.colors.surfaceElevated};
@@ -220,6 +220,7 @@ export default function SettingsPage() {
       { key: "general" as const, label: "Geral" },
       { key: "evolution" as const, label: "Evolution API" },
       { key: "n8n" as const, label: "N8N" },
+      { key: "uazapi" as const, label: "UAZAPI" },
       { key: "contactsSync" as const, label: "Sincronizar Contatos" },
       { key: "notifications" as const, label: "Notificações" }
     ],
@@ -264,6 +265,20 @@ export default function SettingsPage() {
                   <span>{isDark ? "🌙" : "☀️"}</span>
                 </ThemeSwitch>
               </ToggleCard>
+
+              <h3 style={{ marginTop: 24 }}>Canal WhatsApp</h3>
+              <Info>Seleciona qual integração será usada como padrão para enviar mensagens no chat.</Info>
+
+              <FormGrid>
+                <Field>
+                  Provider padrão
+                  <Select value={settings.whatsappProvider} onChange={(e) => update({ whatsappProvider: e.target.value as any })}>
+                    <option value="n8n">N8N</option>
+                    <option value="evolution">Evolution</option>
+                    <option value="uazapi">UAZAPI</option>
+                  </Select>
+                </Field>
+              </FormGrid>
 
               <Footer>
                 <Button variant="ghost" onClick={testSystemApi} disabled={testingApi}>
@@ -361,6 +376,48 @@ export default function SettingsPage() {
               </Footer>
 
               {n8nTestResult ? <ResultBox>{JSON.stringify(n8nTestResult, null, 2)}</ResultBox> : null}
+            </div>
+          )}
+
+          {activeTab === "uazapi" && (
+            <div>
+              <h3>Integração: UAZAPI</h3>
+              <Info>Configure a URL base e o token da instância (header token). Rotas administrativas usam admintoken.</Info>
+
+              <FormGrid>
+                <Field>
+                  URL base (opcional)
+                  <Input placeholder="https://api.uazapi.com" value={settings.uazapiBaseUrl} onChange={(e) => update({ uazapiBaseUrl: e.target.value })} />
+                </Field>
+                <Field>
+                  Subdomínio (se URL base estiver vazia)
+                  <Select value={settings.uazapiSubdomain} onChange={(e) => update({ uazapiSubdomain: e.target.value as any })}>
+                    <option value="api">api</option>
+                    <option value="free">free</option>
+                  </Select>
+                </Field>
+                <Field>
+                  Token da instância
+                  <Input type="password" value={settings.uazapiToken} onChange={(e) => update({ uazapiToken: e.target.value })} />
+                </Field>
+                <Field>
+                  Admin token (opcional)
+                  <Input type="password" value={settings.uazapiAdminToken} onChange={(e) => update({ uazapiAdminToken: e.target.value })} />
+                </Field>
+                <Field>
+                  Transporte padrão
+                  <Select value={settings.uazapiTransport} onChange={(e) => update({ uazapiTransport: e.target.value as any })}>
+                    <option value="rest">REST</option>
+                    <option value="sse">SSE</option>
+                    <option value="websocket">WebSocket</option>
+                    <option value="graphql">GraphQL</option>
+                  </Select>
+                </Field>
+              </FormGrid>
+
+              <Footer>
+                <Button variant="save" onClick={() => saveSettings()}>Salvar UAZAPI</Button>
+              </Footer>
             </div>
           )}
 

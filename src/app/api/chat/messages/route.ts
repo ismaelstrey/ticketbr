@@ -3,6 +3,7 @@ import { chatService } from "@/server/services/chat-service";
 import { resolveWhatsAppConfig } from "@/server/services/whatsapp-settings";
 import { isN8nConfigured, sendMessageToN8n } from "@/server/services/n8n-adapter";
 import { evolutionIsConfigured, sendTextToEvolution, sendMediaToEvolution } from "@/server/services/evolution-service";
+import { sendMediaToUazapi, sendTextToUazapi, uazapiIsConfigured } from "@/server/services/uazapi-service";
 
 function normalizePhone(input?: string) {
   return (input ?? "").replace(/\D/g, "");
@@ -70,8 +71,9 @@ export async function POST(request: NextRequest) {
 
     const n8nEnabled = isN8nConfigured(config);
     const evolutionEnabled = evolutionIsConfigured(config);
+    const uazapiEnabled = uazapiIsConfigured(config);
 
-    if (!n8nEnabled && !evolutionEnabled) {
+    if (!n8nEnabled && !evolutionEnabled && !uazapiEnabled) {
       return NextResponse.json({ error: "WhatsApp não está configurado" }, { status: 400 });
     }
 
@@ -87,7 +89,10 @@ export async function POST(request: NextRequest) {
         targetPhone = normalizePhone(contactId);
     }
 
-    if (n8nEnabled) {
+    const provider = config?.whatsappProvider || (n8nEnabled ? "n8n" : evolutionEnabled ? "evolution" : "uazapi");
+
+    if (provider === "n8n") {
+      if (!n8nEnabled) return NextResponse.json({ error: "Provider n8n selecionado, mas não está configurado" }, { status: 400 });
       try {
         await sendMessageToN8n({
           number: targetPhone, // Usa o telefone resolvido
@@ -99,8 +104,8 @@ export async function POST(request: NextRequest) {
       } catch (error: any) {
         return NextResponse.json({ error: error?.message ?? "Falha ao enviar para N8N" }, { status: 502 });
       }
-    } else if (evolutionEnabled) {
-      // Usa targetPhone (telefone limpo ou extraído do JID) também para Evolution
+    } else if (provider === "evolution") {
+      if (!evolutionEnabled) return NextResponse.json({ error: "Provider Evolution selecionado, mas não está configurado" }, { status: 400 });
       const phone = targetPhone || contactId;
       if (attachment) {
         await sendMediaToEvolution({
@@ -113,8 +118,30 @@ export async function POST(request: NextRequest) {
       } else {
         await sendTextToEvolution(phone, text || "", config);
       }
+    } else if (provider === "uazapi") {
+      if (!uazapiEnabled) return NextResponse.json({ error: "Provider UAZAPI selecionado, mas não está configurado" }, { status: 400 });
+      const phone = targetPhone || "";
+      if (!phone) return NextResponse.json({ error: "contactPhone é obrigatório para UAZAPI" }, { status: 400 });
+      if (attachment) {
+        const mime = String(attachment.mimeType || "").toLowerCase();
+        const mediatype =
+          mime.startsWith("image/") ? "image" :
+          mime.startsWith("video/") ? "video" :
+          mime.startsWith("audio/") ? "audio" :
+          "document";
+        await sendMediaToUazapi({
+          number: phone,
+          mediatype,
+          caption: text,
+          media: attachment.data,
+          mimeType: attachment.mimeType,
+          fileName: attachment.name || "arquivo"
+        }, config);
+      } else {
+        await sendTextToUazapi({ number: phone, text: text || "" }, config);
+      }
     } else {
-      return NextResponse.json({ error: "WhatsApp não está configurado" }, { status: 400 });
+      return NextResponse.json({ error: "Provider WhatsApp inválido" }, { status: 400 });
     }
 
     const shouldPersist = Boolean(process.env.DATABASE_URL);

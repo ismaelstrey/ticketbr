@@ -2,6 +2,7 @@ import { useState, useCallback } from "react";
 import { useToast } from "@/context/ToastContext";
 
 export interface IntegrationSettings {
+  whatsappProvider: "n8n" | "evolution" | "uazapi";
   evolutionBaseUrl: string;
   evolutionApiKey: string;
   evolutionInstance: string;
@@ -20,6 +21,12 @@ export interface IntegrationSettings {
   n8nMessagesPath: string;
   n8nSendPath: string;
   n8nContactsPath: string;
+
+  uazapiBaseUrl: string;
+  uazapiSubdomain: "free" | "api";
+  uazapiToken: string;
+  uazapiAdminToken: string;
+  uazapiTransport: "rest" | "sse" | "websocket" | "graphql";
 }
 
 export interface SyncedContact {
@@ -33,6 +40,7 @@ export interface SyncedContact {
 }
 
 export const defaultSettings: IntegrationSettings = {
+  whatsappProvider: "n8n",
   evolutionBaseUrl: "",
   evolutionApiKey: "",
   evolutionInstance: "",
@@ -50,7 +58,13 @@ export const defaultSettings: IntegrationSettings = {
   n8nConversationsPath: "/conversations",
   n8nMessagesPath: "/messages",
   n8nSendPath: "/send",
-  n8nContactsPath: "/todos/contatos"
+  n8nContactsPath: "/todos/contatos",
+
+  uazapiBaseUrl: "",
+  uazapiSubdomain: "api",
+  uazapiToken: "",
+  uazapiAdminToken: "",
+  uazapiTransport: "rest"
 };
 
 export function useSettings() {
@@ -88,6 +102,9 @@ export function useSettings() {
       if (json?.data) {
         setSettings((curr) => ({
           ...curr,
+          whatsappProvider: (json.data.whatsappProvider === "evolution" || json.data.whatsappProvider === "uazapi" || json.data.whatsappProvider === "n8n")
+            ? json.data.whatsappProvider
+            : curr.whatsappProvider,
           evolutionBaseUrl: json.data.baseUrl ?? curr.evolutionBaseUrl,
           evolutionInstance: json.data.instance ?? curr.evolutionInstance,
           webhookUrl: json.data.webhookUrl ?? json.data.evolutionWebhookUrl ?? curr.webhookUrl,
@@ -105,7 +122,17 @@ export function useSettings() {
           n8nConversationsPath: json.data.n8nConversationsPath ?? curr.n8nConversationsPath,
           n8nMessagesPath: json.data.n8nMessagesPath ?? curr.n8nMessagesPath,
           n8nSendPath: json.data.n8nSendPath ?? curr.n8nSendPath,
-          n8nContactsPath: json.data.n8nContactsPath ?? curr.n8nContactsPath
+          n8nContactsPath: json.data.n8nContactsPath ?? curr.n8nContactsPath,
+
+          uazapiBaseUrl: json.data.uazapiBaseUrl ?? curr.uazapiBaseUrl,
+          uazapiSubdomain: (json.data.uazapiSubdomain === "free" || json.data.uazapiSubdomain === "api")
+            ? json.data.uazapiSubdomain
+            : curr.uazapiSubdomain,
+          uazapiToken: json.data.uazapiTokenMasked ?? curr.uazapiToken,
+          uazapiAdminToken: json.data.uazapiAdminTokenMasked ?? curr.uazapiAdminToken,
+          uazapiTransport: (json.data.uazapiTransport === "sse" || json.data.uazapiTransport === "websocket" || json.data.uazapiTransport === "graphql" || json.data.uazapiTransport === "rest")
+            ? json.data.uazapiTransport
+            : curr.uazapiTransport
         }));
       }
     } catch (error) {
@@ -117,10 +144,26 @@ export function useSettings() {
 
   const saveSettings = useCallback(async () => {
     try {
+      if (settings.whatsappProvider === "uazapi") {
+        if (!settings.uazapiToken.trim()) {
+          showToast("Informe o token da instância do UAZAPI.", "error");
+          return;
+        }
+        if (!settings.uazapiBaseUrl.trim() && !settings.uazapiSubdomain) {
+          showToast("Informe a URL base do UAZAPI ou selecione um subdomínio.", "error");
+          return;
+        }
+        if (settings.uazapiTransport === "websocket" || settings.uazapiTransport === "graphql") {
+          showToast("O UAZAPI não expõe WebSocket/GraphQL no spec; use REST ou SSE.", "error");
+          return;
+        }
+      }
+
       const res = await fetch("/api/settings/whatsapp/config", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          whatsappProvider: settings.whatsappProvider,
           baseUrl: settings.evolutionBaseUrl,
           apiKey: settings.evolutionApiKey,
           instance: settings.evolutionInstance,
@@ -138,7 +181,13 @@ export function useSettings() {
           n8nConversationsPath: settings.n8nConversationsPath,
           n8nMessagesPath: settings.n8nMessagesPath,
           n8nSendPath: settings.n8nSendPath,
-          n8nContactsPath: settings.n8nContactsPath
+          n8nContactsPath: settings.n8nContactsPath,
+
+          uazapiBaseUrl: settings.uazapiBaseUrl,
+          uazapiSubdomain: settings.uazapiSubdomain,
+          uazapiToken: settings.uazapiToken,
+          uazapiAdminToken: settings.uazapiAdminToken,
+          uazapiTransport: settings.uazapiTransport
         })
       });
 

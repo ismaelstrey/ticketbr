@@ -25,7 +25,20 @@ export async function POST(request: NextRequest) {
     const config = normalizeWhatsAppConfig(body);
 
     if (!config) {
-      return NextResponse.json({ error: "Informe configuração Evolution completa ou parâmetros n8n (n8nBaseUrl/n8nWebhookUrl)" }, { status: 400 });
+      return NextResponse.json({ error: "Informe configuração Evolution completa, parâmetros n8n (n8nBaseUrl/n8nWebhookUrl) ou UAZAPI (uazapiToken + uazapiBaseUrl/uazapiSubdomain)" }, { status: 400 });
+    }
+
+    const cookieValue = request.cookies.get(WHATSAPP_CONFIG_COOKIE)?.value;
+    const cookieConfig = decodeWhatsAppConfigCookie(cookieValue);
+    const previous = cookieConfig ?? await getWhatsAppConfigFromDatabase();
+
+    const keepSecret = (nextValue: unknown) => typeof nextValue === "string" && nextValue.includes("••••");
+
+    if (previous) {
+      if (keepSecret(body.apiKey) && previous.apiKey) config.apiKey = previous.apiKey;
+      if (keepSecret(body.n8nApiKey) && previous.n8nApiKey) config.n8nApiKey = previous.n8nApiKey;
+      if (keepSecret(body.uazapiToken) && previous.uazapiToken) config.uazapiToken = previous.uazapiToken;
+      if (keepSecret(body.uazapiAdminToken) && previous.uazapiAdminToken) config.uazapiAdminToken = previous.uazapiAdminToken;
     }
 
     await saveWhatsAppConfigToDatabase(config);

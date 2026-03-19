@@ -7,6 +7,9 @@ const emitChatEventToN8nMock = vi.fn();
 const evolutionIsConfiguredMock = vi.fn();
 const sendTextToEvolutionMock = vi.fn();
 const sendMediaToEvolutionMock = vi.fn();
+const uazapiIsConfiguredMock = vi.fn();
+const sendTextToUazapiMock = vi.fn();
+const sendMediaToUazapiMock = vi.fn();
 
 vi.mock("@/server/services/whatsapp-settings", () => ({
   resolveWhatsAppConfig: resolveWhatsAppConfigMock
@@ -26,6 +29,12 @@ vi.mock("@/server/services/evolution-service", () => ({
   fetchMessagesFromEvolution: vi.fn()
 }));
 
+vi.mock("@/server/services/uazapi-service", () => ({
+  uazapiIsConfigured: uazapiIsConfiguredMock,
+  sendTextToUazapi: sendTextToUazapiMock,
+  sendMediaToUazapi: sendMediaToUazapiMock
+}));
+
 describe("POST /api/chat/messages", () => {
   beforeEach(() => {
     resolveWhatsAppConfigMock.mockReset();
@@ -35,6 +44,9 @@ describe("POST /api/chat/messages", () => {
     evolutionIsConfiguredMock.mockReset();
     sendTextToEvolutionMock.mockReset();
     sendMediaToEvolutionMock.mockReset();
+    uazapiIsConfiguredMock.mockReset();
+    sendTextToUazapiMock.mockReset();
+    sendMediaToUazapiMock.mockReset();
   });
 
   it("retorna 400 quando WhatsApp não está configurado", async () => {
@@ -88,6 +100,7 @@ describe("POST /api/chat/messages", () => {
     resolveWhatsAppConfigMock.mockResolvedValueOnce({ n8nBaseUrl: "http://n8n", n8nWebhookUrl: "http://hook" });
     isN8nConfiguredMock.mockReturnValueOnce(true);
     evolutionIsConfiguredMock.mockReturnValueOnce(false);
+    uazapiIsConfiguredMock.mockReturnValueOnce(false);
     sendMessageToN8nMock.mockRejectedValueOnce(new Error("n8n request failed (401)"));
     const { POST } = await import("./route");
 
@@ -106,5 +119,29 @@ describe("POST /api/chat/messages", () => {
     expect(res.status).toBe(502);
     expect(body.error).toContain("n8n request failed");
   });
-});
 
+  it("retorna 201 quando envia via UAZAPI com provider selecionado", async () => {
+    resolveWhatsAppConfigMock.mockResolvedValueOnce({ whatsappProvider: "uazapi", uazapiBaseUrl: "http://uazapi", uazapiToken: "tok" });
+    isN8nConfiguredMock.mockReturnValueOnce(false);
+    evolutionIsConfiguredMock.mockReturnValueOnce(false);
+    uazapiIsConfiguredMock.mockReturnValueOnce(true);
+    sendTextToUazapiMock.mockResolvedValueOnce({});
+    const { POST } = await import("./route");
+
+    const req = {
+      json: async () => ({
+        contactId: "c1",
+        channel: "whatsapp",
+        contactPhone: "5511999999999",
+        text: "oi"
+      })
+    } as any;
+
+    const res = await POST(req);
+    const body = await res.json();
+
+    expect(res.status).toBe(201);
+    expect(body.data?.direction).toBe("out");
+    expect(sendTextToUazapiMock).toHaveBeenCalledTimes(1);
+  });
+});
