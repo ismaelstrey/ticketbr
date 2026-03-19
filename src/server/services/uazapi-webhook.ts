@@ -20,6 +20,12 @@ function firstNonEmpty(...values: unknown[]) {
   return "";
 }
 
+function normalizeMessageType(value: string) {
+  const normalized = value.trim().toLowerCase();
+  if (!normalized || normalized === "conversation") return "text";
+  return normalized;
+}
+
 function resolveMedia(message: Record<string, unknown>) {
   const image = asRecord(message.image);
   const video = asRecord(message.video);
@@ -43,9 +49,9 @@ function resolveMedia(message: Record<string, unknown>) {
 }
 
 function resolveMessageType(message: Record<string, unknown>) {
-  return firstNonEmpty(
-    message.messageType,
+  return normalizeMessageType(firstNonEmpty(
     message.type,
+    message.messageType,
     message.mediaType,
     message.mediatype,
     message.image ? "image" : "",
@@ -54,7 +60,7 @@ function resolveMessageType(message: Record<string, unknown>) {
     message.document ? "document" : "",
     message.sticker ? "sticker" : "",
     "text"
-  );
+  ));
 }
 
 function resolveText(message: Record<string, unknown>) {
@@ -81,19 +87,22 @@ export type ParsedUazapiWebhook = {
 export function parseUazapiWebhookPayload(input: unknown): ParsedUazapiWebhook {
   const root = asRecord(input);
   const data = asRecord(root.data);
-  const message = asRecord(data.message);
+  const rootMessage = asRecord(root.message);
+  const dataMessage = asRecord(data.message);
+  const message = Object.keys(rootMessage).length ? rootMessage : dataMessage;
+  const chat = asRecord(root.chat);
 
-  const event = firstNonEmpty(root.event, root.type).toLowerCase();
+  const event = firstNonEmpty(root.EventType, root.event, root.type).toLowerCase();
   const eventName = event || "message";
-  const instance = firstNonEmpty(root.instance, data.instance, data.owner, root.sender) || "default";
-  const chatId = firstNonEmpty(data.chatid, data.chatId, data.remoteJid, data.sender, data.from);
-  const messageId = firstNonEmpty(data.messageid, data.messageId, data.id);
-  const timestamp = asNumber(data.messageTimestamp ?? data.timestamp ?? root.timestamp);
-  const fromMe = Boolean(data.fromMe ?? data.from_me ?? false);
-  const pushName = firstNonEmpty(data.senderName, data.pushName, data.notifyName, data.name) || null;
+  const instance = firstNonEmpty(root.instanceName, root.instance, data.instance, data.owner, root.sender) || "default";
+  const chatId = firstNonEmpty(message.chatid, message.chatId, chat.wa_chatid, data.chatid, data.chatId, data.remoteJid, data.sender, data.from);
+  const messageId = firstNonEmpty(message.messageid, message.messageId, message.id, data.messageid, data.messageId, data.id);
+  const timestamp = asNumber(message.messageTimestamp ?? message.timestamp ?? chat.wa_lastMsgTimestamp ?? data.messageTimestamp ?? data.timestamp ?? root.timestamp);
+  const fromMe = Boolean(message.fromMe ?? data.fromMe ?? data.from_me ?? false);
+  const pushName = firstNonEmpty(message.senderName, chat.wa_contactName, chat.name, data.senderName, data.pushName, data.notifyName, data.name) || null;
 
   if (eventName === "messages_update" || eventName === "message_update" || eventName === "status") {
-    const status = firstNonEmpty(data.status, data.messageStatus, data.state);
+    const status = firstNonEmpty(message.status, data.status, data.messageStatus, data.state);
     if (messageId && status) {
       return {
         kind: "message_update",

@@ -62,6 +62,45 @@ describe("parseUazapiWebhookPayload", () => {
     });
   });
 
+
+  it("normaliza o payload real enviado pelo webhook da UAZAPI", () => {
+    const result = parseUazapiWebhookPayload({
+      BaseUrl: "https://strey.uazapi.com",
+      EventType: "messages",
+      instanceName: "VIVO",
+      chat: {
+        wa_chatid: "555181754701@s.whatsapp.net",
+        wa_contactName: "Ismael Strey Pereira",
+        name: "Ismael Strey Pereira",
+        wa_lastMsgTimestamp: 1773949051000
+      },
+      message: {
+        chatid: "555181754701@s.whatsapp.net",
+        text: "Tudo bom",
+        content: "Tudo bom",
+        fromMe: false,
+        messageTimestamp: 1773949051000,
+        messageType: "Conversation",
+        messageid: "AC47900E27E272C6E7D8E226DD2B52F5",
+        senderName: "Ismael Strey"
+      }
+    });
+
+    expect(result.kind).toBe("message");
+    expect(result.payload).toMatchObject({
+      provider: "uazapi",
+      instance: "VIVO",
+      wa_chat_id: "555181754701@s.whatsapp.net",
+      wa_message_id: "AC47900E27E272C6E7D8E226DD2B52F5",
+      fromMe: false,
+      pushName: "Ismael Strey",
+      message: {
+        type: "text",
+        text: "Tudo bom"
+      }
+    });
+  });
+
   it("transforma eventos de atualização em atualização de status", () => {
     const result = parseUazapiWebhookPayload({
       event: "messages_update",
