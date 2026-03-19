@@ -283,3 +283,8 @@ export async function syncWhatsAppContacts(config?: WhatsAppRuntimeConfig | null
 
   return syncWhatsAppContactsFromN8n(config);
 }
+
+export async function syncSingleContactByPhone(phone: string, config?: WhatsAppRuntimeConfig | null) {
+  await syncWhatsAppContacts(config);
+  return findWhatsAppContactByPhone(phone);
+}

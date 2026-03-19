@@ -45,51 +45,33 @@ function toConversationView(
   };
 }
 
+function toContact(
+  conversation: EvolutionConversation | ChatContact,
+  provider: string
+): ChatContact {
+  const normalized = toConversationView(conversation);
+  const tags = Array.isArray((conversation as any).tags) ? (conversation as any).tags.map(String) : [];
+  const baseTags = tags.length ? tags : ["WhatsApp"];
+  if (!baseTags.includes(provider)) baseTags.push(provider);
+  if (!baseTags.includes("WhatsApp")) baseTags.push("WhatsApp");
+
+  return {
+    id: normalized.id,
+    name: normalized.name,
+    company: (conversation as any).company ?? "Sem empresa",
+    email: normalized.email,
+    phone: normalized.phone,
+    tags: baseTags,
+    hasWhatsApp: true,
+    conversationId: normalized.conversationId,
+    lastMessagePreview: normalized.lastMessagePreview,
+    lastMessageAt: normalized.lastMessageAt
+  };
+}
+
 export async function GET(request: NextRequest) {
   try {
     const config = await resolveWhatsAppConfig(request);
-
-    const funcionarios = await prisma.funcionario.findMany({
-      where: {
-        solicitante: {
-          status: true
-        }
-      },
-      orderBy: { nome: "asc" },
-      select: {
-        id: true,
-        nome: true,
-        email: true,
-        telefone: true,
-        remoteJid: true,
-        whatsappId: true,
-        solicitante: {
-          select: {
-            nome_fantasia: true,
-            razao_social: true
-          }
-        }
-      }
-    });
-
-    const baseContacts: ChatContact[] = funcionarios.map((f) => {
-      const tags = inferTags(f.nome);
-      if (f.remoteJid || f.whatsappId) tags.push("WhatsApp");
-      if (f.email) tags.push("Email");
-
-      return {
-        id: f.id,
-        name: f.nome,
-        company: f.solicitante?.nome_fantasia || f.solicitante?.razao_social || "Sem empresa",
-        email: f.email ?? undefined,
-        phone: f.telefone,
-        tags,
-        hasWhatsApp: Boolean(f.remoteJid || f.whatsappId),
-        conversationId: f.remoteJid || (f.telefone ? `${onlyDigits(f.telefone)}@s.whatsapp.net` : undefined),
-        lastMessagePreview: undefined,
-        lastMessageAt: undefined
-      };
-    });
 
     const provider = config?.whatsappProvider || (uazapiIsConfigured(config) ? "uazapi" : evolutionIsConfigured(config) ? "evolution" : "n8n");
 
@@ -113,6 +95,57 @@ export async function GET(request: NextRequest) {
               return [];
             })
           : []);
+
+    let baseContacts: ChatContact[] = [];
+    try {
+      const funcionarios = await prisma.funcionario.findMany({
+        where: {
+          solicitante: {
+            status: true
+          }
+        },
+        orderBy: { nome: "asc" },
+        select: {
+          id: true,
+          nome: true,
+          email: true,
+          telefone: true,
+          remoteJid: true,
+          whatsappId: true,
+          solicitante: {
+            select: {
+              nome_fantasia: true,
+              razao_social: true
+            }
+          }
+        }
+      });
+
+      baseContacts = funcionarios.map((f) => {
+        const tags = inferTags(f.nome);
+        if (f.remoteJid || f.whatsappId) tags.push("WhatsApp");
+        if (f.email) tags.push("Email");
+
+        return {
+          id: f.id,
+          name: f.nome,
+          company: f.solicitante?.nome_fantasia || f.solicitante?.razao_social || "Sem empresa",
+          email: f.email ?? undefined,
+          phone: f.telefone,
+          tags,
+          hasWhatsApp: Boolean(f.remoteJid || f.whatsappId),
+          conversationId: f.remoteJid || (f.telefone ? `${onlyDigits(f.telefone)}@s.whatsapp.net` : undefined),
+          lastMessagePreview: undefined,
+          lastMessageAt: undefined
+        };
+      });
+    } catch (error) {
+      console.warn("Database unavailable, returning provider contacts only", error);
+    }
+
+    if (baseContacts.length === 0) {
+      return NextResponse.json({ data: conversations.map((c: any) => toContact(c, provider)) });
+    }
 
     if (conversations.length === 0) {
       return NextResponse.json({ data: baseContacts });
