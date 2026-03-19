@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { normalizeWhatsAppConfig, resolveWhatsAppConfig } from "@/server/services/whatsapp-settings";
-import { syncWhatsAppContactsFromN8n } from "@/server/services/whatsapp-contacts";
+import { syncWhatsAppContacts } from "@/server/services/whatsapp-contacts";
 
 export async function POST(request: NextRequest) {
   try {
@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
     const config = await resolveWhatsAppConfig(request, bodyConfig);
     // console.log(config)
 
-    const result = await syncWhatsAppContactsFromN8n(config);
+    const result = await syncWhatsAppContacts(config);
     return NextResponse.json({ data: result });
   } catch (error: any) {
     console.error("Error syncing WhatsApp contacts", error);
