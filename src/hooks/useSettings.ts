@@ -265,11 +265,17 @@ export function useSettings() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          whatsappProvider: settings.whatsappProvider,
           n8nBaseUrl: settings.n8nBaseUrl,
           n8nApiKey: settings.n8nApiKey,
           n8nWebhookUrl: settings.n8nWebhookUrl,
           n8nUseTestWebhook: settings.n8nUseTestWebhook,
-          n8nContactsPath: settings.n8nContactsPath
+          n8nContactsPath: settings.n8nContactsPath,
+          uazapiBaseUrl: settings.uazapiBaseUrl,
+          uazapiSubdomain: settings.uazapiSubdomain,
+          uazapiToken: settings.uazapiToken,
+          uazapiAdminToken: settings.uazapiAdminToken,
+          uazapiTransport: settings.uazapiTransport
         })
       });
 
@@ -294,20 +300,26 @@ export function useSettings() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          whatsappProvider: settings.whatsappProvider,
           baseUrl: settings.evolutionBaseUrl,
           apiKey: settings.evolutionApiKey,
           instance: settings.evolutionInstance,
           webhookUrl: settings.evolutionWebhookUrl || settings.webhookUrl,
           autoLinkTickets: settings.autoLinkTickets,
           n8nWebhookUrl: settings.n8nWebhookUrl,
-          n8nUseTestWebhook: settings.n8nUseTestWebhook
+          n8nUseTestWebhook: settings.n8nUseTestWebhook,
+          uazapiBaseUrl: settings.uazapiBaseUrl,
+          uazapiSubdomain: settings.uazapiSubdomain,
+          uazapiToken: settings.uazapiToken,
+          uazapiAdminToken: settings.uazapiAdminToken,
+          uazapiTransport: settings.uazapiTransport
         })
       });
 
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error || "Falha ao carregar QR Code");
 
-      setConnectionStatus(String(json?.data?.status?.instance?.state || json?.data?.status?.state || "desconhecido"));
+      setConnectionStatus(String(json?.data?.status?.instance?.status || json?.data?.status?.instance?.state || json?.data?.status?.state || "desconhecido"));
       setQrCode(typeof json?.data?.qrCode === "string" ? json.data.qrCode : null);
       setPairingCode(typeof json?.data?.pairingCode === "string" ? json.data.pairingCode : null);
     } catch (error: any) {
