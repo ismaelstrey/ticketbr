@@ -39,6 +39,21 @@ export interface SyncedContact {
   instanceId: string | null;
 }
 
+export interface WebhookRequestLog {
+  id: string;
+  createdAt: string;
+  method: string;
+  path: string;
+  route: string;
+  source: string;
+  status: number;
+  ok: boolean;
+  ip: string | null;
+  userAgent: string | null;
+  payload: unknown;
+  headers: Record<string, string>;
+}
+
 export const defaultSettings: IntegrationSettings = {
   whatsappProvider: "n8n",
   evolutionBaseUrl: "",
@@ -78,11 +93,13 @@ export function useSettings() {
   const [syncingContacts, setSyncingContacts] = useState(false);
   const [loadingContacts, setLoadingContacts] = useState(false);
   const [loadingQr, setLoadingQr] = useState(false);
+  const [loadingWebhookLogs, setLoadingWebhookLogs] = useState(false);
 
   // Resultados
   const [n8nTestResult, setN8nTestResult] = useState<unknown>(null);
   const [contactsSyncResult, setContactsSyncResult] = useState<unknown>(null);
   const [contacts, setContacts] = useState<SyncedContact[]>([]);
+  const [webhookLogs, setWebhookLogs] = useState<WebhookRequestLog[]>([]);
   
   // Status de conexão
   const [qrCode, setQrCode] = useState<string | null>(null);
@@ -292,6 +309,33 @@ export function useSettings() {
     }
   }, [settings, loadSyncedContacts, showToast]);
 
+
+  const loadWebhookLogs = useCallback(async () => {
+    try {
+      setLoadingWebhookLogs(true);
+      const res = await fetch("/api/settings/webhook-logs?limit=120", { cache: "no-store" });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error || "Erro ao carregar logs de webhook");
+      setWebhookLogs(Array.isArray(json?.data) ? json.data : []);
+    } catch (error: any) {
+      showToast(error?.message ?? "Falha ao carregar logs de webhook", "error");
+    } finally {
+      setLoadingWebhookLogs(false);
+    }
+  }, [showToast]);
+
+  const clearWebhookLogs = useCallback(async () => {
+    try {
+      const res = await fetch("/api/settings/webhook-logs", { method: "DELETE" });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json?.error || "Erro ao limpar logs");
+      setWebhookLogs([]);
+      showToast("Logs externos limpos.", "success");
+    } catch (error: any) {
+      showToast(error?.message ?? "Erro ao limpar logs", "error");
+    }
+  }, [showToast]);
+
   const loadQr = useCallback(async () => {
     try {
       setLoadingQr(true);
@@ -342,6 +386,8 @@ export function useSettings() {
     testN8n,
     syncContacts,
     loadSyncedContacts,
+    loadWebhookLogs,
+    clearWebhookLogs,
     loadQr,
 
     // Loading states
@@ -350,11 +396,13 @@ export function useSettings() {
     syncingContacts,
     loadingContacts,
     loadingQr,
+    loadingWebhookLogs,
 
     // Data states
     n8nTestResult,
     contactsSyncResult,
     contacts,
+    webhookLogs,
     qrCode,
     pairingCode,
     connectionStatus

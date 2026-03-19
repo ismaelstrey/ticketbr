@@ -10,7 +10,7 @@ import { Input, Select } from "@/components/ui/Input";
 import { useThemeMode } from "@/context/ThemeModeContext";
 import { useSettings } from "@/hooks/useSettings";
 
-type TabKey = "general" | "evolution" | "n8n" | "uazapi" | "contactsSync" | "notifications";
+type TabKey = "general" | "evolution" | "n8n" | "uazapi" | "contactsSync" | "webhookLogs" | "notifications";
 
 const Card = styled.section`
   background: ${({ theme }) => theme.colors.surfaceElevated};
@@ -193,6 +193,55 @@ const StatusPanel = styled.div`
   color: ${({ theme }) => theme.colors.text.secondary};
 `;
 
+
+const LogsGrid = styled.div`
+  display: grid;
+  grid-template-columns: minmax(320px, 1.1fr) minmax(300px, 0.9fr);
+  gap: 1rem;
+
+  @media (max-width: 1100px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const LogList = styled.div`
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: 20px;
+  background: ${({ theme }) => theme.colors.surface};
+  overflow: hidden;
+`;
+
+const LogItemButton = styled.button<{ $active?: boolean; $ok?: boolean }>`
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.border};
+  background: ${({ theme, $active }) => ($active ? theme.colors.surfaceAlt : theme.colors.surface)};
+  padding: 0.9rem 1rem;
+  text-align: left;
+  cursor: pointer;
+  color: ${({ theme }) => theme.colors.text.primary};
+
+  strong {
+    color: ${({ theme, $ok }) => ($ok ? theme.colors.status.success : theme.colors.status.warning)};
+  }
+`;
+
+const LogMeta = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.85rem;
+  margin-top: 0.35rem;
+  font-size: 0.8rem;
+  color: ${({ theme }) => theme.colors.text.secondary};
+`;
+
+const DetailCard = styled.div`
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: 20px;
+  background: ${({ theme }) => theme.colors.surface};
+  padding: 1rem;
+`;
+
 const EmptyCell = styled.td`
   color: ${({ theme }) => theme.colors.text.muted} !important;
 `;
@@ -210,24 +259,39 @@ export default function SettingsPage() {
     testN8n,
     syncContacts,
     loadSyncedContacts,
+    loadWebhookLogs,
+    clearWebhookLogs,
     loadQr,
     testingApi,
     testingN8n,
     syncingContacts,
     loadingContacts,
     loadingQr,
+    loadingWebhookLogs,
     n8nTestResult,
     contactsSyncResult,
     contacts,
+    webhookLogs,
     qrCode,
     pairingCode,
     connectionStatus
   } = useSettings();
 
+  const [selectedWebhookLogId, setSelectedWebhookLogId] = useState<string | null>(null);
+
   useEffect(() => {
     fetchSettings();
     loadSyncedContacts();
   }, [fetchSettings, loadSyncedContacts]);
+
+  useEffect(() => {
+    if (activeTab !== "webhookLogs") return;
+    loadWebhookLogs();
+    const timer = window.setInterval(() => {
+      loadWebhookLogs();
+    }, 2500);
+    return () => window.clearInterval(timer);
+  }, [activeTab, loadWebhookLogs]);
 
   const tabs = useMemo(
     () => [
@@ -236,6 +300,7 @@ export default function SettingsPage() {
       { key: "n8n" as const, label: "N8N" },
       { key: "uazapi" as const, label: "UAZAPI" },
       { key: "contactsSync" as const, label: "Sincronizar Contatos" },
+      { key: "webhookLogs" as const, label: "Logs Externos" },
       { key: "notifications" as const, label: "Notificações" }
     ],
     []
@@ -480,6 +545,65 @@ export default function SettingsPage() {
                   ) : null}
                 </tbody>
               </ContactsTable>
+            </div>
+          )}
+
+          {activeTab === "webhookLogs" && (
+            <div>
+              <h3>Monitor de Webhooks e Requisições Externas</h3>
+              <Info>
+                Esta aba mostra em tempo real as chamadas externas recebidas pelos endpoints públicos de webhook da aplicação.
+                A lista é atualizada automaticamente a cada 2,5 segundos.
+              </Info>
+
+              <Footer>
+                <Button variant="ghost" onClick={loadWebhookLogs} disabled={loadingWebhookLogs}>{loadingWebhookLogs ? "Atualizando..." : "Atualizar agora"}</Button>
+                <Button variant="primary" onClick={clearWebhookLogs}>Limpar logs</Button>
+              </Footer>
+
+              <LogsGrid>
+                <LogList>
+                  {webhookLogs.length ? webhookLogs.map((log) => {
+                    const active = (selectedWebhookLogId || webhookLogs[0]?.id) === log.id;
+                    return (
+                      <LogItemButton
+                        key={log.id}
+                        type="button"
+                        $active={active}
+                        $ok={log.ok}
+                        onClick={() => setSelectedWebhookLogId(log.id)}
+                      >
+                        <div><strong>{log.status}</strong> {log.method} {log.path}</div>
+                        <LogMeta>
+                          <span>{new Date(log.createdAt).toLocaleString("pt-BR")}</span>
+                          <span>rota: {log.route}</span>
+                          <span>fonte: {log.source}</span>
+                          <span>IP: {log.ip || "n/d"}</span>
+                        </LogMeta>
+                      </LogItemButton>
+                    );
+                  }) : <Info style={{ padding: "1rem" }}>Nenhuma requisição externa registrada ainda.</Info>}
+                </LogList>
+
+                <DetailCard>
+                  {(() => {
+                    const selected = webhookLogs.find((item) => item.id === (selectedWebhookLogId || webhookLogs[0]?.id)) || webhookLogs[0];
+                    if (!selected) return <Info>Selecione um log para visualizar o payload recebido.</Info>;
+                    return (
+                      <>
+                        <Info>
+                          <strong>Status:</strong> {selected.status} · <strong>Método:</strong> {selected.method} · <strong>Origem:</strong> {selected.source}
+                        </Info>
+                        <Info>
+                          <strong>Path:</strong> {selected.path}<br />
+                          <strong>User-Agent:</strong> {selected.userAgent || "n/d"}
+                        </Info>
+                        <ResultBox>{JSON.stringify(selected, null, 2)}</ResultBox>
+                      </>
+                    );
+                  })()}
+                </DetailCard>
+              </LogsGrid>
             </div>
           )}
 

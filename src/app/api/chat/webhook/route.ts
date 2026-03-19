@@ -3,6 +3,7 @@ import { appendMessage } from "@/server/services/chat-memory";
 import { chatService } from "@/server/services/chat-service";
 import { emitChatEventToN8n } from "@/server/services/n8n-adapter";
 import { parseUazapiWebhookPayload } from "@/server/services/uazapi-webhook";
+import { logWebhookRequest } from "@/server/services/webhook-request-logs";
 
 async function processInboundWebhook(payload: unknown) {
   const parsed = parseUazapiWebhookPayload(payload);
@@ -47,12 +48,15 @@ async function processInboundWebhook(payload: unknown) {
 }
 
 export async function POST(request: NextRequest) {
+  let payload: unknown = null;
   try {
-    const payload = await request.json();
+    payload = await request.json();
     const response = await processInboundWebhook(payload);
+    logWebhookRequest({ request, payload, route: "chat.webhook", source: "uazapi", status: 200 });
     return NextResponse.json(response);
   } catch (error) {
     console.error("Error on chat webhook", error);
+    logWebhookRequest({ request, payload, route: "chat.webhook", source: "uazapi", status: 400 });
     return NextResponse.json({ error: "Webhook inválido" }, { status: 400 });
   }
 }
