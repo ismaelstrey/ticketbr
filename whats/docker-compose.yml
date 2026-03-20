@@ -18,7 +18,7 @@ services:
       - "6379:6379"
 
   postgres:
-    image: postgres:latest
+    image: postgres:16
     platform: linux/amd64
     environment:
       POSTGRES_USER: default
@@ -28,6 +28,12 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U default -d default"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
 
   waha:
     image: devlikeapro/waha:latest
@@ -36,7 +42,7 @@ services:
       WHATSAPP_HOOK_URL: http://host.docker.internal:5678/webhook/webhook
       WHATSAPP_DEFAULT_ENGINE: GOWS
       WHATSAPP_HOOK_EVENTS: message
-      WAHA_API_KEY: 10203040
+      WAHA_API_KEY: 10203040      
       WAHA_DASHBOARD_PASSWORD: default
       WAHA_NO_API_KEY: true
       WAHA_DASHBOARD_NO_PASSWORD: true
