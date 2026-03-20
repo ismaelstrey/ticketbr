@@ -1,9 +1,25 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const companyId = request.nextUrl.searchParams.get("companyId")?.trim();
+    const companyName = request.nextUrl.searchParams.get("companyName")?.trim();
+
+    const where = companyId
+      ? { solicitante_id: companyId }
+      : companyName
+        ? {
+            OR: [
+              { company: { equals: companyName, mode: "insensitive" as const } },
+              { solicitante: { is: { nome_fantasia: { equals: companyName, mode: "insensitive" as const } } } },
+              { solicitante: { is: { razao_social: { equals: companyName, mode: "insensitive" as const } } } }
+            ]
+          }
+        : undefined;
+
     const tickets = await prisma.ticket.findMany({
+      where,
       orderBy: { createdAt: "desc" },
       take: 200,
       select: {

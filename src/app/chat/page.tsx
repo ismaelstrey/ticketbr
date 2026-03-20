@@ -364,22 +364,42 @@ export default function ChatPage() {
   }, [contacts, companyTab, search, channel]);
 
   async function loadBase() {
-    const [contactsRes, ticketsRes] = await Promise.all([fetch("/api/chat/contacts"), fetch("/api/chat/tickets")]);
+    const contactsRes = await fetch("/api/chat/contacts");
 
     const contactsJson = await contactsRes.json();
-    const ticketsJson = await ticketsRes.json();
 
     if (!contactsRes.ok) throw new Error(contactsJson?.error || "Erro ao carregar contatos");
-    if (!ticketsRes.ok) throw new Error(ticketsJson?.error || "Erro ao carregar tickets");
 
     const nextContacts = Array.isArray(contactsJson.data) ? contactsJson.data : [];
     setContacts(nextContacts);
-    setTickets(Array.isArray(ticketsJson.data) ? ticketsJson.data : []);
 
     if (!contactId && nextContacts.length) {
       setContactId(nextContacts[0].id);
       setConversationId(nextContacts[0].conversationId || `whatsapp:${nextContacts[0].id}`);
     }
+  }
+
+
+  async function loadTicketsForContact(contact?: ChatContact) {
+    if (!contact) {
+      setTickets([]);
+      return;
+    }
+
+    const params = new URLSearchParams();
+    if (contact.companyId) {
+      params.set("companyId", contact.companyId);
+    } else if (contact.company) {
+      params.set("companyName", contact.company);
+    } else {
+      setTickets([]);
+      return;
+    }
+
+    const res = await fetch(`/api/chat/tickets?${params.toString()}`);
+    const json = await res.json();
+    if (!res.ok) throw new Error(json?.error || "Erro ao carregar tickets");
+    setTickets(Array.isArray(json.data) ? json.data : []);
   }
 
   async function loadMessages() {
@@ -454,11 +474,15 @@ export default function ChatPage() {
 
   useEffect(() => {
     if (!selectedTicket) return;
-    const stillAvailable = filteredTickets.some((ticket) => ticket.id === selectedTicket);
+    const stillAvailable = tickets.some((ticket) => ticket.id === selectedTicket);
     if (!stillAvailable) {
       setSelectedTicket("");
     }
-  }, [filteredTickets, selectedTicket]);
+  }, [tickets, selectedTicket]);
+
+  useEffect(() => {
+    loadTicketsForContact(selectedContact).catch((error) => showToast(error.message, "error"));
+  }, [selectedContact?.id, selectedContact?.companyId, selectedContact?.company]);
 
   useEffect(() => {
     if (!filteredContacts.length) {
