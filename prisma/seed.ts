@@ -1,5 +1,6 @@
 import "dotenv/config";
 import { PrismaClient, TicketStatus, TicketPriority, TicketEventType } from "./generated/client";
+import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaPostgresAdapter } from "@prisma/adapter-ppg";
 import bcrypt from "bcryptjs";
 
@@ -7,9 +8,17 @@ const connectionString = process.env.DATABASE_URL;
 if (!connectionString) {
   throw new Error("DATABASE_URL is required");
 }
+const hostname = (() => {
+  try {
+    return new URL(connectionString).hostname;
+  } catch {
+    return "";
+  }
+})();
 
-const adapter = new PrismaPostgresAdapter({ connectionString });
-const prisma = new PrismaClient({ adapter });
+const prisma = hostname.endsWith("prisma.io")
+  ? new PrismaClient({ adapter: new PrismaPostgresAdapter({ connectionString }) } as any)
+  : new PrismaClient({ adapter: new PrismaPg({ connectionString }) } as any);
 
 async function main() {
   console.log('Start seeding ...')

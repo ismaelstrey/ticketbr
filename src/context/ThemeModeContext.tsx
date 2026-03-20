@@ -17,17 +17,28 @@ const STORAGE_KEY = "ticketbr-theme-mode";
 
 export function ThemeModeProvider({ children }: { children: React.ReactNode }) {
   const [mode, setModeState] = useState<ThemeMode>("light");
+  const [hasUserPreference, setHasUserPreference] = useState(false);
 
   useEffect(() => {
     const storedMode = window.localStorage.getItem(STORAGE_KEY) as ThemeMode | null;
     if (storedMode === "dark" || storedMode === "light") {
       setModeState(storedMode);
+      setHasUserPreference(true);
       return;
     }
 
     const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
     setModeState(prefersDark ? "dark" : "light");
   }, []);
+
+  useEffect(() => {
+    if (hasUserPreference) return;
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
+    const handler = () => setModeState(media.matches ? "dark" : "light");
+    handler();
+    media.addEventListener("change", handler);
+    return () => media.removeEventListener("change", handler);
+  }, [hasUserPreference]);
 
   useEffect(() => {
     document.documentElement.dataset.theme = mode;
@@ -39,8 +50,14 @@ export function ThemeModeProvider({ children }: { children: React.ReactNode }) {
     () => ({
       mode,
       isDark: mode === "dark",
-      toggleMode: () => setModeState((current) => (current === "dark" ? "light" : "dark")),
-      setMode: (nextMode: ThemeMode) => setModeState(nextMode)
+      toggleMode: () => {
+        setHasUserPreference(true);
+        setModeState((current) => (current === "dark" ? "light" : "dark"));
+      },
+      setMode: (nextMode: ThemeMode) => {
+        setHasUserPreference(true);
+        setModeState(nextMode);
+      }
     }),
     [mode]
   );
