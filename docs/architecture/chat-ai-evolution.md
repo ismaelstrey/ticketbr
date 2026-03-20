@@ -80,7 +80,9 @@ Suggested output format:
 
 ### Rule C — Build a conversation context service before adding LLM calls
 
-Before calling an LLM, create a dedicated context builder that aggregates:
+A first context boundary now exists in `src/server/services/chat-context.ts`, and it should remain the canonical place to assemble reusable conversation state before any future AI orchestration.
+
+Before calling an LLM, create or extend a dedicated context builder that aggregates:
 - customer/contact identity;
 - company/requester;
 - open tickets;
