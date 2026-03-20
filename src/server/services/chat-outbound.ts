@@ -44,6 +44,14 @@ function resolveMediaType(attachment?: ChatAttachment & { type?: string }) {
   return "document";
 }
 
+function resolveAttachmentPayload(attachment: ChatAttachment & { type?: string }) {
+  const media = attachment.data || attachment.url;
+  if (!media) {
+    throw new Error("attachment.data ou attachment.url é obrigatório para envio de mídia");
+  }
+  return media;
+}
+
 export async function sendOutboundMessage(input: SendOutboundMessageInput, config?: WhatsAppRuntimeConfig | null): Promise<SendOutboundMessageResult> {
   const availableProviders = getAvailableWhatsAppProviders(config);
   if (!availableProviders.n8n && !availableProviders.evolution && !availableProviders.uazapi) {
@@ -88,7 +96,7 @@ export async function sendOutboundMessage(input: SendOutboundMessageInput, confi
       await sendMediaToEvolution({
         number: phone,
         caption: input.text,
-        media: input.attachment.data,
+        media: resolveAttachmentPayload(input.attachment),
         mimeType: input.attachment.mimeType,
         fileName: input.attachment.name || "arquivo"
       }, config);
@@ -105,7 +113,7 @@ export async function sendOutboundMessage(input: SendOutboundMessageInput, confi
       number: targetPhone,
       mediatype: resolveMediaType(input.attachment),
       caption: input.text,
-      media: input.attachment.data,
+      media: resolveAttachmentPayload(input.attachment),
       mimeType: input.attachment.mimeType,
       fileName: input.attachment.name || "arquivo"
     }, config);
