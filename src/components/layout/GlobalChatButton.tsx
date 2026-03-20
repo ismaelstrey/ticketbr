@@ -115,7 +115,9 @@ export function GlobalChatButton() {
   const [contacts, setContacts] = useState<ChatContact[]>([]);
   const previousUnreadRef = useRef(0);
 
+  const isChatRoute = pathname === "/chat" || pathname.startsWith("/chat/");
   const hidden = !user || loading || pathname === "/login";
+  const shouldHideButton = hidden || isChatRoute;
 
   const unreadCount = useMemo(() => {
     const seenMap = readSeenMap();
@@ -156,7 +158,7 @@ export function GlobalChatButton() {
   useEffect(() => {
     if (hidden) return;
 
-    if (pathname === "/chat") {
+    if (isChatRoute) {
       persistSeenMap(buildSeenMap(contacts));
       previousUnreadRef.current = 0;
       return;
@@ -170,7 +172,7 @@ export function GlobalChatButton() {
     }
 
     previousUnreadRef.current = unreadCount;
-  }, [contacts, hidden, pathname, showToast, unreadCount]);
+  }, [contacts, hidden, isChatRoute, showToast, unreadCount]);
 
   const handleOpenChat = () => {
     persistSeenMap(buildSeenMap(contacts));
@@ -178,7 +180,7 @@ export function GlobalChatButton() {
     router.push("/chat");
   };
 
-  if (hidden) return null;
+  if (shouldHideButton) return null;
 
   return (
     <FloatingButton type="button" onClick={handleOpenChat} $hasUnread={unreadCount > 0} aria-label="Abrir chat">
