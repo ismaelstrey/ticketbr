@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import type { WhatsAppRuntimeConfig } from "@/server/services/whatsapp-settings";
 import { isN8nConfigured, requestN8n, requestN8nChatPath, resolvePath } from "@/server/services/n8n-adapter";
 import { isUazapiConfigured, requestUazapi } from "@/server/services/uazapi-adapter";
+import { resolveWhatsAppProvider } from "@/server/services/chat-provider";
 
 export interface WhatsAppContactRecord {
   id: string;
@@ -285,7 +286,11 @@ export async function syncWhatsAppContactsFromUazapi(config?: WhatsAppRuntimeCon
 }
 
 export async function syncWhatsAppContacts(config?: WhatsAppRuntimeConfig | null) {
-  const provider = config?.whatsappProvider || (isUazapiConfigured(config) ? "uazapi" : "n8n");
+  const provider = resolveWhatsAppProvider(config, ["uazapi", "n8n"]);
+
+  if (!provider) {
+    throw new Error("Nenhum provider de WhatsApp configurado para sincronização de contatos.");
+  }
 
   if (provider === "uazapi") {
     return syncWhatsAppContactsFromUazapi(config);

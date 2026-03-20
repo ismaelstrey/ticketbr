@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { evolutionIsConfigured, getEvolutionConnectionState, getEvolutionQrCode } from "@/server/services/evolution-service";
-import { getUazapiConnectionState, getUazapiQrCode, uazapiIsConfigured } from "@/server/services/uazapi-service";
+import { getEvolutionConnectionState, getEvolutionQrCode } from "@/server/services/evolution-service";
+import { getUazapiConnectionState, getUazapiQrCode } from "@/server/services/uazapi-service";
+import { assertProviderConfigured, resolveWhatsAppProvider } from "@/server/services/chat-provider";
 import { normalizeWhatsAppConfig, resolveWhatsAppConfig } from "@/server/services/whatsapp-settings";
 
 export async function POST(request: NextRequest) {
@@ -14,11 +15,11 @@ export async function POST(request: NextRequest) {
   }
 
   const config = await resolveWhatsAppConfig(request, bodyConfig);
-  const provider = config?.whatsappProvider || (uazapiIsConfigured(config) ? "uazapi" : "evolution");
+  const provider = resolveWhatsAppProvider(config, ["uazapi", "evolution"]);
 
   try {
     if (provider === "uazapi") {
-      if (!uazapiIsConfigured(config)) {
+      if (!assertProviderConfigured("uazapi", config)) {
         return NextResponse.json({ error: "UAZAPI não configurada no servidor/sessão." }, { status: 400 });
       }
 
@@ -38,7 +39,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    if (!evolutionIsConfigured(config)) {
+    if (!assertProviderConfigured("evolution", config)) {
       return NextResponse.json(
         { error: "Evolution API não configurada no servidor/sessão." },
         { status: 400 }

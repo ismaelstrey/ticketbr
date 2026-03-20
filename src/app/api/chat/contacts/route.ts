@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import type { EvolutionConversation } from "@/server/services/evolution-service";
-import { evolutionIsConfigured, fetchConversationsFromEvolution } from "@/server/services/evolution-service";
-import { fetchConversationsFromN8n, isN8nConfigured } from "@/server/services/n8n-adapter";
+import { fetchConversationsFromEvolution } from "@/server/services/evolution-service";
+import { fetchConversationsFromN8n } from "@/server/services/n8n-adapter";
 import { ChatContact } from "@/types/chat";
 import { resolveWhatsAppConfig } from "@/server/services/whatsapp-settings";
-import { fetchConversationsFromUazapi, uazapiIsConfigured } from "@/server/services/uazapi-service";
+import { fetchConversationsFromUazapi } from "@/server/services/uazapi-service";
+import { resolveWhatsAppProvider } from "@/server/services/chat-provider";
 
 function inferTags(name: string) {
   const tags: string[] = [];
@@ -117,28 +118,24 @@ export async function GET(request: NextRequest) {
       };
     });
 
-    const provider = config?.whatsappProvider || (uazapiIsConfigured(config) ? "uazapi" : evolutionIsConfigured(config) ? "evolution" : "n8n");
+    const provider = resolveWhatsAppProvider(config, ["uazapi", "evolution", "n8n"]);
 
     const conversations = provider === "uazapi"
-      ? (uazapiIsConfigured(config)
-        ? await fetchConversationsFromUazapi(config).catch((error) => {
-            console.warn("UAZAPI fetch conversations failed", error);
+      ? await fetchConversationsFromUazapi(config).catch((error) => {
+          console.warn("UAZAPI fetch conversations failed", error);
+          return [];
+        })
+      : provider === "evolution"
+        ? await fetchConversationsFromEvolution(config).catch((error) => {
+            console.warn("Evolution fetch conversations failed", error);
             return [];
           })
-        : [])
-      : provider === "evolution"
-        ? (evolutionIsConfigured(config)
-          ? await fetchConversationsFromEvolution(config).catch((error) => {
-              console.warn("Evolution fetch conversations failed", error);
-              return [];
-            })
-          : [])
-        : (isN8nConfigured(config)
+        : provider === "n8n"
           ? await fetchConversationsFromN8n(config).catch((error) => {
               console.warn("n8n fetch conversations failed", error);
               return [];
             })
-          : []);
+          : [];
 
     if (conversations.length === 0) {
       return NextResponse.json({ data: baseContacts });
