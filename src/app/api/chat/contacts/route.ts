@@ -5,6 +5,7 @@ import { evolutionIsConfigured, fetchConversationsFromEvolution } from "@/server
 import { fetchConversationsFromN8n, isN8nConfigured } from "@/server/services/n8n-adapter";
 import { ChatContact } from "@/types/chat";
 import { resolveWhatsAppConfig } from "@/server/services/whatsapp-settings";
+import { fetchConversationsFromUazapi, uazapiIsConfigured } from "@/server/services/uazapi-service";
 
 function inferTags(name: string) {
   const tags: string[] = [];
@@ -64,6 +65,7 @@ export async function GET(request: NextRequest) {
         whatsappId: true,
         solicitante: {
           select: {
+            id: true,
             nome_fantasia: true,
             razao_social: true
           }
@@ -80,6 +82,7 @@ export async function GET(request: NextRequest) {
         id: f.id,
         name: f.nome,
         company: f.solicitante?.nome_fantasia || f.solicitante?.razao_social || "Sem empresa",
+        companyId: f.solicitante?.id,
         email: f.email ?? undefined,
         phone: f.telefone,
         tags,
@@ -90,17 +93,28 @@ export async function GET(request: NextRequest) {
       };
     });
 
-    const conversations = isN8nConfigured(config)
-      ? await fetchConversationsFromN8n(config).catch((error) => {
-        console.warn("n8n fetch conversations failed", error);
-        return [];
-      })
-      : evolutionIsConfigured(config)
-        ? await fetchConversationsFromEvolution(config).catch((error) => {
-          console.warn("Evolution fetch conversations failed", error);
-          return [];
-        })
-        : [];
+    const provider = config?.whatsappProvider || (uazapiIsConfigured(config) ? "uazapi" : evolutionIsConfigured(config) ? "evolution" : "n8n");
+
+    const conversations = provider === "uazapi"
+      ? (uazapiIsConfigured(config)
+        ? await fetchConversationsFromUazapi(config).catch((error) => {
+            console.warn("UAZAPI fetch conversations failed", error);
+            return [];
+          })
+        : [])
+      : provider === "evolution"
+        ? (evolutionIsConfigured(config)
+          ? await fetchConversationsFromEvolution(config).catch((error) => {
+              console.warn("Evolution fetch conversations failed", error);
+              return [];
+            })
+          : [])
+        : (isN8nConfigured(config)
+          ? await fetchConversationsFromN8n(config).catch((error) => {
+              console.warn("n8n fetch conversations failed", error);
+              return [];
+            })
+          : []);
 
     if (conversations.length === 0) {
       return NextResponse.json({ data: baseContacts });

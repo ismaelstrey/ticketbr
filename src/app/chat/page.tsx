@@ -310,7 +310,7 @@ function playNotificationTone() {
 export default function ChatPage() {
   const { showToast } = useToast();
   const [contacts, setContacts] = useState<ChatContact[]>([]);
-  const [tickets, setTickets] = useState<any[]>([]);
+  const [tickets, setTickets] = useState<Array<{ id: string; number: number; subject: string; companyId?: string | null; companyName?: string | null }>>([]);
   const [links, setLinks] = useState<ChatTicketLink[]>([]);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [archivedConversations, setArchivedConversations] = useState<ArchivedChatConversation[]>([]);
@@ -331,6 +331,18 @@ export default function ChatPage() {
 
   const selectedContact = useMemo(() => contacts.find((c) => c.id === contactId), [contacts, contactId]);
   const activeArchivedConversation = useMemo(() => archivedConversations.find((item) => item.id === activeArchivedId), [archivedConversations, activeArchivedId]);
+
+  const filteredTickets = useMemo(() => {
+    if (!selectedContact) return tickets;
+    if (selectedContact.companyId) {
+      return tickets.filter((ticket) => ticket.companyId === selectedContact.companyId);
+    }
+    if (selectedContact.company) {
+      const normalizedCompany = selectedContact.company.trim().toLowerCase();
+      return tickets.filter((ticket) => String(ticket.companyName || "").trim().toLowerCase() === normalizedCompany);
+    }
+    return [];
+  }, [tickets, selectedContact]);
 
   const companyTabs = useMemo(() => {
     const companies = Array.from(new Set(contacts.map((c) => c.company || "Sem empresa")));
@@ -439,6 +451,14 @@ export default function ChatPage() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, activeArchivedConversation]);
+
+  useEffect(() => {
+    if (!selectedTicket) return;
+    const stillAvailable = filteredTickets.some((ticket) => ticket.id === selectedTicket);
+    if (!stillAvailable) {
+      setSelectedTicket("");
+    }
+  }, [filteredTickets, selectedTicket]);
 
   useEffect(() => {
     if (!filteredContacts.length) {
@@ -668,11 +688,11 @@ export default function ChatPage() {
             <Footer>
               <Select value={selectedTicket} onChange={(e) => setSelectedTicket(e.target.value)}>
                 <option value="">Associar a um ticket...</option>
-                {tickets.map((ticket) => (
+                {filteredTickets.map((ticket) => (
                   <option key={ticket.id} value={ticket.id}>#{ticket.number} - {ticket.subject}</option>
                 ))}
               </Select>
-              <Input placeholder="ID da conversa" value={conversationId} onChange={(e) => setConversationId(e.target.value)} />
+              <Input placeholder="ID da conversa" value={conversationId} onChange={(e) => setConversationId(e.target.value)} disabled />
               <Button variant="save" onClick={() => linkToTicket().catch((error) => showToast(error.message, "error"))}>Associar</Button>
 
               <Select value={activeArchivedId} onChange={(e) => setActiveArchivedId(e.target.value)}>
