@@ -18,8 +18,16 @@ function isAbsoluteUrl(value: string) {
   return /^https?:\/\//i.test(value);
 }
 
+function stripWrappingTicks(value: string) {
+  const trimmed = value.trim();
+  if (!trimmed) return "";
+  const noTicks = trimmed.replace(/^`+|`+$/g, "");
+  const noQuotes = noTicks.replace(/^"+|"+$/g, "").replace(/^'+|'+$/g, "");
+  return noQuotes.trim();
+}
+
 function normalizeBaseUrl(baseUrl: string) {
-  const trimmed = baseUrl.trim();
+  const trimmed = stripWrappingTicks(baseUrl);
   if (!trimmed) return "";
   return trimmed.endsWith("/") ? trimmed.slice(0, -1) : trimmed;
 }
@@ -31,16 +39,33 @@ export function resolveUazapiBaseUrl(config?: WhatsAppRuntimeConfig | null) {
   return `https://${subdomain}.uazapi.com`;
 }
 
+function hasInvalidByteStringChars(value: string) {
+  for (let i = 0; i < value.length; i += 1) {
+    const code = value.charCodeAt(i);
+    if (code > 255) return true;
+  }
+  return false;
+}
+
+function isMaskedSecret(value: string) {
+  return value.includes("•");
+}
+
 export function isUazapiConfigured(config?: WhatsAppRuntimeConfig | null) {
   const base = resolveUazapiBaseUrl(config);
   const token = String(config?.uazapiToken || process.env.UAZAPI_TOKEN || "").trim();
-  return Boolean(base && token);
+  if (!base || !token) return false;
+  if (isMaskedSecret(token)) return false;
+  if (hasInvalidByteStringChars(token)) return false;
+  return true;
 }
 
 function resolveTokens(config?: WhatsAppRuntimeConfig | null) {
+  const token = String(config?.uazapiToken || process.env.UAZAPI_TOKEN || "").trim();
+  const adminToken = String(config?.uazapiAdminToken || process.env.UAZAPI_ADMIN_TOKEN || "").trim();
   return {
-    token: String(config?.uazapiToken || process.env.UAZAPI_TOKEN || "").trim(),
-    adminToken: String(config?.uazapiAdminToken || process.env.UAZAPI_ADMIN_TOKEN || "").trim()
+    token: isMaskedSecret(token) ? "" : token,
+    adminToken: isMaskedSecret(adminToken) ? "" : adminToken
   };
 }
 
@@ -106,6 +131,8 @@ export async function requestUazapi(input: {
   auth?: "token" | "admintoken" | "none";
 }, config?: WhatsAppRuntimeConfig | null) {
   const base = resolveUazapiBaseUrl(config);
+  const rawToken = String(config?.uazapiToken || process.env.UAZAPI_TOKEN || "").trim();
+  const rawAdminToken = String(config?.uazapiAdminToken || process.env.UAZAPI_ADMIN_TOKEN || "").trim();
   const { token, adminToken } = resolveTokens(config);
   const url = buildUrl(base, input.pathOrUrl) + toQueryString(input.query);
   const timeoutMs = resolveTimeoutMs(config);
@@ -116,6 +143,8 @@ export async function requestUazapi(input: {
   if (!url) throw new Error("UAZAPI baseUrl não configurada.");
 
   const auth = input.auth ?? "token";
+  if (auth === "token" && isMaskedSecret(rawToken)) throw new Error("UAZAPI token está mascarado. Abra Configurações > UAZAPI e informe o token completo.");
+  if (auth === "admintoken" && isMaskedSecret(rawAdminToken)) throw new Error("UAZAPI admintoken está mascarado. Abra Configurações > UAZAPI e informe o admin token completo.");
   if (auth === "token" && !token) throw new Error("UAZAPI token não configurado.");
   if (auth === "admintoken" && !adminToken) throw new Error("UAZAPI admintoken não configurado.");
 
@@ -124,15 +153,23 @@ export async function requestUazapi(input: {
     const timer = setTimeout(() => controller.abort(), timeoutMs);
     const start = Date.now();
     try {
+      const headers = {
+        "Content-Type": "application/json",
+        ...(auth === "token" ? { token } : {}),
+        ...(auth === "admintoken" ? { admintoken: adminToken } : {}),
+        ...input.headers
+      };
+
+      for (const value of Object.values(headers)) {
+        if (typeof value === "string" && hasInvalidByteStringChars(value)) {
+          throw new Error("Header inválido: contém caracteres não compatíveis com ByteString. Verifique tokens/configuração.");
+        }
+      }
+
       const response = await fetch(url, {
         method,
         signal: controller.signal,
-        headers: {
-          "Content-Type": "application/json",
-          ...(auth === "token" ? { token } : {}),
-          ...(auth === "admintoken" ? { admintoken: adminToken } : {}),
-          ...input.headers
-        },
+        headers,
         body: input.body === undefined ? undefined : JSON.stringify(input.body)
       });
 
