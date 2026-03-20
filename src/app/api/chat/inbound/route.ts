@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { chatService } from "@/server/services/chat-service";
+import { logWebhookRequest } from "@/server/services/webhook-request-logs";
 
 export async function POST(req: NextRequest) {
+  let body: any = null;
   try {
-    const body = await req.json();
+    body = await req.json();
     let payload: any; // Usando any temporariamente para a construção manual
 
     // Adaptação para o formato de array enviado pelo N8N
@@ -83,6 +85,7 @@ export async function POST(req: NextRequest) {
     console.log("Received inbound message:", JSON.stringify(payload, null, 2));
 
     if (!payload?.wa_chat_id || !payload?.wa_message_id) {
+      logWebhookRequest({ request: req, payload, route: "chat.inbound", source: String(payload?.provider || "webhook"), status: 400 });
       return NextResponse.json(
         { error: "Invalid payload: wa_chat_id or wa_message_id missing" },
         { status: 400 }
@@ -90,10 +93,12 @@ export async function POST(req: NextRequest) {
     }
 
     const response = await chatService.processInboundMessage(payload);
+    logWebhookRequest({ request: req, payload, route: "chat.inbound", source: String(payload?.provider || "webhook"), status: 200 });
 
     return NextResponse.json(response);
   } catch (error: any) {
     console.error("Error processing inbound message:", error);
+    logWebhookRequest({ request: req, payload: body, route: "chat.inbound", source: "webhook", status: 500 });
     return NextResponse.json(
       { error: "Internal Server Error", details: error.message },
       { status: 500 }
