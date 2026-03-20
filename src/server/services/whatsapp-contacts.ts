@@ -59,7 +59,7 @@ function mapUazapiContact(item: unknown, instanceId?: string | null): WhatsAppCo
   return {
     id: jid,
     remoteJid: jid,
-    pushName: normalizeUtf8(raw.contactName) || normalizeUtf8(raw.contact_name) || normalizeUtf8(raw.contact_FirstName),
+    pushName: normalizeText(raw.contactName) || normalizeText(raw.contact_name) || normalizeText(raw.contact_FirstName),
     profilePicUrl: null,
     createdAt: now,
     updatedAt: now,
@@ -252,51 +252,35 @@ export async function syncWhatsAppContactsFromUazapi(config?: WhatsAppRuntimeCon
     throw new Error("Integração UAZAPI não configurada para sincronização de contatos.");
   }
 
+  let payload: any;
+  let usedEndpoint = "/contacts";
+
+  try {
+    payload = await requestUazapi({ pathOrUrl: "/contacts", method: "GET" }, config);
+  } catch (error) {
+    usedEndpoint = "/contacts/list";
+    payload = await requestUazapi({ pathOrUrl: "/contacts/list", method: "POST", body: { page: 1, pageSize: 500 } }, config);
+  }
+
   const statusPayload = await requestUazapi({ pathOrUrl: "/instance/status", method: "GET" }, config).catch(() => null);
   const instanceId = normalizeText((statusPayload as any)?.instance?.id) || normalizeText((statusPayload as any)?.instance?.name) || null;
 
-  let usedEndpoint = "/contacts/list";
-  let totalReceived = 0;
-  let totalSaved = 0;
-  let page = 1;
-  const pageSize = 1000;
+  const rawList: unknown[] = Array.isArray(payload)
+    ? payload
+    : Array.isArray(payload?.contacts)
+      ? payload.contacts
+      : Array.isArray(payload?.data)
+        ? payload.data
+        : [];
 
-  try {
-    while (true) {
-      const payload = await requestUazapi({ pathOrUrl: "/contacts/list", method: "POST", body: { page, pageSize } }, config);
-      const rawList: unknown[] = Array.isArray((payload as any)?.contacts) ? (payload as any).contacts : [];
-      const pagination = (payload as any)?.pagination as Record<string, unknown> | undefined;
-      const hasNextPage = Boolean((pagination as any)?.hasNextPage);
-
-      totalReceived += rawList.length;
-      const contacts = rawList.map((item: unknown) => mapUazapiContact(item, instanceId)).filter(Boolean) as WhatsAppContactRecord[];
-      totalSaved += contacts.length;
-      await persistContacts(contacts);
-
-      if (!hasNextPage || rawList.length === 0) break;
-      page += 1;
-      if (page > 10_000) break;
-    }
-  } catch (error) {
-    try {
-      usedEndpoint = "/contacts";
-      const payload = await requestUazapi({ pathOrUrl: "/contacts", method: "GET" }, config);
-      const rawList: unknown[] = Array.isArray(payload) ? payload : [];
-      totalReceived = rawList.length;
-      const contacts = rawList.map((item: unknown) => mapUazapiContact(item, instanceId)).filter(Boolean) as WhatsAppContactRecord[];
-      totalSaved = contacts.length;
-      await persistContacts(contacts);
-    } catch (fallbackError) {
-      console.error("UAZAPI contacts sync failed", { error, fallbackError, usedEndpoint });
-      throw fallbackError instanceof Error ? fallbackError : new Error("Falha ao sincronizar contatos via UAZAPI");
-    }
-  }
+  const contacts = rawList.map((item: unknown) => mapUazapiContact(item, instanceId)).filter(Boolean) as WhatsAppContactRecord[];
+  await persistContacts(contacts);
 
   return {
     provider: "uazapi",
     endpoint: usedEndpoint,
-    totalReceived,
-    totalSaved
+    totalReceived: rawList.length,
+    totalSaved: contacts.length
   };
 }
 
@@ -308,9 +292,4 @@ export async function syncWhatsAppContacts(config?: WhatsAppRuntimeConfig | null
   }
 
   return syncWhatsAppContactsFromN8n(config);
-}
-
-export async function syncSingleContactByPhone(phone: string, config?: WhatsAppRuntimeConfig | null) {
-  await syncWhatsAppContacts(config);
-  return findWhatsAppContactByPhone(phone);
 }

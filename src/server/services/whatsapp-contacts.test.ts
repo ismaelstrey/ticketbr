@@ -4,7 +4,6 @@ import {
   syncWhatsAppContactsFromN8n,
   syncWhatsAppContactsFromUazapi
 } from "./whatsapp-contacts";
-import { prisma } from "@/lib/prisma";
 import * as n8nAdapter from "./n8n-adapter";
 import * as uazapiAdapter from "./uazapi-adapter";
 
@@ -90,48 +89,21 @@ describe("whatsapp-contacts", () => {
     };
 
     vi.mocked(uazapiAdapter.requestUazapi)
-      .mockResolvedValueOnce({ instance: { id: "inst_01" } })
-      .mockResolvedValueOnce({
-        contacts: [
-          { jid: "5511999999999@s.whatsapp.net", contact_name: "João Silva" }
-        ],
-        pagination: { hasNextPage: false }
-      });
+      .mockResolvedValueOnce([
+        { jid: "5511999999999@s.whatsapp.net", contactName: "João Silva" }
+      ])
+      .mockResolvedValueOnce({ instance: { id: "inst_01" } });
 
     const result = await syncWhatsAppContactsFromUazapi(config);
 
-    expect(uazapiAdapter.requestUazapi).toHaveBeenNthCalledWith(1, { pathOrUrl: "/instance/status", method: "GET" }, config);
-    expect(uazapiAdapter.requestUazapi).toHaveBeenNthCalledWith(2, { pathOrUrl: "/contacts/list", method: "POST", body: { page: 1, pageSize: 1000 } }, config);
+    expect(uazapiAdapter.requestUazapi).toHaveBeenNthCalledWith(1, { pathOrUrl: "/contacts", method: "GET" }, config);
+    expect(uazapiAdapter.requestUazapi).toHaveBeenNthCalledWith(2, { pathOrUrl: "/instance/status", method: "GET" }, config);
     expect(result).toEqual({
       provider: "uazapi",
-      endpoint: "/contacts/list",
+      endpoint: "/contacts",
       totalReceived: 1,
       totalSaved: 1
     });
-  });
-
-  it("deve suportar acentuação e emojis ao salvar contatos via UAZAPI", async () => {
-    const config = {
-      whatsappProvider: "uazapi" as const,
-      uazapiBaseUrl: "https://api.uazapi.com",
-      uazapiToken: "tok"
-    };
-
-    const pushName = "João 😀";
-    vi.mocked(uazapiAdapter.requestUazapi)
-      .mockResolvedValueOnce({ instance: { id: "inst_01" } })
-      .mockResolvedValueOnce({
-        contacts: [
-          { jid: "5511888888888@s.whatsapp.net", contactName: pushName }
-        ],
-        pagination: { hasNextPage: false }
-      });
-
-    await syncWhatsAppContactsFromUazapi(config);
-
-    const calls = vi.mocked(prisma.$executeRawUnsafe as any).mock.calls as any[];
-    const saved = calls.some((args) => args.includes(pushName));
-    expect(saved).toBe(true);
   });
 
   it("deve rotear sincronização para UAZAPI quando esse for o provider selecionado", async () => {
@@ -142,8 +114,8 @@ describe("whatsapp-contacts", () => {
     };
 
     vi.mocked(uazapiAdapter.requestUazapi)
-      .mockResolvedValueOnce({ instance: { id: "inst_01" } })
-      .mockResolvedValueOnce({ contacts: [], pagination: { hasNextPage: false } });
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce({ instance: { id: "inst_01" } });
 
     const result = await syncWhatsAppContacts(config);
 

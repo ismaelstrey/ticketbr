@@ -303,8 +303,8 @@ export function useSettings() {
           n8nContactsPath: settings.n8nContactsPath,
           uazapiBaseUrl: settings.uazapiBaseUrl,
           uazapiSubdomain: settings.uazapiSubdomain,
-          uazapiToken,
-          uazapiAdminToken,
+          uazapiToken: settings.uazapiToken,
+          uazapiAdminToken: settings.uazapiAdminToken,
           uazapiTransport: settings.uazapiTransport
         })
       });
@@ -369,8 +369,8 @@ export function useSettings() {
           n8nUseTestWebhook: settings.n8nUseTestWebhook,
           uazapiBaseUrl: settings.uazapiBaseUrl,
           uazapiSubdomain: settings.uazapiSubdomain,
-          uazapiToken,
-          uazapiAdminToken,
+          uazapiToken: settings.uazapiToken,
+          uazapiAdminToken: settings.uazapiAdminToken,
           uazapiTransport: settings.uazapiTransport
         })
       });

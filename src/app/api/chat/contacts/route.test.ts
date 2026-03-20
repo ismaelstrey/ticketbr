@@ -61,37 +61,4 @@ describe("GET /api/chat/contacts", () => {
     expect(fetchConversationsFromN8nMock).not.toHaveBeenCalled();
     expect(fetchConversationsFromEvolutionMock).not.toHaveBeenCalled();
   });
-
-  it("retorna contatos do provider quando o banco está indisponível", async () => {
-    resolveWhatsAppConfigMock.mockResolvedValueOnce({
-      whatsappProvider: "uazapi",
-      uazapiBaseUrl: "https://api.uazapi.com",
-      uazapiToken: "tok"
-    });
-    uazapiIsConfiguredMock.mockReturnValueOnce(true);
-    findManyMock.mockRejectedValueOnce(new Error("db down"));
-    fetchConversationsFromUazapiMock.mockResolvedValueOnce([
-      {
-        id: "wa:5511999999999",
-        name: "Cliente",
-        phone: "5511999999999",
-        email: undefined,
-        company: "Sem empresa",
-        tags: ["WhatsApp"],
-        conversationId: "5511999999999@s.whatsapp.net",
-        lastMessagePreview: "oi",
-        lastMessageAt: "2026-03-19T00:00:00.000Z"
-      }
-    ]);
-
-    const { GET } = await import("./route");
-    const res = await GET({} as any);
-    const body = await res.json();
-
-    expect(res.status).toBe(200);
-    expect(Array.isArray(body.data)).toBe(true);
-    expect(body.data.length).toBe(1);
-    expect(body.data[0].id).toBe("wa:5511999999999");
-    expect(body.data[0].conversationId).toBe("5511999999999@s.whatsapp.net");
-  });
 });

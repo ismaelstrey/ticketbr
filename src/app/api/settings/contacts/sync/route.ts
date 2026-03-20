@@ -1,11 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { normalizeWhatsAppConfig, resolveWhatsAppConfig } from "@/server/services/whatsapp-settings";
 import { syncWhatsAppContacts } from "@/server/services/whatsapp-contacts";
-import { isUazapiConfigured } from "@/server/services/uazapi-adapter";
-
-function isMaskedSecret(value: unknown) {
-  return typeof value === "string" && value.includes("•");
-}
 
 export async function POST(request: NextRequest) {
   try {
