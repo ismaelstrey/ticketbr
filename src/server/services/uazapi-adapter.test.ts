@@ -29,6 +29,17 @@ describe("uazapi-adapter", () => {
     expect(init.headers.token).toBe("tok_123");
   });
 
+  it("falha com token mascarado (ByteString inválido) sem chamar fetch", async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock as any);
+
+    await expect(
+      requestUazapi({ pathOrUrl: "/instance/status" }, { uazapiBaseUrl: "https://api.uazapi.com", uazapiToken: "tok_••••" } as any)
+    ).rejects.toThrow();
+
+    expect(fetchMock).toHaveBeenCalledTimes(0);
+  });
+
   it("sends admintoken header when requested", async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
@@ -79,4 +90,3 @@ describe("uazapi-adapter", () => {
     expect(url).toContain("events=messages%2Cchats");
   });
 });
-

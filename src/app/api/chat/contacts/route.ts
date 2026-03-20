@@ -45,6 +45,30 @@ function toConversationView(
   };
 }
 
+function toContact(
+  conversation: EvolutionConversation | ChatContact,
+  provider: string
+): ChatContact {
+  const normalized = toConversationView(conversation);
+  const tags = Array.isArray((conversation as any).tags) ? (conversation as any).tags.map(String) : [];
+  const baseTags = tags.length ? tags : ["WhatsApp"];
+  if (!baseTags.includes(provider)) baseTags.push(provider);
+  if (!baseTags.includes("WhatsApp")) baseTags.push("WhatsApp");
+
+  return {
+    id: normalized.id,
+    name: normalized.name,
+    company: (conversation as any).company ?? "Sem empresa",
+    email: normalized.email,
+    phone: normalized.phone,
+    tags: baseTags,
+    hasWhatsApp: true,
+    conversationId: normalized.conversationId,
+    lastMessagePreview: normalized.lastMessagePreview,
+    lastMessageAt: normalized.lastMessageAt
+  };
+}
+
 export async function GET(request: NextRequest) {
   try {
     const config = await resolveWhatsAppConfig(request);
