@@ -39,6 +39,8 @@ The goal is that routes stay thin and `ChatService` only receives internal paylo
 
 ### 3. Thin routes, thicker services
 
+Outbound message delivery should also pass through a shared service boundary (`src/server/services/chat-outbound.ts`) so provider routing, phone normalization, and provider-specific send semantics stay out of route handlers.
+
 Routes should only:
 - parse HTTP input;
 - resolve runtime config;
