@@ -1,4 +1,5 @@
 import { PrismaClient, Prisma } from "../../prisma/generated/client.ts";
+import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaPostgresAdapter } from "@prisma/adapter-ppg";
 
 const prismaClientSingleton = () => {
@@ -6,11 +7,27 @@ const prismaClientSingleton = () => {
   if (!connectionString) {
     throw new Error("DATABASE_URL is required");
   }
-  const adapter = new PrismaPostgresAdapter({ connectionString });
+  const hostname = (() => {
+    try {
+      return new URL(connectionString).hostname;
+    } catch {
+      return "";
+    }
+  })();
+
+  if (hostname.endsWith("prisma.io")) {
+    const adapter = new PrismaPostgresAdapter({ connectionString });
+    return new PrismaClient({
+      adapter,
+      log: process.env.NODE_ENV === "development" ? ["query", "warn", "error"] : ["error"],
+    } as any);
+  }
+
+  const adapter = new PrismaPg({ connectionString });
   return new PrismaClient({
     adapter,
     log: process.env.NODE_ENV === "development" ? ["query", "warn", "error"] : ["error"],
-  });
+  } as any);
 };
 
 type PrismaClientSingleton = ReturnType<typeof prismaClientSingleton>;
