@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { normalizeWhatsAppConfig, resolveWhatsAppConfig } from "@/server/services/whatsapp-settings";
 import { syncWhatsAppContacts } from "@/server/services/whatsapp-contacts";
+import { isUazapiConfigured } from "@/server/services/uazapi-adapter";
 
 function isMaskedSecret(value: unknown) {
   return typeof value === "string" && value.includes("•");
@@ -29,6 +30,16 @@ export async function POST(request: NextRequest) {
     }
 
     const config = merged;
+
+    if (config?.whatsappProvider === "uazapi" && !isUazapiConfigured(config)) {
+      return NextResponse.json(
+        {
+          error:
+            "Integração UAZAPI não configurada para sincronização de contatos. Configure o token e a URL base (ou subdomínio) em Configurações > UAZAPI e salve."
+        },
+        { status: 400 }
+      );
+    }
 
     const result = await syncWhatsAppContacts(config);
     return NextResponse.json({ data: result });

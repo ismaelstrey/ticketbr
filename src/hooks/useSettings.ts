@@ -280,6 +280,17 @@ export function useSettings() {
       const uazapiToken = settings.uazapiToken.includes("•") ? undefined : settings.uazapiToken;
       const uazapiAdminToken = settings.uazapiAdminToken.includes("•") ? undefined : settings.uazapiAdminToken;
 
+      if (settings.whatsappProvider === "uazapi") {
+        if (!settings.uazapiToken.trim()) {
+          showToast("Informe o token da instância do UAZAPI ou salve a configuração para reutilizar o token.", "error");
+          return;
+        }
+        if (!settings.uazapiBaseUrl.trim() && !settings.uazapiSubdomain) {
+          showToast("Informe a URL base do UAZAPI ou selecione um subdomínio.", "error");
+          return;
+        }
+      }
+
       const res = await fetch("/api/settings/contacts/sync", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
