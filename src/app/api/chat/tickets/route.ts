@@ -9,11 +9,28 @@ export async function GET() {
       select: {
         id: true,
         number: true,
-        subject: true
+        subject: true,
+        company: true,
+        solicitante_id: true,
+        solicitante: {
+          select: {
+            id: true,
+            nome_fantasia: true,
+            razao_social: true
+          }
+        }
       }
     });
 
-    return NextResponse.json({ data: tickets });
+    return NextResponse.json({
+      data: tickets.map((ticket) => ({
+        id: ticket.id,
+        number: ticket.number,
+        subject: ticket.subject,
+        companyId: ticket.solicitante?.id ?? ticket.solicitante_id ?? null,
+        companyName: ticket.solicitante?.nome_fantasia || ticket.solicitante?.razao_social || ticket.company || null
+      }))
+    });
   } catch (error) {
     console.error("Error loading chat tickets", error);
     return NextResponse.json({ error: "Erro ao carregar tickets" }, { status: 500 });
