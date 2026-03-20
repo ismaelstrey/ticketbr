@@ -6,6 +6,7 @@ export interface ChatContact {
   email?: string;
   phone?: string;
   company?: string;
+  companyId?: string;
   tags?: string[];
   hasWhatsApp?: boolean;
   conversationId?: string;

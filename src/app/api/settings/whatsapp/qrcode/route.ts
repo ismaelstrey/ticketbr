@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { evolutionIsConfigured, getEvolutionConnectionState, getEvolutionQrCode } from "@/server/services/evolution-service";
+import { getEvolutionConnectionState, getEvolutionQrCode } from "@/server/services/evolution-service";
+import { getUazapiConnectionState, getUazapiQrCode } from "@/server/services/uazapi-service";
+import { assertProviderConfigured, resolveWhatsAppProvider } from "@/server/services/chat-provider";
 import { normalizeWhatsAppConfig, resolveWhatsAppConfig } from "@/server/services/whatsapp-settings";
 
 export async function POST(request: NextRequest) {
@@ -13,15 +15,37 @@ export async function POST(request: NextRequest) {
   }
 
   const config = await resolveWhatsAppConfig(request, bodyConfig);
-
-  if (!evolutionIsConfigured(config)) {
-    return NextResponse.json(
-      { error: "Evolution API não configurada no servidor/sessão." },
-      { status: 400 }
-    );
-  }
+  const provider = resolveWhatsAppProvider(config, ["uazapi", "evolution"]);
 
   try {
+    if (provider === "uazapi") {
+      if (!assertProviderConfigured("uazapi", config)) {
+        return NextResponse.json({ error: "UAZAPI não configurada no servidor/sessão." }, { status: 400 });
+      }
+
+      const [status, qrData] = await Promise.all([
+        getUazapiConnectionState(config).catch(() => null),
+        getUazapiQrCode(undefined, config)
+      ]);
+
+      return NextResponse.json({
+        data: {
+          provider,
+          status,
+          qrCode: qrData.qrCode,
+          pairingCode: qrData.pairingCode,
+          raw: qrData.raw
+        }
+      });
+    }
+
+    if (!assertProviderConfigured("evolution", config)) {
+      return NextResponse.json(
+        { error: "Evolution API não configurada no servidor/sessão." },
+        { status: 400 }
+      );
+    }
+
     const [status, qrData] = await Promise.all([
       getEvolutionConnectionState(config),
       getEvolutionQrCode(config)
@@ -29,6 +53,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       data: {
+        provider: "evolution",
         status,
         qrCode: qrData.qrCode,
         pairingCode: qrData.pairingCode,
