@@ -1,48 +1,31 @@
 import { NextRequest, NextResponse } from "next/server";
-import { appendMessage } from "@/server/services/chat-memory";
-import { emitChatEventToN8n } from "@/server/services/n8n-adapter";
+import { normalizeInboundPayload } from "@/server/services/chat-inbound-normalizer";
+import { processNormalizedInboundEvent } from "@/server/services/chat-inbound-processing";
+import { logWebhookRequest } from "@/server/services/webhook-request-logs";
 
-function asRecord(input: unknown): Record<string, unknown> {
-  return input && typeof input === "object" ? (input as Record<string, unknown>) : {};
+async function processInboundWebhook(payload: unknown) {
+  const basePayload = payload && typeof payload === "object" ? payload as Record<string, unknown> : { raw: payload };
+  const normalized = normalizeInboundPayload({ ...basePayload, provider: "uazapi" });
+
+  if (normalized.kind === "ignored") {
+    return { ok: true, ignored: true, reason: normalized.reason, source: normalized.source };
+  }
+
+  return processNormalizedInboundEvent(normalized);
 }
 
 export async function POST(request: NextRequest) {
+  let payload: unknown = null;
   try {
-    const payload = await request.json();
-    const root = asRecord(payload);
-    const data = asRecord(root.data);
-    const key = asRecord(data.key);
-    const message = asRecord(data.message);
-
-    const remoteJid = String(key.remoteJid ?? "");
-    const contactId = remoteJid.split("@")[0] ?? "unknown";
-
-    const text =
-      String(message.conversation ?? "") ||
-      String(asRecord(message.extendedTextMessage).text ?? "") ||
-      "Mensagem recebida";
-
-    const incoming = {
-      id: crypto.randomUUID(),
-      contactId,
-      channel: "whatsapp" as const,
-      direction: "in" as const,
-      text,
-      createdAt: new Date().toISOString()
-    };
-
-    appendMessage(incoming);
-
-    await emitChatEventToN8n({
-      type: "chat.message.received",
-      source: "ticketbr-chat",
-      occurredAt: new Date().toISOString(),
-      data: incoming as unknown as Record<string, unknown>
-    });
-
-    return NextResponse.json({ ok: true });
+    payload = await request.json();
+    const response = await processInboundWebhook(payload);
+    logWebhookRequest({ request, payload, route: "chat.webhook", source: "uazapi", status: 200 });
+    return NextResponse.json(response);
   } catch (error) {
     console.error("Error on chat webhook", error);
+    logWebhookRequest({ request, payload, route: "chat.webhook", source: "uazapi", status: 400 });
     return NextResponse.json({ error: "Webhook inválido" }, { status: 400 });
   }
 }
+
+export { processInboundWebhook };
