@@ -7,6 +7,7 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { useToast } from "@/context/ToastContext";
+import { useThemeMode } from "@/context/ThemeModeContext";
 
 interface SyncedContact {
   id: string;
@@ -19,10 +20,13 @@ interface SyncedContact {
 }
 
 const Card = styled.section`
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
+  background: ${({ theme }) => theme.colors.surfaceElevated};
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  box-shadow: ${({ theme }) => theme.shadows.card};
+  border-radius: 24px;
   padding: 1rem;
+  color: ${({ theme }) => theme.colors.text.primary};
+  transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
 `;
 
 const Header = styled.div`
@@ -31,28 +35,92 @@ const Header = styled.div`
   align-items: center;
   gap: 1rem;
   margin-bottom: 1rem;
+  flex-wrap: wrap;
+`;
+
+const HeaderMeta = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+`;
+
+const Title = styled.h2`
+  margin: 0;
+  color: ${({ theme }) => theme.colors.text.primary};
+`;
+
+const Subtitle = styled.p`
+  margin: 0;
+  color: ${({ theme }) => theme.colors.text.secondary};
+`;
+
+const HeaderActions = styled.div`
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  align-items: center;
+`;
+
+const ThemeSwitch = styled.button<{ $active: boolean }>`
+  width: 68px;
+  height: 38px;
+  border: 1px solid ${({ theme }) => theme.colors.borderStrong};
+  background: ${({ theme, $active }) => ($active ? `${theme.colors.primary}22` : theme.colors.surface)};
+  border-radius: 999px;
+  padding: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: ${({ $active }) => ($active ? "flex-end" : "flex-start")};
+  transition: all 0.25s ease;
+
+  span {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: ${({ theme, $active }) => ($active ? theme.colors.primary : theme.colors.surfaceAlt)};
+    color: ${({ theme }) => theme.colors.text.primary};
+    box-shadow: ${({ theme }) => theme.shadows.card};
+    font-size: 0.9rem;
+  }
 `;
 
 const SearchBar = styled.div`
   margin-bottom: 0.9rem;
 `;
 
+const TableWrapper = styled.div`
+  width: 100%;
+  overflow-x: auto;
+`;
+
 const ContactsTable = styled.table`
   width: 100%;
   border-collapse: collapse;
+  min-width: 720px;
 
   th,
   td {
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid ${({ theme }) => theme.colors.border};
     text-align: left;
     padding: 0.55rem;
     font-size: 0.84rem;
     vertical-align: top;
+    color: ${({ theme }) => theme.colors.text.secondary};
+    transition: border-color 0.25s ease, color 0.25s ease, background 0.25s ease;
+  }
+
+  th {
+    color: ${({ theme }) => theme.colors.text.primary};
+    background: ${({ theme }) => theme.colors.surfaceAlt};
   }
 `;
 
 export default function WhatsAppContatosPage() {
   const { showToast } = useToast();
+  const { isDark, toggleMode } = useThemeMode();
   const [syncing, setSyncing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [contacts, setContacts] = useState<SyncedContact[]>([]);
@@ -109,15 +177,25 @@ export default function WhatsAppContatosPage() {
       <MainContent>
         <Card>
           <Header>
-            <div>
-              <h2 style={{ margin: 0 }}>Contatos WhatsApp</h2>
-              <p style={{ margin: "0.4rem 0 0", color: "#6b7280" }}>
-                Lista de contatos sincronizados do endpoint n8n.
-              </p>
-            </div>
-            <Button onClick={syncContacts} disabled={syncing}>
-              {syncing ? "Sincronizando..." : "Sincronizar contatos"}
-            </Button>
+            <HeaderMeta>
+              <Title>Contatos WhatsApp</Title>
+              <Subtitle>Lista de contatos sincronizados.</Subtitle>
+            </HeaderMeta>
+
+            <HeaderActions>
+              <ThemeSwitch
+                type="button"
+                $active={isDark}
+                onClick={toggleMode}
+                aria-label={isDark ? "Desativar dark mode" : "Ativar dark mode"}
+                aria-pressed={isDark}
+              >
+                <span>{isDark ? "🌙" : "☀️"}</span>
+              </ThemeSwitch>
+              <Button onClick={syncContacts} disabled={syncing}>
+                {syncing ? "Sincronizando..." : "Sincronizar contatos"}
+              </Button>
+            </HeaderActions>
           </Header>
 
           {loading ? (
@@ -131,34 +209,36 @@ export default function WhatsAppContatosPage() {
                   onChange={(e) => setSearch(e.target.value)}
                 />
               </SearchBar>
-              <ContactsTable>
-                <thead>
-                <tr>
-                  <th>Nome</th>
-                  <th>WhatsApp</th>
-                  <th>Instância</th>
-                  <th>Atualizado em</th>
-                </tr>
-                </thead>
-                <tbody>
-                {filteredContacts.length === 0 ? (
+              <TableWrapper>
+                <ContactsTable>
+                  <thead>
                   <tr>
-                    <td colSpan={4} style={{ color: "#6b7280" }}>
-                      {contacts.length === 0 ? "Nenhum contato sincronizado." : "Nenhum contato encontrado para a busca."}
-                    </td>
+                    <th>Nome</th>
+                    <th>WhatsApp</th>
+                    <th>Instância</th>
+                    <th>Atualizado em</th>
                   </tr>
-                ) : (
-                  filteredContacts.map((contact) => (
-                    <tr key={contact.id}>
-                      <td>{contact.pushName || "Sem nome"}</td>
-                      <td>{contact.remoteJid}</td>
-                      <td>{contact.instanceId || "-"}</td>
-                      <td>{new Date(contact.updatedAt).toLocaleString("pt-BR")}</td>
+                  </thead>
+                  <tbody>
+                  {filteredContacts.length === 0 ? (
+                    <tr>
+                      <td colSpan={4} style={{ color: "inherit" }}>
+                        {contacts.length === 0 ? "Nenhum contato sincronizado." : "Nenhum contato encontrado para a busca."}
+                      </td>
                     </tr>
-                  ))
-                )}
-                </tbody>
-              </ContactsTable>
+                  ) : (
+                    filteredContacts.map((contact) => (
+                      <tr key={contact.id}>
+                        <td>{contact.pushName || "Sem nome"}</td>
+                        <td>{contact.remoteJid}</td>
+                        <td>{contact.instanceId || "-"}</td>
+                        <td>{new Date(contact.updatedAt).toLocaleString("pt-BR")}</td>
+                      </tr>
+                    ))
+                  )}
+                  </tbody>
+                </ContactsTable>
+              </TableWrapper>
             </>
           )}
         </Card>
