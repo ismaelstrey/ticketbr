@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { chatService } from "@/server/services/chat-service";
 import { normalizeInboundPayload } from "@/server/services/chat-inbound-normalizer";
+import { processNormalizedInboundEvent } from "@/server/services/chat-inbound-processing";
 import { logWebhookRequest } from "@/server/services/webhook-request-logs";
 
 export async function POST(req: NextRequest) {
@@ -14,13 +14,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: normalized.reason }, { status: 400 });
     }
 
-    if (normalized.kind === "message_update") {
-      await chatService.updateMessageStatus(normalized.statusUpdate.waMessageId, normalized.statusUpdate.status);
-      logWebhookRequest({ request: req, payload: body, route: "chat.inbound", source: normalized.source, status: 200 });
-      return NextResponse.json({ success: true, kind: normalized.kind });
-    }
-
-    const response = await chatService.processInboundMessage(normalized.payload);
+    const response = await processNormalizedInboundEvent(normalized);
     logWebhookRequest({ request: req, payload: body, route: "chat.inbound", source: normalized.source, status: 200 });
     return NextResponse.json(response);
   } catch (error: any) {

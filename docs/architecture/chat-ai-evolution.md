@@ -27,7 +27,10 @@ Inbound webhook payloads must be normalized before business logic runs.
 Normalization entrypoint:
 - `src/server/services/chat-inbound-normalizer.ts`
 
-This file converts raw webhook payloads into one of three canonical outcomes:
+Execution entrypoint after normalization:
+- `src/server/services/chat-inbound-processing.ts`
+
+Together these files convert raw webhook payloads into one of three canonical outcomes and then execute the shared inbound workflow:
 - `message`
 - `message_update`
 - `ignored`
