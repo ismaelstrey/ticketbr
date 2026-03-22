@@ -16,6 +16,7 @@ export const TicketEventTypeSchema = z.enum([
 export const CreateTicketSchema = z.object({
   empresa: z.string().min(1, "Empresa é obrigatória"),
   solicitante: z.string().min(1, "Solicitante é obrigatório"),
+  solicitanteId: z.string().min(1).optional(),
   assunto: z.string().min(1, "Assunto é obrigatório"),
   descricao: z.string().optional(),
   prioridade: z.enum(["Alta", "Média", "Sem prioridade"]).optional(), // UI values

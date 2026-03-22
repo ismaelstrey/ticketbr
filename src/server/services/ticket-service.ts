@@ -243,10 +243,34 @@ export async function getTicketById(id: string) {
   return ticket ? mapTicket(ticket) : null;
 }
 
+async function resolveSolicitanteId(input: CreateTicketInput | UpdateTicketInput) {
+  const direct = (input as any).solicitanteId as string | undefined;
+  if (direct && direct.trim()) return direct.trim();
+
+  const candidates = [input.empresa, input.solicitante]
+    .map((value) => String(value ?? "").trim())
+    .filter(Boolean);
+
+  if (!candidates.length) return null;
+
+  const solicitante = await prisma.solicitante.findFirst({
+    where: {
+      OR: [
+        ...candidates.map((name) => ({ nome_fantasia: { equals: name, mode: "insensitive" as const } })),
+        ...candidates.map((name) => ({ razao_social: { equals: name, mode: "insensitive" as const } }))
+      ]
+    },
+    select: { id: true }
+  });
+
+  return solicitante?.id ?? null;
+}
+
 export async function createTicket(input: CreateTicketInput) {
   // Safe cast to Prisma enum strings
   const status = (input.status ? toPrismaStatus(input.status as UiStatus) : "TODO") as TicketStatus;
   const priority = (input.prioridade ? toPrismaPriority(input.prioridade as UiPriority) : undefined) as TicketPriority | undefined;
+  const solicitanteId = await resolveSolicitanteId(input);
 
   const ticket = await prisma.ticket.create({
     data: {
@@ -254,6 +278,7 @@ export async function createTicket(input: CreateTicketInput) {
       requester: input.solicitante,
       subject: input.assunto,
       description: input.descricao,
+      ...(solicitanteId ? { solicitante_id: solicitanteId } : {}),
       status,
       priority,
       operator: input.operador,
@@ -312,6 +337,11 @@ export async function updateTicket(id: string, input: UpdateTicketInput) {
 
   if (input.pauseSla !== undefined) {
     data.pauseSla = input.pauseSla;
+  }
+
+  const solicitanteId = await resolveSolicitanteId(input);
+  if (solicitanteId) {
+    data.solicitante_id = solicitanteId;
   }
 
   await prisma.ticket.update({ where: { id }, data });

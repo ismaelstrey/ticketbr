@@ -365,6 +365,7 @@ export default function NewTicketModal({ isOpen, onClose, onCreated }: NewTicket
   const { user } = useAuth();
   const { showToast } = useToast();
   const [requester, setRequester] = useState("");
+  const [requesterId, setRequesterId] = useState("");
   const [subject, setSubject] = useState("");
   const [description, setDescription] = useState("");
   const [followTicket, setFollowTicket] = useState(false);
@@ -380,9 +381,11 @@ export default function NewTicketModal({ isOpen, onClose, onCreated }: NewTicket
   const [isRequesterListOpen, setIsRequesterListOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const handleRequesterSelect = (value: string) => {
-    setRequester(value);
-    setSearchTerm(value);
+  const handleRequesterSelect = (req: any) => {
+    const name = String(req?.nome_fantasia || "").trim();
+    setRequester(name);
+    setRequesterId(String(req?.id || "").trim());
+    setSearchTerm(name);
     setIsRequesterListOpen(false);
   };
 
@@ -444,6 +447,7 @@ export default function NewTicketModal({ isOpen, onClose, onCreated }: NewTicket
       const payload = {
         empresa: requester,
         solicitante: requester,
+        solicitanteId: requesterId || undefined,
         assunto: subject,
         descricao: description,
         prioridade: priority,
@@ -503,6 +507,7 @@ export default function NewTicketModal({ isOpen, onClose, onCreated }: NewTicket
                     setSearchTerm(e.target.value);
                     setIsRequesterListOpen(true);
                     setRequester("");
+                    setRequesterId("");
                   }}
                   onFocus={() => setIsRequesterListOpen(true)}
                   $hasError={!requester}
@@ -511,7 +516,7 @@ export default function NewTicketModal({ isOpen, onClose, onCreated }: NewTicket
                   <Dropdown>
                     {filteredRequesters.length > 0 ? (
                       filteredRequesters.map((req: any) => (
-                        <DropdownItem key={req.id} onClick={() => handleRequesterSelect(req.nome_fantasia)}>
+                        <DropdownItem key={req.id} onClick={() => handleRequesterSelect(req)}>
                           <strong>{req.nome_fantasia}</strong>
                           <DropdownMeta>{req.email} - {req.cnpj}</DropdownMeta>
                         </DropdownItem>

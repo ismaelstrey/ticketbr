@@ -508,6 +508,7 @@ export default function ChatPage() {
     const params = new URLSearchParams();
     if (contact.companyId) {
       params.set("companyId", contact.companyId);
+      if (contact.company) params.set("companyName", contact.company);
     } else if (contact.company) {
       params.set("companyName", contact.company);
     } else {

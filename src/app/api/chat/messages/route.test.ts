@@ -3,6 +3,10 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 const resolveWhatsAppConfigMock = vi.fn();
 const sendOutboundMessageMock = vi.fn();
 
+vi.mock("@/lib/prisma", () => ({
+  prisma: {}
+}));
+
 vi.mock("@/server/services/whatsapp-settings", () => ({
   resolveWhatsAppConfig: resolveWhatsAppConfigMock
 }));
@@ -15,7 +19,8 @@ describe("POST /api/chat/messages", () => {
   beforeEach(() => {
     resolveWhatsAppConfigMock.mockReset();
     sendOutboundMessageMock.mockReset();
-    process.env.DATABASE_URL = "";
+    vi.resetModules();
+    delete process.env.DATABASE_URL;
   });
 
   it("retorna 400 quando WhatsApp não está configurado", async () => {
