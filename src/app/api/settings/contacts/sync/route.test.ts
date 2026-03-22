@@ -6,6 +6,9 @@ const syncWhatsAppContactsMock = vi.fn();
 const isUazapiConfiguredMock = vi.fn();
 
 vi.mock("@/server/services/whatsapp-settings", () => ({
+  WHATSAPP_CONFIG_COOKIE: "ticketbr_whatsapp_config",
+  decodeWhatsAppConfigCookie: vi.fn(() => null),
+  getWhatsAppConfigFromDatabase: vi.fn(async () => null),
   normalizeWhatsAppConfig: normalizeWhatsAppConfigMock,
   resolveWhatsAppConfig: resolveWhatsAppConfigMock
 }));
@@ -31,9 +34,11 @@ describe("POST /api/settings/contacts/sync", () => {
     const { POST } = await import("./route");
 
     const req = {
-      json: async () => ({ whatsappProvider: "uazapi" })
+      json: async () => ({ whatsappProvider: "uazapi" }),
+      cookies: { get: () => undefined }
     } as any;
 
+    resolveWhatsAppConfigMock.mockResolvedValueOnce({ whatsappProvider: "uazapi" });
     const res = await POST(req);
     const body = await res.json();
 
@@ -46,9 +51,11 @@ describe("POST /api/settings/contacts/sync", () => {
     const { POST } = await import("./route");
 
     const req = {
-      json: async () => ({ whatsappProvider: "n8n" })
+      json: async () => ({ whatsappProvider: "n8n" }),
+      cookies: { get: () => undefined }
     } as any;
 
+    resolveWhatsAppConfigMock.mockResolvedValueOnce({ whatsappProvider: "n8n" });
     const res = await POST(req);
     const body = await res.json();
 
@@ -57,4 +64,3 @@ describe("POST /api/settings/contacts/sync", () => {
     expect(syncWhatsAppContactsMock).toHaveBeenCalledTimes(1);
   });
 });
-

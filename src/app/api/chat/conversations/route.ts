@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
+import { ensureChatConversationFinalizedColumn } from "@/server/services/chat-conversation-schema";
 
 export async function GET(request: NextRequest) {
   try {
+    await ensureChatConversationFinalizedColumn();
     const contactId = request.nextUrl.searchParams.get("contactId") ?? undefined;
     const channel = request.nextUrl.searchParams.get("channel") ?? undefined;
 
@@ -35,6 +37,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    await ensureChatConversationFinalizedColumn();
     const body = await request.json();
 
     if (!body?.contactId || !body?.channel || !Array.isArray(body?.messages)) {

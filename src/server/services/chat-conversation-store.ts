@@ -2,6 +2,7 @@ import type { Prisma } from "../../../prisma/generated/client.ts";
 import { prisma } from "@/lib/prisma";
 import type { ChatMessage } from "@/types/chat";
 import type { NormalizedInboundResult } from "@/server/services/chat-inbound-normalizer";
+import { ensureChatConversationFinalizedColumn } from "@/server/services/chat-conversation-schema";
 
 interface StoredChatMessage extends ChatMessage {
   status?: string;
@@ -36,6 +37,7 @@ function toJsonMessages(messages: StoredChatMessage[]): Prisma.InputJsonValue {
 }
 
 export async function upsertInboundConversation(normalized: Extract<NormalizedInboundResult, { kind: "message" }>) {
+  await ensureChatConversationFinalizedColumn();
   const conversationId = normalized.payload.wa_chat_id;
   const message = buildInboundChatMessage(normalized);
 
@@ -80,6 +82,7 @@ export async function upsertInboundConversation(normalized: Extract<NormalizedIn
 }
 
 export async function syncConversationMessageStatus(waMessageId: string, status: string) {
+  await ensureChatConversationFinalizedColumn();
   const conversations = await prisma.chatConversation.findMany({
     where: {
       channel: "whatsapp"

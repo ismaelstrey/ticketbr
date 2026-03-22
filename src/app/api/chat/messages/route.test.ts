@@ -1,58 +1,26 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 
 const resolveWhatsAppConfigMock = vi.fn();
-const isN8nConfiguredMock = vi.fn();
-const sendMessageToN8nMock = vi.fn();
-const emitChatEventToN8nMock = vi.fn();
-const evolutionIsConfiguredMock = vi.fn();
-const sendTextToEvolutionMock = vi.fn();
-const sendMediaToEvolutionMock = vi.fn();
-const uazapiIsConfiguredMock = vi.fn();
-const sendTextToUazapiMock = vi.fn();
-const sendMediaToUazapiMock = vi.fn();
+const sendOutboundMessageMock = vi.fn();
 
 vi.mock("@/server/services/whatsapp-settings", () => ({
   resolveWhatsAppConfig: resolveWhatsAppConfigMock
 }));
 
-vi.mock("@/server/services/n8n-adapter", () => ({
-  isN8nConfigured: isN8nConfiguredMock,
-  sendMessageToN8n: sendMessageToN8nMock,
-  emitChatEventToN8n: emitChatEventToN8nMock,
-  fetchMessagesFromN8n: vi.fn()
-}));
-
-vi.mock("@/server/services/evolution-service", () => ({
-  evolutionIsConfigured: evolutionIsConfiguredMock,
-  sendTextToEvolution: sendTextToEvolutionMock,
-  sendMediaToEvolution: sendMediaToEvolutionMock,
-  fetchMessagesFromEvolution: vi.fn()
-}));
-
-vi.mock("@/server/services/uazapi-service", () => ({
-  uazapiIsConfigured: uazapiIsConfiguredMock,
-  sendTextToUazapi: sendTextToUazapiMock,
-  sendMediaToUazapi: sendMediaToUazapiMock
+vi.mock("@/server/services/chat-outbound", () => ({
+  sendOutboundMessage: sendOutboundMessageMock
 }));
 
 describe("POST /api/chat/messages", () => {
   beforeEach(() => {
     resolveWhatsAppConfigMock.mockReset();
-    isN8nConfiguredMock.mockReset();
-    sendMessageToN8nMock.mockReset();
-    emitChatEventToN8nMock.mockReset();
-    evolutionIsConfiguredMock.mockReset();
-    sendTextToEvolutionMock.mockReset();
-    sendMediaToEvolutionMock.mockReset();
-    uazapiIsConfiguredMock.mockReset();
-    sendTextToUazapiMock.mockReset();
-    sendMediaToUazapiMock.mockReset();
+    sendOutboundMessageMock.mockReset();
+    process.env.DATABASE_URL = "";
   });
 
   it("retorna 400 quando WhatsApp não está configurado", async () => {
     resolveWhatsAppConfigMock.mockResolvedValueOnce(null);
-    isN8nConfiguredMock.mockReturnValueOnce(false);
-    evolutionIsConfiguredMock.mockReturnValueOnce(false);
+    sendOutboundMessageMock.mockRejectedValueOnce(new Error("WhatsApp não está configurado"));
     const { POST } = await import("./route");
 
     const req = {
@@ -73,10 +41,7 @@ describe("POST /api/chat/messages", () => {
 
   it("retorna 201 quando envia via N8N com base configurada", async () => {
     resolveWhatsAppConfigMock.mockResolvedValueOnce({ n8nBaseUrl: "http://n8n", n8nWebhookUrl: "http://hook" });
-    isN8nConfiguredMock.mockReturnValueOnce(true);
-    evolutionIsConfiguredMock.mockReturnValueOnce(false);
-    sendMessageToN8nMock.mockResolvedValueOnce({});
-    emitChatEventToN8nMock.mockResolvedValueOnce(undefined);
+    sendOutboundMessageMock.mockResolvedValueOnce({ waMessageId: "out_1" });
     const { POST } = await import("./route");
 
     const req = {
@@ -93,15 +58,12 @@ describe("POST /api/chat/messages", () => {
 
     expect(res.status).toBe(201);
     expect(body.data?.direction).toBe("out");
-    expect(sendMessageToN8nMock).toHaveBeenCalledTimes(1);
+    expect(sendOutboundMessageMock).toHaveBeenCalledTimes(1);
   });
 
   it("retorna 502 quando o envio para N8N falha", async () => {
     resolveWhatsAppConfigMock.mockResolvedValueOnce({ n8nBaseUrl: "http://n8n", n8nWebhookUrl: "http://hook" });
-    isN8nConfiguredMock.mockReturnValueOnce(true);
-    evolutionIsConfiguredMock.mockReturnValueOnce(false);
-    uazapiIsConfiguredMock.mockReturnValueOnce(false);
-    sendMessageToN8nMock.mockRejectedValueOnce(new Error("n8n request failed (401)"));
+    sendOutboundMessageMock.mockRejectedValueOnce(new Error("Falha ao enviar para N8N"));
     const { POST } = await import("./route");
 
     const req = {
@@ -117,15 +79,12 @@ describe("POST /api/chat/messages", () => {
     const body = await res.json();
 
     expect(res.status).toBe(502);
-    expect(body.error).toContain("n8n request failed");
+    expect(String(body.error)).toContain("N8N");
   });
 
   it("retorna 201 quando envia via UAZAPI com provider selecionado", async () => {
     resolveWhatsAppConfigMock.mockResolvedValueOnce({ whatsappProvider: "uazapi", uazapiBaseUrl: "http://uazapi", uazapiToken: "tok" });
-    isN8nConfiguredMock.mockReturnValueOnce(false);
-    evolutionIsConfiguredMock.mockReturnValueOnce(false);
-    uazapiIsConfiguredMock.mockReturnValueOnce(true);
-    sendTextToUazapiMock.mockResolvedValueOnce({});
+    sendOutboundMessageMock.mockResolvedValueOnce({ waMessageId: "out_uazapi_1" });
     const { POST } = await import("./route");
 
     const req = {
@@ -142,6 +101,6 @@ describe("POST /api/chat/messages", () => {
 
     expect(res.status).toBe(201);
     expect(body.data?.direction).toBe("out");
-    expect(sendTextToUazapiMock).toHaveBeenCalledTimes(1);
+    expect(sendOutboundMessageMock).toHaveBeenCalledTimes(1);
   });
 });

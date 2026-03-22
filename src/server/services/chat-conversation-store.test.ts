@@ -12,7 +12,8 @@ vi.mock("@/lib/prisma", () => ({
       create: createMock,
       update: updateMock,
       findMany: findManyMock
-    }
+    },
+    $executeRawUnsafe: vi.fn().mockResolvedValue(undefined)
   }
 }));
 
