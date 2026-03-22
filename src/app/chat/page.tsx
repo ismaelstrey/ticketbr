@@ -328,6 +328,8 @@ export default function ChatPage() {
   const [enableAlert, setEnableAlert] = useState(false);
   const lastMessageIdRef = useRef<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const preferencesLoadedRef = useRef(false);
+  const preferencesSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const selectedContact = useMemo(() => contacts.find((c) => c.id === contactId), [contacts, contactId]);
   const activeArchivedConversation = useMemo(() => archivedConversations.find((item) => item.id === activeArchivedId), [archivedConversations, activeArchivedId]);
@@ -450,8 +452,25 @@ export default function ChatPage() {
     setArchivedConversations(Array.isArray(json.data) ? json.data : []);
   }
 
+  async function loadInteractionPreferences() {
+    const res = await fetch("/api/chat/preferences", { cache: "no-store" });
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(json?.error || "Erro ao carregar preferências do chat");
+
+    if (json?.data) {
+      setEnableSound(Boolean(json.data.enableSound));
+      setEnableAlert(Boolean(json.data.enableAlert));
+      setChannel(json.data.preferredChannel === "email" ? "email" : "whatsapp");
+    }
+
+    preferencesLoadedRef.current = true;
+  }
+
   useEffect(() => {
-    loadBase().catch((error) => showToast(error.message, "error"));
+    Promise.all([
+      loadBase(),
+      loadInteractionPreferences()
+    ]).catch((error) => showToast(error.message, "error"));
   }, []);
 
   useEffect(() => {
@@ -496,6 +515,23 @@ export default function ChatPage() {
       setConversationId(filteredContacts[0].conversationId || `whatsapp:${filteredContacts[0].id}`);
     }
   }, [filteredContacts, contactId]);
+
+  useEffect(() => {
+    if (!preferencesLoadedRef.current) return;
+    if (preferencesSaveTimerRef.current) clearTimeout(preferencesSaveTimerRef.current);
+
+    preferencesSaveTimerRef.current = setTimeout(() => {
+      fetch("/api/chat/preferences", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ enableSound, enableAlert, preferredChannel: channel })
+      }).catch((error) => console.error("Failed to persist chat preferences", error));
+    }, 300);
+
+    return () => {
+      if (preferencesSaveTimerRef.current) clearTimeout(preferencesSaveTimerRef.current);
+    };
+  }, [enableSound, enableAlert, channel]);
 
   async function requestBrowserAlertPermission() {
     if (!("Notification" in window)) {
