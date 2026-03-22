@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { buildConversationContext } from "@/server/services/chat-context";
 
 export interface ChatAction {
   type: "typing_start" | "typing_stop" | "mark_read" | "send";
@@ -142,6 +143,8 @@ export class ChatService {
       data: { lastMessageAt: new Date() },
     });
 
+    const context = await buildConversationContext(conversation.id);
+
     // 4. Decide response (Hybrid Logic)
     const actions: ChatAction[] = [];
     const suggestions: Array<{ text: string }> = [];
@@ -152,7 +155,7 @@ export class ChatService {
     actions.push({ type: "mark_read", wa_message_id });
 
     // Logic: If bot is active and no human is assigned, bot can respond
-    if (conversation.botActive && !conversation.humanActive) {
+    if (context.botActive && !context.humanActive) {
       // Simple echo bot logic for demonstration (replace with actual AI logic)
       // In a real scenario, you'd call an AI service here.
       
@@ -189,7 +192,7 @@ export class ChatService {
       routing: {
         queue: "default",
         priority: "normal",
-        assignee: conversation.assignedTo,
+        assignee: context.assignedTo,
       },
       actions,
       suggestions,

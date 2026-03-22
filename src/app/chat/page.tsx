@@ -310,7 +310,7 @@ function playNotificationTone() {
 export default function ChatPage() {
   const { showToast } = useToast();
   const [contacts, setContacts] = useState<ChatContact[]>([]);
-  const [tickets, setTickets] = useState<any[]>([]);
+  const [tickets, setTickets] = useState<Array<{ id: string; number: number; subject: string; companyId?: string | null; companyName?: string | null }>>([]);
   const [links, setLinks] = useState<ChatTicketLink[]>([]);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [archivedConversations, setArchivedConversations] = useState<ArchivedChatConversation[]>([]);
@@ -328,6 +328,8 @@ export default function ChatPage() {
   const [enableAlert, setEnableAlert] = useState(false);
   const lastMessageIdRef = useRef<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const preferencesLoadedRef = useRef(false);
+  const preferencesSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const selectedContact = useMemo(() => contacts.find((c) => c.id === contactId), [contacts, contactId]);
   const activeArchivedConversation = useMemo(() => archivedConversations.find((item) => item.id === activeArchivedId), [archivedConversations, activeArchivedId]);
@@ -352,22 +354,42 @@ export default function ChatPage() {
   }, [contacts, companyTab, search, channel]);
 
   async function loadBase() {
-    const [contactsRes, ticketsRes] = await Promise.all([fetch("/api/chat/contacts"), fetch("/api/chat/tickets")]);
+    const contactsRes = await fetch("/api/chat/contacts");
 
     const contactsJson = await contactsRes.json();
-    const ticketsJson = await ticketsRes.json();
 
     if (!contactsRes.ok) throw new Error(contactsJson?.error || "Erro ao carregar contatos");
-    if (!ticketsRes.ok) throw new Error(ticketsJson?.error || "Erro ao carregar tickets");
 
     const nextContacts = Array.isArray(contactsJson.data) ? contactsJson.data : [];
     setContacts(nextContacts);
-    setTickets(Array.isArray(ticketsJson.data) ? ticketsJson.data : []);
 
     if (!contactId && nextContacts.length) {
       setContactId(nextContacts[0].id);
       setConversationId(nextContacts[0].conversationId || `whatsapp:${nextContacts[0].id}`);
     }
+  }
+
+
+  async function loadTicketsForContact(contact?: ChatContact) {
+    if (!contact) {
+      setTickets([]);
+      return;
+    }
+
+    const params = new URLSearchParams();
+    if (contact.companyId) {
+      params.set("companyId", contact.companyId);
+    } else if (contact.company) {
+      params.set("companyName", contact.company);
+    } else {
+      setTickets([]);
+      return;
+    }
+
+    const res = await fetch(`/api/chat/tickets?${params.toString()}`);
+    const json = await res.json();
+    if (!res.ok) throw new Error(json?.error || "Erro ao carregar tickets");
+    setTickets(Array.isArray(json.data) ? json.data : []);
   }
 
   async function loadMessages() {
@@ -418,8 +440,25 @@ export default function ChatPage() {
     setArchivedConversations(Array.isArray(json.data) ? json.data : []);
   }
 
+  async function loadInteractionPreferences() {
+    const res = await fetch("/api/chat/preferences", { cache: "no-store" });
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(json?.error || "Erro ao carregar preferências do chat");
+
+    if (json?.data) {
+      setEnableSound(Boolean(json.data.enableSound));
+      setEnableAlert(Boolean(json.data.enableAlert));
+      setChannel(json.data.preferredChannel === "email" ? "email" : "whatsapp");
+    }
+
+    preferencesLoadedRef.current = true;
+  }
+
   useEffect(() => {
-    loadBase().catch((error) => showToast(error.message, "error"));
+    Promise.all([
+      loadBase(),
+      loadInteractionPreferences()
+    ]).catch((error) => showToast(error.message, "error"));
   }, []);
 
   useEffect(() => {
@@ -441,6 +480,18 @@ export default function ChatPage() {
   }, [messages, activeArchivedConversation]);
 
   useEffect(() => {
+    if (!selectedTicket) return;
+    const stillAvailable = tickets.some((ticket) => ticket.id === selectedTicket);
+    if (!stillAvailable) {
+      setSelectedTicket("");
+    }
+  }, [tickets, selectedTicket]);
+
+  useEffect(() => {
+    loadTicketsForContact(selectedContact).catch((error) => showToast(error.message, "error"));
+  }, [selectedContact?.id, selectedContact?.companyId, selectedContact?.company]);
+
+  useEffect(() => {
     if (!filteredContacts.length) {
       setContactId("");
       return;
@@ -452,6 +503,23 @@ export default function ChatPage() {
       setConversationId(filteredContacts[0].conversationId || `whatsapp:${filteredContacts[0].id}`);
     }
   }, [filteredContacts, contactId]);
+
+  useEffect(() => {
+    if (!preferencesLoadedRef.current) return;
+    if (preferencesSaveTimerRef.current) clearTimeout(preferencesSaveTimerRef.current);
+
+    preferencesSaveTimerRef.current = setTimeout(() => {
+      fetch("/api/chat/preferences", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ enableSound, enableAlert, preferredChannel: channel })
+      }).catch((error) => console.error("Failed to persist chat preferences", error));
+    }, 300);
+
+    return () => {
+      if (preferencesSaveTimerRef.current) clearTimeout(preferencesSaveTimerRef.current);
+    };
+  }, [enableSound, enableAlert, channel]);
 
   async function requestBrowserAlertPermission() {
     if (!("Notification" in window)) {
@@ -672,7 +740,7 @@ export default function ChatPage() {
                   <option key={ticket.id} value={ticket.id}>#{ticket.number} - {ticket.subject}</option>
                 ))}
               </Select>
-              <Input placeholder="ID da conversa" value={conversationId} onChange={(e) => setConversationId(e.target.value)} />
+              <Input placeholder="ID da conversa" value={conversationId} onChange={(e) => setConversationId(e.target.value)} disabled />
               <Button variant="save" onClick={() => linkToTicket().catch((error) => showToast(error.message, "error"))}>Associar</Button>
 
               <Select value={activeArchivedId} onChange={(e) => setActiveArchivedId(e.target.value)}>
