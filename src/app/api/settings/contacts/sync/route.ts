@@ -1,15 +1,36 @@
 import { NextRequest, NextResponse } from "next/server";
-import { normalizeWhatsAppConfig, resolveWhatsAppConfig } from "@/server/services/whatsapp-settings";
-import { syncWhatsAppContactsFromN8n } from "@/server/services/whatsapp-contacts";
+import {
+  WHATSAPP_CONFIG_COOKIE,
+  decodeWhatsAppConfigCookie,
+  getWhatsAppConfigFromDatabase,
+  normalizeWhatsAppConfig,
+  resolveWhatsAppConfig
+} from "@/server/services/whatsapp-settings";
+import { syncWhatsAppContacts } from "@/server/services/whatsapp-contacts";
+
+function isMaskedSecret(value: unknown) {
+  return typeof value === "string" && value.includes("••••");
+}
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json().catch(() => ({}));
     const bodyConfig = normalizeWhatsAppConfig(body);
-    const config = await resolveWhatsAppConfig(request, bodyConfig);
-    // console.log(config)
 
-    const result = await syncWhatsAppContactsFromN8n(config);
+    const cookieValue = request.cookies.get(WHATSAPP_CONFIG_COOKIE)?.value;
+    const cookieConfig = decodeWhatsAppConfigCookie(cookieValue);
+    const storedConfig = cookieConfig ?? await getWhatsAppConfigFromDatabase();
+
+    const merged = bodyConfig ? { ...bodyConfig } : null;
+    if (merged && storedConfig) {
+      if (isMaskedSecret(body.apiKey) && storedConfig.apiKey) merged.apiKey = storedConfig.apiKey;
+      if (isMaskedSecret(body.n8nApiKey) && storedConfig.n8nApiKey) merged.n8nApiKey = storedConfig.n8nApiKey;
+      if (isMaskedSecret(body.uazapiToken) && storedConfig.uazapiToken) merged.uazapiToken = storedConfig.uazapiToken;
+      if (isMaskedSecret(body.uazapiAdminToken) && storedConfig.uazapiAdminToken) merged.uazapiAdminToken = storedConfig.uazapiAdminToken;
+    }
+
+    const config = await resolveWhatsAppConfig(request, merged);
+    const result = await syncWhatsAppContacts(config);
     return NextResponse.json({ data: result });
   } catch (error: any) {
     console.error("Error syncing WhatsApp contacts", error);
