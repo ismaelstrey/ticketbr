@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
 import { AppShellContainer, MainContent } from "@/components/layout/AppShell";
 import { Sidebar } from "@/components/layout/Sidebar";
@@ -218,7 +218,29 @@ const MessageList = styled.div`
   }
 `;
 
-const Bubble = styled.div<{ $in?: boolean }>`
+const LoadMoreButton = styled.button`
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  background: ${({ theme }) => theme.colors.surfaceAlt};
+  color: ${({ theme }) => theme.colors.text.secondary};
+  padding: 0.45rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  cursor: pointer;
+  align-self: center;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: ${({ theme }) => theme.colors.primary};
+    color: ${({ theme }) => theme.colors.primary};
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+`;
+
+const Bubble = styled.div<{ $in?: boolean; $animate?: boolean }>`
   align-self: ${({ $in }) => ($in ? "flex-start" : "flex-end")};
   background: ${({ theme, $in }) => ($in ? theme.colors.surface : `${theme.colors.primary}22`)};
   color: ${({ theme }) => theme.colors.text.primary};
@@ -227,6 +249,16 @@ const Bubble = styled.div<{ $in?: boolean }>`
   padding: 0.6rem 0.75rem;
   max-width: 72%;
   box-shadow: ${({ theme }) => theme.shadows.card};
+  opacity: ${({ $animate }) => ($animate ? 0 : 1)};
+  transform: ${({ $animate }) => ($animate ? "translateY(6px) scale(0.995)" : "translateY(0) scale(1)")};
+  animation: ${({ $animate }) => ($animate ? "chatBubbleIn 220ms ease forwards" : "none")};
+
+  @keyframes chatBubbleIn {
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
 `;
 
 const MessageMeta = styled.div`
@@ -368,9 +400,12 @@ export default function ChatPage() {
   const [tickets, setTickets] = useState<Array<{ id: string; number: number; subject: string; companyId?: string | null; companyName?: string | null }>>([]);
   const [links, setLinks] = useState<ChatTicketLink[]>([]);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [messagesOlderCursor, setMessagesOlderCursor] = useState<string | null>(null);
+  const [loadingOlderMessages, setLoadingOlderMessages] = useState(false);
   const [archivedConversations, setArchivedConversations] = useState<ArchivedChatConversation[]>([]);
   const [activeArchivedId, setActiveArchivedId] = useState("");
   const [finalizePreview, setFinalizePreview] = useState<null | { archivedId: string; closedAt: string; ticketNumber: number | null }>(null);
+  const [animatedMessageId, setAnimatedMessageId] = useState<string | null>(null);
   const [savingConversation, setSavingConversation] = useState(false);
   const [contactId, setContactId] = useState("");
   const [channel, setChannel] = useState<"whatsapp" | "email">("whatsapp");
@@ -383,9 +418,12 @@ export default function ChatPage() {
   const [enableSound, setEnableSound] = useState(true);
   const [enableAlert, setEnableAlert] = useState(false);
   const lastMessageIdRef = useRef<string | null>(null);
+  const messageListRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const preferencesLoadedRef = useRef(false);
   const preferencesSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const skipAutoScrollRef = useRef(false);
+  const scrollLoadRafRef = useRef<number | null>(null);
 
   const selectedContact = useMemo(() => contacts.find((c) => c.id === contactId), [contacts, contactId]);
 
@@ -399,6 +437,19 @@ export default function ChatPage() {
     return null;
   }
   const activeArchivedConversation = useMemo(() => archivedConversations.find((item) => item.id === activeArchivedId), [archivedConversations, activeArchivedId]);
+
+  const displayedMessages = useMemo(() => {
+    if (!activeArchivedConversation) return messages;
+    const base = (activeArchivedConversation.messages || []) as ChatMessage[];
+    const copy = [...base];
+    copy.sort((a, b) => {
+      const aTime = new Date(a.createdAt).getTime();
+      const bTime = new Date(b.createdAt).getTime();
+      if (aTime !== bTime) return aTime - bTime;
+      return String(a.id).localeCompare(String(b.id));
+    });
+    return copy;
+  }, [activeArchivedConversation, messages]);
 
   const filteredTickets = useMemo(() => {
     if (!selectedContact) return tickets;
@@ -470,22 +521,37 @@ export default function ChatPage() {
     setTickets(Array.isArray(json.data) ? json.data : []);
   }
 
-  async function loadMessages() {
+  function sortChatMessages(input: ChatMessage[]) {
+    input.sort((a, b) => {
+      const aTime = new Date(a.createdAt).getTime();
+      const bTime = new Date(b.createdAt).getTime();
+      if (aTime !== bTime) return aTime - bTime;
+      return String(a.id).localeCompare(String(b.id));
+    });
+  }
+
+  async function loadMessages(options?: { reset?: boolean }) {
     if (!contactId) return;
+    if (activeArchivedId) return;
+    const reset = Boolean(options?.reset);
     const fallbackPhone = selectedContact?.id.startsWith("wa:") ? selectedContact.id.replace("wa:", "") : "";
     const waChatId = resolveActiveWaChatId();
     const params = new URLSearchParams({ channel, contactPhone: selectedContact?.phone ?? fallbackPhone });
     if (waChatId) params.set("waChatId", waChatId);
     else params.set("contactId", contactId);
+    params.set("limit", "50");
     const res = await fetch(`/api/chat/messages?${params.toString()}`);
     const json = await res.json();
     if (!res.ok) throw new Error(json?.error || "Erro ao carregar mensagens");
 
-    const nextMessages = Array.isArray(json.data) ? json.data : [];
+    const nextMessages: ChatMessage[] = Array.isArray(json.data) ? (json.data as ChatMessage[]) : [];
+    sortChatMessages(nextMessages);
+    const nextCursor = String(json?.paging?.nextCursor || "") || null;
+
     const previousLast = lastMessageIdRef.current;
     const currentLast = nextMessages.at(-1)?.id ?? null;
 
-    if (previousLast && currentLast && previousLast !== currentLast) {
+    if (!reset && previousLast && currentLast && previousLast !== currentLast) {
       const latest = nextMessages.at(-1);
       if (latest?.direction === "in") {
         if (enableSound) playNotificationTone();
@@ -494,11 +560,109 @@ export default function ChatPage() {
         }
         showToast("Nova mensagem recebida", "success");
       }
+      setAnimatedMessageId(String(currentLast));
+      window.setTimeout(() => setAnimatedMessageId(null), 320);
     }
 
     lastMessageIdRef.current = currentLast;
-    setMessages(nextMessages);
+
+    if (reset) {
+      setMessagesOlderCursor(nextCursor);
+      setMessages(nextMessages);
+      requestAnimationFrame(() => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }));
+      return;
+    }
+
+    setMessages((current) => {
+      if (!current.length) return nextMessages;
+      const seen = new Set(current.map((m) => String(m.id)));
+      const appended = nextMessages.filter((m) => !seen.has(String(m.id)));
+      if (!appended.length) return current;
+      return [...current, ...appended];
+    });
   }
+
+  async function loadOlderMessages() {
+    if (!contactId) return;
+    if (activeArchivedId || activeArchivedConversation) return;
+    if (!messagesOlderCursor || loadingOlderMessages) return;
+
+    setLoadingOlderMessages(true);
+    skipAutoScrollRef.current = true;
+
+    const container = messageListRef.current;
+    const previousScrollHeight = container?.scrollHeight ?? 0;
+    const previousScrollTop = container?.scrollTop ?? 0;
+
+    try {
+      const fallbackPhone = selectedContact?.id.startsWith("wa:") ? selectedContact.id.replace("wa:", "") : "";
+      const waChatId = resolveActiveWaChatId();
+      const params = new URLSearchParams({ channel, contactPhone: selectedContact?.phone ?? fallbackPhone });
+      if (waChatId) params.set("waChatId", waChatId);
+      else params.set("contactId", contactId);
+      params.set("limit", "50");
+      params.set("cursor", messagesOlderCursor);
+
+      const res = await fetch(`/api/chat/messages?${params.toString()}`);
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error || "Erro ao carregar mensagens anteriores");
+
+      const older = Array.isArray(json.data) ? (json.data as ChatMessage[]) : [];
+      sortChatMessages(older);
+
+      if (!older.length) {
+        setMessagesOlderCursor(null);
+        return;
+      }
+
+      setMessages((current) => {
+        const seen = new Set(current.map((m) => String(m.id)));
+        const prefix = older.filter((m) => !seen.has(String(m.id)));
+        return prefix.length ? [...prefix, ...current] : current;
+      });
+
+      const nextCursor = String(json?.paging?.nextCursor || "") || null;
+      setMessagesOlderCursor(nextCursor);
+
+      requestAnimationFrame(() => {
+        const el = messageListRef.current;
+        if (!el) return;
+        const nextScrollHeight = el.scrollHeight;
+        el.scrollTop = nextScrollHeight - previousScrollHeight + previousScrollTop;
+      });
+    } finally {
+      setLoadingOlderMessages(false);
+      window.setTimeout(() => {
+        skipAutoScrollRef.current = false;
+      }, 0);
+    }
+  }
+
+  const onMessageListScroll = useCallback(() => {
+    if (!contactId) return;
+    if (activeArchivedConversation || activeArchivedId) return;
+    if (!messages.length) return;
+    if (!messagesOlderCursor || loadingOlderMessages) return;
+
+    const el = messageListRef.current;
+    if (!el) return;
+
+    if (el.scrollTop > 80) return;
+    if (scrollLoadRafRef.current !== null) return;
+
+    scrollLoadRafRef.current = window.requestAnimationFrame(() => {
+      scrollLoadRafRef.current = null;
+      loadOlderMessages().catch((error) => showToast(error.message, "error"));
+    });
+  }, [activeArchivedConversation, activeArchivedId, contactId, loadOlderMessages, loadingOlderMessages, messages.length, messagesOlderCursor, showToast]);
+
+  useEffect(() => {
+    return () => {
+      if (scrollLoadRafRef.current !== null) {
+        window.cancelAnimationFrame(scrollLoadRafRef.current);
+      }
+    };
+  }, []);
 
   async function loadLinks() {
     if (!contactId) return;
@@ -549,7 +713,10 @@ export default function ChatPage() {
     if (!contactId) return;
     setActiveArchivedId("");
     setFinalizePreview(null);
-    loadMessages().catch((error) => showToast(error.message, "error"));
+    setMessages([]);
+    setMessagesOlderCursor(null);
+    lastMessageIdRef.current = null;
+    loadMessages({ reset: true }).catch((error) => showToast(error.message, "error"));
     loadLinks().catch((error) => showToast(error.message, "error"));
     loadArchivedConversations().catch((error) => showToast(error.message, "error"));
   }, [contactId, channel]);
@@ -565,7 +732,17 @@ export default function ChatPage() {
   }, [contactId, channel, selectedContact?.phone, enableSound, enableAlert, activeArchivedId]);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (skipAutoScrollRef.current) return;
+    if (activeArchivedConversation || finalizePreview) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      return;
+    }
+    const el = messageListRef.current;
+    if (!el) return;
+    const distanceFromBottom = el.scrollHeight - (el.scrollTop + el.clientHeight);
+    if (distanceFromBottom < 120) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
   }, [messages, activeArchivedConversation, finalizePreview]);
 
   useEffect(() => {
@@ -781,7 +958,27 @@ export default function ChatPage() {
               </HeaderActions>
             </Header>
 
-            <MessageList>
+            <MessageList ref={messageListRef} onScroll={onMessageListScroll}>
+              {!activeArchivedConversation && messagesOlderCursor ? (
+                <LoadMoreButton
+                  type="button"
+                  disabled={loadingOlderMessages}
+                  onClick={() => loadOlderMessages().catch((error) => showToast(error.message, "error"))}
+                >
+                  {loadingOlderMessages ? "Carregando..." : "Carregar mensagens anteriores"}
+                </LoadMoreButton>
+              ) : null}
+              {displayedMessages.map((message) => (
+                <Bubble key={message.id} $in={message.direction === "in"} $animate={!activeArchivedConversation && message.id === animatedMessageId}>
+                  {message.text ? <div>{message.text}</div> : null}
+                  {message.attachment ? (
+                    <a href={message.attachment.data ? `data:${message.attachment.mimeType};base64,${message.attachment.data}` : message.attachment.url} target="_blank" rel="noreferrer">
+                      📎 {message.attachment.name}
+                    </a>
+                  ) : null}
+                  <MessageMeta>{new Date(message.createdAt).toLocaleString("pt-BR")}</MessageMeta>
+                </Bubble>
+              ))}
               {activeArchivedConversation ? (
                 <ConversationSeparator>
                   <SeparatorLine />
@@ -794,17 +991,6 @@ export default function ChatPage() {
                   <SeparatorLine />
                 </ConversationSeparator>
               ) : null}
-              {(activeArchivedConversation?.messages || messages).map((message) => (
-                <Bubble key={message.id} $in={message.direction === "in"}>
-                  {message.text ? <div>{message.text}</div> : null}
-                  {message.attachment ? (
-                    <a href={message.attachment.data ? `data:${message.attachment.mimeType};base64,${message.attachment.data}` : message.attachment.url} target="_blank" rel="noreferrer">
-                      📎 {message.attachment.name}
-                    </a>
-                  ) : null}
-                  <MessageMeta>{new Date(message.createdAt).toLocaleString("pt-BR")}</MessageMeta>
-                </Bubble>
-              ))}
               {!activeArchivedConversation && finalizePreview ? (
                 <ConversationSeparator>
                   <SeparatorLine />
@@ -817,7 +1003,7 @@ export default function ChatPage() {
                   <SeparatorLine />
                 </ConversationSeparator>
               ) : null}
-              {!(activeArchivedConversation?.messages || messages).length && <EmptyState>Nenhuma mensagem ainda.</EmptyState>}
+              {!displayedMessages.length && <EmptyState>Nenhuma mensagem ainda.</EmptyState>}
               <div ref={messagesEndRef} />
             </MessageList>
 
