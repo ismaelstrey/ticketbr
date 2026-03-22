@@ -305,18 +305,19 @@ model TicketEvent {
 
 
 model ChatConversation {
-  id           String   @id @default(cuid())
-  contactId    String
-  contactName  String
-  channel      String
+  id             String   @id @default(cuid())
+  contactId      String
+  contactName    String
+  channel        String
   conversationId String
-  ticketId     String?
-  ticket       Ticket?  @relation(fields: [ticketId], references: [id], onDelete: SetNull)
-  messages     Json
-  closedAt     DateTime @default(now())
-  createdBy    String?
+  ticketId       String?
+  ticket         Ticket?  @relation(fields: [ticketId], references: [id], onDelete: SetNull)
+  messages       Json
+  finalized      Boolean  @default(false)
+  closedAt       DateTime @default(now())
+  createdBy      String?
 
-  @@index([contactId, channel, closedAt])
+  @@index([contactId, channel, finalized, closedAt])
   @@index([ticketId])
 }
 

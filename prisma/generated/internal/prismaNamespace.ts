@@ -1625,6 +1625,7 @@ export const ChatConversationScalarFieldEnum = {
   conversationId: 'conversationId',
   ticketId: 'ticketId',
   messages: 'messages',
+  finalized: 'finalized',
   closedAt: 'closedAt',
   createdBy: 'createdBy'
 } as const

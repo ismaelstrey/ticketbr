@@ -9,6 +9,7 @@ export async function GET(request: NextRequest) {
 
     const data = await prisma.chatConversation.findMany({
       where: {
+        finalized: true,
         ...(contactId ? { contactId } : {}),
         ...(channel ? { channel } : {})
       },
@@ -41,48 +42,82 @@ export async function POST(request: NextRequest) {
     }
 
     const session = await getSession();
+    const conversationId = String(body.conversationId || `${body.channel}:${body.contactId}`);
+    const closedAt = new Date();
 
-    const created = await prisma.chatConversation.create({
-      data: {
+    const existing = await prisma.chatConversation.findFirst({
+      where: {
         contactId: String(body.contactId),
-        contactName: String(body.contactName || "Contato"),
         channel: String(body.channel),
-        conversationId: String(body.conversationId || `${body.channel}:${body.contactId}`),
-        ticketId: body.ticketId ? String(body.ticketId) : undefined,
-        messages: body.messages,
-        createdBy: (session?.name as string | undefined) || "Sistema"
+        conversationId,
+        finalized: false
       },
-      include: {
-        ticket: {
-          select: {
-            id: true,
-            number: true,
-            subject: true
-          }
-        }
-      }
+      orderBy: { closedAt: "desc" }
     });
 
+    const persisted = existing
+      ? await prisma.chatConversation.update({
+          where: { id: existing.id },
+          data: {
+            contactName: String(body.contactName || existing.contactName || "Contato"),
+            ticketId: body.ticketId ? String(body.ticketId) : null,
+            messages: body.messages,
+            finalized: true,
+            createdBy: (session?.name as string | undefined) || existing.createdBy || "Sistema",
+            closedAt
+          },
+          include: {
+            ticket: {
+              select: {
+                id: true,
+                number: true,
+                subject: true
+              }
+            }
+          }
+        })
+      : await prisma.chatConversation.create({
+          data: {
+            contactId: String(body.contactId),
+            contactName: String(body.contactName || "Contato"),
+            channel: String(body.channel),
+            conversationId,
+            ticketId: body.ticketId ? String(body.ticketId) : undefined,
+            messages: body.messages,
+            finalized: true,
+            createdBy: (session?.name as string | undefined) || "Sistema",
+            closedAt
+          },
+          include: {
+            ticket: {
+              select: {
+                id: true,
+                number: true,
+                subject: true
+              }
+            }
+          }
+        });
 
-    if (created.ticketId) {
+    if (persisted.ticketId) {
       await prisma.ticketEvent.create({
         data: {
-          ticketId: created.ticketId,
+          ticketId: persisted.ticketId,
           type: "NOTE",
           title: "Conversa finalizada no chat",
-          description: `Conversa ${created.conversationId} finalizada e salva no histórico`,
+          description: `Conversa ${persisted.conversationId} finalizada e salva no histórico`,
           author: (session?.name as string | undefined) || "Sistema",
           metadata: {
-            chatConversationId: created.id,
-            contactId: created.contactId,
-            channel: created.channel,
-            closedAt: created.closedAt.toISOString()
+            chatConversationId: persisted.id,
+            contactId: persisted.contactId,
+            channel: persisted.channel,
+            closedAt: persisted.closedAt.toISOString()
           }
         }
       });
     }
 
-    return NextResponse.json({ data: created }, { status: 201 });
+    return NextResponse.json({ data: persisted }, { status: existing ? 200 : 201 });
   } catch (error) {
     console.error("Error creating archived chat conversation", error);
     return NextResponse.json({ error: "Erro ao finalizar conversa" }, { status: 500 });

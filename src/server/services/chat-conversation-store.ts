@@ -43,7 +43,8 @@ export async function upsertInboundConversation(normalized: Extract<NormalizedIn
     where: {
       contactId: normalized.payload.wa_chat_id,
       channel: "whatsapp",
-      conversationId
+      conversationId,
+      finalized: false
     },
     orderBy: { closedAt: "desc" }
   });
@@ -56,6 +57,7 @@ export async function upsertInboundConversation(normalized: Extract<NormalizedIn
         channel: "whatsapp",
         conversationId,
         messages: toJsonMessages([message]),
+        finalized: false,
         createdBy: "Webhook",
         closedAt: new Date(message.createdAt)
       }
