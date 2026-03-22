@@ -332,6 +332,16 @@ export default function ChatPage() {
   const preferencesSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const selectedContact = useMemo(() => contacts.find((c) => c.id === contactId), [contacts, contactId]);
+
+  function resolveActiveWaChatId() {
+    if (channel !== "whatsapp") return null;
+    const fromContact = selectedContact?.conversationId ? String(selectedContact.conversationId) : "";
+    if (fromContact.includes("@")) return fromContact;
+    if (String(contactId).includes("@")) return String(contactId);
+    const phoneDigits = String(selectedContact?.phone || "").replace(/\D/g, "");
+    if (phoneDigits) return `${phoneDigits}@s.whatsapp.net`;
+    return null;
+  }
   const activeArchivedConversation = useMemo(() => archivedConversations.find((item) => item.id === activeArchivedId), [archivedConversations, activeArchivedId]);
 
   const filteredTickets = useMemo(() => {
@@ -407,7 +417,10 @@ export default function ChatPage() {
   async function loadMessages() {
     if (!contactId) return;
     const fallbackPhone = selectedContact?.id.startsWith("wa:") ? selectedContact.id.replace("wa:", "") : "";
-    const params = new URLSearchParams({ contactId, channel, contactPhone: selectedContact?.phone ?? fallbackPhone });
+    const waChatId = resolveActiveWaChatId();
+    const params = new URLSearchParams({ channel, contactPhone: selectedContact?.phone ?? fallbackPhone });
+    if (waChatId) params.set("waChatId", waChatId);
+    else params.set("contactId", contactId);
     const res = await fetch(`/api/chat/messages?${params.toString()}`);
     const json = await res.json();
     if (!res.ok) throw new Error(json?.error || "Erro ao carregar mensagens");
@@ -433,7 +446,9 @@ export default function ChatPage() {
 
   async function loadLinks() {
     if (!contactId) return;
-    const res = await fetch(`/api/chat/links?contactId=${contactId}`);
+    const waChatId = resolveActiveWaChatId();
+    const id = waChatId ?? contactId;
+    const res = await fetch(`/api/chat/links?contactId=${encodeURIComponent(id)}`);
     const json = await res.json();
     if (!res.ok) throw new Error(json?.error || "Erro ao carregar vínculos");
     setLinks(Array.isArray(json.data) ? json.data : []);
@@ -445,7 +460,8 @@ export default function ChatPage() {
       return;
     }
 
-    const params = new URLSearchParams({ contactId, channel });
+    const waChatId = resolveActiveWaChatId();
+    const params = new URLSearchParams({ contactId: waChatId ?? contactId, channel });
     const res = await fetch(`/api/chat/conversations?${params.toString()}`);
     const json = await res.json();
     if (!res.ok) throw new Error(json?.error || "Erro ao carregar conversas finalizadas");
@@ -549,13 +565,14 @@ export default function ChatPage() {
 
   async function sendMessage() {
     if (!contactId || (!text.trim() && !attachment)) return;
-    const phone = selectedContact?.phone || (contactId.includes("@") ? contactId.split("@")[0] : contactId);
+    const waChatId = resolveActiveWaChatId();
+    const phone = selectedContact?.phone || (waChatId ? waChatId.split("@")[0] : (contactId.includes("@") ? contactId.split("@")[0] : contactId));
 
     const res = await fetch("/api/chat/messages", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        contactId,
+        contactId: waChatId ?? contactId,
         channel,
         text,
         contactPhone: phone,
@@ -586,7 +603,7 @@ export default function ChatPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          contactId,
+          contactId: resolveActiveWaChatId() ?? contactId,
           contactName: selectedContact?.name || "Contato",
           channel,
           conversationId: conversationId.trim() || `${channel}:${contactId}`,
@@ -615,7 +632,7 @@ export default function ChatPage() {
     const res = await fetch("/api/chat/links", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ticketId: selectedTicket, contactId, channel, conversationId })
+      body: JSON.stringify({ ticketId: selectedTicket, contactId: resolveActiveWaChatId() ?? contactId, channel, conversationId })
     });
     const json = await res.json();
     if (!res.ok) throw new Error(json?.error || "Erro ao associar conversa");
