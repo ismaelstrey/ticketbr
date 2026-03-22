@@ -20,6 +20,16 @@ function normalizeText(value: unknown) {
   return trimmed || null;
 }
 
+function normalizeUtf8(value: unknown) {
+  if (typeof value !== "string") return null;
+  const normalized = value.normalize("NFC");
+  const encoder = new TextEncoder();
+  const bytes = encoder.encode(normalized);
+  const decoded = new TextDecoder("utf-8", { fatal: false }).decode(bytes);
+  const trimmed = decoded.trim();
+  return trimmed || null;
+}
+
 function mapIncomingContact(item: unknown): WhatsAppContactRecord | null {
   if (!item || typeof item !== "object") return null;
   const raw = item as Record<string, unknown>;
