@@ -334,6 +334,18 @@ export default function ChatPage() {
   const selectedContact = useMemo(() => contacts.find((c) => c.id === contactId), [contacts, contactId]);
   const activeArchivedConversation = useMemo(() => archivedConversations.find((item) => item.id === activeArchivedId), [archivedConversations, activeArchivedId]);
 
+  const filteredTickets = useMemo(() => {
+    if (!selectedContact) return tickets;
+    if (selectedContact.companyId) {
+      return tickets.filter((ticket) => ticket.companyId === selectedContact.companyId);
+    }
+    if (selectedContact.company) {
+      const normalizedCompany = selectedContact.company.trim().toLowerCase();
+      return tickets.filter((ticket) => String(ticket.companyName || "").trim().toLowerCase() === normalizedCompany);
+    }
+    return [];
+  }, [tickets, selectedContact]);
+
   const companyTabs = useMemo(() => {
     const companies = Array.from(new Set(contacts.map((c) => c.company || "Sem empresa")));
     return ["all", ...companies];
@@ -736,7 +748,7 @@ export default function ChatPage() {
             <Footer>
               <Select value={selectedTicket} onChange={(e) => setSelectedTicket(e.target.value)}>
                 <option value="">Associar a um ticket...</option>
-                {tickets.map((ticket) => (
+                {filteredTickets.map((ticket) => (
                   <option key={ticket.id} value={ticket.id}>#{ticket.number} - {ticket.subject}</option>
                 ))}
               </Select>
