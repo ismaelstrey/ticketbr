@@ -2,6 +2,7 @@ import { appendMessage } from "@/server/services/chat-memory";
 import { chatService } from "@/server/services/chat-service";
 import type { NormalizedInboundResult } from "@/server/services/chat-inbound-normalizer";
 import { emitChatEventToN8n } from "@/server/services/n8n-adapter";
+import { syncConversationMessageStatus, upsertInboundConversation } from "@/server/services/chat-conversation-store";
 
 function buildAttachment(payload: Extract<NormalizedInboundResult, { kind: "message" }>['payload']) {
   if (!payload.message.media?.url) return undefined;
@@ -19,10 +20,12 @@ export async function processNormalizedInboundEvent(normalized: NormalizedInboun
 
   if (normalized.kind === "message_update") {
     await chatService.updateMessageStatus(normalized.statusUpdate.waMessageId, normalized.statusUpdate.status);
+    await syncConversationMessageStatus(normalized.statusUpdate.waMessageId, normalized.statusUpdate.status);
     return { ok: true, kind: normalized.kind, source: normalized.source };
   }
 
   await chatService.processInboundMessage(normalized.payload);
+  await upsertInboundConversation(normalized);
 
   if (!normalized.payload.fromMe) {
     appendMessage({

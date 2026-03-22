@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { chatService } from "@/server/services/chat-service";
 import { logWebhookRequest } from "@/server/services/webhook-request-logs";
+import { syncConversationMessageStatus } from "@/server/services/chat-conversation-store";
 
 export async function POST(req: NextRequest) {
   let body: any = null;
@@ -19,6 +20,7 @@ export async function POST(req: NextRequest) {
     }
 
     await chatService.updateMessageStatus(wa_message_id, status);
+    await syncConversationMessageStatus(wa_message_id, status);
     logWebhookRequest({ request: req, payload: body, route: "chat.status", source: "status-webhook", status: 200 });
 
     return NextResponse.json({ success: true });
