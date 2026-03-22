@@ -239,6 +239,54 @@ const EmptyState = styled.small`
   color: ${({ theme }) => theme.colors.text.muted};
 `;
 
+const ConversationSeparator = styled.div`
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.25rem 0;
+  opacity: 0;
+  transform: translateY(6px);
+  animation: chatSeparatorIn 220ms ease forwards;
+
+  @keyframes chatSeparatorIn {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+`;
+
+const SeparatorLine = styled.div`
+  height: 1px;
+  width: 100%;
+  background: ${({ theme }) => theme.colors.border};
+`;
+
+const SeparatorLabel = styled.div`
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: ${({ theme }) => theme.colors.text.muted};
+  background: ${({ theme }) => theme.colors.surfaceAlt};
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: 999px;
+  padding: 0.25rem 0.6rem;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+`;
+
+const TicketLabel = styled.span`
+  font-size: 0.72rem;
+  color: ${({ theme }) => theme.colors.text.secondary};
+  background: ${({ theme }) => theme.colors.surface};
+  border: 1px solid ${({ theme }) => theme.colors.borderStrong};
+  border-radius: 999px;
+  padding: 0.15rem 0.45rem;
+  white-space: nowrap;
+`;
+
 const Composer = styled.div`
   background: ${({ theme }) => theme.colors.surfaceElevated};
   border-top: 1px solid ${({ theme }) => theme.colors.border};
@@ -307,6 +355,13 @@ function playNotificationTone() {
   osc.stop(ctx.currentTime + 0.22);
 }
 
+function formatFinalizedAt(value: string | Date) {
+  const dt = value instanceof Date ? value : new Date(value);
+  const date = dt.toLocaleDateString("pt-BR");
+  const time = dt.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+  return `${date} às ${time}`;
+}
+
 export default function ChatPage() {
   const { showToast } = useToast();
   const [contacts, setContacts] = useState<ChatContact[]>([]);
@@ -315,6 +370,7 @@ export default function ChatPage() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [archivedConversations, setArchivedConversations] = useState<ArchivedChatConversation[]>([]);
   const [activeArchivedId, setActiveArchivedId] = useState("");
+  const [finalizePreview, setFinalizePreview] = useState<null | { archivedId: string; closedAt: string; ticketNumber: number | null }>(null);
   const [savingConversation, setSavingConversation] = useState(false);
   const [contactId, setContactId] = useState("");
   const [channel, setChannel] = useState<"whatsapp" | "email">("whatsapp");
@@ -492,10 +548,15 @@ export default function ChatPage() {
   useEffect(() => {
     if (!contactId) return;
     setActiveArchivedId("");
+    setFinalizePreview(null);
     loadMessages().catch((error) => showToast(error.message, "error"));
     loadLinks().catch((error) => showToast(error.message, "error"));
     loadArchivedConversations().catch((error) => showToast(error.message, "error"));
   }, [contactId, channel]);
+
+  useEffect(() => {
+    if (activeArchivedId) setFinalizePreview(null);
+  }, [activeArchivedId]);
 
   useEffect(() => {
     if (!contactId || activeArchivedId) return;
@@ -505,7 +566,7 @@ export default function ChatPage() {
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, activeArchivedConversation]);
+  }, [messages, activeArchivedConversation, finalizePreview]);
 
   useEffect(() => {
     if (!selectedTicket) return;
@@ -615,9 +676,23 @@ export default function ChatPage() {
       if (!res.ok) throw new Error(json?.error || "Erro ao finalizar conversa");
 
       showToast("Conversa finalizada e salva no histórico", "success");
+      const archivedId = json?.data?.id ? String(json.data.id) : "";
+      const closedAt = String(json?.data?.closedAt || new Date().toISOString());
+      const ticketNumber = typeof json?.data?.ticket?.number === "number"
+        ? Number(json.data.ticket.number)
+        : (selectedTicket ? (tickets.find((t) => t.id === selectedTicket)?.number ?? null) : null);
+
+      if (archivedId) {
+        setFinalizePreview({ archivedId, closedAt, ticketNumber });
+        requestAnimationFrame(() => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }));
+      }
+
       await loadArchivedConversations();
-      if (json?.data?.id) {
-        setActiveArchivedId(String(json.data.id));
+      if (archivedId) {
+        window.setTimeout(() => {
+          setFinalizePreview(null);
+          setActiveArchivedId(archivedId);
+        }, 450);
       }
     } finally {
       setSavingConversation(false);
@@ -707,6 +782,18 @@ export default function ChatPage() {
             </Header>
 
             <MessageList>
+              {activeArchivedConversation ? (
+                <ConversationSeparator>
+                  <SeparatorLine />
+                  <SeparatorLabel>
+                    {formatFinalizedAt(activeArchivedConversation.closedAt)}
+                    {activeArchivedConversation.ticket ? (
+                      <TicketLabel>Ticket #{activeArchivedConversation.ticket.number}</TicketLabel>
+                    ) : null}
+                  </SeparatorLabel>
+                  <SeparatorLine />
+                </ConversationSeparator>
+              ) : null}
               {(activeArchivedConversation?.messages || messages).map((message) => (
                 <Bubble key={message.id} $in={message.direction === "in"}>
                   {message.text ? <div>{message.text}</div> : null}
@@ -718,16 +805,25 @@ export default function ChatPage() {
                   <MessageMeta>{new Date(message.createdAt).toLocaleString("pt-BR")}</MessageMeta>
                 </Bubble>
               ))}
+              {!activeArchivedConversation && finalizePreview ? (
+                <ConversationSeparator>
+                  <SeparatorLine />
+                  <SeparatorLabel>
+                    {formatFinalizedAt(finalizePreview.closedAt)}
+                    {typeof finalizePreview.ticketNumber === "number" ? (
+                      <TicketLabel>Ticket #{finalizePreview.ticketNumber}</TicketLabel>
+                    ) : null}
+                  </SeparatorLabel>
+                  <SeparatorLine />
+                </ConversationSeparator>
+              ) : null}
               {!(activeArchivedConversation?.messages || messages).length && <EmptyState>Nenhuma mensagem ainda.</EmptyState>}
               <div ref={messagesEndRef} />
             </MessageList>
 
             {activeArchivedConversation ? (
               <ArchiveBanner>
-                <ArchiveText>
-                  Visualizando conversa finalizada em {new Date(activeArchivedConversation.closedAt).toLocaleString("pt-BR")}
-                  {activeArchivedConversation.ticket ? ` • Ticket #${activeArchivedConversation.ticket.number}` : ""}
-                </ArchiveText>
+                <ArchiveText>Conversa finalizada</ArchiveText>
                 <Button variant="ghost" onClick={() => setActiveArchivedId("")}>Voltar para conversa atual</Button>
               </ArchiveBanner>
             ) : (
