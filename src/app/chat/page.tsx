@@ -9,9 +9,9 @@ import { Input, Select, Textarea } from "@/components/ui/Input";
 import { useToast } from "@/context/ToastContext";
 import { ArchivedChatConversation, ChatContact, ChatMessage, ChatTicketLink } from "@/types/chat";
 import { buildChatTimeline, mergeSeparators } from "@/lib/chatTimeline";
-import { HistoryToggle } from "@/components/chat/HistoryToggle";
 import { getPersistedBoolean, setPersistedBoolean } from "@/lib/persistedBoolean";
 import { computeCurrentConversationCutoffMs, filterMessagesByCutoff } from "@/lib/chatHistoryVisibility";
+import { ChatActionsMenu } from "@/components/chat/ChatActionsMenu";
 
 const ChatMain = styled(MainContent)`
   padding: 0;
@@ -1140,9 +1140,14 @@ export default function ChatPage() {
                 <HeaderSubtitle>{selectedContact?.company || selectedContact?.phone || selectedContact?.email || ""}</HeaderSubtitle>
               </div>
               <HeaderActions>
-                <label><input type="checkbox" checked={enableSound} onChange={(e) => setEnableSound(e.target.checked)} /> Som</label>
-                <Button variant="ghost" onClick={requestBrowserAlertPermission}>Ativar alerta</Button>
-                <HistoryToggle checked={showArchivedPreference} label="Mostrar conversas anteriores" onChange={setShowArchivedPersisted} />
+                <ChatActionsMenu
+                  showArchived={showArchivedPreference}
+                  onToggleShowArchived={setShowArchivedPersisted}
+                  enableAlert={enableAlert}
+                  onRequestAlertPermission={requestBrowserAlertPermission}
+                  enableSound={enableSound}
+                  onToggleSound={setEnableSound}
+                />
                 {activeArchivedConversation ? <Chip>Histórico</Chip> : null}
               </HeaderActions>
             </Header>
