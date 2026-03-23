@@ -1,17 +1,42 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import styled from "styled-components";
+import styled, { css, keyframes } from "styled-components";
 import { AppShellContainer, MainContent } from "@/components/layout/AppShell";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Button } from "@/components/ui/Button";
 import { Input, Select, Textarea } from "@/components/ui/Input";
 import { useToast } from "@/context/ToastContext";
+import { useAuth } from "@/context/AuthContext";
 import { ArchivedChatConversation, ChatContact, ChatMessage, ChatTicketLink } from "@/types/chat";
 import { buildChatTimeline, mergeSeparators } from "@/lib/chatTimeline";
 import { getPersistedBoolean, setPersistedBoolean } from "@/lib/persistedBoolean";
 import { computeCurrentConversationCutoffMs, filterMessagesByCutoff } from "@/lib/chatHistoryVisibility";
 import { ChatActionsMenu } from "@/components/chat/ChatActionsMenu";
+
+const openConversationPulse = keyframes`
+  0% {
+    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0);
+    transform: scale(0.96);
+  }
+
+  25% {
+    box-shadow: 0 0 0 0.22rem rgba(99, 102, 241, 0.22);
+    transform: scale(1);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0.55rem rgba(99, 102, 241, 0);
+    transform: scale(0.96);
+  }
+`;
+
+const chatBubbleIn = keyframes`
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+`;
 
 const ChatMain = styled(MainContent)`
   padding: 0;
@@ -84,21 +109,36 @@ const ContactList = styled.div`
   overflow: auto;
 `;
 
-const ContactItem = styled.button<{ $active?: boolean }>`
+const ContactItem = styled.button<{ $active?: boolean; $open?: boolean }>`
   width: 100%;
   border: none;
   border-bottom: 1px solid ${({ theme }) => theme.colors.border};
-  background: ${({ theme, $active }) => ($active ? `${theme.colors.primary}14` : "transparent")};
+  position: relative;
+  isolation: isolate;
+  background: ${({ theme, $active, $open }) => ($active ? `${theme.colors.primary}14` : $open ? `${theme.colors.primary}08` : "transparent")};
   padding: 0.75rem;
   display: grid;
   grid-template-columns: 44px 1fr auto;
   gap: 0.55rem;
   text-align: left;
   cursor: pointer;
-  transition: background 0.2s ease;
+  box-shadow: ${({ theme, $open }) => ($open ? `inset 0 0 0 1px ${theme.colors.primary}18` : "none")};
+  transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 10px 0 auto 0;
+    height: calc(100% - 20px);
+    width: 3px;
+    border-radius: 999px;
+    background: ${({ theme, $open }) => ($open ? `linear-gradient(180deg, ${theme.colors.primary}, ${theme.colors.status.purple})` : "transparent")};
+    opacity: ${({ $open }) => ($open ? 0.9 : 0)};
+  }
 
   &:hover {
-    background: ${({ theme }) => theme.colors.surfaceAlt};
+    background: ${({ theme, $open }) => ($open ? `${theme.colors.primary}12` : theme.colors.surfaceAlt)};
+    transform: translateX(1px);
   }
 `;
 
@@ -118,9 +158,44 @@ const ContactBody = styled.div`
   min-width: 0;
 `;
 
+const ContactNameRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 0;
+`;
+
 const ContactName = styled.div`
   font-weight: 700;
   color: ${({ theme }) => theme.colors.text.primary};
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;
+
+const OpenConversationBadge = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.16rem 0.48rem;
+  border-radius: 999px;
+  border: 1px solid ${({ theme }) => `${theme.colors.primary}2f`};
+  background: linear-gradient(135deg, ${({ theme }) => `${theme.colors.primary}16`}, ${({ theme }) => `${theme.colors.status.purple}12`});
+  color: ${({ theme }) => theme.colors.primary};
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+`;
+
+const OpenConversationDot = styled.span`
+  width: 0.48rem;
+  height: 0.48rem;
+  border-radius: 999px;
+  background: ${({ theme }) => theme.colors.primary};
+  box-shadow: 0 0 0 0 ${({ theme }) => `${theme.colors.primary}55`};
+  animation: ${openConversationPulse} 1.8s ease-out infinite;
 `;
 
 const ContactMeta = styled.div`
@@ -257,14 +332,7 @@ const Bubble = styled.div<{ $in?: boolean; $animate?: boolean }>`
   box-shadow: ${({ theme }) => theme.shadows.card};
   opacity: ${({ $animate }) => ($animate ? 0 : 1)};
   transform: ${({ $animate }) => ($animate ? "translateY(6px) scale(0.995)" : "translateY(0) scale(1)")};
-  animation: ${({ $animate }) => ($animate ? "chatBubbleIn 220ms ease forwards" : "none")};
-
-  @keyframes chatBubbleIn {
-    to {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-    }
-  }
+  animation: ${({ $animate }) => ($animate ? css`${chatBubbleIn} 220ms ease forwards` : "none")};
 `;
 
 const MessageMeta = styled.div`
@@ -397,6 +465,17 @@ function playNotificationTone() {
   osc.stop(ctx.currentTime + 0.22);
 }
 
+function compareContactsByPriority(a: Pick<ChatContact, "hasOpenConversation" | "lastMessageAt" | "name">, b: Pick<ChatContact, "hasOpenConversation" | "lastMessageAt" | "name">) {
+  if (Boolean(a.hasOpenConversation) !== Boolean(b.hasOpenConversation)) {
+    return Number(Boolean(b.hasOpenConversation)) - Number(Boolean(a.hasOpenConversation));
+  }
+
+  const byLastMessage = String(b.lastMessageAt || "").localeCompare(String(a.lastMessageAt || ""));
+  if (byLastMessage !== 0) return byLastMessage;
+
+  return a.name.localeCompare(b.name, "pt-BR");
+}
+
 function formatFinalizedAt(value: string | Date) {
   const dt = value instanceof Date ? value : new Date(value);
   const date = dt.toLocaleDateString("pt-BR");
@@ -409,6 +488,7 @@ const CHAT_SHOW_ARCHIVED_STORAGE_KEY = "ticketbr-chat-show-archived-v1";
 
 export default function ChatPage() {
   const { showToast } = useToast();
+  const { user } = useAuth();
   const [contacts, setContacts] = useState<ChatContact[]>([]);
   const [tickets, setTickets] = useState<Array<{ id: string; number: number; subject: string; companyId?: string | null; companyName?: string | null }>>([]);
   const [links, setLinks] = useState<ChatTicketLink[]>([]);
@@ -581,18 +661,28 @@ export default function ChatPage() {
   }, [contacts]);
 
   const filteredContacts = useMemo(() => {
-    return contacts.filter((contact) => {
-      const companyPass = companyTab === "all" || (contact.company || "Sem empresa") === companyTab;
-      const q = search.trim().toLowerCase();
-      const searchPass = !q || contact.name.toLowerCase().includes(q) || (contact.company || "").toLowerCase().includes(q);
+    return contacts
+      .filter((contact) => {
+        const companyPass = companyTab === "all" || (contact.company || "Sem empresa") === companyTab;
+        const q = search.trim().toLowerCase();
+        const searchPass = !q || contact.name.toLowerCase().includes(q) || (contact.company || "").toLowerCase().includes(q);
 
-      const channelPass = channel === "whatsapp"
-        ? Boolean(contact.hasWhatsApp)
-        : Boolean(contact.email && contact.email.trim());
+        const channelPass = channel === "whatsapp"
+          ? Boolean(contact.hasWhatsApp)
+          : Boolean(contact.email && contact.email.trim());
 
-      return companyPass && searchPass && channelPass;
-    });
+        return companyPass && searchPass && channelPass;
+      })
+      .sort(compareContactsByPriority);
   }, [contacts, companyTab, search, channel]);
+
+  const updateSelectedContactOpenConversation = useCallback((hasOpenConversation: boolean) => {
+    if (!contactId) return;
+
+    setContacts((current) => current.map((contact) => contact.id === contactId
+      ? { ...contact, hasOpenConversation }
+      : contact));
+  }, [contactId]);
 
   async function loadBase() {
     const contactsRes = await fetch("/api/chat/contacts");
@@ -944,6 +1034,10 @@ export default function ChatPage() {
     if (!contactId || (!text.trim() && !attachment)) return;
     const waChatId = resolveActiveWaChatId();
     const phone = selectedContact?.phone || (waChatId ? waChatId.split("@")[0] : (contactId.includes("@") ? contactId.split("@")[0] : contactId));
+    const trimmedText = text.trim();
+    const outboundText = trimmedText
+      ? `${user?.name || "Atendente"}: ${trimmedText}`
+      : text;
 
     const res = await fetch("/api/chat/messages", {
       method: "POST",
@@ -951,7 +1045,7 @@ export default function ChatPage() {
       body: JSON.stringify({
         contactId: waChatId ?? contactId,
         channel,
-        text,
+        text: outboundText,
         contactPhone: phone,
         attachment
       })
@@ -992,6 +1086,7 @@ export default function ChatPage() {
       if (!res.ok) throw new Error(json?.error || "Erro ao finalizar conversa");
 
       showToast("Conversa finalizada e salva no histórico", "success");
+      updateSelectedContactOpenConversation(false);
       const archivedId = json?.data?.id ? String(json.data.id) : "";
       const closedAt = String(json?.data?.closedAt || new Date().toISOString());
       const ticketNumber = typeof json?.data?.ticket?.number === "number"
@@ -1042,6 +1137,8 @@ export default function ChatPage() {
         const existingTicketNumber = conversationSeparators.find((s) => s.archivedId === id)?.ticketNumber ?? null;
         upsertSeparators([{ archivedId: id, closedAt, startAt, ticketNumber: existingTicketNumber }]);
       }
+
+      updateSelectedContactOpenConversation(true);
     } finally {
       setActiveArchivedId("");
     }
@@ -1116,10 +1213,18 @@ export default function ChatPage() {
                       setContactId(contact.id);
                       setConversationId(contact.conversationId || `whatsapp:${contact.id}`);
                     }}
+                    $open={Boolean(contact.hasOpenConversation)}
                   >
                     <Avatar>{contact.name.slice(0, 2).toUpperCase()}</Avatar>
                     <ContactBody>
-                      <ContactName>{contact.name}</ContactName>
+                      <ContactNameRow>
+                        <ContactName>{contact.name}</ContactName>
+                        {contact.hasOpenConversation ? (
+                          <OpenConversationBadge title="Conversa em aberto">
+                            <OpenConversationDot /> Em aberto
+                          </OpenConversationBadge>
+                        ) : null}
+                      </ContactNameRow>
                       <ContactMeta>{contact.company || "Sem empresa"}</ContactMeta>
                       <ContactPreview>{lastPreview}</ContactPreview>
                       <Chips>
