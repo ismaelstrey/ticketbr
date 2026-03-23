@@ -46,6 +46,17 @@ function toConversationView(
   };
 }
 
+function compareContactsByPriority(a: Pick<ChatContact, "hasOpenConversation" | "lastMessageAt" | "name">, b: Pick<ChatContact, "hasOpenConversation" | "lastMessageAt" | "name">) {
+  if (Boolean(a.hasOpenConversation) !== Boolean(b.hasOpenConversation)) {
+    return Number(Boolean(b.hasOpenConversation)) - Number(Boolean(a.hasOpenConversation));
+  }
+
+  const byLastMessage = String(b.lastMessageAt || "").localeCompare(String(a.lastMessageAt || ""));
+  if (byLastMessage !== 0) return byLastMessage;
+
+  return a.name.localeCompare(b.name, "pt-BR");
+}
+
 function toContact(
   conversation: EvolutionConversation | ChatContact,
   provider: string
@@ -98,6 +109,40 @@ export async function GET(request: NextRequest) {
       }
     });
 
+    const openConversations = await prisma.chatConversation.findMany({
+      where: { finalized: false },
+      select: {
+        contactId: true,
+        channel: true,
+        conversationId: true
+      }
+    });
+
+    const openConversationKeys = new Set<string>();
+    for (const conversation of openConversations) {
+      const rawContactId = String(conversation.contactId || "");
+      const rawConversationId = String(conversation.conversationId || "");
+      if (rawContactId) {
+        openConversationKeys.add(`${conversation.channel}:${rawContactId}`);
+        const contactDigits = onlyDigits(rawContactId);
+        if (contactDigits) openConversationKeys.add(`${conversation.channel}:${contactDigits}`);
+      }
+      if (rawConversationId) {
+        openConversationKeys.add(`${conversation.channel}:${rawConversationId}`);
+      }
+    }
+
+    const hasOpenConversation = (
+      channel: "whatsapp" | "email",
+      identifiers: Array<string | null | undefined>
+    ) => identifiers.some((value) => {
+      const raw = String(value || "").trim();
+      if (!raw) return false;
+      if (openConversationKeys.has(`${channel}:${raw}`)) return true;
+      const digits = onlyDigits(raw);
+      return digits ? openConversationKeys.has(`${channel}:${digits}`) : false;
+    });
+
     const baseContacts: ChatContact[] = funcionarios.map((f) => {
       const tags = inferTags(f.nome);
       if (f.remoteJid || f.whatsappId) tags.push("WhatsApp");
@@ -114,7 +159,9 @@ export async function GET(request: NextRequest) {
         hasWhatsApp: Boolean(f.remoteJid || f.whatsappId),
         conversationId: f.remoteJid || (f.telefone ? `${onlyDigits(f.telefone)}@s.whatsapp.net` : undefined),
         lastMessagePreview: undefined,
-        lastMessageAt: undefined
+        lastMessageAt: undefined,
+        hasOpenConversation: hasOpenConversation("whatsapp", [f.remoteJid, f.telefone, f.whatsappId])
+          || hasOpenConversation("email", [f.email])
       };
     });
 
@@ -138,6 +185,7 @@ export async function GET(request: NextRequest) {
           : [];
 
     if (conversations.length === 0) {
+      baseContacts.sort(compareContactsByPriority);
       return NextResponse.json({ data: baseContacts });
     }
 
@@ -155,10 +203,11 @@ export async function GET(request: NextRequest) {
         if (!currentTags.includes("WhatsApp")) currentTags.push("WhatsApp");
         matched.tags = currentTags;
         matched.hasWhatsApp = true;
+        matched.hasOpenConversation = matched.hasOpenConversation || hasOpenConversation("whatsapp", [normalized.conversationId, normalized.phone, matched.phone]);
       }
     }
 
-    baseContacts.sort((a, b) => (b.lastMessageAt || "").localeCompare(a.lastMessageAt || ""));
+    baseContacts.sort(compareContactsByPriority);
 
     return NextResponse.json({ data: baseContacts });
   } catch (error) {
