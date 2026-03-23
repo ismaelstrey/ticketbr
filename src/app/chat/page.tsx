@@ -7,6 +7,7 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { Button } from "@/components/ui/Button";
 import { Input, Select, Textarea } from "@/components/ui/Input";
 import { useToast } from "@/context/ToastContext";
+import { useAuth } from "@/context/AuthContext";
 import { ArchivedChatConversation, ChatContact, ChatMessage, ChatTicketLink } from "@/types/chat";
 import { buildChatTimeline, mergeSeparators } from "@/lib/chatTimeline";
 import { getPersistedBoolean, setPersistedBoolean } from "@/lib/persistedBoolean";
@@ -487,6 +488,7 @@ const CHAT_SHOW_ARCHIVED_STORAGE_KEY = "ticketbr-chat-show-archived-v1";
 
 export default function ChatPage() {
   const { showToast } = useToast();
+  const { user } = useAuth();
   const [contacts, setContacts] = useState<ChatContact[]>([]);
   const [tickets, setTickets] = useState<Array<{ id: string; number: number; subject: string; companyId?: string | null; companyName?: string | null }>>([]);
   const [links, setLinks] = useState<ChatTicketLink[]>([]);
@@ -1032,6 +1034,10 @@ export default function ChatPage() {
     if (!contactId || (!text.trim() && !attachment)) return;
     const waChatId = resolveActiveWaChatId();
     const phone = selectedContact?.phone || (waChatId ? waChatId.split("@")[0] : (contactId.includes("@") ? contactId.split("@")[0] : contactId));
+    const trimmedText = text.trim();
+    const outboundText = trimmedText
+      ? `${user?.name || "Atendente"}: ${trimmedText}`
+      : text;
 
     const res = await fetch("/api/chat/messages", {
       method: "POST",
@@ -1039,7 +1045,7 @@ export default function ChatPage() {
       body: JSON.stringify({
         contactId: waChatId ?? contactId,
         channel,
-        text,
+        text: outboundText,
         contactPhone: phone,
         attachment
       })
