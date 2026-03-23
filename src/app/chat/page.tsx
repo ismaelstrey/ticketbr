@@ -674,6 +674,14 @@ export default function ChatPage() {
       .sort(compareContactsByPriority);
   }, [contacts, companyTab, search, channel]);
 
+  const updateSelectedContactOpenConversation = useCallback((hasOpenConversation: boolean) => {
+    if (!contactId) return;
+
+    setContacts((current) => current.map((contact) => contact.id === contactId
+      ? { ...contact, hasOpenConversation }
+      : contact));
+  }, [contactId]);
+
   async function loadBase() {
     const contactsRes = await fetch("/api/chat/contacts");
 
@@ -1072,6 +1080,7 @@ export default function ChatPage() {
       if (!res.ok) throw new Error(json?.error || "Erro ao finalizar conversa");
 
       showToast("Conversa finalizada e salva no histórico", "success");
+      updateSelectedContactOpenConversation(false);
       const archivedId = json?.data?.id ? String(json.data.id) : "";
       const closedAt = String(json?.data?.closedAt || new Date().toISOString());
       const ticketNumber = typeof json?.data?.ticket?.number === "number"
@@ -1122,6 +1131,8 @@ export default function ChatPage() {
         const existingTicketNumber = conversationSeparators.find((s) => s.archivedId === id)?.ticketNumber ?? null;
         upsertSeparators([{ archivedId: id, closedAt, startAt, ticketNumber: existingTicketNumber }]);
       }
+
+      updateSelectedContactOpenConversation(true);
     } finally {
       setActiveArchivedId("");
     }
