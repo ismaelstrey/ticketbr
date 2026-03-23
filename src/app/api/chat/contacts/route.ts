@@ -46,6 +46,17 @@ function toConversationView(
   };
 }
 
+function compareContactsByPriority(a: Pick<ChatContact, "hasOpenConversation" | "lastMessageAt" | "name">, b: Pick<ChatContact, "hasOpenConversation" | "lastMessageAt" | "name">) {
+  if (Boolean(a.hasOpenConversation) !== Boolean(b.hasOpenConversation)) {
+    return Number(Boolean(b.hasOpenConversation)) - Number(Boolean(a.hasOpenConversation));
+  }
+
+  const byLastMessage = String(b.lastMessageAt || "").localeCompare(String(a.lastMessageAt || ""));
+  if (byLastMessage !== 0) return byLastMessage;
+
+  return a.name.localeCompare(b.name, "pt-BR");
+}
+
 function toContact(
   conversation: EvolutionConversation | ChatContact,
   provider: string
@@ -174,6 +185,7 @@ export async function GET(request: NextRequest) {
           : [];
 
     if (conversations.length === 0) {
+      baseContacts.sort(compareContactsByPriority);
       return NextResponse.json({ data: baseContacts });
     }
 
@@ -195,7 +207,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    baseContacts.sort((a, b) => (b.lastMessageAt || "").localeCompare(a.lastMessageAt || ""));
+    baseContacts.sort(compareContactsByPriority);
 
     return NextResponse.json({ data: baseContacts });
   } catch (error) {

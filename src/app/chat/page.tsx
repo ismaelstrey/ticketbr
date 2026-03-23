@@ -464,6 +464,17 @@ function playNotificationTone() {
   osc.stop(ctx.currentTime + 0.22);
 }
 
+function compareContactsByPriority(a: Pick<ChatContact, "hasOpenConversation" | "lastMessageAt" | "name">, b: Pick<ChatContact, "hasOpenConversation" | "lastMessageAt" | "name">) {
+  if (Boolean(a.hasOpenConversation) !== Boolean(b.hasOpenConversation)) {
+    return Number(Boolean(b.hasOpenConversation)) - Number(Boolean(a.hasOpenConversation));
+  }
+
+  const byLastMessage = String(b.lastMessageAt || "").localeCompare(String(a.lastMessageAt || ""));
+  if (byLastMessage !== 0) return byLastMessage;
+
+  return a.name.localeCompare(b.name, "pt-BR");
+}
+
 function formatFinalizedAt(value: string | Date) {
   const dt = value instanceof Date ? value : new Date(value);
   const date = dt.toLocaleDateString("pt-BR");
@@ -648,17 +659,19 @@ export default function ChatPage() {
   }, [contacts]);
 
   const filteredContacts = useMemo(() => {
-    return contacts.filter((contact) => {
-      const companyPass = companyTab === "all" || (contact.company || "Sem empresa") === companyTab;
-      const q = search.trim().toLowerCase();
-      const searchPass = !q || contact.name.toLowerCase().includes(q) || (contact.company || "").toLowerCase().includes(q);
+    return contacts
+      .filter((contact) => {
+        const companyPass = companyTab === "all" || (contact.company || "Sem empresa") === companyTab;
+        const q = search.trim().toLowerCase();
+        const searchPass = !q || contact.name.toLowerCase().includes(q) || (contact.company || "").toLowerCase().includes(q);
 
-      const channelPass = channel === "whatsapp"
-        ? Boolean(contact.hasWhatsApp)
-        : Boolean(contact.email && contact.email.trim());
+        const channelPass = channel === "whatsapp"
+          ? Boolean(contact.hasWhatsApp)
+          : Boolean(contact.email && contact.email.trim());
 
-      return companyPass && searchPass && channelPass;
-    });
+        return companyPass && searchPass && channelPass;
+      })
+      .sort(compareContactsByPriority);
   }, [contacts, companyTab, search, channel]);
 
   async function loadBase() {
