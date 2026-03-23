@@ -1142,6 +1142,7 @@ export default function ChatPage() {
               <HeaderActions>
                 <label><input type="checkbox" checked={enableSound} onChange={(e) => setEnableSound(e.target.checked)} /> Som</label>
                 <Button variant="ghost" onClick={requestBrowserAlertPermission}>Ativar alerta</Button>
+                <HistoryToggle checked={showArchivedPreference} label="Mostrar conversas anteriores" onChange={setShowArchivedPersisted} />
                 {activeArchivedConversation ? <Chip>Histórico</Chip> : null}
               </HeaderActions>
             </Header>
@@ -1247,14 +1248,12 @@ export default function ChatPage() {
             )}
 
             <Footer>
-              <HistoryToggle checked={showArchivedPreference} label="Mostrar conversas anteriores" onChange={setShowArchivedPersisted} />
               <Select value={selectedTicket} onChange={(e) => setSelectedTicket(e.target.value)}>
                 <option value="">Associar a um ticket...</option>
                 {filteredTickets.map((ticket) => (
                   <option key={ticket.id} value={ticket.id}>#{ticket.number} - {ticket.subject}</option>
                 ))}
               </Select>
-              <Input placeholder="ID da conversa" value={conversationId} onChange={(e) => setConversationId(e.target.value)} disabled />
               <Button variant="save" onClick={() => linkToTicket().catch((error) => showToast(error.message, "error"))}>Associar</Button>
 
               {showArchived ? (

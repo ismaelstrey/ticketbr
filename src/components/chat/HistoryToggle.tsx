@@ -6,9 +6,9 @@ const Wrap = styled.button<{ $active: boolean }>`
   display: inline-flex;
   align-items: center;
   gap: 0.6rem;
-  border: 1px solid ${({ theme }) => theme.colors.borderStrong};
-  background: ${({ theme, $active }) => ($active ? `${theme.colors.primary}18` : theme.colors.surface)};
-  color: ${({ theme, $active }) => ($active ? theme.colors.primary : theme.colors.text.secondary)};
+  border: 1px solid ${({ theme, $active }) => ($active ? theme.colors.primary : theme.colors.borderStrong)};
+  background: ${({ theme, $active }) => ($active ? `${theme.colors.primary}22` : theme.colors.surface)};
+  color: ${({ theme, $active }) => ($active ? theme.colors.text.primary : theme.colors.text.primary)};
   border-radius: 999px;
   padding: 0.35rem 0.55rem;
   cursor: pointer;
@@ -17,21 +17,35 @@ const Wrap = styled.button<{ $active: boolean }>`
 
   &:hover {
     border-color: ${({ theme }) => theme.colors.primary};
-    color: ${({ theme }) => theme.colors.primary};
+    color: ${({ theme }) => theme.colors.text.primary};
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.primary};
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
   }
 `;
 
 const Label = styled.span`
   font-size: 0.85rem;
   white-space: nowrap;
+
+  @media (max-width: 800px) {
+    display: none;
+  }
 `;
 
 const Track = styled.span<{ $active: boolean }>`
   width: 54px;
   height: 30px;
   border-radius: 999px;
-  border: 1px solid ${({ theme }) => theme.colors.border};
-  background: ${({ theme, $active }) => ($active ? `${theme.colors.primary}22` : theme.colors.surfaceAlt)};
+  border: 1px solid ${({ theme, $active }) => ($active ? `${theme.colors.primary}80` : theme.colors.borderStrong)};
+  background: ${({ theme, $active }) => ($active ? `${theme.colors.primary}35` : theme.colors.surfaceAlt)};
   padding: 3px;
   display: flex;
   align-items: center;
@@ -43,7 +57,7 @@ const Knob = styled.span<{ $active: boolean }>`
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: ${({ theme, $active }) => ($active ? theme.colors.primary : theme.colors.surface)};
+  background: ${({ theme, $active }) => ($active ? theme.colors.primary : theme.colors.text.primary)};
   box-shadow: ${({ theme }) => theme.shadows.card};
   transition: all 0.2s ease;
 `;
@@ -75,4 +89,3 @@ export function HistoryToggle({
     </Wrap>
   );
 }
-
