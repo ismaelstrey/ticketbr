@@ -73,7 +73,7 @@ export default function LoginPage() {
 
     try {
       await login(email, password);
-      router.push("/");
+      router.push("/ticket/kanban");
     } catch (err) {
       setError("Falha no login. Verifique suas credenciais.");
     }

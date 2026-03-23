@@ -269,7 +269,7 @@ interface MenuItemType {
 }
 
 const menuItems: MenuItemType[] = [
-  { label: "Dashboards", icon: FiHome, path: "/" },
+  { label: "Dashboards", icon: FiHome, path: "/ticket/kanban" },
   { label: "Tarefas", icon: FiGrid, path: "/tasks" },
   { label: "Projetos", icon: FiBookOpen, path: "/projects" },
   { label: "Inventário", icon: FiWifi, path: "/inventory" },
@@ -447,7 +447,7 @@ export function Sidebar() {
         onMouseLeave={handleDesktopCollapse}
       >
         <SidebarHeader $isExpanded={isExpanded}>
-          <Brand $isExpanded={isExpanded} onClick={() => router.push("/")}>
+          <Brand $isExpanded={isExpanded} onClick={() => router.push("/ticket/kanban")}>
             <BrandMark>T</BrandMark>
             <BrandText $isExpanded={isExpanded}>
               <BrandTitle>TicketBR</BrandTitle>

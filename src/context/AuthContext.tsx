@@ -59,7 +59,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         const data = await res.json();
         setUser(data.user); // Assumindo que a API retorna { message, user }
-        router.push("/");
+        router.push("/ticket/kanban");
     }
 
     async function logout() {

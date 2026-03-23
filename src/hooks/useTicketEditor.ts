@@ -1,9 +1,19 @@
 import type { Dispatch, SetStateAction } from "react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Ticket } from "@/types/ticket";
 
-export function useTicketEditor(tickets: Ticket[], setTickets: Dispatch<SetStateAction<Ticket[]>>) {
-  const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
+export function useTicketEditor(
+  tickets: Ticket[],
+  setTickets: Dispatch<SetStateAction<Ticket[]>>,
+  initialSelectedTicketId?: string | null
+) {
+  const [selectedTicketId, setSelectedTicketId] = useState<string | null>(initialSelectedTicketId ?? null);
+
+  useEffect(() => {
+    if (initialSelectedTicketId === undefined) return;
+    if (initialSelectedTicketId === selectedTicketId) return;
+    setSelectedTicketId(initialSelectedTicketId ?? null);
+  }, [initialSelectedTicketId, selectedTicketId]);
 
   const selectedTicket = useMemo(
     () => tickets.find((ticket) => ticket.id === selectedTicketId) ?? null,
@@ -33,6 +43,7 @@ export function useTicketEditor(tickets: Ticket[], setTickets: Dispatch<SetState
   return {
     selectedTicket,
     selectedTicketId,
+    setSelectedTicketId,
     openTicket,
     closeTicket,
     updateSelectedTicket

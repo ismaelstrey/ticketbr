@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
+import { useRouter } from "next/navigation";
 import {
   FiAlertCircle,
   FiZap,
@@ -12,6 +13,7 @@ import { AppShellContainer, MainContent } from "@/components/layout/AppShell";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Topbar } from "@/components/layout/Topbar";
 import { Card } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
 import { Select } from "@/components/ui/Input";
 import { KanbanColumn } from "./Column";
 import { PauseModal } from "./PauseModal";
@@ -102,7 +104,26 @@ const KanbanGrid = styled.section`
   }
 `;
 
-export default function KanbanBoard() {
+const ErrorCard = styled(Card)`
+  padding: 1rem;
+`;
+
+const ErrorTitle = styled.h2`
+  margin: 0 0 0.35rem;
+  color: ${({ theme }) => theme.colors.text.primary};
+`;
+
+const ErrorText = styled.p`
+  margin: 0;
+  color: ${({ theme }) => theme.colors.text.secondary};
+`;
+
+const ErrorActions = styled.div`
+  margin-top: 0.9rem;
+`;
+
+export default function KanbanBoard({ initialTicketId }: { initialTicketId?: string } = {}) {
+  const router = useRouter();
   const {
     tickets,
     setTickets,
@@ -121,7 +142,11 @@ export default function KanbanBoard() {
     setPauseSla
   } = useTicketDragDrop();
 
-  const { selectedTicket, openTicket, closeTicket, updateSelectedTicket } = useTicketEditor(tickets, setTickets);
+  const { selectedTicket, selectedTicketId, setSelectedTicketId, updateSelectedTicket } = useTicketEditor(
+    tickets,
+    setTickets,
+    initialTicketId ? initialTicketId : null
+  );
 
   const {
     filteredTickets,
@@ -139,6 +164,8 @@ export default function KanbanBoard() {
   const [isNewTicketModalOpen, setIsNewTicketModalOpen] = useState(false);
   const { showToast } = useToast();
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [ticketsLoaded, setTicketsLoaded] = useState(false);
+  const [ticketNotFound, setTicketNotFound] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -156,6 +183,10 @@ export default function KanbanBoard() {
         if (!isMounted) return;
         console.error("Failed to load tickets from API. Using local fallback.", error);
         setLoadError("Não foi possível sincronizar tickets com o servidor.");
+      } finally {
+        if (isMounted) {
+          setTicketsLoaded(true);
+        }
       }
     }
 
@@ -165,6 +196,53 @@ export default function KanbanBoard() {
       isMounted = false;
     };
   }, [setTickets]);
+
+  useEffect(() => {
+    if (!initialTicketId) return;
+    if (!ticketsLoaded) return;
+    if (ticketNotFound) return;
+    if (selectedTicket) return;
+    if (initialTicketId.trim().length === 0) {
+      setTicketNotFound(true);
+      return;
+    }
+
+    const ticketId = initialTicketId;
+    let cancelled = false;
+    async function loadTicketById() {
+      try {
+        const response = await api.tickets.get(ticketId);
+        if (cancelled) return;
+        if (!response?.data) {
+          setTicketNotFound(true);
+          return;
+        }
+        setTickets((current) => {
+          const exists = current.some((t) => t.id === response.data.id);
+          return exists ? current : [...current, response.data];
+        });
+        setTicketNotFound(false);
+      } catch (error) {
+        if (cancelled) return;
+        setTicketNotFound(true);
+      }
+    }
+
+    loadTicketById();
+    return () => {
+      cancelled = true;
+    };
+  }, [initialTicketId, selectedTicket, setTickets, ticketNotFound, ticketsLoaded]);
+
+  const openTicket = (ticketId: string) => {
+    setSelectedTicketId(ticketId);
+    router.push(`/ticket/kanban/${ticketId}`);
+  };
+
+  const closeTicket = () => {
+    setSelectedTicketId(null);
+    router.push("/ticket/kanban");
+  };
 
   const handleSaveTicket = async () => {
     if (!selectedTicket) return;
@@ -189,6 +267,16 @@ export default function KanbanBoard() {
             onChange={updateSelectedTicket}
             onSave={handleSaveTicket}
           />
+        ) : selectedTicketId && ticketsLoaded && ticketNotFound ? (
+          <ErrorCard>
+            <ErrorTitle>Ticket não encontrado</ErrorTitle>
+            <ErrorText>O ticket informado não existe ou o ID é inválido.</ErrorText>
+            <ErrorActions>
+              <Button variant="ghost" type="button" onClick={closeTicket}>
+                Voltar para o Kanban
+              </Button>
+            </ErrorActions>
+          </ErrorCard>
         ) : (
           <>
             <Topbar 
