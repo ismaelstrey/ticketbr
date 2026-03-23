@@ -182,7 +182,7 @@ export function ChatActionsMenu({
               setOpen(false);
             }}
           >
-            <ItemLabel>Mostrar conversas anteriores</ItemLabel>
+            <ItemLabel>Histórico</ItemLabel>
             <Badge $on={showArchived}>
               <BadgeDot $on={showArchived} />
             </Badge>
