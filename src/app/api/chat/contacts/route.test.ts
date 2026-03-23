@@ -8,11 +8,15 @@ const fetchConversationsFromEvolutionMock = vi.fn();
 const evolutionIsConfiguredMock = vi.fn();
 const fetchConversationsFromUazapiMock = vi.fn();
 const uazapiIsConfiguredMock = vi.fn();
+const chatConversationFindManyMock = vi.fn();
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {
     funcionario: {
       findMany: findManyMock
+    },
+    chatConversation: {
+      findMany: chatConversationFindManyMock
     }
   }
 }));
@@ -40,6 +44,7 @@ describe("GET /api/chat/contacts", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     findManyMock.mockResolvedValue([]);
+    chatConversationFindManyMock.mockResolvedValue([]);
     isN8nConfiguredMock.mockReturnValue(false);
     evolutionIsConfiguredMock.mockReturnValue(false);
     uazapiIsConfiguredMock.mockReturnValue(false);
