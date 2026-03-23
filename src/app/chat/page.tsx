@@ -272,6 +272,55 @@ const HeaderActions = styled.div`
   color: ${({ theme }) => theme.colors.text.secondary};
 `;
 
+const AttendanceBar = styled.div`
+  background: ${({ theme }) => theme.colors.surfaceElevated};
+  border-bottom: 1px solid ${({ theme }) => theme.colors.border};
+  padding: 0.65rem 0.9rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+`;
+
+const AttendanceInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+`;
+
+const AttendanceTitle = styled.strong`
+  color: ${({ theme }) => theme.colors.text.primary};
+  font-size: 0.86rem;
+`;
+
+const AttendanceHint = styled.small`
+  color: ${({ theme }) => theme.colors.text.muted};
+`;
+
+const AttendanceControls = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+`;
+
+const InlineSelect = styled(Select)`
+  min-width: 220px;
+`;
+
+const ComposerBlocked = styled.div`
+  background: ${({ theme }) => theme.colors.surfaceAlt};
+  border-top: 1px solid ${({ theme }) => theme.colors.border};
+  padding: 0.75rem;
+  color: ${({ theme }) => theme.colors.text.secondary};
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+`;
+
 const MessageList = styled.div<{ $fading?: boolean }>`
   padding: 1rem;
   overflow-y: auto;
@@ -486,6 +535,20 @@ function formatFinalizedAt(value: string | Date) {
 const CHAT_SEPARATORS_STORAGE_KEY = "ticketbr-chat-separators-v1";
 const CHAT_SHOW_ARCHIVED_STORAGE_KEY = "ticketbr-chat-show-archived-v1";
 
+interface ChatAgent {
+  id: string;
+  name: string;
+  email?: string;
+  role?: string;
+}
+
+interface ConversationAttendanceMeta {
+  assignedTo: string | null;
+  assignedUserName: string | null;
+  humanActive: boolean;
+  botActive: boolean;
+}
+
 export default function ChatPage() {
   const { showToast } = useToast();
   const { user } = useAuth();
@@ -493,6 +556,10 @@ export default function ChatPage() {
   const [tickets, setTickets] = useState<Array<{ id: string; number: number; subject: string; companyId?: string | null; companyName?: string | null }>>([]);
   const [links, setLinks] = useState<ChatTicketLink[]>([]);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [agents, setAgents] = useState<ChatAgent[]>([]);
+  const [conversationAttendance, setConversationAttendance] = useState<ConversationAttendanceMeta | null>(null);
+  const [transferTargetUserId, setTransferTargetUserId] = useState("");
+  const [attendanceBusy, setAttendanceBusy] = useState(false);
   const [messagesOlderCursor, setMessagesOlderCursor] = useState<string | null>(null);
   const [loadingOlderMessages, setLoadingOlderMessages] = useState(false);
   const [conversationSeparators, setConversationSeparators] = useState<Array<{ archivedId: string; closedAt: string; startAt: string | null; ticketNumber: number | null }>>([]);
@@ -535,6 +602,11 @@ export default function ChatPage() {
     return null;
   }
   const activeArchivedConversation = useMemo(() => archivedConversations.find((item) => item.id === activeArchivedId), [archivedConversations, activeArchivedId]);
+  const isAssignedToMe = Boolean(conversationAttendance?.assignedTo && user?.id && conversationAttendance.assignedTo === user.id);
+  const isAssignedToOther = Boolean(conversationAttendance?.assignedTo && user?.id && conversationAttendance.assignedTo !== user.id);
+  const needsAttendanceStart = Boolean(!activeArchivedConversation && selectedContact?.hasOpenConversation && !conversationAttendance?.assignedTo);
+  const canInteractWithConversation = Boolean(!activeArchivedConversation && (selectedContact?.hasOpenConversation ? isAssignedToMe : !isAssignedToOther));
+
   const conversationStorageKey = useMemo(() => {
     const id = resolveActiveWaChatId() ?? contactId;
     if (!id) return null;
@@ -750,6 +822,12 @@ export default function ChatPage() {
     const nextMessages: ChatMessage[] = Array.isArray(json.data) ? (json.data as ChatMessage[]) : [];
     sortChatMessages(nextMessages);
     const nextCursor = String(json?.paging?.nextCursor || "") || null;
+    setConversationAttendance({
+      assignedTo: json?.meta?.assignedTo ? String(json.meta.assignedTo) : null,
+      assignedUserName: json?.meta?.assignedUserName ? String(json.meta.assignedUserName) : null,
+      humanActive: Boolean(json?.meta?.humanActive),
+      botActive: Boolean(json?.meta?.botActive)
+    });
 
     const previousLast = lastMessageIdRef.current;
     const currentLast = nextMessages.at(-1)?.id ?? null;
@@ -908,6 +986,13 @@ export default function ChatPage() {
     }
   }
 
+  async function loadAgents() {
+    const res = await fetch("/api/chat/agents", { cache: "no-store" });
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(json?.error || "Erro ao carregar atendentes");
+    setAgents(Array.isArray(json.data) ? json.data : []);
+  }
+
   async function loadInteractionPreferences() {
     const res = await fetch("/api/chat/preferences", { cache: "no-store" });
     const json = await res.json().catch(() => ({}));
@@ -925,7 +1010,8 @@ export default function ChatPage() {
   useEffect(() => {
     Promise.all([
       loadBase(),
-      loadInteractionPreferences()
+      loadInteractionPreferences(),
+      loadAgents()
     ]).catch((error) => showToast(error.message, "error"));
   }, []);
 
@@ -935,6 +1021,8 @@ export default function ChatPage() {
     setFinalizePreview(null);
     setMessages([]);
     setMessagesOlderCursor(null);
+    setConversationAttendance(null);
+    setTransferTargetUserId("");
     setConversationSeparators([]);
     lastMessageIdRef.current = null;
     loadMessages({ reset: true }).catch((error) => showToast(error.message, "error"));
@@ -959,6 +1047,13 @@ export default function ChatPage() {
     const timer = setInterval(() => loadMessages().catch(() => undefined), 5000);
     return () => clearInterval(timer);
   }, [contactId, channel, selectedContact?.phone, enableSound, enableAlert, activeArchivedId]);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      loadBase().catch(() => undefined);
+    }, 10000);
+    return () => clearInterval(timer);
+  }, [channel]);
 
   useEffect(() => {
     if (skipAutoScrollRef.current) return;
@@ -1032,6 +1127,10 @@ export default function ChatPage() {
 
   async function sendMessage() {
     if (!contactId || (!text.trim() && !attachment)) return;
+    if (!canInteractWithConversation) {
+      showToast(needsAttendanceStart ? "Inicie o atendimento antes de responder" : "Esta conversa está com outro atendente", "error");
+      return;
+    }
     const waChatId = resolveActiveWaChatId();
     const phone = selectedContact?.phone || (waChatId ? waChatId.split("@")[0] : (contactId.includes("@") ? contactId.split("@")[0] : contactId));
     const trimmedText = text.trim();
@@ -1055,6 +1154,68 @@ export default function ChatPage() {
     setText("");
     setAttachment(null);
     await loadMessages();
+  }
+
+  async function claimConversation() {
+    const waChatId = resolveActiveWaChatId();
+    if (!waChatId) {
+      showToast("Conversa inválida para iniciar atendimento", "error");
+      return;
+    }
+
+    setAttendanceBusy(true);
+    try {
+      const res = await fetch("/api/chat/attendance", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "claim", waChatId })
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json?.error || "Erro ao iniciar atendimento");
+
+      setConversationAttendance({
+        assignedTo: json?.data?.assignedTo ? String(json.data.assignedTo) : user?.id ?? null,
+        assignedUserName: json?.data?.assignedUserName ? String(json.data.assignedUserName) : user?.name ?? "Atendente",
+        humanActive: Boolean(json?.data?.humanActive ?? true),
+        botActive: Boolean(json?.data?.botActive ?? false)
+      });
+      updateSelectedContactOpenConversation(true);
+      showToast("Atendimento iniciado com sucesso", "success");
+      await loadBase();
+    } finally {
+      setAttendanceBusy(false);
+    }
+  }
+
+  async function transferConversation() {
+    const waChatId = resolveActiveWaChatId();
+    if (!waChatId || !transferTargetUserId) {
+      showToast("Selecione o atendente de destino", "error");
+      return;
+    }
+
+    setAttendanceBusy(true);
+    try {
+      const res = await fetch("/api/chat/attendance", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "transfer", waChatId, targetUserId: transferTargetUserId })
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json?.error || "Erro ao transferir atendimento");
+
+      setConversationAttendance({
+        assignedTo: json?.data?.assignedTo ? String(json.data.assignedTo) : transferTargetUserId,
+        assignedUserName: json?.data?.assignedUserName ? String(json.data.assignedUserName) : null,
+        humanActive: Boolean(json?.data?.humanActive ?? true),
+        botActive: Boolean(json?.data?.botActive ?? false)
+      });
+      setTransferTargetUserId("");
+      showToast("Atendimento transferido com sucesso", "success");
+      await loadBase();
+    } finally {
+      setAttendanceBusy(false);
+    }
   }
 
   async function finalizeConversation() {
@@ -1257,6 +1418,51 @@ export default function ChatPage() {
               </HeaderActions>
             </Header>
 
+            {!activeArchivedConversation && selectedContact ? (
+              <AttendanceBar>
+                <AttendanceInfo>
+                  <AttendanceTitle>
+                    {isAssignedToMe
+                      ? "Você está atendendo esta conversa"
+                      : conversationAttendance?.assignedUserName
+                        ? `Em atendimento por ${conversationAttendance.assignedUserName}`
+                        : selectedContact.hasOpenConversation
+                          ? "Conversa em aberto aguardando atendimento"
+                          : "Conversa disponível"}
+                  </AttendanceTitle>
+                  <AttendanceHint>
+                    {isAssignedToMe
+                      ? "Somente você pode responder até transferir o atendimento."
+                      : conversationAttendance?.assignedUserName
+                        ? "Outros atendentes ficam bloqueados até a conversa ser transferida."
+                        : selectedContact.hasOpenConversation
+                          ? "Clique em iniciar atendimento para assumir a conversa."
+                          : "Ao responder, esta conversa poderá ser assumida por um atendente."}
+                  </AttendanceHint>
+                </AttendanceInfo>
+                <AttendanceControls>
+                  {needsAttendanceStart ? (
+                    <Button type="button" disabled={attendanceBusy} onClick={() => claimConversation().catch((error) => showToast(error.message, "error"))}>
+                      {attendanceBusy ? "Iniciando..." : "Iniciar atendimento"}
+                    </Button>
+                  ) : null}
+                  {isAssignedToMe ? (
+                    <>
+                      <InlineSelect value={transferTargetUserId} onChange={(e) => setTransferTargetUserId(e.target.value)}>
+                        <option value="">Transferir para...</option>
+                        {agents
+                          .filter((agent) => agent.id !== user?.id)
+                          .map((agent) => <option key={agent.id} value={agent.id}>{agent.name}</option>)}
+                      </InlineSelect>
+                      <Button type="button" variant="ghost" disabled={attendanceBusy || !transferTargetUserId} onClick={() => transferConversation().catch((error) => showToast(error.message, "error"))}>
+                        {attendanceBusy ? "Transferindo..." : "Transferir"}
+                      </Button>
+                    </>
+                  ) : null}
+                </AttendanceControls>
+              </AttendanceBar>
+            ) : null}
+
             <MessageList ref={messageListRef} onScroll={onMessageListScroll} $fading={messagesFading}>
               {!activeArchivedConversation && showArchived && messagesOlderCursor ? (
                 <LoadMoreButton
@@ -1325,7 +1531,7 @@ export default function ChatPage() {
                 <ArchiveText>Conversa finalizada</ArchiveText>
                 <Button variant="ghost" onClick={() => returnToCurrentConversation().catch((error) => showToast(error.message, "error"))}>Voltar para conversa atual</Button>
               </ArchiveBanner>
-            ) : (
+            ) : canInteractWithConversation ? (
               <Composer>
                 <Textarea
                   placeholder="Digite uma mensagem (Enter para enviar, Ctrl+Enter para quebra de linha)"
@@ -1355,6 +1561,19 @@ export default function ChatPage() {
                   <Button onClick={() => sendMessage().catch((error) => showToast(error.message, "error"))}>Enviar</Button>
                 </ComposerActions>
               </Composer>
+            ) : (
+              <ComposerBlocked>
+                <span>
+                  {needsAttendanceStart
+                    ? "Clique em iniciar atendimento para assumir esta conversa antes de responder."
+                    : `Esta conversa está em atendimento por ${conversationAttendance?.assignedUserName || "outro atendente"}.`}
+                </span>
+                {needsAttendanceStart ? (
+                  <Button type="button" disabled={attendanceBusy} onClick={() => claimConversation().catch((error) => showToast(error.message, "error"))}>
+                    {attendanceBusy ? "Iniciando..." : "Iniciar atendimento"}
+                  </Button>
+                ) : null}
+              </ComposerBlocked>
             )}
 
             <Footer>

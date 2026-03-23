@@ -2,9 +2,20 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 
 const resolveWhatsAppConfigMock = vi.fn();
 const sendOutboundMessageMock = vi.fn();
+const getSessionMock = vi.fn();
+const conversationFindUniqueMock = vi.fn();
+const userFindUniqueMock = vi.fn();
 
 vi.mock("@/lib/prisma", () => ({
-  prisma: {}
+  prisma: {
+    conversation: {
+      findUnique: conversationFindUniqueMock,
+      update: vi.fn()
+    },
+    user: {
+      findUnique: userFindUniqueMock
+    }
+  }
 }));
 
 vi.mock("@/server/services/whatsapp-settings", () => ({
@@ -15,10 +26,20 @@ vi.mock("@/server/services/chat-outbound", () => ({
   sendOutboundMessage: sendOutboundMessageMock
 }));
 
+vi.mock("@/lib/auth", () => ({
+  getSession: getSessionMock
+}));
+
 describe("POST /api/chat/messages", () => {
   beforeEach(() => {
     resolveWhatsAppConfigMock.mockReset();
     sendOutboundMessageMock.mockReset();
+    getSessionMock.mockReset();
+    conversationFindUniqueMock.mockReset();
+    userFindUniqueMock.mockReset();
+    getSessionMock.mockResolvedValue({ id: "user_1", name: "Agente" });
+    conversationFindUniqueMock.mockResolvedValue(null);
+    userFindUniqueMock.mockResolvedValue(null);
     vi.resetModules();
     delete process.env.DATABASE_URL;
   });
