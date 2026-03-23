@@ -11,6 +11,7 @@ import { ArchivedChatConversation, ChatContact, ChatMessage, ChatTicketLink } fr
 import { buildChatTimeline, mergeSeparators } from "@/lib/chatTimeline";
 import { HistoryToggle } from "@/components/chat/HistoryToggle";
 import { getPersistedBoolean, setPersistedBoolean } from "@/lib/persistedBoolean";
+import { computeCurrentConversationCutoffMs, filterMessagesByCutoff } from "@/lib/chatHistoryVisibility";
 
 const ChatMain = styled(MainContent)`
   padding: 0;
@@ -196,12 +197,14 @@ const HeaderActions = styled.div`
   color: ${({ theme }) => theme.colors.text.secondary};
 `;
 
-const MessageList = styled.div`
+const MessageList = styled.div<{ $fading?: boolean }>`
   padding: 1rem;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  opacity: ${({ $fading }) => ($fading ? 0.55 : 1)};
+  transition: opacity 180ms ease;
 
   &::-webkit-scrollbar {
     width: 6px;
@@ -417,6 +420,8 @@ export default function ChatPage() {
   const [activeArchivedId, setActiveArchivedId] = useState("");
   const [finalizePreview, setFinalizePreview] = useState<null | { archivedId: string; closedAt: string; ticketNumber: number | null }>(null);
   const [showArchived, setShowArchived] = useState(false);
+  const [showArchivedPreference, setShowArchivedPreference] = useState(false);
+  const [messagesFading, setMessagesFading] = useState(false);
   const [animatedMessageId, setAnimatedMessageId] = useState<string | null>(null);
   const [savingConversation, setSavingConversation] = useState(false);
   const [contactId, setContactId] = useState("");
@@ -436,6 +441,7 @@ export default function ChatPage() {
   const preferencesSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const skipAutoScrollRef = useRef(false);
   const scrollLoadRafRef = useRef<number | null>(null);
+  const showArchivedTimerRef = useRef<number | null>(null);
 
   const selectedContact = useMemo(() => contacts.find((c) => c.id === contactId), [contacts, contactId]);
 
@@ -468,6 +474,17 @@ export default function ChatPage() {
     return copy;
   }, [activeArchivedConversation, messages]);
 
+  const currentConversationCutoffMs = useMemo(() => {
+    if (activeArchivedConversation) return null;
+    if (showArchived) return null;
+    return computeCurrentConversationCutoffMs(conversationSeparators);
+  }, [activeArchivedConversation, conversationSeparators, showArchived]);
+
+  const visibleMessages = useMemo(() => {
+    if (activeArchivedConversation) return displayedMessages;
+    return filterMessagesByCutoff(displayedMessages, currentConversationCutoffMs);
+  }, [activeArchivedConversation, currentConversationCutoffMs, displayedMessages]);
+
   const timeline = useMemo(() => {
     if (activeArchivedConversation) {
       return displayedMessages.map((message) => ({ kind: "message" as const, message }));
@@ -475,18 +492,20 @@ export default function ChatPage() {
     const baseSeparators = showArchived ? conversationSeparators : [];
     const separators = finalizePreview ? baseSeparators.filter((s) => s.archivedId !== finalizePreview.archivedId) : baseSeparators;
     const items = buildChatTimeline(
-      displayedMessages.map((m) => ({ id: String(m.id), createdAt: String(m.createdAt) })),
+      visibleMessages.map((m) => ({ id: String(m.id), createdAt: String(m.createdAt) })),
       separators.map((s) => ({ archivedId: s.archivedId, closedAt: s.closedAt, startAt: s.startAt, ticketNumber: s.ticketNumber }))
     );
-    const byId = new Map(displayedMessages.map((m) => [String(m.id), m]));
+    const byId = new Map(visibleMessages.map((m) => [String(m.id), m]));
     return items.map((item) => item.kind === "message"
       ? { kind: "message" as const, message: byId.get(item.message.id)! }
       : { kind: "separator" as const, id: item.id, closedAt: item.closedAt, startAt: item.startAt, ticketNumber: item.ticketNumber ?? null }
     );
-  }, [activeArchivedConversation, conversationSeparators, displayedMessages, finalizePreview, showArchived]);
+  }, [activeArchivedConversation, conversationSeparators, displayedMessages, finalizePreview, showArchived, visibleMessages]);
 
   useEffect(() => {
-    setShowArchived(getPersistedBoolean(CHAT_SHOW_ARCHIVED_STORAGE_KEY, false));
+    const persisted = getPersistedBoolean(CHAT_SHOW_ARCHIVED_STORAGE_KEY, false);
+    setShowArchived(persisted);
+    setShowArchivedPreference(persisted);
   }, []);
 
   useEffect(() => {
@@ -678,6 +697,7 @@ export default function ChatPage() {
 
   async function loadOlderMessages() {
     if (!contactId) return;
+    if (!showArchived) return;
     if (activeArchivedId || activeArchivedConversation) return;
     if (!messagesOlderCursor || loadingOlderMessages) return;
 
@@ -734,6 +754,7 @@ export default function ChatPage() {
 
   const onMessageListScroll = useCallback(() => {
     if (!contactId) return;
+    if (!showArchived) return;
     if (activeArchivedConversation || activeArchivedId) return;
     if (!messages.length) return;
     if (!messagesOlderCursor || loadingOlderMessages) return;
@@ -748,12 +769,15 @@ export default function ChatPage() {
       scrollLoadRafRef.current = null;
       loadOlderMessages().catch((error) => showToast(error.message, "error"));
     });
-  }, [activeArchivedConversation, activeArchivedId, contactId, loadOlderMessages, loadingOlderMessages, messages.length, messagesOlderCursor, showToast]);
+  }, [activeArchivedConversation, activeArchivedId, contactId, loadOlderMessages, loadingOlderMessages, messages.length, messagesOlderCursor, showArchived, showToast]);
 
   useEffect(() => {
     return () => {
       if (scrollLoadRafRef.current !== null) {
         window.cancelAnimationFrame(scrollLoadRafRef.current);
+      }
+      if (showArchivedTimerRef.current) {
+        window.clearTimeout(showArchivedTimerRef.current);
       }
     };
   }, []);
@@ -1040,11 +1064,20 @@ export default function ChatPage() {
   }
 
   function setShowArchivedPersisted(next: boolean) {
-    setShowArchived(next);
+    setShowArchivedPreference(next);
     const ok = setPersistedBoolean(CHAT_SHOW_ARCHIVED_STORAGE_KEY, next);
     if (!ok) {
       showToast("Falha ao salvar preferência de conversas anteriores.", "error");
     }
+
+    setMessagesFading(true);
+    if (showArchivedTimerRef.current) {
+      window.clearTimeout(showArchivedTimerRef.current);
+    }
+    showArchivedTimerRef.current = window.setTimeout(() => {
+      setShowArchived(next);
+      setMessagesFading(false);
+    }, 160);
   }
 
   return (
@@ -1113,8 +1146,8 @@ export default function ChatPage() {
               </HeaderActions>
             </Header>
 
-            <MessageList ref={messageListRef} onScroll={onMessageListScroll}>
-              {!activeArchivedConversation && messagesOlderCursor ? (
+            <MessageList ref={messageListRef} onScroll={onMessageListScroll} $fading={messagesFading}>
+              {!activeArchivedConversation && showArchived && messagesOlderCursor ? (
                 <LoadMoreButton
                   type="button"
                   disabled={loadingOlderMessages}
@@ -1214,7 +1247,7 @@ export default function ChatPage() {
             )}
 
             <Footer>
-              <HistoryToggle checked={showArchived} label="Mostrar conversas anteriores" onChange={setShowArchivedPersisted} />
+              <HistoryToggle checked={showArchivedPreference} label="Mostrar conversas anteriores" onChange={setShowArchivedPersisted} />
               <Select value={selectedTicket} onChange={(e) => setSelectedTicket(e.target.value)}>
                 <option value="">Associar a um ticket...</option>
                 {filteredTickets.map((ticket) => (
