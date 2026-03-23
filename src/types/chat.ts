@@ -12,6 +12,7 @@ export interface ChatContact {
   conversationId?: string;
   lastMessagePreview?: string;
   lastMessageAt?: string;
+  hasOpenConversation?: boolean;
 }
 
 export interface ChatAttachment {
