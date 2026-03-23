@@ -9,6 +9,8 @@ import { Input, Select, Textarea } from "@/components/ui/Input";
 import { useToast } from "@/context/ToastContext";
 import { ArchivedChatConversation, ChatContact, ChatMessage, ChatTicketLink } from "@/types/chat";
 import { buildChatTimeline, mergeSeparators } from "@/lib/chatTimeline";
+import { HistoryToggle } from "@/components/chat/HistoryToggle";
+import { getPersistedBoolean, setPersistedBoolean } from "@/lib/persistedBoolean";
 
 const ChatMain = styled(MainContent)`
   padding: 0;
@@ -400,6 +402,7 @@ function formatFinalizedAt(value: string | Date) {
 }
 
 const CHAT_SEPARATORS_STORAGE_KEY = "ticketbr-chat-separators-v1";
+const CHAT_SHOW_ARCHIVED_STORAGE_KEY = "ticketbr-chat-show-archived-v1";
 
 export default function ChatPage() {
   const { showToast } = useToast();
@@ -413,6 +416,7 @@ export default function ChatPage() {
   const [archivedConversations, setArchivedConversations] = useState<ArchivedChatConversation[]>([]);
   const [activeArchivedId, setActiveArchivedId] = useState("");
   const [finalizePreview, setFinalizePreview] = useState<null | { archivedId: string; closedAt: string; ticketNumber: number | null }>(null);
+  const [showArchived, setShowArchived] = useState(false);
   const [animatedMessageId, setAnimatedMessageId] = useState<string | null>(null);
   const [savingConversation, setSavingConversation] = useState(false);
   const [contactId, setContactId] = useState("");
@@ -468,9 +472,8 @@ export default function ChatPage() {
     if (activeArchivedConversation) {
       return displayedMessages.map((message) => ({ kind: "message" as const, message }));
     }
-    const separators = finalizePreview
-      ? conversationSeparators.filter((s) => s.archivedId !== finalizePreview.archivedId)
-      : conversationSeparators;
+    const baseSeparators = showArchived ? conversationSeparators : [];
+    const separators = finalizePreview ? baseSeparators.filter((s) => s.archivedId !== finalizePreview.archivedId) : baseSeparators;
     const items = buildChatTimeline(
       displayedMessages.map((m) => ({ id: String(m.id), createdAt: String(m.createdAt) })),
       separators.map((s) => ({ archivedId: s.archivedId, closedAt: s.closedAt, startAt: s.startAt, ticketNumber: s.ticketNumber }))
@@ -480,7 +483,17 @@ export default function ChatPage() {
       ? { kind: "message" as const, message: byId.get(item.message.id)! }
       : { kind: "separator" as const, id: item.id, closedAt: item.closedAt, startAt: item.startAt, ticketNumber: item.ticketNumber ?? null }
     );
-  }, [activeArchivedConversation, conversationSeparators, displayedMessages, finalizePreview]);
+  }, [activeArchivedConversation, conversationSeparators, displayedMessages, finalizePreview, showArchived]);
+
+  useEffect(() => {
+    setShowArchived(getPersistedBoolean(CHAT_SHOW_ARCHIVED_STORAGE_KEY, false));
+  }, []);
+
+  useEffect(() => {
+    if (!showArchived && activeArchivedId) {
+      setActiveArchivedId("");
+    }
+  }, [activeArchivedId, showArchived]);
 
   const syncSeparatorsToStorage = useCallback((key: string, next: Array<{ archivedId: string; closedAt: string; startAt: string | null; ticketNumber: number | null }>) => {
     try {
@@ -1026,6 +1039,14 @@ export default function ChatPage() {
     await loadLinks();
   }
 
+  function setShowArchivedPersisted(next: boolean) {
+    setShowArchived(next);
+    const ok = setPersistedBoolean(CHAT_SHOW_ARCHIVED_STORAGE_KEY, next);
+    if (!ok) {
+      showToast("Falha ao salvar preferência de conversas anteriores.", "error");
+    }
+  }
+
   return (
     <AppShellContainer>
       <Sidebar />
@@ -1193,6 +1214,7 @@ export default function ChatPage() {
             )}
 
             <Footer>
+              <HistoryToggle checked={showArchived} label="Mostrar conversas anteriores" onChange={setShowArchivedPersisted} />
               <Select value={selectedTicket} onChange={(e) => setSelectedTicket(e.target.value)}>
                 <option value="">Associar a um ticket...</option>
                 {filteredTickets.map((ticket) => (
@@ -1202,14 +1224,18 @@ export default function ChatPage() {
               <Input placeholder="ID da conversa" value={conversationId} onChange={(e) => setConversationId(e.target.value)} disabled />
               <Button variant="save" onClick={() => linkToTicket().catch((error) => showToast(error.message, "error"))}>Associar</Button>
 
-              <Select value={activeArchivedId} onChange={(e) => setActiveArchivedId(e.target.value)}>
-                <option value="">Abrir conversa finalizada...</option>
-                {archivedConversations.map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {new Date(item.closedAt).toLocaleString("pt-BR")} {item.ticket ? `• Ticket #${item.ticket.number}` : ""}
-                  </option>
-                ))}
-              </Select>
+              {showArchived ? (
+                <Select value={activeArchivedId} onChange={(e) => setActiveArchivedId(e.target.value)}>
+                  <option value="">Abrir conversa finalizada...</option>
+                  {archivedConversations.map((item) => (
+                    <option key={item.id} value={item.id}>
+                      {new Date(item.closedAt).toLocaleString("pt-BR")} {item.ticket ? `• Ticket #${item.ticket.number}` : ""}
+                    </option>
+                  ))}
+                </Select>
+              ) : (
+                <div />
+              )}
               <div />
               <Button
                 variant="ghost"
