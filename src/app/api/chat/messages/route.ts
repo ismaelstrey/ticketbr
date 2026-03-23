@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { chatService } from "@/server/services/chat-service";
 import { resolveWhatsAppConfig } from "@/server/services/whatsapp-settings";
 import { sendOutboundMessage } from "@/server/services/chat-outbound";
+import { getSession } from "@/lib/auth";
 
 function parsePositiveInt(value: string | null, fallback: number) {
   const parsed = Number(value);
@@ -101,6 +102,9 @@ export async function GET(request: NextRequest) {
     }));
 
     const nextCursor = messages.length ? messages[messages.length - 1].id : null;
+    const assignedUser = conversation.assignedTo
+      ? await prisma.user.findUnique({ where: { id: conversation.assignedTo }, select: { name: true } })
+      : null;
 
     return NextResponse.json({
       data: mappedMessages,
@@ -109,7 +113,10 @@ export async function GET(request: NextRequest) {
         usersTotal,
         conversationId: conversation.id,
         waChatId: conversation.waChatId,
-        assignedTo: conversation.assignedTo ?? null
+        assignedTo: conversation.assignedTo ?? null,
+        assignedUserName: assignedUser?.name ?? null,
+        humanActive: conversation.humanActive,
+        botActive: conversation.botActive
       },
       paging: { limit, cursor: cursor ?? null, nextCursor }
     });
@@ -121,11 +128,34 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const session = await getSession();
+    if (!session?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const body = await request.json();
     const { contactId, text, attachment, contactPhone } = body; // contactId aqui é o JID (wa_chat_id)
 
     if (!contactId) {
       return NextResponse.json({ error: "contactId (JID) é obrigatório" }, { status: 400 });
+    }
+
+    const currentConversation = await prisma.conversation.findUnique({
+      where: { waChatId: normalizeWaChatId(String(contactId)) }
+    });
+
+    if (currentConversation?.assignedTo && currentConversation.assignedTo !== String(session.id)) {
+      const assignedUser = await prisma.user.findUnique({
+        where: { id: currentConversation.assignedTo },
+        select: { name: true }
+      });
+      return NextResponse.json({
+        error: `Esta conversa está em atendimento por ${assignedUser?.name || "outro atendente"}`
+      }, { status: 403 });
+    }
+
+    if (currentConversation && !currentConversation.assignedTo) {
+      return NextResponse.json({ error: "Inicie o atendimento antes de responder esta conversa" }, { status: 409 });
     }
 
     const config = await resolveWhatsAppConfig(request);
@@ -150,6 +180,17 @@ export async function POST(request: NextRequest) {
     const shouldPersist = Boolean(process.env.DATABASE_URL);
     if (shouldPersist) {
       const conversation = await chatService.findOrCreateConversation(contactId);
+      if (!conversation.assignedTo || conversation.assignedTo !== String(session.id)) {
+        await prisma.conversation.update({
+          where: { id: conversation.id },
+          data: {
+            assignedTo: String(session.id),
+            humanActive: true,
+            botActive: false,
+            status: "open"
+          }
+        });
+      }
       const savedMessage = await chatService.saveMessage({
         waMessageId,
         conversationId: conversation.id,
