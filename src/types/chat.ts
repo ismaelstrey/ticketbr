@@ -54,5 +54,6 @@ export interface ArchivedChatConversation {
   ticket?: { id: string; number: number; subject: string } | null;
   messages: ChatMessage[];
   closedAt: string;
+  nextStartedAt?: string | null;
   createdBy?: string | null;
 }

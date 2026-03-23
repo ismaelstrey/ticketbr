@@ -33,6 +33,7 @@ export type ChatConversationMinAggregateOutputType = {
   ticketId: string | null
   finalized: boolean | null
   closedAt: Date | null
+  nextStartedAt: Date | null
   createdBy: string | null
 }
 
@@ -45,6 +46,7 @@ export type ChatConversationMaxAggregateOutputType = {
   ticketId: string | null
   finalized: boolean | null
   closedAt: Date | null
+  nextStartedAt: Date | null
   createdBy: string | null
 }
 
@@ -58,6 +60,7 @@ export type ChatConversationCountAggregateOutputType = {
   messages: number
   finalized: number
   closedAt: number
+  nextStartedAt: number
   createdBy: number
   _all: number
 }
@@ -72,6 +75,7 @@ export type ChatConversationMinAggregateInputType = {
   ticketId?: true
   finalized?: true
   closedAt?: true
+  nextStartedAt?: true
   createdBy?: true
 }
 
@@ -84,6 +88,7 @@ export type ChatConversationMaxAggregateInputType = {
   ticketId?: true
   finalized?: true
   closedAt?: true
+  nextStartedAt?: true
   createdBy?: true
 }
 
@@ -97,6 +102,7 @@ export type ChatConversationCountAggregateInputType = {
   messages?: true
   finalized?: true
   closedAt?: true
+  nextStartedAt?: true
   createdBy?: true
   _all?: true
 }
@@ -183,6 +189,7 @@ export type ChatConversationGroupByOutputType = {
   messages: runtime.JsonValue
   finalized: boolean
   closedAt: Date
+  nextStartedAt: Date | null
   createdBy: string | null
   _count: ChatConversationCountAggregateOutputType | null
   _min: ChatConversationMinAggregateOutputType | null
@@ -217,6 +224,7 @@ export type ChatConversationWhereInput = {
   messages?: Prisma.JsonFilter<"ChatConversation">
   finalized?: Prisma.BoolFilter<"ChatConversation"> | boolean
   closedAt?: Prisma.DateTimeFilter<"ChatConversation"> | Date | string
+  nextStartedAt?: Prisma.DateTimeNullableFilter<"ChatConversation"> | Date | string | null
   createdBy?: Prisma.StringNullableFilter<"ChatConversation"> | string | null
   ticket?: Prisma.XOR<Prisma.TicketNullableScalarRelationFilter, Prisma.TicketWhereInput> | null
 }
@@ -231,6 +239,7 @@ export type ChatConversationOrderByWithRelationInput = {
   messages?: Prisma.SortOrder
   finalized?: Prisma.SortOrder
   closedAt?: Prisma.SortOrder
+  nextStartedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdBy?: Prisma.SortOrderInput | Prisma.SortOrder
   ticket?: Prisma.TicketOrderByWithRelationInput
 }
@@ -248,6 +257,7 @@ export type ChatConversationWhereUniqueInput = Prisma.AtLeast<{
   messages?: Prisma.JsonFilter<"ChatConversation">
   finalized?: Prisma.BoolFilter<"ChatConversation"> | boolean
   closedAt?: Prisma.DateTimeFilter<"ChatConversation"> | Date | string
+  nextStartedAt?: Prisma.DateTimeNullableFilter<"ChatConversation"> | Date | string | null
   createdBy?: Prisma.StringNullableFilter<"ChatConversation"> | string | null
   ticket?: Prisma.XOR<Prisma.TicketNullableScalarRelationFilter, Prisma.TicketWhereInput> | null
 }, "id">
@@ -262,6 +272,7 @@ export type ChatConversationOrderByWithAggregationInput = {
   messages?: Prisma.SortOrder
   finalized?: Prisma.SortOrder
   closedAt?: Prisma.SortOrder
+  nextStartedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdBy?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.ChatConversationCountOrderByAggregateInput
   _max?: Prisma.ChatConversationMaxOrderByAggregateInput
@@ -281,6 +292,7 @@ export type ChatConversationScalarWhereWithAggregatesInput = {
   messages?: Prisma.JsonWithAggregatesFilter<"ChatConversation">
   finalized?: Prisma.BoolWithAggregatesFilter<"ChatConversation"> | boolean
   closedAt?: Prisma.DateTimeWithAggregatesFilter<"ChatConversation"> | Date | string
+  nextStartedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"ChatConversation"> | Date | string | null
   createdBy?: Prisma.StringNullableWithAggregatesFilter<"ChatConversation"> | string | null
 }
 
@@ -293,6 +305,7 @@ export type ChatConversationCreateInput = {
   messages: Prisma.JsonNullValueInput | runtime.InputJsonValue
   finalized?: boolean
   closedAt?: Date | string
+  nextStartedAt?: Date | string | null
   createdBy?: string | null
   ticket?: Prisma.TicketCreateNestedOneWithoutChatConversationsInput
 }
@@ -307,6 +320,7 @@ export type ChatConversationUncheckedCreateInput = {
   messages: Prisma.JsonNullValueInput | runtime.InputJsonValue
   finalized?: boolean
   closedAt?: Date | string
+  nextStartedAt?: Date | string | null
   createdBy?: string | null
 }
 
@@ -319,6 +333,7 @@ export type ChatConversationUpdateInput = {
   messages?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   finalized?: Prisma.BoolFieldUpdateOperationsInput | boolean
   closedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  nextStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ticket?: Prisma.TicketUpdateOneWithoutChatConversationsNestedInput
 }
@@ -333,6 +348,7 @@ export type ChatConversationUncheckedUpdateInput = {
   messages?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   finalized?: Prisma.BoolFieldUpdateOperationsInput | boolean
   closedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  nextStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
@@ -346,6 +362,7 @@ export type ChatConversationCreateManyInput = {
   messages: Prisma.JsonNullValueInput | runtime.InputJsonValue
   finalized?: boolean
   closedAt?: Date | string
+  nextStartedAt?: Date | string | null
   createdBy?: string | null
 }
 
@@ -358,6 +375,7 @@ export type ChatConversationUpdateManyMutationInput = {
   messages?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   finalized?: Prisma.BoolFieldUpdateOperationsInput | boolean
   closedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  nextStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
@@ -371,6 +389,7 @@ export type ChatConversationUncheckedUpdateManyInput = {
   messages?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   finalized?: Prisma.BoolFieldUpdateOperationsInput | boolean
   closedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  nextStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
@@ -394,6 +413,7 @@ export type ChatConversationCountOrderByAggregateInput = {
   messages?: Prisma.SortOrder
   finalized?: Prisma.SortOrder
   closedAt?: Prisma.SortOrder
+  nextStartedAt?: Prisma.SortOrder
   createdBy?: Prisma.SortOrder
 }
 
@@ -406,6 +426,7 @@ export type ChatConversationMaxOrderByAggregateInput = {
   ticketId?: Prisma.SortOrder
   finalized?: Prisma.SortOrder
   closedAt?: Prisma.SortOrder
+  nextStartedAt?: Prisma.SortOrder
   createdBy?: Prisma.SortOrder
 }
 
@@ -418,6 +439,7 @@ export type ChatConversationMinOrderByAggregateInput = {
   ticketId?: Prisma.SortOrder
   finalized?: Prisma.SortOrder
   closedAt?: Prisma.SortOrder
+  nextStartedAt?: Prisma.SortOrder
   createdBy?: Prisma.SortOrder
 }
 
@@ -472,6 +494,7 @@ export type ChatConversationCreateWithoutTicketInput = {
   messages: Prisma.JsonNullValueInput | runtime.InputJsonValue
   finalized?: boolean
   closedAt?: Date | string
+  nextStartedAt?: Date | string | null
   createdBy?: string | null
 }
 
@@ -484,6 +507,7 @@ export type ChatConversationUncheckedCreateWithoutTicketInput = {
   messages: Prisma.JsonNullValueInput | runtime.InputJsonValue
   finalized?: boolean
   closedAt?: Date | string
+  nextStartedAt?: Date | string | null
   createdBy?: string | null
 }
 
@@ -526,6 +550,7 @@ export type ChatConversationScalarWhereInput = {
   messages?: Prisma.JsonFilter<"ChatConversation">
   finalized?: Prisma.BoolFilter<"ChatConversation"> | boolean
   closedAt?: Prisma.DateTimeFilter<"ChatConversation"> | Date | string
+  nextStartedAt?: Prisma.DateTimeNullableFilter<"ChatConversation"> | Date | string | null
   createdBy?: Prisma.StringNullableFilter<"ChatConversation"> | string | null
 }
 
@@ -538,6 +563,7 @@ export type ChatConversationCreateManyTicketInput = {
   messages: Prisma.JsonNullValueInput | runtime.InputJsonValue
   finalized?: boolean
   closedAt?: Date | string
+  nextStartedAt?: Date | string | null
   createdBy?: string | null
 }
 
@@ -550,6 +576,7 @@ export type ChatConversationUpdateWithoutTicketInput = {
   messages?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   finalized?: Prisma.BoolFieldUpdateOperationsInput | boolean
   closedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  nextStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
@@ -562,6 +589,7 @@ export type ChatConversationUncheckedUpdateWithoutTicketInput = {
   messages?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   finalized?: Prisma.BoolFieldUpdateOperationsInput | boolean
   closedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  nextStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
@@ -574,6 +602,7 @@ export type ChatConversationUncheckedUpdateManyWithoutTicketInput = {
   messages?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   finalized?: Prisma.BoolFieldUpdateOperationsInput | boolean
   closedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  nextStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
@@ -589,6 +618,7 @@ export type ChatConversationSelect<ExtArgs extends runtime.Types.Extensions.Inte
   messages?: boolean
   finalized?: boolean
   closedAt?: boolean
+  nextStartedAt?: boolean
   createdBy?: boolean
   ticket?: boolean | Prisma.ChatConversation$ticketArgs<ExtArgs>
 }, ExtArgs["result"]["chatConversation"]>
@@ -603,6 +633,7 @@ export type ChatConversationSelectCreateManyAndReturn<ExtArgs extends runtime.Ty
   messages?: boolean
   finalized?: boolean
   closedAt?: boolean
+  nextStartedAt?: boolean
   createdBy?: boolean
   ticket?: boolean | Prisma.ChatConversation$ticketArgs<ExtArgs>
 }, ExtArgs["result"]["chatConversation"]>
@@ -617,6 +648,7 @@ export type ChatConversationSelectUpdateManyAndReturn<ExtArgs extends runtime.Ty
   messages?: boolean
   finalized?: boolean
   closedAt?: boolean
+  nextStartedAt?: boolean
   createdBy?: boolean
   ticket?: boolean | Prisma.ChatConversation$ticketArgs<ExtArgs>
 }, ExtArgs["result"]["chatConversation"]>
@@ -631,10 +663,11 @@ export type ChatConversationSelectScalar = {
   messages?: boolean
   finalized?: boolean
   closedAt?: boolean
+  nextStartedAt?: boolean
   createdBy?: boolean
 }
 
-export type ChatConversationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "contactId" | "contactName" | "channel" | "conversationId" | "ticketId" | "messages" | "finalized" | "closedAt" | "createdBy", ExtArgs["result"]["chatConversation"]>
+export type ChatConversationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "contactId" | "contactName" | "channel" | "conversationId" | "ticketId" | "messages" | "finalized" | "closedAt" | "nextStartedAt" | "createdBy", ExtArgs["result"]["chatConversation"]>
 export type ChatConversationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   ticket?: boolean | Prisma.ChatConversation$ticketArgs<ExtArgs>
 }
@@ -660,6 +693,7 @@ export type $ChatConversationPayload<ExtArgs extends runtime.Types.Extensions.In
     messages: runtime.JsonValue
     finalized: boolean
     closedAt: Date
+    nextStartedAt: Date | null
     createdBy: string | null
   }, ExtArgs["result"]["chatConversation"]>
   composites: {}
@@ -1094,6 +1128,7 @@ export interface ChatConversationFieldRefs {
   readonly messages: Prisma.FieldRef<"ChatConversation", 'Json'>
   readonly finalized: Prisma.FieldRef<"ChatConversation", 'Boolean'>
   readonly closedAt: Prisma.FieldRef<"ChatConversation", 'DateTime'>
+  readonly nextStartedAt: Prisma.FieldRef<"ChatConversation", 'DateTime'>
   readonly createdBy: Prisma.FieldRef<"ChatConversation", 'String'>
 }
     

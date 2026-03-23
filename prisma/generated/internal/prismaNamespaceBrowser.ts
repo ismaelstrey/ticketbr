@@ -292,6 +292,7 @@ export const ChatConversationScalarFieldEnum = {
   messages: 'messages',
   finalized: 'finalized',
   closedAt: 'closedAt',
+  nextStartedAt: 'nextStartedAt',
   createdBy: 'createdBy'
 } as const
 

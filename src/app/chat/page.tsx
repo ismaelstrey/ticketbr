@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { Input, Select, Textarea } from "@/components/ui/Input";
 import { useToast } from "@/context/ToastContext";
 import { ArchivedChatConversation, ChatContact, ChatMessage, ChatTicketLink } from "@/types/chat";
+import { buildChatTimeline, mergeSeparators } from "@/lib/chatTimeline";
 
 const ChatMain = styled(MainContent)`
   padding: 0;
@@ -309,6 +310,10 @@ const SeparatorLabel = styled.div`
   transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 `;
 
+const SeparatorSecondary = styled.span`
+  color: ${({ theme }) => theme.colors.text.secondary};
+`;
+
 const TicketLabel = styled.span`
   font-size: 0.72rem;
   color: ${({ theme }) => theme.colors.text.secondary};
@@ -394,6 +399,8 @@ function formatFinalizedAt(value: string | Date) {
   return `${date} às ${time}`;
 }
 
+const CHAT_SEPARATORS_STORAGE_KEY = "ticketbr-chat-separators-v1";
+
 export default function ChatPage() {
   const { showToast } = useToast();
   const [contacts, setContacts] = useState<ChatContact[]>([]);
@@ -402,6 +409,7 @@ export default function ChatPage() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [messagesOlderCursor, setMessagesOlderCursor] = useState<string | null>(null);
   const [loadingOlderMessages, setLoadingOlderMessages] = useState(false);
+  const [conversationSeparators, setConversationSeparators] = useState<Array<{ archivedId: string; closedAt: string; startAt: string | null; ticketNumber: number | null }>>([]);
   const [archivedConversations, setArchivedConversations] = useState<ArchivedChatConversation[]>([]);
   const [activeArchivedId, setActiveArchivedId] = useState("");
   const [finalizePreview, setFinalizePreview] = useState<null | { archivedId: string; closedAt: string; ticketNumber: number | null }>(null);
@@ -437,6 +445,11 @@ export default function ChatPage() {
     return null;
   }
   const activeArchivedConversation = useMemo(() => archivedConversations.find((item) => item.id === activeArchivedId), [archivedConversations, activeArchivedId]);
+  const conversationStorageKey = useMemo(() => {
+    const id = resolveActiveWaChatId() ?? contactId;
+    if (!id) return null;
+    return `${channel}:${id}`;
+  }, [channel, contactId, selectedContact?.conversationId, selectedContact?.phone]);
 
   const displayedMessages = useMemo(() => {
     if (!activeArchivedConversation) return messages;
@@ -450,6 +463,73 @@ export default function ChatPage() {
     });
     return copy;
   }, [activeArchivedConversation, messages]);
+
+  const timeline = useMemo(() => {
+    if (activeArchivedConversation) {
+      return displayedMessages.map((message) => ({ kind: "message" as const, message }));
+    }
+    const separators = finalizePreview
+      ? conversationSeparators.filter((s) => s.archivedId !== finalizePreview.archivedId)
+      : conversationSeparators;
+    const items = buildChatTimeline(
+      displayedMessages.map((m) => ({ id: String(m.id), createdAt: String(m.createdAt) })),
+      separators.map((s) => ({ archivedId: s.archivedId, closedAt: s.closedAt, startAt: s.startAt, ticketNumber: s.ticketNumber }))
+    );
+    const byId = new Map(displayedMessages.map((m) => [String(m.id), m]));
+    return items.map((item) => item.kind === "message"
+      ? { kind: "message" as const, message: byId.get(item.message.id)! }
+      : { kind: "separator" as const, id: item.id, closedAt: item.closedAt, startAt: item.startAt, ticketNumber: item.ticketNumber ?? null }
+    );
+  }, [activeArchivedConversation, conversationSeparators, displayedMessages, finalizePreview]);
+
+  const syncSeparatorsToStorage = useCallback((key: string, next: Array<{ archivedId: string; closedAt: string; startAt: string | null; ticketNumber: number | null }>) => {
+    try {
+      const raw = window.localStorage.getItem(CHAT_SEPARATORS_STORAGE_KEY);
+      const parsed = raw ? JSON.parse(raw) : {};
+      const nextAll = typeof parsed === "object" && parsed ? parsed as Record<string, any> : {};
+      nextAll[key] = next;
+      window.localStorage.setItem(CHAT_SEPARATORS_STORAGE_KEY, JSON.stringify(nextAll));
+    } catch (error) {
+      console.error("Failed to persist chat separators", error);
+      showToast("Falha ao salvar separações do chat.", "error");
+    }
+  }, [showToast]);
+
+  const loadSeparatorsFromStorage = useCallback((key: string) => {
+    try {
+      const raw = window.localStorage.getItem(CHAT_SEPARATORS_STORAGE_KEY);
+      const parsed = raw ? JSON.parse(raw) : {};
+      const all = typeof parsed === "object" && parsed ? parsed as Record<string, unknown> : {};
+      const value = all[key];
+      if (!Array.isArray(value)) return [];
+      return value
+        .map((item) => ({
+          archivedId: String((item as any)?.archivedId || ""),
+          closedAt: String((item as any)?.closedAt || ""),
+          startAt: (item as any)?.startAt ? String((item as any).startAt) : null,
+          ticketNumber: typeof (item as any)?.ticketNumber === "number" ? Number((item as any).ticketNumber) : null
+        }))
+        .filter((item) => item.archivedId && item.closedAt);
+    } catch (error) {
+      console.error("Failed to load chat separators", error);
+      return [];
+    }
+  }, []);
+
+  const upsertSeparators = useCallback((incoming: Array<{ archivedId: string; closedAt: string; startAt: string | null; ticketNumber: number | null }>) => {
+    setConversationSeparators((current) => {
+      const merged = mergeSeparators(current, incoming).map((item) => ({
+        archivedId: item.archivedId,
+        closedAt: item.closedAt,
+        startAt: item.startAt ? item.startAt : null,
+        ticketNumber: typeof item.ticketNumber === "number" ? item.ticketNumber : null
+      }));
+      if (conversationStorageKey) {
+        syncSeparatorsToStorage(conversationStorageKey, merged);
+      }
+      return merged;
+    });
+  }, [conversationStorageKey, syncSeparatorsToStorage]);
 
   const filteredTickets = useMemo(() => {
     if (!selectedContact) return tickets;
@@ -686,7 +766,19 @@ export default function ChatPage() {
     const res = await fetch(`/api/chat/conversations?${params.toString()}`);
     const json = await res.json();
     if (!res.ok) throw new Error(json?.error || "Erro ao carregar conversas finalizadas");
-    setArchivedConversations(Array.isArray(json.data) ? json.data : []);
+    const list = Array.isArray(json.data) ? json.data : [];
+    setArchivedConversations(list);
+    if (conversationStorageKey) {
+      const incoming = list
+        .filter((item: any) => item?.id && item?.closedAt)
+        .map((item: any) => ({
+          archivedId: String(item.id),
+          closedAt: new Date(item.closedAt).toISOString(),
+          startAt: item?.nextStartedAt ? new Date(item.nextStartedAt).toISOString() : null,
+          ticketNumber: typeof item?.ticket?.number === "number" ? Number(item.ticket.number) : null
+        }));
+      upsertSeparators(incoming);
+    }
   }
 
   async function loadInteractionPreferences() {
@@ -716,11 +808,20 @@ export default function ChatPage() {
     setFinalizePreview(null);
     setMessages([]);
     setMessagesOlderCursor(null);
+    setConversationSeparators([]);
     lastMessageIdRef.current = null;
     loadMessages({ reset: true }).catch((error) => showToast(error.message, "error"));
     loadLinks().catch((error) => showToast(error.message, "error"));
     loadArchivedConversations().catch((error) => showToast(error.message, "error"));
   }, [contactId, channel]);
+
+  useEffect(() => {
+    if (!conversationStorageKey) return;
+    const stored = loadSeparatorsFromStorage(conversationStorageKey);
+    if (stored.length) {
+      upsertSeparators(stored);
+    }
+  }, [conversationStorageKey, loadSeparatorsFromStorage, upsertSeparators]);
 
   useEffect(() => {
     if (activeArchivedId) setFinalizePreview(null);
@@ -863,6 +964,7 @@ export default function ChatPage() {
       if (archivedId) {
         setFinalizePreview({ archivedId, closedAt, ticketNumber });
         requestAnimationFrame(() => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }));
+        upsertSeparators([{ archivedId, closedAt: new Date(closedAt).toISOString(), startAt: null, ticketNumber }]);
       }
 
       await loadArchivedConversations();
@@ -874,6 +976,37 @@ export default function ChatPage() {
       }
     } finally {
       setSavingConversation(false);
+    }
+  }
+
+  async function returnToCurrentConversation() {
+    if (!activeArchivedConversation) {
+      setActiveArchivedId("");
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/chat/conversations/start", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contactId: activeArchivedConversation.contactId,
+          channel: activeArchivedConversation.channel
+        })
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json?.error || "Erro ao marcar início de nova conversa");
+
+      const data = json?.data;
+      if (data?.id && data?.nextStartedAt) {
+        const id = String(data.id);
+        const closedAt = data?.closedAt ? new Date(data.closedAt).toISOString() : activeArchivedConversation.closedAt;
+        const startAt = new Date(data.nextStartedAt).toISOString();
+        const existingTicketNumber = conversationSeparators.find((s) => s.archivedId === id)?.ticketNumber ?? null;
+        upsertSeparators([{ archivedId: id, closedAt, startAt, ticketNumber: existingTicketNumber }]);
+      }
+    } finally {
+      setActiveArchivedId("");
     }
   }
 
@@ -969,16 +1102,30 @@ export default function ChatPage() {
                   {loadingOlderMessages ? "Carregando..." : "Carregar mensagens anteriores"}
                 </LoadMoreButton>
               ) : null}
-              {displayedMessages.map((message) => (
-                <Bubble key={message.id} $in={message.direction === "in"} $animate={!activeArchivedConversation && message.id === animatedMessageId}>
-                  {message.text ? <div>{message.text}</div> : null}
-                  {message.attachment ? (
-                    <a href={message.attachment.data ? `data:${message.attachment.mimeType};base64,${message.attachment.data}` : message.attachment.url} target="_blank" rel="noreferrer">
-                      📎 {message.attachment.name}
+              {timeline.map((item) => item.kind === "message" ? (
+                <Bubble key={item.message.id} $in={item.message.direction === "in"} $animate={!activeArchivedConversation && item.message.id === animatedMessageId}>
+                  {item.message.text ? <div>{item.message.text}</div> : null}
+                  {item.message.attachment ? (
+                    <a href={item.message.attachment.data ? `data:${item.message.attachment.mimeType};base64,${item.message.attachment.data}` : item.message.attachment.url} target="_blank" rel="noreferrer">
+                      📎 {item.message.attachment.name}
                     </a>
                   ) : null}
-                  <MessageMeta>{new Date(message.createdAt).toLocaleString("pt-BR")}</MessageMeta>
+                  <MessageMeta>{new Date(item.message.createdAt).toLocaleString("pt-BR")}</MessageMeta>
                 </Bubble>
+              ) : (
+                <ConversationSeparator key={`sep_${item.id}`}>
+                  <SeparatorLine />
+                  <SeparatorLabel>
+                    <span>Finalizada em {formatFinalizedAt(item.closedAt)}</span>
+                    {item.startAt ? (
+                      <SeparatorSecondary>Nova conversa iniciada em {formatFinalizedAt(item.startAt)}</SeparatorSecondary>
+                    ) : null}
+                    {typeof item.ticketNumber === "number" ? (
+                      <TicketLabel>Ticket #{item.ticketNumber}</TicketLabel>
+                    ) : null}
+                  </SeparatorLabel>
+                  <SeparatorLine />
+                </ConversationSeparator>
               ))}
               {activeArchivedConversation ? (
                 <ConversationSeparator>
@@ -1011,7 +1158,7 @@ export default function ChatPage() {
             {activeArchivedConversation ? (
               <ArchiveBanner>
                 <ArchiveText>Conversa finalizada</ArchiveText>
-                <Button variant="ghost" onClick={() => setActiveArchivedId("")}>Voltar para conversa atual</Button>
+                <Button variant="ghost" onClick={() => returnToCurrentConversation().catch((error) => showToast(error.message, "error"))}>Voltar para conversa atual</Button>
               </ArchiveBanner>
             ) : (
               <Composer>

@@ -315,9 +315,11 @@ model ChatConversation {
   messages       Json
   finalized      Boolean  @default(false)
   closedAt       DateTime @default(now())
+  nextStartedAt  DateTime?
   createdBy      String?
 
   @@index([contactId, channel, finalized, closedAt])
+  @@index([contactId, channel, nextStartedAt])
   @@index([ticketId])
 }
 
