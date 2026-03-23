@@ -121,7 +121,10 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const hasOpenConversation = (channel: "whatsapp" | "email", identifiers: Array<string | undefined>) => identifiers.some((value) => {
+    const hasOpenConversation = (
+      channel: "whatsapp" | "email",
+      identifiers: Array<string | null | undefined>
+    ) => identifiers.some((value) => {
       const raw = String(value || "").trim();
       if (!raw) return false;
       if (openConversationKeys.has(`${channel}:${raw}`)) return true;
