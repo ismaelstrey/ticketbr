@@ -1,16 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo } from "react";
 import styled, { keyframes } from "styled-components";
 import { usePathname, useRouter } from "next/navigation";
-import { FiUsers } from "@/components/icons";
 import { useAuth } from "@/context/AuthContext";
-import { useToast } from "@/context/ToastContext";
-import type { ChatContact } from "@/types/chat";
+import { useChatOpenConversations } from "@/context/ChatOpenConversationsContext";
 import { IoLogoWhatsapp } from "react-icons/io";
-
-const STORAGE_KEY = "ticketbr-chat-last-seen";
-const POLL_INTERVAL_MS = 15000;
 
 const floatPulse = keyframes`
   0%, 100% { transform: translateY(0); box-shadow: 0 16px 30px rgba(37, 99, 235, 0.28); }
@@ -85,110 +80,33 @@ const IconWrap = styled.span`
   font-size: 1.2rem;
 `;
 
-function readSeenMap() {
-  if (typeof window === "undefined") return {} as Record<string, string>;
-  try {
-    return JSON.parse(window.localStorage.getItem(STORAGE_KEY) || "{}") as Record<string, string>;
-  } catch {
-    return {} as Record<string, string>;
-  }
-}
-
-function persistSeenMap(map: Record<string, string>) {
-  if (typeof window === "undefined") return;
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(map));
-}
-
-function buildSeenMap(contacts: ChatContact[]) {
-  return contacts.reduce<Record<string, string>>((acc, contact) => {
-    if (contact.lastMessageAt) {
-      acc[contact.id] = contact.lastMessageAt;
-    }
-    return acc;
-  }, {});
-}
-
 export function GlobalChatButton() {
   const router = useRouter();
   const pathname = usePathname();
   const { user, loading } = useAuth();
-  const { showToast } = useToast();
-  const [contacts, setContacts] = useState<ChatContact[]>([]);
-  const previousUnreadRef = useRef(0);
+  const { openCount } = useChatOpenConversations();
 
   const isChatRoute = pathname === "/chat" || pathname.startsWith("/chat/");
   const hidden = !user || loading || pathname === "/login";
   const shouldHideButton = hidden || isChatRoute;
 
-  const unreadCount = useMemo(() => {
-    const seenMap = readSeenMap();
-    return contacts.reduce((count, contact) => {
-      if (!contact.lastMessageAt) return count;
-      const seenAt = seenMap[contact.id];
-      if (!seenAt) return count + 1;
-      return new Date(contact.lastMessageAt).getTime() > new Date(seenAt).getTime() ? count + 1 : count;
-    }, 0);
-  }, [contacts]);
-
-  useEffect(() => {
-    if (hidden) return;
-
-    let cancelled = false;
-
-    const loadContacts = async () => {
-      try {
-        const res = await fetch("/api/chat/contacts", { cache: "no-store" });
-        if (!res.ok) return;
-        const json = await res.json();
-        if (!cancelled) {
-          setContacts(Array.isArray(json?.data) ? json.data : []);
-        }
-      } catch {
-        // silently ignore polling issues
-      }
-    };
-
-    loadContacts();
-    const timer = window.setInterval(loadContacts, POLL_INTERVAL_MS);
-    return () => {
-      cancelled = true;
-      window.clearInterval(timer);
-    };
-  }, [hidden]);
-
-  useEffect(() => {
-    if (hidden) return;
-
-    if (isChatRoute) {
-      persistSeenMap(buildSeenMap(contacts));
-      previousUnreadRef.current = 0;
-      return;
-    }
-
-    if (unreadCount > previousUnreadRef.current && previousUnreadRef.current !== 0) {
-      showToast(
-        unreadCount === 1 ? "Você recebeu uma nova mensagem no chat." : `Você tem ${unreadCount} conversas com novas mensagens.`,
-        "info"
-      );
-    }
-
-    previousUnreadRef.current = unreadCount;
-  }, [contacts, hidden, isChatRoute, showToast, unreadCount]);
-
   const handleOpenChat = () => {
-    persistSeenMap(buildSeenMap(contacts));
-    previousUnreadRef.current = 0;
     router.push("/chat");
   };
 
   if (shouldHideButton) return null;
 
+  const badgeValue = useMemo(() => {
+    if (!openCount) return null;
+    if (openCount > 99) return "99+";
+    return String(openCount);
+  }, [openCount]);
+
   return (
-    <FloatingButton type="button" onClick={handleOpenChat} $hasUnread={unreadCount > 0} aria-label="Abrir chat">
+    <FloatingButton type="button" onClick={handleOpenChat} $hasUnread={openCount > 0} aria-label="Abrir chat">
       <IconWrap>
         <IoLogoWhatsapp size={30} color="#25D366"/>
-        {/* <FiUsers /> */}
-        {unreadCount > 0 ? <Badge>{unreadCount > 99 ? "99+" : unreadCount}</Badge> : null}
+        {badgeValue ? <Badge>{badgeValue}</Badge> : null}
       </IconWrap>
       <ButtonLabel>Chat</ButtonLabel>
     </FloatingButton>

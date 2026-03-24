@@ -13,6 +13,7 @@ import { buildChatTimeline, mergeSeparators } from "@/lib/chatTimeline";
 import { getPersistedBoolean, setPersistedBoolean } from "@/lib/persistedBoolean";
 import { computeCurrentConversationCutoffMs, filterMessagesByCutoff } from "@/lib/chatHistoryVisibility";
 import { ChatActionsMenu } from "@/components/chat/ChatActionsMenu";
+import { broadcastChatOpenConversationsInvalidation, useChatOpenConversations } from "@/context/ChatOpenConversationsContext";
 
 const openConversationPulse = keyframes`
   0% {
@@ -585,6 +586,7 @@ export default function ChatPage() {
   const messageListRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const preferencesLoadedRef = useRef(false);
+  const { optimisticAdjust: optimisticAdjustOpenConversations } = useChatOpenConversations();
   const preferencesSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const skipAutoScrollRef = useRef(false);
   const scrollLoadRafRef = useRef<number | null>(null);
@@ -1179,6 +1181,10 @@ export default function ChatPage() {
         humanActive: Boolean(json?.data?.humanActive ?? true),
         botActive: Boolean(json?.data?.botActive ?? false)
       });
+      if (!selectedContact?.hasOpenConversation) {
+        optimisticAdjustOpenConversations(1);
+      }
+      broadcastChatOpenConversationsInvalidation();
       updateSelectedContactOpenConversation(true);
       showToast("Atendimento iniciado com sucesso", "success");
       await loadBase();
@@ -1247,6 +1253,10 @@ export default function ChatPage() {
       if (!res.ok) throw new Error(json?.error || "Erro ao finalizar conversa");
 
       showToast("Conversa finalizada e salva no histórico", "success");
+      if (selectedContact?.hasOpenConversation) {
+        optimisticAdjustOpenConversations(-1);
+      }
+      broadcastChatOpenConversationsInvalidation();
       updateSelectedContactOpenConversation(false);
       const archivedId = json?.data?.id ? String(json.data.id) : "";
       const closedAt = String(json?.data?.closedAt || new Date().toISOString());
@@ -1299,6 +1309,10 @@ export default function ChatPage() {
         upsertSeparators([{ archivedId: id, closedAt, startAt, ticketNumber: existingTicketNumber }]);
       }
 
+      if (!selectedContact?.hasOpenConversation) {
+        optimisticAdjustOpenConversations(1);
+      }
+      broadcastChatOpenConversationsInvalidation();
       updateSelectedContactOpenConversation(true);
     } finally {
       setActiveArchivedId("");

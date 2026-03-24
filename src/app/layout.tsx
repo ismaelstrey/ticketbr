@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { AuthProvider } from "@/context/AuthContext";
 import { ToastProvider } from "@/context/ToastContext";
+import { ChatOpenConversationsProvider } from "@/context/ChatOpenConversationsContext";
 import StyledComponentsRegistry from "@/lib/registry";
 import { GlobalChatButton } from "@/components/layout/GlobalChatButton";
 import { StyledComponentsProvider } from "@/styles/StyledComponentsProvider";
@@ -35,7 +36,12 @@ export default function RootLayout({
         <StyledComponentsRegistry>
           <StyledComponentsProvider>
             <AuthProvider>
-              <ToastProvider>{children}<GlobalChatButton /></ToastProvider>
+              <ToastProvider>
+                <ChatOpenConversationsProvider>
+                  {children}
+                  <GlobalChatButton />
+                </ChatOpenConversationsProvider>
+              </ToastProvider>
             </AuthProvider>
           </StyledComponentsProvider>
         </StyledComponentsRegistry>

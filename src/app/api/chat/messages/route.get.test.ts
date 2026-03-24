@@ -4,6 +4,9 @@ const prismaMock = {
   conversation: {
     findUnique: vi.fn()
   },
+  user: {
+    findUnique: vi.fn()
+  },
   message: {
     count: vi.fn(),
     groupBy: vi.fn(),
@@ -19,6 +22,7 @@ describe("GET /api/chat/messages", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     prismaMock.conversation.findUnique.mockResolvedValue(null);
+    prismaMock.user.findUnique.mockResolvedValue(null);
     prismaMock.message.count.mockResolvedValue(0);
     prismaMock.message.groupBy.mockResolvedValue([]);
     prismaMock.message.findMany.mockResolvedValue([]);
@@ -98,4 +102,3 @@ describe("GET /api/chat/messages", () => {
     expect(body.paging.nextCursor).toBe("m_1");
   });
 });
-
