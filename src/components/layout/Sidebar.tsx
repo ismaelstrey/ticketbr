@@ -305,8 +305,8 @@ const UserInfo = styled.div<{ $isExpanded: boolean }>`
   gap: 0.85rem;
   padding: 0.75rem;
   border-radius: 10px;
-  background: rgba(15, 23, 42, 0.38);
-  border: 1px solid ${({ theme }) => theme.colors.border};
+  // background: rgba(15, 23, 42, 0.38);
+  // border: 1px solid ${({ theme }) => theme.colors.border};
   justify-content: ${({ $isExpanded }) => ($isExpanded ? "flex-start" : "center")};
 `;
 
@@ -349,22 +349,22 @@ const UserRole = styled.span`
 
 const LogoutButton = styled.button<{ $isExpanded: boolean }>`
   background: transparent;
-  border: 1px solid rgba(248, 113, 113, 0.16);
+  border: 0px solid rgba(248, 113, 113, 0.16);
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 0.8rem;
   padding: 0.8rem 0.85rem;
-  border-radius: 16px;
-  color: #fda4af;
+  // border-radius: 16px;
+  // color: #fda4af;
   width: 100%;
   transition: all 0.2s ease;
   justify-content: ${({ $isExpanded }) => ($isExpanded ? "flex-start" : "center")};
 
   &:hover {
-    background: rgba(127, 29, 29, 0.28);
+    // background: rgba(127, 29, 29, 0.28);
     border-color: rgba(248, 113, 113, 0.26);
-    color: #fecdd3;
+     color: #fecdd3;
   }
 
   span {

@@ -7,6 +7,7 @@ import { FiUsers } from "@/components/icons";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
 import type { ChatContact } from "@/types/chat";
+import { IoLogoWhatsapp } from "react-icons/io";
 
 const STORAGE_KEY = "ticketbr-chat-last-seen";
 const POLL_INTERVAL_MS = 15000;
@@ -32,7 +33,7 @@ const FloatingButton = styled.button<{ $hasUnread: boolean }>`
   gap: 0.65rem;
   cursor: pointer;
   color: ${({ theme }) => theme.colors.text.white};
-  background: linear-gradient(135deg, ${({ theme }) => theme.colors.primary}, ${({ theme }) => theme.colors.status.purple});
+  background: linear-gradient(135deg, ${({ theme }) => theme.colors.backgroundAccent}, ${({ theme }) => theme.colors.status.purple});
   box-shadow: 0 16px 30px rgba(37, 99, 235, 0.28);
   transition: transform 0.2s ease, opacity 0.2s ease;
   animation: ${({ $hasUnread }) => ($hasUnread ? floatPulse : "none")} 2.2s ease-in-out infinite;
@@ -185,7 +186,8 @@ export function GlobalChatButton() {
   return (
     <FloatingButton type="button" onClick={handleOpenChat} $hasUnread={unreadCount > 0} aria-label="Abrir chat">
       <IconWrap>
-        <FiUsers />
+        <IoLogoWhatsapp size={30} color="#25D366"/>
+        {/* <FiUsers /> */}
         {unreadCount > 0 ? <Badge>{unreadCount > 99 ? "99+" : unreadCount}</Badge> : null}
       </IconWrap>
       <ButtonLabel>Chat</ButtonLabel>
