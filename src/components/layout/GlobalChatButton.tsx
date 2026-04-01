@@ -27,9 +27,12 @@ const FloatingButton = styled.button<{ $hasUnread: boolean }>`
   justify-content: center;
   gap: 0.65rem;
   cursor: pointer;
-  color: ${({ theme }) => theme.colors.text.white};
-  background: linear-gradient(135deg, ${({ theme }) => theme.colors.backgroundAccent}, ${({ theme }) => theme.colors.status.purple});
-  box-shadow: 0 16px 30px rgba(37, 99, 235, 0.28);
+  color: ${({ theme }) => (theme.mode === "dark" ? theme.colors.text.white : theme.colors.text.primary)};
+  background: ${({ theme }) =>
+    theme.mode === "dark"
+      ? "linear-gradient(135deg, rgba(37, 99, 235, 0.65), rgba(139, 92, 246, 0.75))"
+      : "linear-gradient(135deg, rgba(15, 23, 42, 0.06), rgba(99, 102, 241, 0.18))"};
+  box-shadow: ${({ theme }) => theme.shadows.card};
   transition: transform 0.2s ease, opacity 0.2s ease;
   animation: ${({ $hasUnread }) => ($hasUnread ? floatPulse : "none")} 2.2s ease-in-out infinite;
 

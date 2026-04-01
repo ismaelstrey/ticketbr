@@ -137,6 +137,7 @@ export function getTheme(mode: ThemeMode): DefaultTheme {
   const colors = mode === "dark" ? darkColors : lightColors;
 
   return {
+    mode,
     colors,
     breakpoints: common.breakpoints,
     shadows: {

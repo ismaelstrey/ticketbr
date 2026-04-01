@@ -1,7 +1,9 @@
-import 'styled-components';
+import "styled-components";
+import type { ThemeMode } from "@/context/ThemeModeContext";
 
 declare module 'styled-components' {
   export interface DefaultTheme {
+    mode: ThemeMode;
     colors: {
       primary: string;
       primaryHover: string;

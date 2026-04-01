@@ -14,6 +14,7 @@ import { getPersistedBoolean, setPersistedBoolean } from "@/lib/persistedBoolean
 import { computeCurrentConversationCutoffMs, filterMessagesByCutoff } from "@/lib/chatHistoryVisibility";
 import { ChatActionsMenu } from "@/components/chat/ChatActionsMenu";
 import { broadcastChatOpenConversationsInvalidation, useChatOpenConversations } from "@/context/ChatOpenConversationsContext";
+import { PeripheralNotice } from "@/components/chat/PeripheralNotice";
 
 const openConversationPulse = keyframes`
   0% {
@@ -242,6 +243,7 @@ const ChatPane = styled.section`
     ${({ theme }) => theme.colors.background};
   height: 100%;
   overflow: hidden;
+  position: relative;
 `;
 
 const Header = styled.div`
@@ -271,39 +273,6 @@ const HeaderActions = styled.div`
   align-items: center;
   flex-wrap: wrap;
   color: ${({ theme }) => theme.colors.text.secondary};
-`;
-
-const AttendanceBar = styled.div`
-  background: ${({ theme }) => theme.colors.surfaceElevated};
-  border-bottom: 1px solid ${({ theme }) => theme.colors.border};
-  padding: 0.65rem 0.9rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-`;
-
-const AttendanceInfo = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 0.12rem;
-`;
-
-const AttendanceTitle = styled.strong`
-  color: ${({ theme }) => theme.colors.text.primary};
-  font-size: 0.86rem;
-`;
-
-const AttendanceHint = styled.small`
-  color: ${({ theme }) => theme.colors.text.muted};
-`;
-
-const AttendanceControls = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  flex-wrap: wrap;
 `;
 
 const InlineSelect = styled(Select)`
@@ -1433,48 +1402,45 @@ export default function ChatPage() {
             </Header>
 
             {!activeArchivedConversation && selectedContact ? (
-              <AttendanceBar>
-                <AttendanceInfo>
-                  <AttendanceTitle>
-                    {isAssignedToMe
-                      ? "Você está atendendo esta conversa"
-                      : conversationAttendance?.assignedUserName
-                        ? `Em atendimento por ${conversationAttendance.assignedUserName}`
-                        : selectedContact.hasOpenConversation
-                          ? "Conversa em aberto aguardando atendimento"
-                          : "Conversa disponível"}
-                  </AttendanceTitle>
-                  <AttendanceHint>
-                    {isAssignedToMe
-                      ? "Somente você pode responder até transferir o atendimento."
-                      : conversationAttendance?.assignedUserName
-                        ? "Outros atendentes ficam bloqueados até a conversa ser transferida."
-                        : selectedContact.hasOpenConversation
-                          ? "Clique em iniciar atendimento para assumir a conversa."
-                          : "Ao responder, esta conversa poderá ser assumida por um atendente."}
-                  </AttendanceHint>
-                </AttendanceInfo>
-                <AttendanceControls>
-                  {needsAttendanceStart ? (
-                    <Button type="button" disabled={attendanceBusy} onClick={() => claimConversation().catch((error) => showToast(error.message, "error"))}>
-                      {attendanceBusy ? "Iniciando..." : "Iniciar atendimento"}
+              <PeripheralNotice
+                title={
+                  isAssignedToMe
+                    ? "Você está atendendo esta conversa"
+                    : conversationAttendance?.assignedUserName
+                      ? `Em atendimento por ${conversationAttendance.assignedUserName}`
+                      : selectedContact.hasOpenConversation
+                        ? "Conversa em aberto aguardando atendimento"
+                        : "Conversa disponível"
+                }
+                hint={
+                  isAssignedToMe
+                    ? "Somente você pode responder até transferir o atendimento."
+                    : conversationAttendance?.assignedUserName
+                      ? "Outros atendentes ficam bloqueados até a conversa ser transferida."
+                      : selectedContact.hasOpenConversation
+                        ? "Clique em iniciar atendimento para assumir a conversa."
+                        : "Ao responder, esta conversa poderá ser assumida por um atendente."
+                }
+              >
+                {needsAttendanceStart ? (
+                  <Button type="button" disabled={attendanceBusy} onClick={() => claimConversation().catch((error) => showToast(error.message, "error"))}>
+                    {attendanceBusy ? "Iniciando..." : "Iniciar atendimento"}
+                  </Button>
+                ) : null}
+                {isAssignedToMe ? (
+                  <>
+                    <InlineSelect value={transferTargetUserId} onChange={(e) => setTransferTargetUserId(e.target.value)}>
+                      <option value="">Transferir para...</option>
+                      {agents
+                        .filter((agent) => agent.id !== user?.id)
+                        .map((agent) => <option key={agent.id} value={agent.id}>{agent.name}</option>)}
+                    </InlineSelect>
+                    <Button type="button" variant="ghost" disabled={attendanceBusy || !transferTargetUserId} onClick={() => transferConversation().catch((error) => showToast(error.message, "error"))}>
+                      {attendanceBusy ? "Transferindo..." : "Transferir"}
                     </Button>
-                  ) : null}
-                  {isAssignedToMe ? (
-                    <>
-                      <InlineSelect value={transferTargetUserId} onChange={(e) => setTransferTargetUserId(e.target.value)}>
-                        <option value="">Transferir para...</option>
-                        {agents
-                          .filter((agent) => agent.id !== user?.id)
-                          .map((agent) => <option key={agent.id} value={agent.id}>{agent.name}</option>)}
-                      </InlineSelect>
-                      <Button type="button" variant="ghost" disabled={attendanceBusy || !transferTargetUserId} onClick={() => transferConversation().catch((error) => showToast(error.message, "error"))}>
-                        {attendanceBusy ? "Transferindo..." : "Transferir"}
-                      </Button>
-                    </>
-                  ) : null}
-                </AttendanceControls>
-              </AttendanceBar>
+                  </>
+                ) : null}
+              </PeripheralNotice>
             ) : null}
 
             <MessageList ref={messageListRef} onScroll={onMessageListScroll} $fading={messagesFading}>
