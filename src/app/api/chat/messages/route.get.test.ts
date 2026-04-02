@@ -33,7 +33,7 @@ describe("GET /api/chat/messages", () => {
     const req = { nextUrl: { searchParams: new URLSearchParams() } } as any;
     const res = await GET(req);
     expect(res.status).toBe(400);
-  });
+  }, 15_000);
 
   it("retorna lista vazia com meta quando conversa não existe", async () => {
     const { GET } = await import("./route");

@@ -20,7 +20,11 @@ const PUBLIC_API_PATHS = [
   "/api/auth/login",
   "/api/health",
   "/api/chat/webhook",
-   "/api/chat/inbound"
+  "/api/chat/inbound",
+  "/chat/inbound",
+  "/chat/status",
+  "/chat/presence",
+  "/chat/media-ready"
 ];
 
 const ALLOWED_CORS_ORIGINS = new Set(

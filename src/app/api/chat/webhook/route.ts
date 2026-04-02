@@ -27,5 +27,3 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Webhook inválido" }, { status: 400 });
   }
 }
-
-export { processInboundWebhook };

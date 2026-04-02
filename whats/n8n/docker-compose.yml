@@ -1,7 +1,5 @@
-version: '3.9'
 services:
   evolution-api:
-    container_name: evolution_api
     image: atendai/evolution-api:latest
     restart: always
     ports:
@@ -11,32 +9,69 @@ services:
     volumes:
       - evolution_instances:/evolution/instances
     depends_on:
-      - postgres
-      - redis
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
   postgres:
-    container_name: evolution_postgres
     image: postgres:15-alpine
     restart: always
     ports:
-      - "5432:5432"
+      - "5433:5432"
     environment:
       - POSTGRES_DB=evolution
       - POSTGRES_USER=evolution
       - POSTGRES_PASSWORD=evolution
     volumes:
       - evolution_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U evolution -d evolution -h 127.0.0.1 -p 5432"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
 
   redis:
-    container_name: evolution_redis
     image: redis:7-alpine
     restart: always
     ports:
-      - "6379:6379"
+      - "6380:6379"
     volumes:
       - evolution_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  n8n:
+    image: n8nio/n8n:latest
+    restart: unless-stopped
+    environment:
+      WEBHOOK_URL: http://host.docker.internal:5678
+      N8N_HOST: host.docker.internal
+      GENERIC_TIMEZONE: America/Sao_Paulo
+      N8N_LOG_LEVEL: info
+      N8N_SECURE_COOKIE: "false"
+      N8N_COMMUNITY_PACKAGES_ALLOW_TOOL_USAGE: "true"
+    ports:
+      - "5678:5678"
+    volumes:
+      - n8n_data:/home/node/.n8n
+
+  flowise:
+    image: flowiseai/flowise:latest
+    restart: unless-stopped
+    environment:
+      PORT: "3000"
+    ports:
+      - "3001:3000"
+    volumes:
+      - flowise_data:/root/.flowise
 
 volumes:
   evolution_instances:
   evolution_postgres_data:
   evolution_redis_data:
+  n8n_data:
+  flowise_data:
