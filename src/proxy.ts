@@ -18,6 +18,7 @@ const ADMIN_API_PREFIXES = [
 
 const PUBLIC_API_PATHS = [
   "/api/auth/login",
+  "/api/customer/auth/login",
   "/api/health",
   "/api/chat/webhook",
   "/api/chat/inbound",
@@ -81,7 +82,7 @@ export async function proxy(request: NextRequest) {
     return applyCorsHeaders(request, new NextResponse(null, { status: 204 }));
   }
 
-  if (pathname === "/login" || isPublicApiPath(pathname)) {
+  if (pathname === "/login" || pathname === "/cliente/login" || isPublicApiPath(pathname)) {
     if (pathname.startsWith("/api/")) {
       return applyCorsHeaders(request, NextResponse.next());
     }
@@ -104,11 +105,22 @@ export async function proxy(request: NextRequest) {
     return applyCorsHeaders(request, NextResponse.next());
   }
 
-  if (!isAuthenticated && pathname !== "/login") {
+  if (!isAuthenticated && pathname !== "/login" && pathname !== "/cliente/login") {
+    if (pathname.startsWith("/cliente")) {
+      return NextResponse.redirect(new URL("/cliente/login", request.url));
+    }
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
   if (isAuthenticated && pathname === "/login") {
+    return NextResponse.redirect(new URL("/", request.url));
+  }
+
+  if (isAuthenticated && pathname === "/cliente/login") {
+    return NextResponse.redirect(new URL("/cliente", request.url));
+  }
+
+  if (pathname.startsWith("/cliente") && payload?.role !== "CUSTOMER") {
     return NextResponse.redirect(new URL("/", request.url));
   }
 

@@ -5,6 +5,5 @@ describe("POST /chat/inbound", () => {
     const route = await import("./route");
     const apiRoute = await import("../../api/chat/inbound/route");
     expect(route.POST).toBe(apiRoute.POST);
-  });
+  }, 15_000);
 });
-

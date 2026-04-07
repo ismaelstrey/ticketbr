@@ -122,10 +122,28 @@ model Funcionario {
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
 
+  isAdmin        Boolean     @default(false) @map("is_admin")
+
   @@unique([solicitante_id, telefone])
   @@index([solicitante_id])
   @@index([telefone])
   @@index([whatsappContactId])
+}
+
+model AuditLog {
+  id            String   @id @default(cuid())
+  solicitanteId String?  @map("solicitante_id")
+  actorUserId   String?  @map("actor_user_id")
+  action        String
+  entity        String
+  entityId      String?  @map("entity_id")
+  metadata      Json?    @map("metadata")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  @@index([solicitanteId, createdAt])
+  @@index([actorUserId, createdAt])
+  @@index([entity, entityId])
+  @@map("audit_logs")
 }
 
 model Tipo_Ticket {

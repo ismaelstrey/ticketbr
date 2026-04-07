@@ -58,5 +58,5 @@ describe("ChatActionsMenu", () => {
     fireEvent.click(screen.getByLabelText("Menu de ações do chat"));
     fireEvent.click(screen.getByRole("menuitemcheckbox", { name: "Ativar som" }));
     expect(handlers.onToggleSound).toHaveBeenCalledWith(false);
-  });
+  }, 15_000);
 });

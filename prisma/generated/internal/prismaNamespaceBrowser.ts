@@ -55,6 +55,7 @@ export const ModelName = {
   WhatsAppContact: 'WhatsAppContact',
   Solicitante: 'Solicitante',
   Funcionario: 'Funcionario',
+  AuditLog: 'AuditLog',
   Tipo_Ticket: 'Tipo_Ticket',
   Categoria_Ticket: 'Categoria_Ticket',
   Mesa_Trabalho: 'Mesa_Trabalho',
@@ -148,10 +149,25 @@ export const FuncionarioScalarFieldEnum = {
   instanceId: 'instanceId',
   whatsappContactId: 'whatsappContactId',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  isAdmin: 'isAdmin'
 } as const
 
 export type FuncionarioScalarFieldEnum = (typeof FuncionarioScalarFieldEnum)[keyof typeof FuncionarioScalarFieldEnum]
+
+
+export const AuditLogScalarFieldEnum = {
+  id: 'id',
+  solicitanteId: 'solicitanteId',
+  actorUserId: 'actorUserId',
+  action: 'action',
+  entity: 'entity',
+  entityId: 'entityId',
+  metadata: 'metadata',
+  createdAt: 'createdAt'
+} as const
+
+export type AuditLogScalarFieldEnum = (typeof AuditLogScalarFieldEnum)[keyof typeof AuditLogScalarFieldEnum]
 
 
 export const Tipo_TicketScalarFieldEnum = {

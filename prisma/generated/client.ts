@@ -60,6 +60,11 @@ export type Solicitante = Prisma.SolicitanteModel
  */
 export type Funcionario = Prisma.FuncionarioModel
 /**
+ * Model AuditLog
+ * 
+ */
+export type AuditLog = Prisma.AuditLogModel
+/**
  * Model Tipo_Ticket
  * 
  */

@@ -39,6 +39,7 @@ export type FuncionarioMinAggregateOutputType = {
   whatsappContactId: string | null
   createdAt: Date | null
   updatedAt: Date | null
+  isAdmin: boolean | null
 }
 
 export type FuncionarioMaxAggregateOutputType = {
@@ -56,6 +57,7 @@ export type FuncionarioMaxAggregateOutputType = {
   whatsappContactId: string | null
   createdAt: Date | null
   updatedAt: Date | null
+  isAdmin: boolean | null
 }
 
 export type FuncionarioCountAggregateOutputType = {
@@ -73,6 +75,7 @@ export type FuncionarioCountAggregateOutputType = {
   whatsappContactId: number
   createdAt: number
   updatedAt: number
+  isAdmin: number
   _all: number
 }
 
@@ -92,6 +95,7 @@ export type FuncionarioMinAggregateInputType = {
   whatsappContactId?: true
   createdAt?: true
   updatedAt?: true
+  isAdmin?: true
 }
 
 export type FuncionarioMaxAggregateInputType = {
@@ -109,6 +113,7 @@ export type FuncionarioMaxAggregateInputType = {
   whatsappContactId?: true
   createdAt?: true
   updatedAt?: true
+  isAdmin?: true
 }
 
 export type FuncionarioCountAggregateInputType = {
@@ -126,6 +131,7 @@ export type FuncionarioCountAggregateInputType = {
   whatsappContactId?: true
   createdAt?: true
   updatedAt?: true
+  isAdmin?: true
   _all?: true
 }
 
@@ -216,6 +222,7 @@ export type FuncionarioGroupByOutputType = {
   whatsappContactId: string | null
   createdAt: Date
   updatedAt: Date
+  isAdmin: boolean
   _count: FuncionarioCountAggregateOutputType | null
   _min: FuncionarioMinAggregateOutputType | null
   _max: FuncionarioMaxAggregateOutputType | null
@@ -254,6 +261,7 @@ export type FuncionarioWhereInput = {
   whatsappContactId?: Prisma.StringNullableFilter<"Funcionario"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Funcionario"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Funcionario"> | Date | string
+  isAdmin?: Prisma.BoolFilter<"Funcionario"> | boolean
   solicitante?: Prisma.XOR<Prisma.SolicitanteScalarRelationFilter, Prisma.SolicitanteWhereInput>
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   whatsappContact?: Prisma.XOR<Prisma.WhatsAppContactNullableScalarRelationFilter, Prisma.WhatsAppContactWhereInput> | null
@@ -274,6 +282,7 @@ export type FuncionarioOrderByWithRelationInput = {
   whatsappContactId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  isAdmin?: Prisma.SortOrder
   solicitante?: Prisma.SolicitanteOrderByWithRelationInput
   user?: Prisma.UserOrderByWithRelationInput
   whatsappContact?: Prisma.WhatsAppContactOrderByWithRelationInput
@@ -298,6 +307,7 @@ export type FuncionarioWhereUniqueInput = Prisma.AtLeast<{
   whatsappContactId?: Prisma.StringNullableFilter<"Funcionario"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Funcionario"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Funcionario"> | Date | string
+  isAdmin?: Prisma.BoolFilter<"Funcionario"> | boolean
   solicitante?: Prisma.XOR<Prisma.SolicitanteScalarRelationFilter, Prisma.SolicitanteWhereInput>
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   whatsappContact?: Prisma.XOR<Prisma.WhatsAppContactNullableScalarRelationFilter, Prisma.WhatsAppContactWhereInput> | null
@@ -318,6 +328,7 @@ export type FuncionarioOrderByWithAggregationInput = {
   whatsappContactId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  isAdmin?: Prisma.SortOrder
   _count?: Prisma.FuncionarioCountOrderByAggregateInput
   _max?: Prisma.FuncionarioMaxOrderByAggregateInput
   _min?: Prisma.FuncionarioMinOrderByAggregateInput
@@ -341,6 +352,7 @@ export type FuncionarioScalarWhereWithAggregatesInput = {
   whatsappContactId?: Prisma.StringNullableWithAggregatesFilter<"Funcionario"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Funcionario"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Funcionario"> | Date | string
+  isAdmin?: Prisma.BoolWithAggregatesFilter<"Funcionario"> | boolean
 }
 
 export type FuncionarioCreateInput = {
@@ -355,6 +367,7 @@ export type FuncionarioCreateInput = {
   instanceId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  isAdmin?: boolean
   solicitante: Prisma.SolicitanteCreateNestedOneWithoutFuncionariosInput
   user: Prisma.UserCreateNestedOneWithoutFuncionarioInput
   whatsappContact?: Prisma.WhatsAppContactCreateNestedOneWithoutFuncionariosInput
@@ -375,6 +388,7 @@ export type FuncionarioUncheckedCreateInput = {
   whatsappContactId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  isAdmin?: boolean
 }
 
 export type FuncionarioUpdateInput = {
@@ -389,6 +403,7 @@ export type FuncionarioUpdateInput = {
   instanceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   solicitante?: Prisma.SolicitanteUpdateOneRequiredWithoutFuncionariosNestedInput
   user?: Prisma.UserUpdateOneRequiredWithoutFuncionarioNestedInput
   whatsappContact?: Prisma.WhatsAppContactUpdateOneWithoutFuncionariosNestedInput
@@ -409,6 +424,7 @@ export type FuncionarioUncheckedUpdateInput = {
   whatsappContactId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type FuncionarioCreateManyInput = {
@@ -426,6 +442,7 @@ export type FuncionarioCreateManyInput = {
   whatsappContactId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  isAdmin?: boolean
 }
 
 export type FuncionarioUpdateManyMutationInput = {
@@ -440,6 +457,7 @@ export type FuncionarioUpdateManyMutationInput = {
   instanceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type FuncionarioUncheckedUpdateManyInput = {
@@ -457,6 +475,7 @@ export type FuncionarioUncheckedUpdateManyInput = {
   whatsappContactId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type FuncionarioNullableScalarRelationFilter = {
@@ -494,6 +513,7 @@ export type FuncionarioCountOrderByAggregateInput = {
   whatsappContactId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  isAdmin?: Prisma.SortOrder
 }
 
 export type FuncionarioMaxOrderByAggregateInput = {
@@ -511,6 +531,7 @@ export type FuncionarioMaxOrderByAggregateInput = {
   whatsappContactId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  isAdmin?: Prisma.SortOrder
 }
 
 export type FuncionarioMinOrderByAggregateInput = {
@@ -528,6 +549,7 @@ export type FuncionarioMinOrderByAggregateInput = {
   whatsappContactId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  isAdmin?: Prisma.SortOrder
 }
 
 export type FuncionarioCreateNestedOneWithoutUserInput = {
@@ -658,6 +680,7 @@ export type FuncionarioCreateWithoutUserInput = {
   instanceId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  isAdmin?: boolean
   solicitante: Prisma.SolicitanteCreateNestedOneWithoutFuncionariosInput
   whatsappContact?: Prisma.WhatsAppContactCreateNestedOneWithoutFuncionariosInput
 }
@@ -676,6 +699,7 @@ export type FuncionarioUncheckedCreateWithoutUserInput = {
   whatsappContactId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  isAdmin?: boolean
 }
 
 export type FuncionarioCreateOrConnectWithoutUserInput = {
@@ -706,6 +730,7 @@ export type FuncionarioUpdateWithoutUserInput = {
   instanceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   solicitante?: Prisma.SolicitanteUpdateOneRequiredWithoutFuncionariosNestedInput
   whatsappContact?: Prisma.WhatsAppContactUpdateOneWithoutFuncionariosNestedInput
 }
@@ -724,6 +749,7 @@ export type FuncionarioUncheckedUpdateWithoutUserInput = {
   whatsappContactId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type FuncionarioCreateWithoutWhatsappContactInput = {
@@ -738,6 +764,7 @@ export type FuncionarioCreateWithoutWhatsappContactInput = {
   instanceId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  isAdmin?: boolean
   solicitante: Prisma.SolicitanteCreateNestedOneWithoutFuncionariosInput
   user: Prisma.UserCreateNestedOneWithoutFuncionarioInput
 }
@@ -756,6 +783,7 @@ export type FuncionarioUncheckedCreateWithoutWhatsappContactInput = {
   instanceId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  isAdmin?: boolean
 }
 
 export type FuncionarioCreateOrConnectWithoutWhatsappContactInput = {
@@ -802,6 +830,7 @@ export type FuncionarioScalarWhereInput = {
   whatsappContactId?: Prisma.StringNullableFilter<"Funcionario"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Funcionario"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Funcionario"> | Date | string
+  isAdmin?: Prisma.BoolFilter<"Funcionario"> | boolean
 }
 
 export type FuncionarioCreateWithoutSolicitanteInput = {
@@ -816,6 +845,7 @@ export type FuncionarioCreateWithoutSolicitanteInput = {
   instanceId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  isAdmin?: boolean
   user: Prisma.UserCreateNestedOneWithoutFuncionarioInput
   whatsappContact?: Prisma.WhatsAppContactCreateNestedOneWithoutFuncionariosInput
 }
@@ -834,6 +864,7 @@ export type FuncionarioUncheckedCreateWithoutSolicitanteInput = {
   whatsappContactId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  isAdmin?: boolean
 }
 
 export type FuncionarioCreateOrConnectWithoutSolicitanteInput = {
@@ -876,6 +907,7 @@ export type FuncionarioCreateManyWhatsappContactInput = {
   instanceId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  isAdmin?: boolean
 }
 
 export type FuncionarioUpdateWithoutWhatsappContactInput = {
@@ -890,6 +922,7 @@ export type FuncionarioUpdateWithoutWhatsappContactInput = {
   instanceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   solicitante?: Prisma.SolicitanteUpdateOneRequiredWithoutFuncionariosNestedInput
   user?: Prisma.UserUpdateOneRequiredWithoutFuncionarioNestedInput
 }
@@ -908,6 +941,7 @@ export type FuncionarioUncheckedUpdateWithoutWhatsappContactInput = {
   instanceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type FuncionarioUncheckedUpdateManyWithoutWhatsappContactInput = {
@@ -924,6 +958,7 @@ export type FuncionarioUncheckedUpdateManyWithoutWhatsappContactInput = {
   instanceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type FuncionarioCreateManySolicitanteInput = {
@@ -940,6 +975,7 @@ export type FuncionarioCreateManySolicitanteInput = {
   whatsappContactId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  isAdmin?: boolean
 }
 
 export type FuncionarioUpdateWithoutSolicitanteInput = {
@@ -954,6 +990,7 @@ export type FuncionarioUpdateWithoutSolicitanteInput = {
   instanceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   user?: Prisma.UserUpdateOneRequiredWithoutFuncionarioNestedInput
   whatsappContact?: Prisma.WhatsAppContactUpdateOneWithoutFuncionariosNestedInput
 }
@@ -972,6 +1009,7 @@ export type FuncionarioUncheckedUpdateWithoutSolicitanteInput = {
   whatsappContactId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type FuncionarioUncheckedUpdateManyWithoutSolicitanteInput = {
@@ -988,6 +1026,7 @@ export type FuncionarioUncheckedUpdateManyWithoutSolicitanteInput = {
   whatsappContactId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 
@@ -1007,6 +1046,7 @@ export type FuncionarioSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   whatsappContactId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  isAdmin?: boolean
   solicitante?: boolean | Prisma.SolicitanteDefaultArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   whatsappContact?: boolean | Prisma.Funcionario$whatsappContactArgs<ExtArgs>
@@ -1027,6 +1067,7 @@ export type FuncionarioSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   whatsappContactId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  isAdmin?: boolean
   solicitante?: boolean | Prisma.SolicitanteDefaultArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   whatsappContact?: boolean | Prisma.Funcionario$whatsappContactArgs<ExtArgs>
@@ -1047,6 +1088,7 @@ export type FuncionarioSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   whatsappContactId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  isAdmin?: boolean
   solicitante?: boolean | Prisma.SolicitanteDefaultArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   whatsappContact?: boolean | Prisma.Funcionario$whatsappContactArgs<ExtArgs>
@@ -1067,9 +1109,10 @@ export type FuncionarioSelectScalar = {
   whatsappContactId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  isAdmin?: boolean
 }
 
-export type FuncionarioOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "solicitante_id" | "userId" | "nome" | "email" | "telefone" | "whatsappId" | "remoteJid" | "pushName" | "profilePicUrl" | "instanceId" | "whatsappContactId" | "createdAt" | "updatedAt", ExtArgs["result"]["funcionario"]>
+export type FuncionarioOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "solicitante_id" | "userId" | "nome" | "email" | "telefone" | "whatsappId" | "remoteJid" | "pushName" | "profilePicUrl" | "instanceId" | "whatsappContactId" | "createdAt" | "updatedAt" | "isAdmin", ExtArgs["result"]["funcionario"]>
 export type FuncionarioInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   solicitante?: boolean | Prisma.SolicitanteDefaultArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1108,6 +1151,7 @@ export type $FuncionarioPayload<ExtArgs extends runtime.Types.Extensions.Interna
     whatsappContactId: string | null
     createdAt: Date
     updatedAt: Date
+    isAdmin: boolean
   }, ExtArgs["result"]["funcionario"]>
   composites: {}
 }
@@ -1548,6 +1592,7 @@ export interface FuncionarioFieldRefs {
   readonly whatsappContactId: Prisma.FieldRef<"Funcionario", 'String'>
   readonly createdAt: Prisma.FieldRef<"Funcionario", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Funcionario", 'DateTime'>
+  readonly isAdmin: Prisma.FieldRef<"Funcionario", 'Boolean'>
 }
     
 
