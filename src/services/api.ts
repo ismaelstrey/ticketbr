@@ -1,6 +1,7 @@
 import { Ticket, TicketStatus } from "@/types/ticket";
 import { Task } from "@/types/task";
 import { Project } from "@/types/project";
+import { TicketOperationalDashboardResponse, TicketDashboardFilters } from "@/types/ticketsDashboard";
 
 const API_BASE = "/api";
 
@@ -89,5 +90,15 @@ export const api = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     })
+  },
+  dashboard: {
+    ticketsOperational: (params?: TicketDashboardFilters) => {
+      const qs = params ? `?${new URLSearchParams(params as any).toString()}` : "";
+      return fetchJson<TicketOperationalDashboardResponse>(`/dashboard/tickets${qs}`);
+    },
+    exportTicketsOperational: (params: TicketDashboardFilters & { format: "xlsx" | "pdf" | "json" }) => {
+      const qs = `?${new URLSearchParams(params as any).toString()}`;
+      return fetch(`${API_BASE}/dashboard/tickets/export${qs}`);
+    }
   }
 };

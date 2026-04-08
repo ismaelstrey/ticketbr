@@ -268,7 +268,15 @@ interface MenuItemType {
 }
 
 const menuItems: MenuItemType[] = [
-  { label: "Dashboards", icon: FiHome, path: "/ticket/kanban" },
+  {
+    label: "Dashboards",
+    icon: FiHome,
+    path: "/",
+    subItems: [
+      { label: "Operacional", path: "/" },
+      { label: "Kanban", path: "/ticket/kanban" }
+    ]
+  },
   { label: "Tarefas", icon: FiGrid, path: "/tasks" },
   { label: "Projetos", icon: FiBookOpen, path: "/projects" },
   { label: "Inventário", icon: FiWifi, path: "/inventory" },
