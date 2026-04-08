@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import styled from "styled-components";
 import { AppShellContainer, MainContent } from "@/components/layout/AppShell";
@@ -60,6 +60,31 @@ function stateToParams(state: ProjectsFiltersState) {
 }
 
 export default function ProjectsListPage() {
+  return (
+    <Suspense
+      fallback={
+        <AppShellContainer>
+          <Sidebar />
+          <MainContent>
+            <Page>
+              <HeaderRow>
+                <div>
+                  <Title>Projetos</Title>
+                  <Sub>Carregando...</Sub>
+                </div>
+              </HeaderRow>
+              <ProjectsTable projects={[]} loading={true} onOpen={() => {}} />
+            </Page>
+          </MainContent>
+        </AppShellContainer>
+      }
+    >
+      <ProjectsListInner />
+    </Suspense>
+  );
+}
+
+function ProjectsListInner() {
   const router = useRouter();
   const sp = useSearchParams();
   const [filters, setFilters] = useState<ProjectsFiltersState>(() => spToState(sp));
@@ -162,4 +187,3 @@ export default function ProjectsListPage() {
     </AppShellContainer>
   );
 }
-
