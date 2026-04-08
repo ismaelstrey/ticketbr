@@ -1,4 +1,5 @@
 import { getSession } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 
 export type StaffSession = {
   userId: string;
@@ -22,6 +23,14 @@ export async function requireStaffSession(): Promise<StaffSession> {
     throw new Error("FORBIDDEN");
   }
 
+  const user = await prisma.user.findUnique({ where: { id: userId }, select: { id: true, role: true } });
+  if (!user) {
+    throw new Error("UNAUTHORIZED");
+  }
+  if (user.role !== "ADMIN" && user.role !== "AGENT") {
+    throw new Error("FORBIDDEN");
+  }
+
   return {
     userId,
     role,
@@ -29,4 +38,3 @@ export async function requireStaffSession(): Promise<StaffSession> {
     email
   };
 }
-

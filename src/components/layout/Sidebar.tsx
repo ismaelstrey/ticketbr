@@ -20,7 +20,7 @@ import {
 } from "@/components/icons";
 
 const EXPANDED_WIDTH = "288px";
-const COLLAPSED_WIDTH = "84px";
+const COLLAPSED_WIDTH = "72px";
 
 const SidebarContainer = styled.aside<{ $isExpanded: boolean }>`
   background: ${({ theme }) => theme.colors.sidebar.background};
@@ -138,11 +138,12 @@ const MenuItem = styled.button<{ $isActive: boolean; $isExpanded: boolean }>`
   align-items: center;
   width: 100%;
   padding: 0.62rem 0.72rem;
-  background: ${({ $isActive }) => ($isActive ? "rgba(59, 130, 246, 0.12)" : "transparent")};
+  background: ${({ $isActive }) => ($isActive ? "rgba(148, 163, 184, 0.12)" : "transparent")};
   border: 1px solid transparent;
   border-radius: 10px;
   cursor: pointer;
-  color: ${({ $isActive, theme }) => ($isActive ? theme.colors.sidebar.activeText : theme.colors.text.secondary)};
+  color: ${({ theme }) => theme.colors.text.primary};
+  opacity: ${({ $isActive }) => ($isActive ? 1 : 0.72)};
   transition: all 0.22s ease;
   justify-content: ${({ $isExpanded }) => ($isExpanded ? "flex-start" : "center")};
   position: relative;
@@ -159,7 +160,7 @@ const MenuItem = styled.button<{ $isActive: boolean; $isExpanded: boolean }>`
 
   &:hover {
     background: rgba(148, 163, 184, 0.1);
-    color: ${({ theme }) => theme.colors.text.primary};
+    opacity: 1;
     transform: translateX(1px);
   }
 
@@ -168,28 +169,25 @@ const MenuItem = styled.button<{ $isActive: boolean; $isExpanded: boolean }>`
   }
 `;
 
-const IconWrap = styled.span<{ $isActive: boolean }>`
+const IconWrap = styled.span`
   width: 24px;
   height: 24px;
   border-radius: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: ${({ $isActive, theme }) => ($isActive ? theme.colors.primary : theme.colors.text.muted)};
+  color: inherit;
   background: transparent;
   box-shadow: none;
   transition: all 0.22s ease;
   position: relative;
   z-index: 1;
 
-  ${MenuItem}:hover & {
-    background: transparent;
-    color: ${({ theme }) => theme.colors.primary};
-    box-shadow: none;
-  }
+  font-size: 22px;
 
-  svg {
-    font-size: 1rem;
+  & > svg {
+    width: 22px;
+    height: 22px;
   }
 `;
 
@@ -224,16 +222,17 @@ const SubMenu = styled.div<{ $isOpen: boolean; $isExpanded: boolean }>`
 const SubMenuItem = styled.a<{ $isActive: boolean }>`
   display: block;
   padding: 0.5rem 0.65rem;
-  color: ${({ $isActive, theme }) => ($isActive ? theme.colors.text.primary : theme.colors.text.muted)};
+  color: ${({ theme }) => theme.colors.text.primary};
+  opacity: ${({ $isActive }) => ($isActive ? 1 : 0.72)};
   font-size: 0.84rem;
   text-decoration: none;
   border-radius: 10px;
-  background: ${({ $isActive }) => ($isActive ? "rgba(59, 130, 246, 0.1)" : "transparent")};
+  background: ${({ $isActive }) => ($isActive ? "rgba(148, 163, 184, 0.1)" : "transparent")};
   border: 1px solid transparent;
   transition: all 0.18s ease;
 
   &:hover {
-    color: ${({ theme }) => theme.colors.text.primary};
+    opacity: 1;
     background: rgba(148, 163, 184, 0.08);
   }
 `;
@@ -292,7 +291,7 @@ const menuItems: MenuItemType[] = [
 
 const UserSection = styled.div<{ $isExpanded: boolean }>`
   border-top: 1px solid ${({ theme }) => theme.colors.border};
-  padding: 1rem 0.85rem 1.1rem;
+  padding: ${({ $isExpanded }) => ($isExpanded ? "1rem 0.85rem 1.1rem" : "0.9rem 0.55rem 1.05rem")};
   margin-top: auto;
   display: flex;
   flex-direction: column;
@@ -349,22 +348,22 @@ const UserRole = styled.span`
 
 const LogoutButton = styled.button<{ $isExpanded: boolean }>`
   background: transparent;
-  border: 0px solid rgba(248, 113, 113, 0.16);
+  border: 1px solid transparent;
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 0.8rem;
   padding: 0.8rem 0.85rem;
-  // border-radius: 16px;
-  // color: #fda4af;
+  border-radius: 10px;
+  color: ${({ theme }) => theme.colors.text.primary};
+  opacity: 0.72;
   width: 100%;
   transition: all 0.2s ease;
   justify-content: ${({ $isExpanded }) => ($isExpanded ? "flex-start" : "center")};
 
   &:hover {
-    // background: rgba(127, 29, 29, 0.28);
-    border-color: rgba(248, 113, 113, 0.26);
-     color: #fecdd3;
+    background: rgba(148, 163, 184, 0.1);
+    opacity: 1;
   }
 
   span {
@@ -474,7 +473,7 @@ export function Sidebar() {
                   onClick={() => handleMenuClick(item)}
                   title={!isExpanded ? item.label : ""}
                 >
-                  <IconWrap $isActive={isActive}>
+                  <IconWrap>
                     <item.icon />
                   </IconWrap>
                   <MenuLabel $isExpanded={isExpanded}>{item.label}</MenuLabel>

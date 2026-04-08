@@ -145,7 +145,14 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: "Conflito de dados" }, { status: 409 });
       }
       if (error.code === "P2003") {
-        return NextResponse.json({ error: "Responsável inválido" }, { status: 400 });
+        const metaField = String((error.meta as any)?.field_name || (error.meta as any)?.constraint || "").toLowerCase();
+        if (metaField.includes("assignee") || metaField.includes("assignee_id")) {
+          return NextResponse.json({ error: "Responsável inválido" }, { status: 400 });
+        }
+        if (metaField.includes("created_by") || metaField.includes("created_by_id")) {
+          return NextResponse.json({ error: "Sessão inválida (usuário não encontrado)" }, { status: 401 });
+        }
+        return NextResponse.json({ error: "Referência inválida" }, { status: 400 });
       }
       if (error.code === "P2021") {
         return NextResponse.json(
