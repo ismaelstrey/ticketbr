@@ -107,3 +107,18 @@ export type TaskAttachment = Prisma.TaskAttachmentModel
  * 
  */
 export type TaskTicketLink = Prisma.TaskTicketLinkModel
+/**
+ * Model Project
+ * 
+ */
+export type Project = Prisma.ProjectModel
+/**
+ * Model ProjectMember
+ * 
+ */
+export type ProjectMember = Prisma.ProjectMemberModel
+/**
+ * Model ProjectExportAudit
+ * 
+ */
+export type ProjectExportAudit = Prisma.ProjectExportAuditModel

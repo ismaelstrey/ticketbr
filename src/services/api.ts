@@ -1,5 +1,6 @@
 import { Ticket, TicketStatus } from "@/types/ticket";
 import { Task } from "@/types/task";
+import { Project } from "@/types/project";
 
 const API_BASE = "/api";
 
@@ -71,5 +72,22 @@ export const api = {
       upload: (taskId: string, payload: any) => fetchJson<{ data: any }>(`/tasks/${taskId}/attachments`, { method: "POST", body: JSON.stringify(payload) }),
       remove: (attachmentId: string) => fetchJson<{ ok: boolean }>(`/tasks/attachments/${attachmentId}`, { method: "DELETE" })
     }
+  }
+  ,
+  projects: {
+    dashboard: () => fetchJson<{ data: { kpis: any; recent: any[] } }>("/projects/dashboard"),
+    list: (params?: Record<string, string>) => {
+      const qs = params ? `?${new URLSearchParams(params).toString()}` : "";
+      return fetchJson<{ data: Project[]; meta: { total: number; page: number; pageSize: number } }>(`/projects${qs}`);
+    },
+    get: (id: string) => fetchJson<{ data: any }>(`/projects/${id}`),
+    create: (payload: any) => fetchJson<{ data: Project }>("/projects", { method: "POST", body: JSON.stringify(payload) }),
+    update: (id: string, payload: any) => fetchJson<{ data: Project }>(`/projects/${id}`, { method: "PATCH", body: JSON.stringify(payload) }),
+    remove: (id: string) => fetchJson<{ ok: boolean }>(`/projects/${id}`, { method: "DELETE" }),
+    export: (payload: any) => fetch(`${API_BASE}/projects/export`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    })
   }
 };

@@ -68,7 +68,10 @@ export const ModelName = {
   Task: 'Task',
   TaskSubtask: 'TaskSubtask',
   TaskAttachment: 'TaskAttachment',
-  TaskTicketLink: 'TaskTicketLink'
+  TaskTicketLink: 'TaskTicketLink',
+  Project: 'Project',
+  ProjectMember: 'ProjectMember',
+  ProjectExportAudit: 'ProjectExportAudit'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -405,6 +408,45 @@ export const TaskTicketLinkScalarFieldEnum = {
 } as const
 
 export type TaskTicketLinkScalarFieldEnum = (typeof TaskTicketLinkScalarFieldEnum)[keyof typeof TaskTicketLinkScalarFieldEnum]
+
+
+export const ProjectScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  description: 'description',
+  status: 'status',
+  ownerUserId: 'ownerUserId',
+  startDate: 'startDate',
+  endDate: 'endDate',
+  archivedAt: 'archivedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ProjectScalarFieldEnum = (typeof ProjectScalarFieldEnum)[keyof typeof ProjectScalarFieldEnum]
+
+
+export const ProjectMemberScalarFieldEnum = {
+  id: 'id',
+  projectId: 'projectId',
+  userId: 'userId',
+  role: 'role',
+  createdAt: 'createdAt'
+} as const
+
+export type ProjectMemberScalarFieldEnum = (typeof ProjectMemberScalarFieldEnum)[keyof typeof ProjectMemberScalarFieldEnum]
+
+
+export const ProjectExportAuditScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  projectId: 'projectId',
+  format: 'format',
+  filters: 'filters',
+  createdAt: 'createdAt'
+} as const
+
+export type ProjectExportAuditScalarFieldEnum = (typeof ProjectExportAuditScalarFieldEnum)[keyof typeof ProjectExportAuditScalarFieldEnum]
 
 
 export const SortOrder = {

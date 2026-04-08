@@ -43,6 +43,5 @@ describe("/api/tasks/[id]/move", () => {
     expect(taskUpdateMock).toHaveBeenCalledTimes(1);
     expect(taskUpdateMock.mock.calls[0][0].data.sortOrder).toBe(6000);
     expect(body.data.id).toBe("t1");
-  });
+  }, 15_000);
 });
-

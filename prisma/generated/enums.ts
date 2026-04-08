@@ -60,6 +60,15 @@ export const TaskPriority = {
 export type TaskPriority = (typeof TaskPriority)[keyof typeof TaskPriority]
 
 
+export const ProjectStatus = {
+  DRAFT: 'DRAFT',
+  ACTIVE: 'ACTIVE',
+  ARCHIVED: 'ARCHIVED'
+} as const
+
+export type ProjectStatus = (typeof ProjectStatus)[keyof typeof ProjectStatus]
+
+
 export const Role = {
   ADMIN: 'ADMIN',
   AGENT: 'AGENT',

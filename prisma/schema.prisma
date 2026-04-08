@@ -43,6 +43,12 @@ enum TaskPriority {
   LOW
 }
 
+enum ProjectStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
 enum Role {
   ADMIN
   AGENT
@@ -69,6 +75,10 @@ model User {
   createdTasks Task[] @relation("TaskCreatedBy")
   assignedTasks Task[] @relation("TaskAssignee")
   createdTaskAttachments TaskAttachment[] @relation("TaskAttachmentCreatedBy")
+
+  ownedProjects Project[] @relation("ProjectOwner")
+  projectMemberships ProjectMember[]
+  projectExports ProjectExportAudit[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -459,4 +469,60 @@ model TaskTicketLink {
 
   @@unique([taskId, ticketId])
   @@index([ticketId])
+}
+
+model Project {
+  id          String        @id @default(cuid())
+  name        String        @db.VarChar(180)
+  description String?       @db.Text
+  status      ProjectStatus @default(ACTIVE)
+
+  ownerUserId String        @map("owner_user_id")
+  ownerUser   User          @relation("ProjectOwner", fields: [ownerUserId], references: [id], onDelete: Restrict)
+
+  startDate   DateTime?     @db.Date @map("start_date")
+  endDate     DateTime?     @db.Date @map("end_date")
+  archivedAt  DateTime?     @map("archived_at")
+
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+
+  members     ProjectMember[]
+  exports     ProjectExportAudit[]
+
+  @@index([status, createdAt])
+  @@index([ownerUserId, createdAt])
+  @@map("projects")
+}
+
+model ProjectMember {
+  id        String   @id @default(cuid())
+  projectId String   @map("project_id")
+  userId    String   @map("user_id")
+  role      String   @default("member")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, userId])
+  @@index([projectId, createdAt])
+  @@index([userId, createdAt])
+  @@map("project_members")
+}
+
+model ProjectExportAudit {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  projectId String?  @map("project_id")
+  format    String
+  filters   Json     @default("{}")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Restrict)
+  project   Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@index([projectId, createdAt])
+  @@map("project_export_audit")
 }
