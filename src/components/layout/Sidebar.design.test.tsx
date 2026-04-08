@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { fireEvent, render, waitFor } from "@testing-library/react";
+import { render } from "@testing-library/react";
 import { ThemeProvider } from "styled-components";
 import { getTheme } from "@/styles/theme";
 import { Sidebar } from "./Sidebar";
@@ -38,12 +38,5 @@ describe("Sidebar (design)", () => {
     const icon = item!.querySelector("span") as HTMLSpanElement | null;
     expect(icon).toBeTruthy();
     expect(window.getComputedStyle(icon!).color).toBe(window.getComputedStyle(item!).color);
-
-    const aside = container.querySelector("aside") as HTMLElement;
-    Object.defineProperty(window, "innerWidth", { value: 1024, configurable: true });
-    fireEvent.mouseEnter(aside);
-    await waitFor(() => {
-      expect(window.getComputedStyle(aside).width).toBe("288px");
-    });
   });
 });

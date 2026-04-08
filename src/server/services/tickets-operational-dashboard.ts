@@ -155,7 +155,7 @@ export async function getTicketsOperationalDashboard(filters: TicketDashboardFil
     SELECT date_trunc('${volumeGranularity}', t."createdAt") AS bucket, COUNT(*)::int AS count
     FROM "Ticket" t
     WHERE ${sqlBase.sql} AND t."createdAt" >= $${sqlBase.params.length + 1} AND t."createdAt" <= $${sqlBase.params.length + 2}
-    GROUP BY bucket
+    GROUP BY 1
     ORDER BY bucket ASC
   `;
   const volumeRows = await prisma.$queryRawUnsafe<any[]>(volumeSql, ...sqlBase.params, window.from, window.to);
@@ -167,7 +167,7 @@ export async function getTicketsOperationalDashboard(filters: TicketDashboardFil
     FROM "Ticket" t
     LEFT JOIN "Solicitante" s ON s.id = t."solicitante_id"
     WHERE ${sqlBase.sql} AND t."createdAt" >= $${sqlBase.params.length + 1} AND t."createdAt" <= $${sqlBase.params.length + 2}
-    GROUP BY "clientId", "clientName"
+    GROUP BY 1, 2
     ORDER BY count DESC
     LIMIT 10
   `;
@@ -180,8 +180,8 @@ export async function getTicketsOperationalDashboard(filters: TicketDashboardFil
     FROM "Ticket" t
     LEFT JOIN "Categoria_Ticket" c ON c.id = t."categoria_id"
     WHERE ${sqlBase.sql} AND t."createdAt" >= $${sqlBase.params.length + 1} AND t."createdAt" <= $${sqlBase.params.length + 2}
-    GROUP BY bucket, category
-    ORDER BY bucket ASC
+    GROUP BY 1, 2
+    ORDER BY 1 ASC
   `;
   const categoryTrendRows = await prisma.$queryRawUnsafe<any[]>(categoryTrendSql, ...sqlBase.params, window.from, window.to);
 
@@ -342,4 +342,3 @@ export async function getTicketsOperationalDashboard(filters: TicketDashboardFil
     }
   };
 }
-

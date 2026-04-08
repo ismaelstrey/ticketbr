@@ -1,7 +1,33 @@
+import React from "react";
 import { describe, expect, it, vi } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import { ThemeProvider } from "styled-components";
 import { getTheme } from "@/styles/theme";
+
+vi.mock("recharts", async () => {
+  const Null = ({ children }: any) => <div data-recharts="stub">{children}</div>;
+  return {
+    ResponsiveContainer: ({ children }: any) => {
+      const child = Array.isArray(children) ? children[0] : children;
+      if (!React.isValidElement(child)) return <div />;
+      return React.cloneElement(child as any, { width: 900, height: 260 });
+    },
+    PieChart: Null,
+    Pie: Null,
+    Cell: Null,
+    Tooltip: Null,
+    BarChart: Null,
+    Bar: Null,
+    XAxis: Null,
+    YAxis: Null,
+    CartesianGrid: Null,
+    LineChart: Null,
+    Line: Null,
+    AreaChart: Null,
+    Area: Null,
+    Legend: Null
+  };
+});
 
 vi.mock("@/services/api", () => ({
   api: {
@@ -59,6 +85,11 @@ describe("TicketOperationalDashboard", () => {
       unobserve() {}
       disconnect() {}
     };
+
+    Object.defineProperty(HTMLElement.prototype, "offsetWidth", { configurable: true, get: () => 900 });
+    Object.defineProperty(HTMLElement.prototype, "offsetHeight", { configurable: true, get: () => 600 });
+    Object.defineProperty(HTMLElement.prototype, "clientWidth", { configurable: true, get: () => 900 });
+    Object.defineProperty(HTMLElement.prototype, "clientHeight", { configurable: true, get: () => 600 });
 
     (HTMLElement.prototype as any).getBoundingClientRect = () => ({
       width: 900,
