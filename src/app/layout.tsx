@@ -37,7 +37,7 @@ export default function RootLayout({
           <StyledComponentsProvider>
             <AuthProvider>
               <ToastProvider>
-                <ChatOpenConversationsProvider pollIntervalMs={100000}>
+                <ChatOpenConversationsProvider pollIntervalMs={10000000}>
                   {children}
                   <GlobalChatButton />
                 </ChatOpenConversationsProvider>
