@@ -42,6 +42,24 @@ export const TicketEventType = {
 export type TicketEventType = (typeof TicketEventType)[keyof typeof TicketEventType]
 
 
+export const TaskStatus = {
+  PENDING: 'PENDING',
+  IN_PROGRESS: 'IN_PROGRESS',
+  DONE: 'DONE'
+} as const
+
+export type TaskStatus = (typeof TaskStatus)[keyof typeof TaskStatus]
+
+
+export const TaskPriority = {
+  HIGH: 'HIGH',
+  MEDIUM: 'MEDIUM',
+  LOW: 'LOW'
+} as const
+
+export type TaskPriority = (typeof TaskPriority)[keyof typeof TaskPriority]
+
+
 export const Role = {
   ADMIN: 'ADMIN',
   AGENT: 'AGENT',

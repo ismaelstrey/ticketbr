@@ -48,7 +48,7 @@ services:
     image: n8nio/n8n:latest
     restart: unless-stopped
     environment:
-      WEBHOOK_URL: http://host.docker.internal:5678
+      WEBHOOK_URL: https://n8n.strey.com.br
       N8N_HOST: host.docker.internal
       GENERIC_TIMEZONE: America/Sao_Paulo
       N8N_LOG_LEVEL: info
@@ -65,7 +65,7 @@ services:
     environment:
       PORT: "3000"
     ports:
-      - "3001:3000"
+      - "3002:3000"
     volumes:
       - flowise_data:/root/.flowise
 

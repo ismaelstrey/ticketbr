@@ -109,3 +109,23 @@ export type Conversation = Prisma.ConversationModel
  * 
  */
 export type Message = Prisma.MessageModel
+/**
+ * Model Task
+ * 
+ */
+export type Task = Prisma.TaskModel
+/**
+ * Model TaskSubtask
+ * 
+ */
+export type TaskSubtask = Prisma.TaskSubtaskModel
+/**
+ * Model TaskAttachment
+ * 
+ */
+export type TaskAttachment = Prisma.TaskAttachmentModel
+/**
+ * Model TaskTicketLink
+ * 
+ */
+export type TaskTicketLink = Prisma.TaskTicketLinkModel

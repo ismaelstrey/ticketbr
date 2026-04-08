@@ -31,6 +31,18 @@ enum TicketEventType {
   UPDATED
 }
 
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  DONE
+}
+
+enum TaskPriority {
+  HIGH
+  MEDIUM
+  LOW
+}
+
 enum Role {
   ADMIN
   AGENT
@@ -53,6 +65,10 @@ model User {
   tickets   Ticket[] @relation("OperatorTickets")
   events    TicketEvent[]
   createdTickets Ticket[] @relation("TicketCreatedBy")
+
+  createdTasks Task[] @relation("TaskCreatedBy")
+  assignedTasks Task[] @relation("TaskAssignee")
+  createdTaskAttachments TaskAttachment[] @relation("TaskAttachmentCreatedBy")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -375,4 +391,72 @@ model Message {
   updatedAt       DateTime  @updatedAt @map("updated_at")
 
   @@map("messages")
+}
+
+model Task {
+  id           String       @id @default(cuid())
+  title        String       @db.VarChar(180)
+  description  String?      @db.Text
+  priority     TaskPriority @default(MEDIUM)
+  status       TaskStatus   @default(PENDING)
+  sortOrder    Float        @default(0) @map("sort_order")
+  dueAt        DateTime?    @map("due_at")
+  completedAt  DateTime?    @map("completed_at")
+
+  assigneeId   String?      @map("assignee_id")
+  assignee     User?        @relation("TaskAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+
+  createdById  String       @map("created_by_id")
+  createdBy    User         @relation("TaskCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  subtasks     TaskSubtask[]
+  attachments  TaskAttachment[]
+  ticketLinks  TaskTicketLink[]
+
+  @@index([status, sortOrder])
+  @@index([dueAt])
+  @@index([assigneeId])
+  @@index([createdById])
+}
+
+model TaskSubtask {
+  id        String   @id @default(cuid())
+  taskId    String   @map("task_id")
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  title     String   @db.VarChar(220)
+  isDone    Boolean  @default(false) @map("is_done")
+  sortOrder Float    @default(0) @map("sort_order")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([taskId, sortOrder])
+}
+
+model TaskAttachment {
+  id          String   @id @default(cuid())
+  taskId      String   @map("task_id")
+  task        Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  fileName    String   @map("file_name")
+  mimeType    String?  @map("mime_type")
+  fileSize    Int?     @map("file_size")
+  data        Bytes
+  createdById String   @map("created_by_id")
+  createdBy   User     @relation("TaskAttachmentCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  createdAt   DateTime @default(now())
+
+  @@index([taskId])
+}
+
+model TaskTicketLink {
+  id        String   @id @default(cuid())
+  taskId    String   @map("task_id")
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  ticketId  String   @map("ticket_id")
+  createdAt DateTime @default(now())
+
+  @@unique([taskId, ticketId])
+  @@index([ticketId])
 }

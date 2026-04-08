@@ -64,7 +64,11 @@ export const ModelName = {
   TicketEvent: 'TicketEvent',
   ChatConversation: 'ChatConversation',
   Conversation: 'Conversation',
-  Message: 'Message'
+  Message: 'Message',
+  Task: 'Task',
+  TaskSubtask: 'TaskSubtask',
+  TaskAttachment: 'TaskAttachment',
+  TaskTicketLink: 'TaskTicketLink'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -346,6 +350,61 @@ export const MessageScalarFieldEnum = {
 } as const
 
 export type MessageScalarFieldEnum = (typeof MessageScalarFieldEnum)[keyof typeof MessageScalarFieldEnum]
+
+
+export const TaskScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  priority: 'priority',
+  status: 'status',
+  sortOrder: 'sortOrder',
+  dueAt: 'dueAt',
+  completedAt: 'completedAt',
+  assigneeId: 'assigneeId',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TaskScalarFieldEnum = (typeof TaskScalarFieldEnum)[keyof typeof TaskScalarFieldEnum]
+
+
+export const TaskSubtaskScalarFieldEnum = {
+  id: 'id',
+  taskId: 'taskId',
+  title: 'title',
+  isDone: 'isDone',
+  sortOrder: 'sortOrder',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TaskSubtaskScalarFieldEnum = (typeof TaskSubtaskScalarFieldEnum)[keyof typeof TaskSubtaskScalarFieldEnum]
+
+
+export const TaskAttachmentScalarFieldEnum = {
+  id: 'id',
+  taskId: 'taskId',
+  fileName: 'fileName',
+  mimeType: 'mimeType',
+  fileSize: 'fileSize',
+  data: 'data',
+  createdById: 'createdById',
+  createdAt: 'createdAt'
+} as const
+
+export type TaskAttachmentScalarFieldEnum = (typeof TaskAttachmentScalarFieldEnum)[keyof typeof TaskAttachmentScalarFieldEnum]
+
+
+export const TaskTicketLinkScalarFieldEnum = {
+  id: 'id',
+  taskId: 'taskId',
+  ticketId: 'ticketId',
+  createdAt: 'createdAt'
+} as const
+
+export type TaskTicketLinkScalarFieldEnum = (typeof TaskTicketLinkScalarFieldEnum)[keyof typeof TaskTicketLinkScalarFieldEnum]
 
 
 export const SortOrder = {

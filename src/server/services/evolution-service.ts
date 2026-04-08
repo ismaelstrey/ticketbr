@@ -51,7 +51,29 @@ async function evolutionRequest(path: string, init?: RequestInit, overrides?: Wh
   const json = await response.json().catch(() => ({}));
 
   if (!response.ok) {
-    throw new Error(json?.message || json?.error || `Evolution API error (${response.status})`);
+    const topMessage = (() => {
+      if (typeof json?.message === "string" && json.message.trim()) return json.message.trim();
+      if (Array.isArray(json?.message)) {
+        const parts = json.message.map((v: unknown) => (typeof v === "string" ? v.trim() : "")).filter(Boolean);
+        if (parts.length) return parts.join("; ");
+      }
+      if (typeof json?.error === "string" && json.error.trim()) return json.error.trim();
+
+      const nestedMessage = json?.response?.message;
+      if (typeof nestedMessage === "string" && nestedMessage.trim()) return nestedMessage.trim();
+      if (Array.isArray(nestedMessage)) {
+        const parts = nestedMessage.map((v: unknown) => (typeof v === "string" ? v.trim() : "")).filter(Boolean);
+        if (parts.length) return parts.join("; ");
+      }
+      if (typeof json?.response?.error === "string" && json.response.error.trim()) return json.response.error.trim();
+
+      const deep = findStringValue(json, (value) => /does not exist|cannot get|not found/i.test(value));
+      return deep?.trim() || null;
+    })();
+
+    const message = topMessage || `Evolution API error (${response.status})`;
+    const method = (init?.method || "GET").toUpperCase();
+    throw new Error(`${message} (${method} ${cfg.baseUrl}${path})`);
   }
 
   return json;
@@ -262,7 +284,10 @@ export async function fetchConversationsFromEvolution(config?: WhatsAppRuntimeCo
   }
 
   if (lastError) {
-    console.warn("Could not load conversations from Evolution", lastError);
+    const message = lastError instanceof Error ? lastError.message : String(lastError);
+    if (!/instance does not exist/i.test(message)) {
+      console.warn("Could not load conversations from Evolution", lastError);
+    }
   }
   return [];
 }
