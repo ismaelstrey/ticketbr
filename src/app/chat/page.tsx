@@ -6,6 +6,7 @@ import { AppShellContainer, MainContent } from "@/components/layout/AppShell";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Button } from "@/components/ui/Button";
 import { Input, Select, Textarea } from "@/components/ui/Input";
+import { ThinScrollArea } from "@/components/ui/ThinScrollArea";
 import { useToast } from "@/context/ToastContext";
 import { useAuth } from "@/context/AuthContext";
 import { ArchivedChatConversation, ChatContact, ChatMessage, ChatTicketLink } from "@/types/chat";
@@ -107,9 +108,7 @@ const TabButton = styled.button<{ $active?: boolean }>`
   }
 `;
 
-const ContactList = styled.div`
-  overflow: auto;
-`;
+const ContactList = styled(ThinScrollArea)``;
 
 const ContactItem = styled.button<{ $active?: boolean; $open?: boolean }>`
   width: 100%;
