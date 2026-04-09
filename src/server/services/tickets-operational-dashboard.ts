@@ -274,7 +274,7 @@ export async function getTicketsOperationalDashboard(filters: TicketDashboardFil
     FROM "Ticket" t
     LEFT JOIN "Categoria_Ticket" c ON c.id = t."categoria_id"
     WHERE ${sqlBase.sql} AND t."createdAt" >= $${sqlBase.params.length + 1} AND t."createdAt" <= $${sqlBase.params.length + 2}
-    GROUP BY category
+    GROUP BY 1
     ORDER BY count DESC
     LIMIT 10
   `;

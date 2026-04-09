@@ -3,6 +3,7 @@ import { z } from "zod";
 import * as XLSX from "xlsx";
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import { getTicketsOperationalDashboard } from "@/server/services/tickets-operational-dashboard";
+import { Prisma } from "@/lib/prisma";
 
 const QuerySchema = z.object({
   format: z.enum(["xlsx", "pdf", "json"]).default("xlsx"),
@@ -22,6 +23,15 @@ function fileName(format: string) {
   return `dashboard_tickets_${stamp}.${format}`;
 }
 
+function pdfSafe(text: string) {
+  return String(text)
+    .replaceAll("→", "->")
+    .replaceAll("—", "-")
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^\x09\x0A\x0D\x20-\x7E\xA0-\xFF]/g, "?");
+}
+
 async function buildPdf(dashboard: any) {
   const doc = await PDFDocument.create();
   const font = await doc.embedFont(StandardFonts.Helvetica);
@@ -31,19 +41,22 @@ async function buildPdf(dashboard: any) {
   let y = 800;
   const left = 48;
   const line = (text: string, size = 11, isBold = false, color = rgb(0.15, 0.18, 0.22)) => {
-    page.drawText(text, { x: left, y, size, font: isBold ? bold : font, color });
+    page.drawText(pdfSafe(text), { x: left, y, size, font: isBold ? bold : font, color });
     y -= size + 6;
   };
 
   line("Dashboard Operacional de Tickets", 16, true);
-  line(`Janela: ${dashboard.data.window.from} → ${dashboard.data.window.to}`, 10);
+  line(`Janela: ${dashboard.data.window.from} -> ${dashboard.data.window.to}`, 10);
   line(`Gerado em: ${dashboard.data.generatedAt}`, 10);
   y -= 6;
 
   line("KPIs", 13, true);
   const k = dashboard.data.kpis;
   line(`Abertos: ${k.openTotal}  |  Estourados: ${k.overdue}`, 11);
-  line(`TMR (h): ${k.avgResolutionHours ?? "—"}  |  FCR: ${k.firstContactResolutionRate == null ? "—" : `${Math.round(k.firstContactResolutionRate * 100)}%`}`, 11);
+  line(
+    `TMR (h): ${k.avgResolutionHours ?? "-"}  |  FCR: ${k.firstContactResolutionRate == null ? "-" : `${Math.round(k.firstContactResolutionRate * 100)}%`}`,
+    11
+  );
   y -= 10;
 
   line("Tickets críticos (top 20)", 13, true);
@@ -64,6 +77,10 @@ export async function GET(request: NextRequest) {
   if (!parsed.success) {
     return NextResponse.json({ error: "Parâmetros inválidos" }, { status: 400 });
   }
+
+  const debug = request.nextUrl.searchParams.get("debug") === "1";
+  const requestId = crypto.randomUUID();
+  const isDev = process.env.NODE_ENV !== "production";
 
   const { format, ...filters } = parsed.data;
 
@@ -121,7 +138,23 @@ export async function GET(request: NextRequest) {
       }
     });
   } catch (error) {
-    console.error("Error exporting tickets dashboard", error);
-    return NextResponse.json({ error: "Erro ao exportar" }, { status: 500 });
+    const message = error instanceof Error ? error.message : String(error);
+    console.error("[dashboard/tickets/export] failed", { requestId }, error);
+
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2010") {
+      return NextResponse.json(
+        {
+          error: "Erro ao exportar (consulta)",
+          requestId,
+          ...(isDev && debug ? { details: { code: error.code, meta: error.meta, stack: error.stack } } : {})
+        },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json(
+      { error: "Erro ao exportar", requestId, ...(isDev && debug ? { details: message, stack: error instanceof Error ? error.stack : undefined } : {}) },
+      { status: 500 }
+    );
   }
 }
