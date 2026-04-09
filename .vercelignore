@@ -1,7 +1,6 @@
+.next
 node_modules
-build
-dist
 .git
 .trae
-.log
-.figma
+*.log
+

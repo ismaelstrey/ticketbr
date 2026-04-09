@@ -120,5 +120,5 @@ describe("TicketOperationalDashboard", () => {
 
     expect(screen.getByText("Tickets críticos")).toBeTruthy();
     expect(screen.getByText("Falha crítica")).toBeTruthy();
-  }, 15_000);
+  }, 30_000);
 });

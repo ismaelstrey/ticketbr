@@ -369,7 +369,7 @@ export async function deleteTicket(id: string) {
 }
 
 export async function changeTicketStatus(id: string, status: UiStatus, author?: string, pauseReason?: string, pauseSla?: boolean) {
-  const current = await prisma.ticket.findUnique({ where: { id } });
+  const current = await findTicketByIdWithCompatibility(id);
   if (!current) {
     return null;
   }
@@ -377,35 +377,68 @@ export async function changeTicketStatus(id: string, status: UiStatus, author?: 
   const nextStatus = toPrismaStatus(status) as TicketStatus;
 
   const now = new Date();
-  const pausedStartedAt = current.pausedStartedAt;
-  const shouldClosePausedWindow = current.status === "PAUSED" && current.pauseSla && pausedStartedAt && nextStatus !== "PAUSED";
+  const pausedStartedAt = (current as any).pausedStartedAt as Date | null | undefined;
+  const currentPauseSla = Boolean((current as any).pauseSla);
+  const currentPausedTotalSeconds = Number((current as any).pausedTotalSeconds ?? 0) || 0;
+  const shouldClosePausedWindow = current.status === "PAUSED" && currentPauseSla && pausedStartedAt && nextStatus !== "PAUSED";
   const pauseWindowSeconds = shouldClosePausedWindow && pausedStartedAt
     ? Math.max(Math.round((now.getTime() - pausedStartedAt.getTime()) / 1000), 0)
     : 0;
 
-  await prisma.ticket.update({
-    where: { id },
-    data: {
-      status: nextStatus,
-      pausedReason: nextStatus === "PAUSED" ? pauseReason ?? "" : null,
-      pauseSla: nextStatus === "PAUSED" ? Boolean(pauseSla) : false,
-      pausedStartedAt: nextStatus === "PAUSED" && pauseSla ? now : null,
-      pausedTotalSeconds: (current.pausedTotalSeconds ?? 0) + pauseWindowSeconds
-    }
-  });
+  const fullUpdate = {
+    status: nextStatus,
+    pausedReason: nextStatus === "PAUSED" ? pauseReason ?? "" : null,
+    pauseSla: nextStatus === "PAUSED" ? Boolean(pauseSla) : false,
+    pausedStartedAt: nextStatus === "PAUSED" && pauseSla ? now : null,
+    pausedTotalSeconds: currentPausedTotalSeconds + pauseWindowSeconds
+  };
 
-  await prisma.ticketEvent.create({
-    data: {
-      ticketId: id,
-      type: nextStatus === "PAUSED" ? "PAUSED" : "STATUS_CHANGED",
-      title: `Status alterado para ${status}`,
-      fromStatus: current.status,
-      toStatus: nextStatus,
-      pauseReason,
-      metadata: nextStatus === "PAUSED" ? { pauseSla: Boolean(pauseSla) } : undefined,
-      author: author ?? "Sistema"
+  try {
+    await prisma.ticket.update({ where: { id }, data: fullUpdate as any });
+  } catch (error) {
+    if (!isMissingPauseColumnsError(error)) {
+      throw error;
     }
-  });
+
+    console.warn("[Service] DB sem colunas de pausa de SLA. Atualizando somente status/pausedReason.");
+    await prisma.ticket.update({
+      where: { id },
+      data: {
+        status: nextStatus,
+        pausedReason: nextStatus === "PAUSED" ? pauseReason ?? "" : null
+      } as any
+    });
+  }
+
+  try {
+    await prisma.ticketEvent.create({
+      data: {
+        ticketId: id,
+        type: nextStatus === "PAUSED" ? "PAUSED" : "STATUS_CHANGED",
+        title: `Status alterado para ${status}`,
+        fromStatus: current.status,
+        toStatus: nextStatus,
+        pauseReason,
+        metadata: nextStatus === "PAUSED" ? { pauseSla: Boolean(pauseSla) } : undefined,
+        author: author ?? "Sistema"
+      }
+    });
+  } catch (error) {
+    if (!isMissingPauseColumnsError(error)) {
+      throw error;
+    }
+
+    await prisma.ticketEvent.create({
+      data: {
+        ticketId: id,
+        type: nextStatus === "PAUSED" ? "PAUSED" : "STATUS_CHANGED",
+        title: `Status alterado para ${status}`,
+        fromStatus: current.status,
+        toStatus: nextStatus,
+        author: author ?? "Sistema"
+      } as any
+    });
+  }
 
   return getTicketById(id);
 }
@@ -433,25 +466,26 @@ export async function addTicketInteraction(
 }
 
 export async function getTicketRoadmap(id: string) {
-  const ticket = await prisma.ticket.findUnique({
-    where: { id },
-    include: {
-      events: {
-        orderBy: { createdAt: "desc" }
-      }
-    }
-  });
+  const ticket = await findTicketByIdWithCompatibility(id);
 
   if (!ticket) {
     return null;
   }
+
+  const events = Array.isArray((ticket as any).events)
+    ? [...((ticket as any).events as any[])].sort((a, b) => {
+        const at = a?.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const bt = b?.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return bt - at;
+      })
+    : [];
 
   return {
     ticketId: ticket.id,
     ticketNumber: ticket.number,
     subject: ticket.subject,
     status: fromPrismaStatus(ticket.status as any),
-    events: ticket.events.map((event: any) => ({
+    events: events.map((event: any) => ({
       id: event.id,
       type: event.type,
       title: event.title,
