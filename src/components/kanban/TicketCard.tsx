@@ -1,6 +1,6 @@
 "use client";
 
-import React, { DragEvent } from "react";
+import React, { DragEvent, useRef } from "react";
 import styled from "styled-components";
 import { FiHash, FiUser, FiTool, FiClock } from "@/components/icons";
 import { Ticket } from "@/types/ticket";
@@ -97,16 +97,28 @@ export function TicketCard({
   onDragEnd,
   onOpen
 }: TicketCardProps) {
+  const isDraggingRef = useRef(false);
   const slaColor = getSlaColor(ticket.progressoSla);
   const slaLabel = getSlaLabel(ticket.progressoSla);
 
   return (
     <StyledCard
       draggable
-      onDragStart={(event: any) => onDragStart(event, ticket.id)}
-      onDragEnd={onDragEnd}
+      onDragStart={(event: any) => {
+        isDraggingRef.current = true;
+        onDragStart(event, ticket.id);
+      }}
+      onDragEnd={() => {
+        onDragEnd();
+        requestAnimationFrame(() => {
+          isDraggingRef.current = false;
+        });
+      }}
       role="button"
-      onClick={() => onOpen(ticket.id)}
+      onClick={() => {
+        if (isDraggingRef.current) return;
+        onOpen(ticket.id);
+      }}
       whileHover={{ y: -2, boxShadow: "0 8px 24px rgba(0,0,0,0.08)" }}
       whileTap={{ scale: 0.98 }}
       layoutId={ticket.id}
