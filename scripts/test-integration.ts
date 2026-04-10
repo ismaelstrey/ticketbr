@@ -1,9 +1,17 @@
 import { strict as assert } from "assert";
 
-const BASE_URL = "http://localhost:3000";
+const BASE_URL = process.env.BASE_URL || "http://localhost:3000";
 
 async function main() {
   console.log("🚀 Iniciando Testes de Integração...");
+
+  console.log("\n0. Testando Healthcheck...");
+  const resHealth = await fetch(`${BASE_URL}/api/health`);
+  if (!resHealth.ok) {
+    console.error("❌ Healthcheck falhou:", resHealth.status, await resHealth.text());
+    process.exit(1);
+  }
+  console.log("✅ Healthcheck OK");
 
   // 1. Tentar acessar API sem token
   console.log("\n1. Testando acesso não autorizado...");

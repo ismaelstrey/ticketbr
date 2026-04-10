@@ -37,9 +37,30 @@ vi.mock("@/context/ToastContext", () => ({
 vi.mock("@/hooks/useTicketDragDrop", () => ({
   useTicketDragDrop: () => {
     const [tickets, setTickets] = React.useState<any[]>([]);
+    const [loading, setLoading] = React.useState(false);
+
+    const refreshTickets = React.useCallback(async () => {
+      setLoading(true);
+      try {
+        const response = await listMock();
+        if (Array.isArray(response?.data)) {
+          setTickets(response.data);
+        }
+      } finally {
+        setLoading(false);
+      }
+    }, []);
+
+    React.useEffect(() => {
+      refreshTickets();
+    }, [refreshTickets]);
+
     return {
       tickets,
       setTickets,
+      loading,
+      loadError: null,
+      refreshTickets,
       dragOverColumn: null,
       onTicketDragStart: () => {},
       onTicketDragEnd: () => {},

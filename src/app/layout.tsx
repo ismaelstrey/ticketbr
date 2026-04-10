@@ -5,6 +5,7 @@ import { ChatOpenConversationsProvider } from "@/context/ChatOpenConversationsCo
 import StyledComponentsRegistry from "@/lib/registry";
 import { GlobalChatButton } from "@/components/layout/GlobalChatButton";
 import { StyledComponentsProvider } from "@/styles/StyledComponentsProvider";
+import { Analytics } from '@vercel/analytics/next';
 
 const appUrl = "https://ticketbr.vercel.app";
 
@@ -33,6 +34,7 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" suppressHydrationWarning>
       <body suppressHydrationWarning>
+        <Analytics />
         <StyledComponentsRegistry>
           <StyledComponentsProvider>
             <AuthProvider>

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { jwtVerify } from "jose";
-import { JWT_KEY } from "@/lib/constants";
+import { getJwtKey } from "@/lib/constants";
 
 type SessionPayload = {
   role?: string;
@@ -40,8 +40,12 @@ const ALLOWED_CORS_ORIGINS = new Set(
 );
 
 async function getPayload(token: string): Promise<SessionPayload | null> {
+  const key = getJwtKey();
+  if (!key) {
+    return null;
+  }
   try {
-    const { payload } = await jwtVerify(token, JWT_KEY);
+    const { payload } = await jwtVerify(token, key);
     return payload as SessionPayload;
   } catch {
     return null;
@@ -73,6 +77,7 @@ function applyCorsHeaders(request: NextRequest, response: NextResponse) {
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const jwtKey = getJwtKey();
 
   if (pathname.startsWith("/_next") || pathname.startsWith("/static") || pathname === "/favicon.ico") {
     return NextResponse.next();
@@ -87,6 +92,22 @@ export async function proxy(request: NextRequest) {
       return applyCorsHeaders(request, NextResponse.next());
     }
     return NextResponse.next();
+  }
+
+  if (!jwtKey) {
+    if (pathname.startsWith("/api/")) {
+      return applyCorsHeaders(
+        request,
+        NextResponse.json(
+          { error: "Server misconfigured: JWT_SECRET is not set." },
+          { status: 503 }
+        )
+      );
+    }
+    if (pathname.startsWith("/cliente")) {
+      return NextResponse.redirect(new URL("/cliente/login", request.url));
+    }
+    return NextResponse.redirect(new URL("/login", request.url));
   }
 
   const token = request.cookies.get("token")?.value;

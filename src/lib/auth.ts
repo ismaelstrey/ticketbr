@@ -1,18 +1,26 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
-import { JWT_KEY } from "@/lib/constants";
+import { getJwtKey } from "@/lib/constants";
 
 export async function signJWT(payload: any) {
+  const key = getJwtKey();
+  if (!key) {
+    throw new Error("JWT_SECRET environment variable is not set.");
+  }
   return await new SignJWT(payload)
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime("8h") // 8 horas de sessão
-    .sign(JWT_KEY);
+    .sign(key);
 }
 
 export async function verifyJWT(token: string) {
+  const key = getJwtKey();
+  if (!key) {
+    return null;
+  }
   try {
-    const { payload } = await jwtVerify(token, JWT_KEY);
+    const { payload } = await jwtVerify(token, key);
     return payload;
   } catch (error) {
     return null;

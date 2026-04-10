@@ -4,21 +4,31 @@ import { CreateTicketSchema } from "@/lib/validations/ticket";
 import { z } from "zod";
 import { getSession } from "@/lib/auth";
 
-export async function GET() {
-  const tickets = await listTickets();
-
-  return NextResponse.json({ data: tickets });
+export async function GET(request: NextRequest) {
+  const requestId = (globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`).toString();
+  const startedAt = Date.now();
+  try {
+    const tickets = await listTickets();
+    console.info("[tickets/list] ok", { requestId, count: tickets.length, ms: Date.now() - startedAt });
+    return NextResponse.json({ data: tickets, requestId }, { headers: { "x-request-id": requestId } });
+  } catch (error) {
+    console.error("[tickets/list] failed", { requestId, ms: Date.now() - startedAt, error });
+    return NextResponse.json({ error: "Erro ao listar tickets.", requestId }, { status: 500, headers: { "x-request-id": requestId } });
+  }
 }
 
 export async function POST(request: NextRequest) {
+  const requestId = (globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`).toString();
+  const startedAt = Date.now();
   try {
-    const body = await request.json();
+    const body = await request.json().catch(() => ({} as any));
     const result = CreateTicketSchema.safeParse(body);
 
     if (!result.success) {
+      console.info("[tickets/create] validation_error", { requestId, ms: Date.now() - startedAt });
       return NextResponse.json(
-        { error: "Erro de validação", details: z.treeifyError(result.error) },
-        { status: 400 }
+        { error: "Erro de validação", details: z.treeifyError(result.error), requestId },
+        { status: 400, headers: { "x-request-id": requestId } }
       );
     }
 
@@ -29,9 +39,10 @@ export async function POST(request: NextRequest) {
     };
 
     const ticket = await createTicket(payload);
-    return NextResponse.json({ data: ticket }, { status: 201 });
+    console.info("[tickets/create] ok", { requestId, id: ticket.id, ms: Date.now() - startedAt });
+    return NextResponse.json({ data: ticket, requestId }, { status: 201, headers: { "x-request-id": requestId } });
   } catch (error) {
-    console.error("Error creating ticket:", error);
-    return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 });
+    console.error("[tickets/create] failed", { requestId, ms: Date.now() - startedAt, error });
+    return NextResponse.json({ error: "Erro interno do servidor", requestId }, { status: 500, headers: { "x-request-id": requestId } });
   }
 }

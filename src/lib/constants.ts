@@ -1,7 +1,9 @@
-export const JWT_SECRET = process.env.JWT_SECRET;
-
-if (!JWT_SECRET) {
-  throw new Error("JWT_SECRET environment variable is not set.");
+export function getJwtSecret() {
+  const secret = process.env.JWT_SECRET;
+  return secret && secret.trim().length > 0 ? secret : null;
 }
 
-export const JWT_KEY = new TextEncoder().encode(JWT_SECRET);
+export function getJwtKey() {
+  const secret = getJwtSecret();
+  return secret ? new TextEncoder().encode(secret) : null;
+}
