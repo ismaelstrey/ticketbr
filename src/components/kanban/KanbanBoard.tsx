@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import styled from "styled-components";
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 import {
   FiAlertCircle,
   FiZap,
@@ -16,9 +17,10 @@ import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Select } from "@/components/ui/Input";
 import { KanbanColumn } from "./Column";
-import { PauseModal } from "./PauseModal";
-import TicketDetails from "@/components/ticket/TicketDetails";
-import NewTicketModal from "@/components/ticket/NewTicketModal";
+
+const PauseModal = dynamic(() => import("./PauseModal").then(mod => mod.PauseModal));
+const TicketDetails = dynamic(() => import("@/components/ticket/TicketDetails"));
+const NewTicketModal = dynamic(() => import("@/components/ticket/NewTicketModal"));
 
 import { columns } from "@/data/kanban-columns";
 import { useTicketDragDrop } from "@/hooks/useTicketDragDrop";
@@ -26,6 +28,7 @@ import { useTicketEditor } from "@/hooks/useTicketEditor";
 import { useTicketFilters } from "@/hooks/useTicketFilters";
 import { api } from "@/services/api";
 import { useToast } from "@/context/ToastContext";
+import { perfMonitor } from "@/lib/performanceMonitor";
 
 const columnIcons = {
   todo: FiAlertCircle,
@@ -123,11 +126,17 @@ const ErrorActions = styled.div`
 `;
 
 export default function KanbanBoard({ initialTicketId }: { initialTicketId?: string } = {}) {
+  const renderStart = useRef(performance.now());
+  renderStart.current = performance.now();
+
   const router = useRouter();
   const lastOpenRef = useRef<{ ticketId: string; at: number } | null>(null);
   const {
     tickets,
     setTickets,
+    loading,
+    loadError,
+    refreshTickets,
     dragOverColumn,
     onTicketDragStart,
     onTicketDragEnd,
@@ -164,34 +173,7 @@ export default function KanbanBoard({ initialTicketId }: { initialTicketId?: str
 
   const [isNewTicketModalOpen, setIsNewTicketModalOpen] = useState(false);
   const { showToast } = useToast();
-  const [loadError, setLoadError] = useState<string | null>(null);
   const [ticketNotFound, setTicketNotFound] = useState(false);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    async function loadTickets() {
-      try {
-        const response = await api.tickets.list();
-        if (!isMounted) return;
-
-        if (Array.isArray(response.data)) {
-          setTickets(response.data);
-        }
-        setLoadError(null);
-      } catch (error) {
-        if (!isMounted) return;
-        console.error("Failed to load tickets from API. Using local fallback.", error);
-        setLoadError("Não foi possível sincronizar tickets com o servidor.");
-      }
-    }
-
-    loadTickets();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [setTickets]);
 
   useEffect(() => {
     if (!initialTicketId) return;
@@ -228,6 +210,10 @@ export default function KanbanBoard({ initialTicketId }: { initialTicketId?: str
       cancelled = true;
     };
   }, [initialTicketId, selectedTicket, setTickets, ticketNotFound]);
+
+  useEffect(() => {
+    perfMonitor.trackRender("KanbanBoard", performance.now() - renderStart.current);
+  });
 
   const openTicket = (ticketId: string) => {
     const now = Date.now();
@@ -380,12 +366,7 @@ export default function KanbanBoard({ initialTicketId }: { initialTicketId?: str
         <NewTicketModal 
           isOpen={isNewTicketModalOpen} 
           onClose={() => setIsNewTicketModalOpen(false)}
-          onCreated={async () => {
-            const response = await api.tickets.list();
-            if (Array.isArray(response.data)) {
-              setTickets(response.data);
-            }
-          }}
+          onCreated={refreshTickets}
         />
       </MainContent>
     </AppShellContainer>
