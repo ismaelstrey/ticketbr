@@ -93,17 +93,17 @@ export function GlobalChatButton() {
   const hidden = !user || loading || pathname === "/login";
   const shouldHideButton = hidden || isChatRoute;
 
-  const handleOpenChat = () => {
-    router.push("/chat");
-  };
-
-  if (shouldHideButton) return null;
-
   const badgeValue = useMemo(() => {
     if (!openCount) return null;
     if (openCount > 99) return "99+";
     return String(openCount);
   }, [openCount]);
+
+  const handleOpenChat = () => {
+    router.push("/chat");
+  };
+
+  if (shouldHideButton) return null;
 
   return (
     <FloatingButton type="button" onClick={handleOpenChat} $hasUnread={openCount > 0} aria-label="Abrir chat">

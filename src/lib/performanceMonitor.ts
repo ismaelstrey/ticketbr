@@ -48,6 +48,18 @@ class PerformanceMonitor {
     }
   }
 
+  private shouldEmitAlerts() {
+    if (typeof window !== "undefined") {
+      try {
+        return window.localStorage.getItem("ticketbr-perf-alerts") === "1";
+      } catch {
+        return false;
+      }
+    }
+
+    return process.env.NODE_ENV === "production";
+  }
+
   private analyzeAPI() {
     const recentMetrics = this.apiMetrics.slice(-100); // Analyze last 100 calls
     if (recentMetrics.length === 0) return;
@@ -64,6 +76,10 @@ class PerformanceMonitor {
 
     const errorRate = errors / recentMetrics.length;
     const avgDuration = totalDuration / recentMetrics.length;
+
+    if (!this.shouldEmitAlerts()) {
+      return;
+    }
 
     if (errorRate > this.ERROR_RATE_THRESHOLD) {
       console.error(`[Alert] API Error rate is high: ${(errorRate * 100).toFixed(2)}%`);

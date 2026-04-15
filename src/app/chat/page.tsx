@@ -108,7 +108,34 @@ const TabButton = styled.button<{ $active?: boolean }>`
   }
 `;
 
-const ContactList = styled(ThinScrollArea)``;
+const ContactList = styled(ThinScrollArea)`
+  padding: 8px;
+  scrollbar-color: ${({ theme }) =>
+      theme.mode === "dark" ? "rgba(226, 232, 240, 0.22) transparent" : "rgba(15, 23, 42, 0.22) transparent"};
+
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: ${({ theme }) => (theme.mode === "dark" ? "rgba(226, 232, 240, 0.22)" : "rgba(15, 23, 42, 0.22)")};
+    border-radius: 3px;
+  }
+
+  &:hover::-webkit-scrollbar-thumb {
+    background: ${({ theme }) => (theme.mode === "dark" ? "rgba(226, 232, 240, 0.34)" : "rgba(15, 23, 42, 0.34)")};
+  }
+
+  @media (max-width: 1024px) {
+    max-height: 320px;
+    height: auto;
+  }
+`;
 
 const ContactItem = styled.button<{ $active?: boolean; $open?: boolean }>`
   width: 100%;
