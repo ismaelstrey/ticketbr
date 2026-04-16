@@ -52,4 +52,29 @@ describe("FixedWindowRateLimiter", () => {
 
     expect((await limiter.consume("ip-1")).allowed).toBe(true);
   });
+
+  it("falls back to permissive mode when store fails during consume", async () => {
+    const limiter = new FixedWindowRateLimiter(5, 60_000, {
+      incrementAndGetWindow: vi.fn(async () => {
+        throw new Error("store unavailable");
+      }),
+      reset: vi.fn(async () => undefined),
+    });
+
+    const result = await limiter.consume("ip-1");
+    expect(result.allowed).toBe(true);
+    expect(result.limit).toBe(5);
+    expect(result.remaining).toBe(5);
+  });
+
+  it("does not throw when store fails during reset", async () => {
+    const limiter = new FixedWindowRateLimiter(1, 60_000, {
+      incrementAndGetWindow: vi.fn(async () => ({ count: 1, resetAt: Date.now() + 60_000 })),
+      reset: vi.fn(async () => {
+        throw new Error("reset failed");
+      }),
+    });
+
+    await expect(limiter.reset("ip-1")).resolves.toBeUndefined();
+  });
 });

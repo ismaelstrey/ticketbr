@@ -69,7 +69,7 @@ describe("API Contract - POST /api/chat/messages", () => {
 
   it("returns error payload contract when provider is not configured", async () => {
     resolveWhatsAppConfigMock.mockResolvedValueOnce(null);
-    sendOutboundMessageMock.mockRejectedValueOnce(new Error("WhatsApp nao esta configurado"));
+    sendOutboundMessageMock.mockRejectedValueOnce(new Error("Provider WhatsApp inválido"));
 
     const { POST } = await import("@/app/api/chat/messages/route");
     const req = {

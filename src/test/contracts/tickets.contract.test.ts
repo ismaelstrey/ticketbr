@@ -43,12 +43,13 @@ describe("API Contract - /api/tickets", () => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        titulo: "Falha em login",
+        empresa: "ACME",
+        solicitante: "Cliente X",
+        assunto: "Falha em login",
         descricao: "Usuario sem acesso",
         categoria: "Acesso",
-        solicitante: "Cliente X",
-        tipo_ticket: "SUPORTE",
-        prioridade: "M",
+        tipoTicket: "SUPORTE",
+        prioridade: "Alta",
       }),
     });
 

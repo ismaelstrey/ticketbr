@@ -71,4 +71,16 @@ describe("API Contract - /api/projects", () => {
     expect(res.status).toBe(400);
     expect(EnvelopeWithErrorSchema.safeParse(body).success).toBe(true);
   });
+
+  it("GET returns unauthorized contract when session is missing", async () => {
+    requireStaffSessionMock.mockRejectedValueOnce(new Error("UNAUTHORIZED"));
+
+    const { GET } = await import("@/app/api/projects/route");
+    const req = { nextUrl: { searchParams: new URLSearchParams({ page: "1", pageSize: "20" }) } } as any;
+    const res = await GET(req);
+    const body = await res.json();
+
+    expect(res.status).toBe(401);
+    expect(EnvelopeWithErrorSchema.safeParse(body).success).toBe(true);
+  });
 });

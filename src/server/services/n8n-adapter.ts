@@ -1,12 +1,6 @@
 import { ChatContact, ChatMessage } from "@/types/chat";
+import { CanonicalTicketChatEvent, parseCanonicalTicketChatEvent, toWebhookDispatchPayload } from "@/server/contracts/ticket-chat-events";
 import { WhatsAppRuntimeConfig } from "@/server/services/whatsapp-settings";
-
-export interface ChatEventPayload {
-  type: string;
-  source: "ticketbr-chat";
-  occurredAt: string;
-  data: Record<string, unknown>;
-}
 
 function resolveWebhook(config?: WhatsAppRuntimeConfig | null) {
   const url = config?.n8nWebhookUrl || process.env.N8N_CHAT_WEBHOOK_URL || "";
@@ -202,6 +196,7 @@ export async function sendMessageToN8n(payload: Record<string, unknown>, config?
           type: "chat.message.send.request",
           source: "ticketbr-chat",
           occurredAt: new Date().toISOString(),
+          schemaVersion: "legacy",
           data: payload
         })
       });
@@ -211,14 +206,15 @@ export async function sendMessageToN8n(payload: Record<string, unknown>, config?
   }
 }
 
-export async function emitChatEventToN8n(event: ChatEventPayload, config?: WhatsAppRuntimeConfig | null) {
+export async function emitChatEventToN8n(event: CanonicalTicketChatEvent, config?: WhatsAppRuntimeConfig | null) {
   const webhook = resolveWebhook(config);
   if (!webhook) return;
 
   try {
+    const parsed = parseCanonicalTicketChatEvent(event);
     await requestN8n(webhook, config, {
       method: "POST",
-      body: JSON.stringify(event)
+      body: JSON.stringify(toWebhookDispatchPayload(parsed))
     });
   } catch (error) {
     console.warn("Failed to dispatch chat event to n8n", error);

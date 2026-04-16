@@ -1,4 +1,5 @@
 import { appendMessage } from "@/server/services/chat-memory";
+import { createChatMessageReceivedEvent } from "@/server/contracts/ticket-chat-events";
 import { chatService } from "@/server/services/chat-service";
 import type { NormalizedInboundResult } from "@/server/services/chat-inbound-normalizer";
 import { emitChatEventToN8n } from "@/server/services/n8n-adapter";
@@ -39,12 +40,25 @@ export async function processNormalizedInboundEvent(normalized: NormalizedInboun
     });
   }
 
-  await emitChatEventToN8n({
-    type: "chat.message.received",
-    source: "ticketbr-chat",
-    occurredAt: new Date().toISOString(),
-    data: normalized.payload as unknown as Record<string, unknown>
-  });
+  await emitChatEventToN8n(
+    createChatMessageReceivedEvent({
+      provider: normalized.payload.provider,
+      mode: normalized.payload.mode,
+      event: normalized.payload.event,
+      instance: normalized.payload.instance,
+      waChatId: normalized.payload.wa_chat_id,
+      waMessageId: normalized.payload.wa_message_id,
+      fromMe: normalized.payload.fromMe,
+      pushName: normalized.payload.pushName,
+      timestamp: normalized.payload.timestamp,
+      message: normalized.payload.message,
+      raw: normalized.payload.raw,
+      correlation: {
+        waChatId: normalized.payload.wa_chat_id,
+        waMessageId: normalized.payload.wa_message_id,
+      },
+    }),
+  );
 
   return { ok: true, kind: normalized.kind, source: normalized.source };
 }

@@ -142,3 +142,8 @@ Estado em `2026-04-16` (execucao local):
 3. Executar lote 1 e lote 2 em paralelo controlado por ownership.
 4. Rodar lote 3 com QA/Security antes de qualquer promocao de release.
 5. Consolidar lote 4 e registrar decisao final CTO.
+
+## 12. Estado do lote 1 (planejamento detalhado)
+- Backlog tecnico detalhado publicado em `docs/architecture/tic-42-lote-1-backlog-fatiado.md`.
+- Historias `ENG-42-001..ENG-42-008` definidas com owner, dependencias e criterio de aceite tecnico.
+- Paralelismo controlado definido por fases para evitar sobreposicao de ownership.

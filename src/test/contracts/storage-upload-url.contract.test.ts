@@ -67,4 +67,16 @@ describe("API Contract - POST /api/storage/upload-url", () => {
     expect(res.status).toBe(401);
     expect(EnvelopeWithErrorSchema.safeParse(body).success).toBe(true);
   });
+
+  it("returns forbidden contract for non-admin users", async () => {
+    getSessionMock.mockResolvedValueOnce({ id: "u2", role: "AGENT" });
+
+    const { POST } = await import("@/app/api/storage/upload-url/route");
+    const req = new Request("http://localhost/api/storage/upload-url", { method: "POST" });
+    const res = await POST(req as any);
+    const body = await res.json();
+
+    expect(res.status).toBe(403);
+    expect(EnvelopeWithErrorSchema.safeParse(body).success).toBe(true);
+  });
 });
