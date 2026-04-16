@@ -10,7 +10,7 @@ import { Input, Select } from "@/components/ui/Input";
 import { useThemeMode } from "@/context/ThemeModeContext";
 import { useSettings } from "@/hooks/useSettings";
 
-type TabKey = "general" | "evolution" | "n8n" | "uazapi" | "contactsSync" | "webhookLogs" | "notifications";
+type TabKey = "general" | "evolution" | "n8n" | "uazapi" | "contactsSync" | "webhookLogs" | "notifications" | "storage";
 
 const Card = styled.section`
   background: ${({ theme }) => theme.colors.surfaceElevated};
@@ -249,10 +249,13 @@ const EmptyCell = styled.td`
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<TabKey>("general");
   const { isDark, toggleMode } = useThemeMode();
+  const [storagePrefix, setStoragePrefix] = useState("");
 
   const {
     settings,
+    storageSettings,
     updateSettings: update,
+    updateStorageSettings: updateStorage,
     fetchSettings,
     saveSettings,
     testSystemApi,
@@ -262,16 +265,24 @@ export default function SettingsPage() {
     loadWebhookLogs,
     clearWebhookLogs,
     loadQr,
+    testStorage,
+    saveStorage,
+    listStorageObjects,
     testingApi,
     testingN8n,
     syncingContacts,
     loadingContacts,
     loadingQr,
     loadingWebhookLogs,
+    testingStorage,
+    savingStorage,
+    storageListLoading,
     n8nTestResult,
     contactsSyncResult,
     contacts,
     webhookLogs,
+    storageTestResult,
+    storageListResult,
     qrCode,
     pairingCode,
     connectionStatus
@@ -299,6 +310,7 @@ export default function SettingsPage() {
       { key: "evolution" as const, label: "Evolution API" },
       { key: "n8n" as const, label: "N8N" },
       { key: "uazapi" as const, label: "UAZAPI" },
+      { key: "storage" as const, label: "Storage (S3)" },
       { key: "contactsSync" as const, label: "Sincronizar Contatos" },
       { key: "webhookLogs" as const, label: "Logs Externos" },
       { key: "notifications" as const, label: "Notificações" }
@@ -502,6 +514,94 @@ export default function SettingsPage() {
               <Footer>
                 <Button variant="save" onClick={() => saveSettings()}>Salvar UAZAPI</Button>
               </Footer>
+            </div>
+          )}
+
+          {activeTab === "storage" && (
+            <div>
+              <h3>Armazenamento de arquivos (S3 / MinIO)</h3>
+              <Info>
+                Configure credenciais e bucket para armazenar arquivos na nuvem. As credenciais são validadas antes de salvar e persistidas de forma criptografada.
+              </Info>
+
+              <FormGrid>
+                <Field>
+                  Provedor
+                  <Select value={storageSettings.provider} onChange={(e) => updateStorage({ provider: e.target.value as any })}>
+                    <option value="aws">Amazon S3</option>
+                    <option value="minio">MinIO / S3 compatível</option>
+                  </Select>
+                </Field>
+                <Field>
+                  Região
+                  <Input placeholder="us-east-1" value={storageSettings.region} onChange={(e) => updateStorage({ region: e.target.value })} />
+                </Field>
+                <Field>
+                  Bucket
+                  <Input placeholder="ticketbr-files" value={storageSettings.bucket} onChange={(e) => updateStorage({ bucket: e.target.value })} />
+                </Field>
+                <Field>
+                  ACL padrão
+                  <Select value={storageSettings.defaultAcl} onChange={(e) => updateStorage({ defaultAcl: e.target.value as any })}>
+                    <option value="private">private</option>
+                    <option value="public-read">public-read</option>
+                  </Select>
+                </Field>
+                <Field>
+                  AWS Access Key ID
+                  <Input value={storageSettings.accessKeyId} onChange={(e) => updateStorage({ accessKeyId: e.target.value })} />
+                </Field>
+                <Field>
+                  AWS Secret Access Key
+                  <Input type="password" value={storageSettings.secretAccessKey} onChange={(e) => updateStorage({ secretAccessKey: e.target.value })} />
+                </Field>
+                <Field>
+                  Endpoint (MinIO)
+                  <Input placeholder="http://localhost:9000" value={storageSettings.endpoint} onChange={(e) => updateStorage({ endpoint: e.target.value })} />
+                </Field>
+                <Field>
+                  Retenção (dias)
+                  <Input placeholder="ex: 30" value={storageSettings.retentionDays} onChange={(e) => updateStorage({ retentionDays: e.target.value })} />
+                </Field>
+
+                <label style={{ display: "flex", gap: 8, marginTop: 4, gridColumn: "1 / -1", color: "inherit" }}>
+                  <input type="checkbox" checked={storageSettings.forcePathStyle} onChange={(e) => updateStorage({ forcePathStyle: e.target.checked })} />
+                  Force path style (recomendado para MinIO)
+                </label>
+              </FormGrid>
+
+              <Footer>
+                <Button variant="save" onClick={() => saveStorage()} disabled={savingStorage}>
+                  {savingStorage ? "Salvando..." : "Salvar storage"}
+                </Button>
+                <Button variant="ghost" onClick={testStorage} disabled={testingStorage}>
+                  {testingStorage ? "Testando..." : "Testar conexão"}
+                </Button>
+              </Footer>
+
+              {storageTestResult ? <ResultBox>{JSON.stringify(storageTestResult, null, 2)}</ResultBox> : null}
+
+              <h3 style={{ marginTop: 24 }}>Listar arquivos (admin)</h3>
+              <Info>Consulta os primeiros objetos no bucket usando o prefixo informado.</Info>
+
+              <FormGrid>
+                <Field>
+                  Prefixo
+                  <Input placeholder="uploads/" value={storagePrefix} onChange={(e) => setStoragePrefix(e.target.value)} />
+                </Field>
+              </FormGrid>
+
+              <Footer>
+                <Button
+                  variant="primary"
+                  onClick={() => listStorageObjects(storagePrefix)}
+                  disabled={storageListLoading}
+                >
+                  {storageListLoading ? "Carregando..." : "Listar objetos"}
+                </Button>
+              </Footer>
+
+              {storageListResult ? <ResultBox>{JSON.stringify(storageListResult, null, 2)}</ResultBox> : null}
             </div>
           )}
 

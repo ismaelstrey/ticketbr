@@ -54,6 +54,18 @@ export interface WebhookRequestLog {
   headers: Record<string, string>;
 }
 
+export interface StorageSettings {
+  provider: "aws" | "minio";
+  accessKeyId: string;
+  secretAccessKey: string;
+  region: string;
+  bucket: string;
+  endpoint: string;
+  forcePathStyle: boolean;
+  defaultAcl: "private" | "public-read";
+  retentionDays: string;
+}
+
 export const defaultSettings: IntegrationSettings = {
   whatsappProvider: "n8n",
   evolutionBaseUrl: "",
@@ -82,9 +94,22 @@ export const defaultSettings: IntegrationSettings = {
   uazapiTransport: "rest"
 };
 
+export const defaultStorageSettings: StorageSettings = {
+  provider: "aws",
+  accessKeyId: "",
+  secretAccessKey: "",
+  region: "",
+  bucket: "",
+  endpoint: "",
+  forcePathStyle: true,
+  defaultAcl: "private",
+  retentionDays: ""
+};
+
 export function useSettings() {
   const { showToast } = useToast();
   const [settings, setSettings] = useState<IntegrationSettings>(defaultSettings);
+  const [storageSettings, setStorageSettings] = useState<StorageSettings>(defaultStorageSettings);
   const [loading, setLoading] = useState(false);
   
   // Estados de carregamento específicos
@@ -94,12 +119,17 @@ export function useSettings() {
   const [loadingContacts, setLoadingContacts] = useState(false);
   const [loadingQr, setLoadingQr] = useState(false);
   const [loadingWebhookLogs, setLoadingWebhookLogs] = useState(false);
+  const [testingStorage, setTestingStorage] = useState(false);
+  const [savingStorage, setSavingStorage] = useState(false);
+  const [storageListLoading, setStorageListLoading] = useState(false);
 
   // Resultados
   const [n8nTestResult, setN8nTestResult] = useState<unknown>(null);
   const [contactsSyncResult, setContactsSyncResult] = useState<unknown>(null);
   const [contacts, setContacts] = useState<SyncedContact[]>([]);
   const [webhookLogs, setWebhookLogs] = useState<WebhookRequestLog[]>([]);
+  const [storageTestResult, setStorageTestResult] = useState<unknown>(null);
+  const [storageListResult, setStorageListResult] = useState<unknown>(null);
   
   // Status de conexão
   const [qrCode, setQrCode] = useState<string | null>(null);
@@ -108,6 +138,10 @@ export function useSettings() {
 
   const updateSettings = useCallback((patch: Partial<IntegrationSettings>) => {
     setSettings((curr) => ({ ...curr, ...patch }));
+  }, []);
+
+  const updateStorageSettings = useCallback((patch: Partial<StorageSettings>) => {
+    setStorageSettings((curr) => ({ ...curr, ...patch }));
   }, []);
 
   const fetchSettings = useCallback(async () => {
@@ -152,12 +186,124 @@ export function useSettings() {
             : curr.uazapiTransport
         }));
       }
+
+      const storageRes = await fetch("/api/settings/storage/config");
+      const storageJson = await storageRes.json().catch(() => ({}));
+      if (storageRes.ok && storageJson?.data) {
+        setStorageSettings((curr) => ({
+          ...curr,
+          provider: storageJson.data.provider === "minio" ? "minio" : "aws",
+          region: storageJson.data.region ?? curr.region,
+          bucket: storageJson.data.bucket ?? curr.bucket,
+          endpoint: storageJson.data.endpoint ?? curr.endpoint,
+          forcePathStyle: Boolean(storageJson.data.forcePathStyle),
+          defaultAcl: storageJson.data.defaultAcl === "public-read" ? "public-read" : "private",
+          retentionDays: storageJson.data.retentionDays ? String(storageJson.data.retentionDays) : "",
+          accessKeyId: storageJson.data.accessKeyIdMasked ?? curr.accessKeyId,
+          secretAccessKey: storageJson.data.secretAccessKeyMasked ?? curr.secretAccessKey
+        }));
+      }
     } catch (error) {
       console.error("Failed to load settings", error);
     } finally {
       setLoading(false);
     }
   }, []);
+
+  const testStorage = useCallback(async () => {
+    try {
+      setTestingStorage(true);
+      setStorageTestResult(null);
+
+      const res = await fetch("/api/settings/storage/test", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          provider: storageSettings.provider,
+          accessKeyId: storageSettings.accessKeyId,
+          secretAccessKey: storageSettings.secretAccessKey,
+          region: storageSettings.region,
+          bucket: storageSettings.bucket,
+          endpoint: storageSettings.endpoint,
+          forcePathStyle: storageSettings.forcePathStyle,
+          defaultAcl: storageSettings.defaultAcl,
+          retentionDays: storageSettings.retentionDays
+        })
+      });
+
+      const json = await res.json().catch(() => ({}));
+      setStorageTestResult(json);
+      if (!res.ok) throw new Error(json?.error || "Falha ao testar storage");
+      showToast("Conexão com storage OK.", "success");
+    } catch (error: any) {
+      showToast(error?.message ?? "Falha ao testar storage", "error");
+    } finally {
+      setTestingStorage(false);
+    }
+  }, [showToast, storageSettings]);
+
+  const saveStorage = useCallback(async () => {
+    try {
+      setSavingStorage(true);
+      const res = await fetch("/api/settings/storage/config", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          provider: storageSettings.provider,
+          accessKeyId: storageSettings.accessKeyId,
+          secretAccessKey: storageSettings.secretAccessKey,
+          region: storageSettings.region,
+          bucket: storageSettings.bucket,
+          endpoint: storageSettings.endpoint,
+          forcePathStyle: storageSettings.forcePathStyle,
+          defaultAcl: storageSettings.defaultAcl,
+          retentionDays: storageSettings.retentionDays
+        })
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json?.error || "Erro ao salvar storage");
+
+      if (json?.data) {
+        setStorageSettings((curr) => ({
+          ...curr,
+          provider: json.data.provider === "minio" ? "minio" : "aws",
+          region: json.data.region ?? curr.region,
+          bucket: json.data.bucket ?? curr.bucket,
+          endpoint: json.data.endpoint ?? curr.endpoint,
+          forcePathStyle: Boolean(json.data.forcePathStyle),
+          defaultAcl: json.data.defaultAcl === "public-read" ? "public-read" : "private",
+          retentionDays: json.data.retentionDays ? String(json.data.retentionDays) : "",
+          accessKeyId: json.data.accessKeyIdMasked ?? curr.accessKeyId,
+          secretAccessKey: json.data.secretAccessKeyMasked ?? curr.secretAccessKey
+        }));
+      }
+
+      showToast("Configuração de storage salva.", "success");
+    } catch (error: any) {
+      showToast(error?.message ?? "Erro ao salvar storage", "error");
+      throw error;
+    } finally {
+      setSavingStorage(false);
+    }
+  }, [showToast, storageSettings]);
+
+  const listStorageObjects = useCallback(async (prefix: string) => {
+    try {
+      setStorageListLoading(true);
+      setStorageListResult(null);
+      const params = new URLSearchParams();
+      if (prefix.trim()) params.set("prefix", prefix.trim());
+      params.set("maxKeys", "50");
+      const res = await fetch(`/api/storage/list?${params.toString()}`);
+      const json = await res.json().catch(() => ({}));
+      setStorageListResult(json);
+      if (!res.ok) throw new Error(json?.error || "Erro ao listar objetos");
+    } catch (error: any) {
+      showToast(error?.message ?? "Erro ao listar objetos", "error");
+    } finally {
+      setStorageListLoading(false);
+    }
+  }, [showToast]);
 
   const saveSettings = useCallback(async () => {
     try {
@@ -391,8 +537,10 @@ export function useSettings() {
 
   return {
     settings,
+    storageSettings,
     loading,
     updateSettings,
+    updateStorageSettings,
     fetchSettings,
     saveSettings,
     
@@ -404,6 +552,9 @@ export function useSettings() {
     loadWebhookLogs,
     clearWebhookLogs,
     loadQr,
+    testStorage,
+    saveStorage,
+    listStorageObjects,
 
     // Loading states
     testingApi,
@@ -412,12 +563,17 @@ export function useSettings() {
     loadingContacts,
     loadingQr,
     loadingWebhookLogs,
+    testingStorage,
+    savingStorage,
+    storageListLoading,
 
     // Data states
     n8nTestResult,
     contactsSyncResult,
     contacts,
     webhookLogs,
+    storageTestResult,
+    storageListResult,
     qrCode,
     pairingCode,
     connectionStatus
