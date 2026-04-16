@@ -21,8 +21,11 @@ describe("GET /api/health", () => {
     const body = await res.json();
 
     expect(res.status).toBe(200);
+    expect(res.headers.get("x-request-id")).toBeTruthy();
     expect(body.status).toBe("ok");
+    expect(typeof body.requestId).toBe("string");
     expect(body.dependencies.database.status).toBe("up");
+    expect(typeof body.dependencies.database.latencyMs).toBe("number");
     expect(typeof body.uptimeSeconds).toBe("number");
   });
 
@@ -34,7 +37,10 @@ describe("GET /api/health", () => {
     const body = await res.json();
 
     expect(res.status).toBe(503);
+    expect(res.headers.get("x-request-id")).toBeTruthy();
     expect(body.status).toBe("degraded");
+    expect(typeof body.requestId).toBe("string");
     expect(body.dependencies.database.status).toBe("down");
+    expect(typeof body.dependencies.database.latencyMs).toBe("number");
   });
 });

@@ -22,8 +22,14 @@ export const MainContent = styled.section`
   min-width: 0;
   padding: ${({ theme }) => theme.spacing[4]};
   overflow-x: hidden;
+  padding-top: calc(${({ theme }) => theme.spacing[4]} + 3rem);
+
+  @media (min-width: ${({ theme }) => theme.breakpoints.tablet}) {
+    padding-top: ${({ theme }) => theme.spacing[4]};
+  }
 
   @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
     padding: ${({ theme }) => theme.spacing[3]};
+    padding-top: calc(${({ theme }) => theme.spacing[3]} + 3rem);
   }
 `;

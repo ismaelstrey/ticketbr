@@ -25,7 +25,7 @@ export async function POST(request: Request) {
     const forwardedFor = request.headers.get("x-forwarded-for");
     const clientIp = forwardedFor?.split(",")[0]?.trim() || "unknown";
 
-    const rate = loginRateLimiter.consume(clientIp);
+    const rate = await loginRateLimiter.consume(clientIp);
     if (!rate.allowed) {
       return NextResponse.json(
         { error: "Muitas tentativas de login. Tente novamente mais tarde." },
@@ -71,7 +71,7 @@ export async function POST(request: Request) {
       name: user.name
     });
 
-    loginRateLimiter.reset(clientIp);
+    await loginRateLimiter.reset(clientIp);
 
     return NextResponse.json(
       {

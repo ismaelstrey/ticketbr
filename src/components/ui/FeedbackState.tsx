@@ -2,11 +2,47 @@ import React from "react";
 import styled from "styled-components";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
+import { FiAlertCircle, FiClock, FiHash } from "@/components/icons";
 
 const StateCard = styled(Card)`
   display: grid;
   gap: ${({ theme }) => theme.spacing[2]};
   padding: ${({ theme }) => theme.spacing[5]};
+`;
+
+const StateIcon = styled.span<{ $tone: "loading" | "error" | "empty" }>`
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: ${({ theme }) => theme.borderRadius.medium};
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: ${({ theme, $tone }) =>
+    $tone === "error" ? theme.tokens.color.status.warning : theme.tokens.color.interactive.primary};
+  background: ${({ theme, $tone }) =>
+    $tone === "error" ? theme.tokens.color.status.warningSurface : theme.tokens.color.bg.surfaceAlt};
+
+  svg {
+    ${({ $tone, theme }) =>
+      $tone === "loading"
+        ? `animation: spin ${theme.motion.slow} linear infinite;`
+        : ""}
+  }
+
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    svg {
+      animation: none;
+    }
+  }
 `;
 
 const StateTitle = styled.h2`
@@ -28,11 +64,14 @@ interface FeedbackStateProps {
   actionLabel?: string;
   onAction?: () => void;
   role?: React.AriaRole;
+  tone: "loading" | "error" | "empty";
 }
 
-function FeedbackState({ title, description, actionLabel, onAction, role }: FeedbackStateProps) {
+function FeedbackState({ title, description, actionLabel, onAction, role, tone }: FeedbackStateProps) {
+  const icon = tone === "error" ? <FiAlertCircle aria-hidden="true" /> : tone === "empty" ? <FiHash aria-hidden="true" /> : <FiClock aria-hidden="true" />;
   return (
-    <StateCard role={role}>
+    <StateCard role={role} aria-live={tone === "error" ? "assertive" : "polite"}>
+      <StateIcon $tone={tone}>{icon}</StateIcon>
       <StateTitle>{title}</StateTitle>
       <StateText>{description}</StateText>
       {actionLabel && onAction ? (
@@ -47,7 +86,7 @@ function FeedbackState({ title, description, actionLabel, onAction, role }: Feed
 }
 
 export function LoadingState({ title = "Carregando", description = "Aguarde um momento..." }) {
-  return <FeedbackState title={title} description={description} role="status" />;
+  return <FeedbackState title={title} description={description} role="status" tone="loading" />;
 }
 
 export function ErrorState({
@@ -55,7 +94,7 @@ export function ErrorState({
   description = "Tente novamente em instantes.",
   actionLabel = "Tentar novamente",
   onAction
-}: Omit<FeedbackStateProps, "role">) {
+}: Omit<FeedbackStateProps, "role" | "tone">) {
   return (
     <FeedbackState
       title={title}
@@ -63,6 +102,7 @@ export function ErrorState({
       actionLabel={actionLabel}
       onAction={onAction}
       role="alert"
+      tone="error"
     />
   );
 }
@@ -70,7 +110,6 @@ export function ErrorState({
 export function EmptyState({
   title = "Nada por aqui",
   description = "Ajuste os filtros para ver resultados."
-}: Omit<FeedbackStateProps, "role" | "actionLabel" | "onAction">) {
-  return <FeedbackState title={title} description={description} />;
+}: Omit<FeedbackStateProps, "role" | "actionLabel" | "onAction" | "tone">) {
+  return <FeedbackState title={title} description={description} tone="empty" />;
 }
-

@@ -23,6 +23,7 @@ const StyledButton = styled.button<{ $variant?: string; $pillIndex?: number }>`
     border-color ${({ theme }) => theme.motion.normal} ${({ theme }) => theme.motion.easing},
     color ${({ theme }) => theme.motion.normal} ${({ theme }) => theme.motion.easing};
   white-space: nowrap;
+  min-height: 2.5rem;
 
   &:disabled {
     opacity: 0.55;
@@ -31,6 +32,14 @@ const StyledButton = styled.button<{ $variant?: string; $pillIndex?: number }>`
 
   &:active:not(:disabled) {
     transform: scale(0.98);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+
+    &:active:not(:disabled) {
+      transform: none;
+    }
   }
 
   &:focus-visible {

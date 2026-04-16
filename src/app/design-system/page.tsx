@@ -121,6 +121,12 @@ const ModalActions = styled.div`
   gap: ${({ theme }) => theme.spacing[2]};
 `;
 
+const ModalDescription = styled.p`
+  margin: 0;
+  color: ${({ theme }) => theme.tokens.color.text.secondary};
+  font-size: ${({ theme }) => theme.typography.size.sm};
+`;
+
 export default function DesignSystemPage() {
   const theme = useTheme();
   const [modalOpen, setModalOpen] = useState(false);
@@ -218,6 +224,9 @@ export default function DesignSystemPage() {
                 <CardText>Componente para agrupar informação com hierarquia e leitura rápida.</CardText>
                 <Flex>
                   <Badge>Normal</Badge>
+                  <Badge tone="success">Sucesso</Badge>
+                  <Badge tone="warning">Atenção</Badge>
+                  <Badge tone="info">Informação</Badge>
                   <Badge priority="Média">Média</Badge>
                   <Badge priority="Alta">Alta</Badge>
                 </Flex>
@@ -236,11 +245,16 @@ export default function DesignSystemPage() {
               <Button onClick={() => setModalOpen(true)}>Abrir modal de exemplo</Button>
             </Flex>
 
-            <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title="Confirmação de ação">
+            <Modal
+              isOpen={modalOpen}
+              onClose={() => setModalOpen(false)}
+              title="Confirmação de ação"
+              descriptionId="modal-description"
+            >
               <FormStack>
-                <CardText>
+                <ModalDescription id="modal-description">
                   Este modal demonstra uso padrão com tokens globais, foco por teclado e fechamento por ESC.
-                </CardText>
+                </ModalDescription>
                 <ModalActions>
                   <Button variant="ghost" onClick={() => setModalOpen(false)}>
                     Cancelar

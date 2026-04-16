@@ -13,13 +13,13 @@ const Overlay = styled.div`
   align-items: center;
   justify-content: center;
   z-index: ${({ theme }) => theme.zIndex.overlay};
-  padding: 1rem;
+  padding: ${({ theme }) => theme.spacing[4]};
 `;
 
 const ModalContainer = styled.div`
   background: ${({ theme }) => theme.tokens.color.bg.surfaceElevated};
   border: 1px solid ${({ theme }) => theme.tokens.color.border.default};
-  border-radius: 20px;
+  border-radius: ${({ theme }) => theme.borderRadius.large};
   width: 100%;
   max-width: 600px;
   max-height: 90vh;
@@ -28,10 +28,27 @@ const ModalContainer = styled.div`
   box-shadow: ${({ theme }) => theme.shadows.hover};
   overflow: hidden;
   color: ${({ theme }) => theme.tokens.color.text.primary};
+  transform: translateY(0);
+  animation: modal-enter ${({ theme }) => theme.motion.normal} ${({ theme }) => theme.motion.easing};
+
+  @keyframes modal-enter {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
 `;
 
 const Header = styled.div`
-  padding: 1rem 1.5rem;
+  padding: ${({ theme }) => `${theme.spacing[4]} ${theme.spacing[6]}`};
   border-bottom: 1px solid ${({ theme }) => theme.tokens.color.border.default};
   display: flex;
   justify-content: space-between;
@@ -68,7 +85,7 @@ const Header = styled.div`
 `;
 
 const Content = styled.div`
-  padding: 1.5rem;
+  padding: ${({ theme }) => theme.spacing[6]};
   overflow-y: auto;
 `;
 
@@ -77,9 +94,10 @@ interface ModalProps {
   onClose: () => void;
   title: string;
   children: React.ReactNode;
+  descriptionId?: string;
 }
 
-export function Modal({ isOpen, onClose, title, children }: ModalProps) {
+export function Modal({ isOpen, onClose, title, children, descriptionId }: ModalProps) {
   const titleId = useId();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const onCloseRef = useRef(onClose);
@@ -96,6 +114,26 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
 
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") onCloseRef.current();
+      if (e.key !== "Tab" || !containerRef.current) return;
+
+      const focusable = Array.from(
+        containerRef.current.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        )
+      );
+      if (focusable.length === 0) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const current = document.activeElement as HTMLElement | null;
+
+      if (e.shiftKey && current === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && current === last) {
+        e.preventDefault();
+        first.focus();
+      }
     };
 
     window.addEventListener("keydown", onKeyDown);
@@ -120,6 +158,7 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
+        aria-describedby={descriptionId}
         tabIndex={-1}
       >
         <Header>

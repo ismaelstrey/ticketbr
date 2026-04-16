@@ -41,5 +41,8 @@ jobs:
       - name: Test
         run: npm test
 
+      - name: Contract Test
+        run: npm run test:contract
+
       - name: Build
         run: npm run build

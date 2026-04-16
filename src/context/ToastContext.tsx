@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useCallback, useContext, useMemo, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import styled, { keyframes } from "styled-components";
 
 type ToastType = "success" | "error" | "info";
@@ -101,8 +101,14 @@ const DismissButton = styled.button`
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
+  const timeoutMapRef = useRef<Map<string, number>>(new Map());
 
   const dismissToast = useCallback((id: string) => {
+    const timeoutId = timeoutMapRef.current.get(id);
+    if (timeoutId) {
+      window.clearTimeout(timeoutId);
+      timeoutMapRef.current.delete(id);
+    }
     setToasts((prev) => prev.filter((toast) => toast.id !== id));
   }, []);
 
@@ -110,26 +116,40 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     const id = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
     setToasts((prev) => [...prev, { id, type, message }]);
 
-    setTimeout(() => {
+    const timeoutId = window.setTimeout(() => {
       dismissToast(id);
     }, 3500);
+    timeoutMapRef.current.set(id, timeoutId);
   }, [dismissToast]);
+
+  useEffect(
+    () => () => {
+      timeoutMapRef.current.forEach((timeoutId) => window.clearTimeout(timeoutId));
+      timeoutMapRef.current.clear();
+    },
+    []
+  );
 
   const value = useMemo(() => ({ showToast }), [showToast]);
 
   return (
     <ToastContext.Provider value={value}>
       {children}
-      <ToastStack role="status" aria-live="polite" aria-atomic="true">
+      <ToastStack aria-live="polite" aria-atomic="true">
         {toasts.map((toast) => (
-          <ToastCard key={toast.id} $type={toast.type} role={toast.type === "error" ? "alert" : "status"}>
+          <ToastCard
+            key={toast.id}
+            $type={toast.type}
+            role={toast.type === "error" ? "alert" : "status"}
+            aria-live={toast.type === "error" ? "assertive" : "polite"}
+          >
             <ToastMessage>{toast.message}</ToastMessage>
             <DismissButton
               type="button"
               aria-label="Fechar notificação"
               onClick={() => dismissToast(toast.id)}
             >
-              ×
+              &times;
             </DismissButton>
           </ToastCard>
         ))}

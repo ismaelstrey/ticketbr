@@ -12,34 +12,25 @@ import { CategoryStackedArea } from "@/components/dashboard/charts/CategoryStack
 import { TicketsHeatmap } from "@/components/dashboard/charts/TicketsHeatmap";
 import { DashboardTables } from "@/components/dashboard/Tables";
 import { ErrorState, LoadingState } from "@/components/ui/FeedbackState";
+import { PageContainer, PageHeader, PageSubtitle, PageTitle } from "@/components/ui/Page";
 import { api } from "@/services/api";
 import { TicketDashboardFilters, TicketOperationalDashboardResponse } from "@/types/ticketsDashboard";
 
-const Page = styled.div`
-  padding: 1rem;
-  display: grid;
-  gap: 12px;
+const Page = styled(PageContainer)`
+  padding: ${({ theme }) => theme.spacing[4]};
 `;
 
-const HeaderRow = styled.div`
+const HeaderRow = styled(PageHeader)`
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 12px;
+  gap: ${({ theme }) => theme.spacing[3]};
   flex-wrap: wrap;
 `;
 
-const Title = styled.h1`
-  margin: 0;
-  font-size: 1.25rem;
-  font-weight: 950;
-  color: ${({ theme }) => theme.tokens.color.text.primary};
-`;
-
-const Sub = styled.div`
-  margin-top: 6px;
+const DashboardSub = styled(PageSubtitle)`
+  margin-top: ${({ theme }) => theme.spacing[1]};
   color: ${({ theme }) => theme.tokens.color.text.muted};
-  font-size: 0.92rem;
 `;
 
 const HeaderActions = styled.div`
@@ -56,7 +47,7 @@ const NoticeActions = styled.div`
 const ChartsGrid = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr 360px;
-  gap: 12px;
+  gap: ${({ theme }) => theme.spacing[3]};
 
   @media (max-width: ${({ theme }) => theme.breakpoints.desktop}) {
     grid-template-columns: 1fr;
@@ -66,7 +57,7 @@ const ChartsGrid = styled.div`
 const ChartsRow2 = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: ${({ theme }) => theme.spacing[3]};
 
   @media (max-width: ${({ theme }) => theme.breakpoints.desktop}) {
     grid-template-columns: 1fr;
@@ -234,8 +225,8 @@ export function TicketOperationalDashboard() {
     <Page>
       <HeaderRow>
         <div>
-          <Title>Dashboard operacional</Title>
-          <Sub>
+          <PageTitle>Dashboard operacional</PageTitle>
+          <DashboardSub>
             {windowLabel ? `Janela: ${windowLabel} · ` : ""}
             {lastUpdated
               ? `Atualizado: ${new Date(lastUpdated).toLocaleTimeString("pt-BR", {
@@ -245,7 +236,7 @@ export function TicketOperationalDashboard() {
                 })}`
               : ""}
             {refreshing ? " · atualizando..." : ""}
-          </Sub>
+          </DashboardSub>
         </div>
 
         <HeaderActions>

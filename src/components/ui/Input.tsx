@@ -31,6 +31,7 @@ const fieldStyles = css`
 export const Input = styled.input`
   ${fieldStyles}
   padding: 0.55rem 0.65rem;
+  min-height: 2.5rem;
   font-family: inherit;
   width: 100%;
 `;
@@ -38,6 +39,7 @@ export const Input = styled.input`
 export const Select = styled.select`
   ${fieldStyles}
   padding: 0.55rem 0.7rem;
+  min-height: 2.5rem;
   font-family: inherit;
   cursor: pointer;
 `;

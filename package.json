@@ -9,6 +9,7 @@
     "start": "next start",
     "lint": "tsc --noEmit",
     "test": "vitest run",
+    "test:contract": "vitest run src/test/contracts",
     "test:watch": "vitest",
     "postinstall": "node -e \"const fs=require('fs'); const cp=require('child_process'); const schema='prisma/schema.prisma'; if(fs.existsSync(schema)){ cp.execSync('npx prisma generate',{stdio:'inherit'});} else { console.warn('Skipping prisma generate: '+schema+' not found'); }\"",
     "db:migrate": "node scripts/db-migrate.cjs",

@@ -8,8 +8,8 @@ const TopbarContainer = styled.header`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 1rem;
-  margin-bottom: 1rem;
+  gap: ${({ theme }) => theme.spacing[4]};
+  margin-bottom: ${({ theme }) => theme.spacing[4]};
 
   @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
     flex-direction: column;
@@ -24,9 +24,17 @@ const SearchWrapper = styled.div`
   min-width: 280px;
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0 0.85rem;
-  color: ${({ theme }) => theme.colors.text.secondary};
+  gap: ${({ theme }) => theme.spacing[2]};
+  padding: 0 ${({ theme }) => theme.spacing[3]};
+  color: ${({ theme }) => theme.tokens.color.text.secondary};
+  transition:
+    border-color ${({ theme }) => theme.motion.normal} ${({ theme }) => theme.motion.easing},
+    box-shadow ${({ theme }) => theme.motion.normal} ${({ theme }) => theme.motion.easing};
+
+  &:focus-within {
+    border-color: ${({ theme }) => theme.tokens.color.interactive.primary};
+    box-shadow: 0 0 0 3px ${({ theme }) => `${theme.tokens.color.interactive.primary}22`};
+  }
 
   @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
     width: 100%;
@@ -37,16 +45,20 @@ const SearchWrapper = styled.div`
 const SearchInput = styled.input`
   border: none;
   border-radius: ${({ theme }) => theme.borderRadius.pill};
-  padding: 0.7rem 0.15rem;
+  padding: ${({ theme }) => theme.spacing[3]} 0.15rem;
   background: transparent;
   min-width: 220px;
   width: 100%;
   outline: none;
   font-family: inherit;
+  color: ${({ theme }) => theme.tokens.color.text.primary};
+
+  &::placeholder {
+    color: ${({ theme }) => theme.tokens.color.text.muted};
+  }
 
   &:focus-visible {
-    outline: 2px solid ${({ theme }) => theme.tokens.color.interactive.primary};
-    outline-offset: 2px;
+    outline: none;
   }
 
   @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
@@ -58,7 +70,7 @@ const SearchInput = styled.input`
 const ActionsWrapper = styled.div`
   display: flex;
   flex-wrap: wrap;
-  gap: 0.6rem;
+  gap: ${({ theme }) => theme.spacing[2]};
 `;
 
 const actionButtons = [
