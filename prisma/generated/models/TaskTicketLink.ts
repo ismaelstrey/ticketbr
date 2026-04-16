@@ -151,7 +151,7 @@ export type TaskTicketLinkGroupByOutputType = {
   _max: TaskTicketLinkMaxAggregateOutputType | null
 }
 
-type GetTaskTicketLinkGroupByPayload<T extends TaskTicketLinkGroupByArgs> = Prisma.PrismaPromise<
+export type GetTaskTicketLinkGroupByPayload<T extends TaskTicketLinkGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<TaskTicketLinkGroupByOutputType, T['by']> &
       {
@@ -1093,6 +1093,11 @@ export type TaskTicketLinkFindManyArgs<ExtArgs extends runtime.Types.Extensions.
    * Skip the first `n` TaskTicketLinks.
    */
   skip?: number
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+   * 
+   * Filter by unique combinations of TaskTicketLinks.
+   */
   distinct?: Prisma.TaskTicketLinkScalarFieldEnum | Prisma.TaskTicketLinkScalarFieldEnum[]
 }
 

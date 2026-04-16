@@ -16,6 +16,7 @@ import { computeCurrentConversationCutoffMs, filterMessagesByCutoff } from "@/li
 import { ChatActionsMenu } from "@/components/chat/ChatActionsMenu";
 import { broadcastChatOpenConversationsInvalidation, useChatOpenConversations } from "@/context/ChatOpenConversationsContext";
 import { PeripheralNotice } from "@/components/chat/PeripheralNotice";
+import { ChatConversationFooter } from "@/components/chat/ChatConversationFooter";
 
 const openConversationPulse = keyframes`
   0% {
@@ -49,6 +50,7 @@ const ChatMain = styled(MainContent)`
 const Frame = styled.div`
   width: 100%;
   height: 100vh;
+  min-height: 0;
   background: ${({ theme }) => theme.colors.surfaceElevated};
   border: none;
   border-radius: 0;
@@ -59,7 +61,8 @@ const Frame = styled.div`
 
   @media (max-width: 1024px) {
     grid-template-columns: 1fr;
-    height: auto;
+    grid-template-rows: minmax(280px, 42vh) 1fr;
+    height: 100vh;
   }
 `;
 
@@ -68,6 +71,8 @@ const SidebarPane = styled.aside`
   display: grid;
   grid-template-rows: auto auto auto 1fr;
   background: linear-gradient(180deg, ${({ theme }) => theme.colors.surfaceAlt}, ${({ theme }) => theme.colors.surface});
+  min-height: 0;
+  overflow: hidden;
 `;
 
 const TopBar = styled.div`
@@ -110,6 +115,8 @@ const TabButton = styled.button<{ $active?: boolean }>`
 
 const ContactList = styled(ThinScrollArea)`
   padding: 8px;
+  min-height: 0;
+  height: 100%;
   scrollbar-color: ${({ theme }) =>
       theme.mode === "dark" ? "rgba(226, 232, 240, 0.22) transparent" : "rgba(15, 23, 42, 0.22) transparent"};
 
@@ -268,6 +275,7 @@ const ChatPane = styled.section`
     radial-gradient(circle at top, rgba(255, 255, 255, 0.04), transparent 30%),
     ${({ theme }) => theme.colors.background};
   height: 100%;
+  min-height: 0;
   overflow: hidden;
   position: relative;
 `;
@@ -306,6 +314,12 @@ const InlineSelect = styled(Select)`
 `;
 
 const ComposerBlocked = styled.div`
+  position: sticky;
+  bottom: 0;
+  z-index: 50;
+  justify-self: end;
+  width: min(860px, 100%);
+  margin-left: auto;
   background: ${({ theme }) => theme.colors.surfaceAlt};
   border-top: 1px solid ${({ theme }) => theme.colors.border};
   padding: 0.75rem;
@@ -315,6 +329,11 @@ const ComposerBlocked = styled.div`
   gap: 0.75rem;
   align-items: center;
   flex-wrap: wrap;
+
+  @media (max-width: 1024px) {
+    justify-self: stretch;
+    width: 100%;
+  }
 `;
 
 const MessageList = styled.div<{ $fading?: boolean }>`
@@ -323,6 +342,7 @@ const MessageList = styled.div<{ $fading?: boolean }>`
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  min-height: 0;
   opacity: ${({ $fading }) => ($fading ? 0.55 : 1)};
   transition: opacity 180ms ease;
 
@@ -443,12 +463,19 @@ const TicketLabel = styled.span`
 `;
 
 const Composer = styled.div`
+  position: sticky;
+  bottom: 0;
+  z-index: 50;
+  justify-self: stretch;
+  width: 100%;
   background: ${({ theme }) => theme.colors.surfaceElevated};
   border-top: 1px solid ${({ theme }) => theme.colors.border};
   padding: 0.75rem;
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 0.5rem;
+  display: block;
+
+  @media (max-width: 1024px) {
+    width: 100%;
+  }
 `;
 
 const ComposerActions = styled.div`
@@ -458,6 +485,12 @@ const ComposerActions = styled.div`
 `;
 
 const ArchiveBanner = styled.div`
+  position: sticky;
+  bottom: 0;
+  z-index: 50;
+  justify-self: end;
+  width: min(860px, 100%);
+  margin-left: auto;
   background: ${({ theme }) => theme.colors.surfaceElevated};
   border-top: 1px solid ${({ theme }) => theme.colors.border};
   padding: 0.75rem;
@@ -465,23 +498,15 @@ const ArchiveBanner = styled.div`
   justify-content: space-between;
   align-items: center;
   gap: 12px;
+
+  @media (max-width: 1024px) {
+    justify-self: stretch;
+    width: 100%;
+  }
 `;
 
 const ArchiveText = styled.small`
   color: ${({ theme }) => theme.colors.text.secondary};
-`;
-
-const Footer = styled.div`
-  background: ${({ theme }) => theme.colors.surface};
-  border-top: 1px solid ${({ theme }) => theme.colors.border};
-  padding: 0.75rem;
-  display: grid;
-  grid-template-columns: 1fr 1fr auto;
-  gap: 0.45rem;
-
-  @media (max-width: 900px) {
-    grid-template-columns: 1fr;
-  }
 `;
 
 function toBase64(file: File): Promise<string> {
@@ -1532,6 +1557,21 @@ export default function ChatPage() {
               <div ref={messagesEndRef} />
             </MessageList>
 
+            <ChatConversationFooter
+              tickets={filteredTickets.map((ticket) => ({ id: ticket.id, number: ticket.number, subject: ticket.subject }))}
+              selectedTicketId={selectedTicket}
+              onSelectedTicketIdChange={setSelectedTicket}
+              onAssociate={() => linkToTicket().catch((error) => showToast(error.message, "error"))}
+              associateDisabled={!selectedTicket || !contactId || !conversationId.trim()}
+              showArchived={showArchived}
+              archivedConversations={archivedConversations.map((item) => ({ id: item.id, closedAt: item.closedAt, ticketNumber: item.ticket?.number ?? null }))}
+              activeArchivedId={activeArchivedId}
+              onActiveArchivedIdChange={setActiveArchivedId}
+              onFinalize={() => finalizeConversation().catch((error) => showToast(error.message, "error"))}
+              finalizeDisabled={savingConversation || !contactId || !messages.length}
+              finalizeLabel={savingConversation ? "Finalizando..." : "Finalizar conversa"}
+            />
+
             {activeArchivedConversation ? (
               <ArchiveBanner>
                 <ArchiveText>Conversa finalizada</ArchiveText>
@@ -1581,37 +1621,6 @@ export default function ChatPage() {
                 ) : null}
               </ComposerBlocked>
             )}
-
-            <Footer>
-              <Select value={selectedTicket} onChange={(e) => setSelectedTicket(e.target.value)}>
-                <option value="">Associar a um ticket...</option>
-                {filteredTickets.map((ticket) => (
-                  <option key={ticket.id} value={ticket.id}>#{ticket.number} - {ticket.subject}</option>
-                ))}
-              </Select>
-              <Button variant="save" onClick={() => linkToTicket().catch((error) => showToast(error.message, "error"))}>Associar</Button>
-
-              {showArchived ? (
-                <Select value={activeArchivedId} onChange={(e) => setActiveArchivedId(e.target.value)}>
-                  <option value="">Abrir conversa finalizada...</option>
-                  {archivedConversations.map((item) => (
-                    <option key={item.id} value={item.id}>
-                      {new Date(item.closedAt).toLocaleString("pt-BR")} {item.ticket ? `• Ticket #${item.ticket.number}` : ""}
-                    </option>
-                  ))}
-                </Select>
-              ) : (
-                <div />
-              )}
-              <div />
-              <Button
-                variant="ghost"
-                disabled={savingConversation || !contactId || !messages.length}
-                onClick={() => finalizeConversation().catch((error) => showToast(error.message, "error"))}
-              >
-                {savingConversation ? "Finalizando..." : "Finalizar conversa"}
-              </Button>
-            </Footer>
           </ChatPane>
         </Frame>
       </ChatMain>

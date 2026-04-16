@@ -213,7 +213,7 @@ export type TaskAttachmentGroupByOutputType = {
   _max: TaskAttachmentMaxAggregateOutputType | null
 }
 
-type GetTaskAttachmentGroupByPayload<T extends TaskAttachmentGroupByArgs> = Prisma.PrismaPromise<
+export type GetTaskAttachmentGroupByPayload<T extends TaskAttachmentGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<TaskAttachmentGroupByOutputType, T['by']> &
       {
@@ -1421,6 +1421,11 @@ export type TaskAttachmentFindManyArgs<ExtArgs extends runtime.Types.Extensions.
    * Skip the first `n` TaskAttachments.
    */
   skip?: number
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+   * 
+   * Filter by unique combinations of TaskAttachments.
+   */
   distinct?: Prisma.TaskAttachmentScalarFieldEnum | Prisma.TaskAttachmentScalarFieldEnum[]
 }
 

@@ -206,7 +206,7 @@ export type TaskSubtaskGroupByOutputType = {
   _max: TaskSubtaskMaxAggregateOutputType | null
 }
 
-type GetTaskSubtaskGroupByPayload<T extends TaskSubtaskGroupByArgs> = Prisma.PrismaPromise<
+export type GetTaskSubtaskGroupByPayload<T extends TaskSubtaskGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<TaskSubtaskGroupByOutputType, T['by']> &
       {
@@ -1236,6 +1236,11 @@ export type TaskSubtaskFindManyArgs<ExtArgs extends runtime.Types.Extensions.Int
    * Skip the first `n` TaskSubtasks.
    */
   skip?: number
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+   * 
+   * Filter by unique combinations of TaskSubtasks.
+   */
   distinct?: Prisma.TaskSubtaskScalarFieldEnum | Prisma.TaskSubtaskScalarFieldEnum[]
 }
 

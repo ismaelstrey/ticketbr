@@ -241,7 +241,7 @@ export type Mesa_TrabalhoGroupByOutputType = {
   _max: Mesa_TrabalhoMaxAggregateOutputType | null
 }
 
-type GetMesa_TrabalhoGroupByPayload<T extends Mesa_TrabalhoGroupByArgs> = Prisma.PrismaPromise<
+export type GetMesa_TrabalhoGroupByPayload<T extends Mesa_TrabalhoGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<Mesa_TrabalhoGroupByOutputType, T['by']> &
       {
@@ -1678,6 +1678,11 @@ export type Mesa_TrabalhoFindManyArgs<ExtArgs extends runtime.Types.Extensions.I
    * Skip the first `n` Mesa_Trabalhos.
    */
   skip?: number
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+   * 
+   * Filter by unique combinations of Mesa_Trabalhos.
+   */
   distinct?: Prisma.Mesa_TrabalhoScalarFieldEnum | Prisma.Mesa_TrabalhoScalarFieldEnum[]
 }
 

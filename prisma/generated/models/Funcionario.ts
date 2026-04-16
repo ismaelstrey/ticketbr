@@ -228,7 +228,7 @@ export type FuncionarioGroupByOutputType = {
   _max: FuncionarioMaxAggregateOutputType | null
 }
 
-type GetFuncionarioGroupByPayload<T extends FuncionarioGroupByArgs> = Prisma.PrismaPromise<
+export type GetFuncionarioGroupByPayload<T extends FuncionarioGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<FuncionarioGroupByOutputType, T['by']> &
       {
@@ -1789,6 +1789,11 @@ export type FuncionarioFindManyArgs<ExtArgs extends runtime.Types.Extensions.Int
    * Skip the first `n` Funcionarios.
    */
   skip?: number
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+   * 
+   * Filter by unique combinations of Funcionarios.
+   */
   distinct?: Prisma.FuncionarioScalarFieldEnum | Prisma.FuncionarioScalarFieldEnum[]
 }
 

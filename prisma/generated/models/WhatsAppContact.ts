@@ -179,7 +179,7 @@ export type WhatsAppContactGroupByOutputType = {
   _max: WhatsAppContactMaxAggregateOutputType | null
 }
 
-type GetWhatsAppContactGroupByPayload<T extends WhatsAppContactGroupByArgs> = Prisma.PrismaPromise<
+export type GetWhatsAppContactGroupByPayload<T extends WhatsAppContactGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<WhatsAppContactGroupByOutputType, T['by']> &
       {
@@ -1186,6 +1186,11 @@ export type WhatsAppContactFindManyArgs<ExtArgs extends runtime.Types.Extensions
    * Skip the first `n` WhatsAppContacts.
    */
   skip?: number
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+   * 
+   * Filter by unique combinations of WhatsAppContacts.
+   */
   distinct?: Prisma.WhatsAppContactScalarFieldEnum | Prisma.WhatsAppContactScalarFieldEnum[]
 }
 

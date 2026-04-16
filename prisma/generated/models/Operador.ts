@@ -235,7 +235,7 @@ export type OperadorGroupByOutputType = {
   _max: OperadorMaxAggregateOutputType | null
 }
 
-type GetOperadorGroupByPayload<T extends OperadorGroupByArgs> = Prisma.PrismaPromise<
+export type GetOperadorGroupByPayload<T extends OperadorGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<OperadorGroupByOutputType, T['by']> &
       {
@@ -1806,6 +1806,11 @@ export type OperadorFindManyArgs<ExtArgs extends runtime.Types.Extensions.Intern
    * Skip the first `n` Operadors.
    */
   skip?: number
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+   * 
+   * Filter by unique combinations of Operadors.
+   */
   distinct?: Prisma.OperadorScalarFieldEnum | Prisma.OperadorScalarFieldEnum[]
 }
 

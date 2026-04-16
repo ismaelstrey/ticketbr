@@ -221,7 +221,7 @@ export type SolicitanteGroupByOutputType = {
   _max: SolicitanteMaxAggregateOutputType | null
 }
 
-type GetSolicitanteGroupByPayload<T extends SolicitanteGroupByArgs> = Prisma.PrismaPromise<
+export type GetSolicitanteGroupByPayload<T extends SolicitanteGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<SolicitanteGroupByOutputType, T['by']> &
       {
@@ -1517,6 +1517,11 @@ export type SolicitanteFindManyArgs<ExtArgs extends runtime.Types.Extensions.Int
    * Skip the first `n` Solicitantes.
    */
   skip?: number
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+   * 
+   * Filter by unique combinations of Solicitantes.
+   */
   distinct?: Prisma.SolicitanteScalarFieldEnum | Prisma.SolicitanteScalarFieldEnum[]
 }
 

@@ -161,7 +161,7 @@ export type ProjectExportAuditGroupByOutputType = {
   _max: ProjectExportAuditMaxAggregateOutputType | null
 }
 
-type GetProjectExportAuditGroupByPayload<T extends ProjectExportAuditGroupByArgs> = Prisma.PrismaPromise<
+export type GetProjectExportAuditGroupByPayload<T extends ProjectExportAuditGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<ProjectExportAuditGroupByOutputType, T['by']> &
       {
@@ -1277,6 +1277,11 @@ export type ProjectExportAuditFindManyArgs<ExtArgs extends runtime.Types.Extensi
    * Skip the first `n` ProjectExportAudits.
    */
   skip?: number
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+   * 
+   * Filter by unique combinations of ProjectExportAudits.
+   */
   distinct?: Prisma.ProjectExportAuditScalarFieldEnum | Prisma.ProjectExportAuditScalarFieldEnum[]
 }
 
