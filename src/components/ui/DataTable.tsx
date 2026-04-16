@@ -7,9 +7,9 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 
 const Container = styled.div`
-  background: ${({ theme }) => theme.colors.surfaceElevated};
-  border-radius: 18px;
-  border: 1px solid ${({ theme }) => theme.colors.border};
+  background: ${({ theme }) => theme.tokens.color.bg.surfaceElevated};
+  border-radius: ${({ theme }) => theme.borderRadius.large};
+  border: 1px solid ${({ theme }) => theme.tokens.color.border.default};
   box-shadow: ${({ theme }) => theme.shadows.card};
   overflow: hidden;
   display: flex;
@@ -19,7 +19,7 @@ const Container = styled.div`
 
 const Header = styled.div`
   padding: 1rem 1.5rem;
-  border-bottom: 1px solid ${({ theme }) => theme.colors.border};
+  border-bottom: 1px solid ${({ theme }) => theme.tokens.color.border.default};
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -30,7 +30,7 @@ const Header = styled.div`
 const Title = styled.h2`
   font-size: 1.25rem;
   font-weight: 600;
-  color: ${({ theme }) => theme.colors.text.primary};
+  color: ${({ theme }) => theme.tokens.color.text.primary};
   margin: 0;
 `;
 
@@ -49,7 +49,7 @@ const SearchWrapper = styled.div`
     left: 10px;
     top: 50%;
     transform: translateY(-50%);
-    color: ${({ theme }) => theme.colors.text.muted};
+    color: ${({ theme }) => theme.tokens.color.text.muted};
   }
 
   input {
@@ -68,43 +68,61 @@ const Table = styled.table`
   text-align: left;
 `;
 
-const Th = styled.th`
+const Th = styled.th<{ $width?: string; $align?: "left" | "right" }>`
   padding: 0.75rem 1.5rem;
-  background: ${({ theme }) => theme.colors.surfaceAlt};
-  color: ${({ theme }) => theme.colors.text.secondary};
+  background: ${({ theme }) => theme.tokens.color.bg.surfaceAlt};
+  color: ${({ theme }) => theme.tokens.color.text.secondary};
   font-weight: 600;
   font-size: 0.85rem;
   text-transform: uppercase;
-  border-bottom: 1px solid ${({ theme }) => theme.colors.border};
+  border-bottom: 1px solid ${({ theme }) => theme.tokens.color.border.default};
   white-space: nowrap;
+  width: ${({ $width }) => $width ?? "auto"};
+  text-align: ${({ $align }) => $align ?? "left"};
 `;
 
-const Td = styled.td`
+const Td = styled.td<{ $align?: "left" | "right" }>`
   padding: 0.75rem 1.5rem;
-  border-bottom: 1px solid ${({ theme }) => theme.colors.border};
-  color: ${({ theme }) => theme.colors.text.secondary};
+  border-bottom: 1px solid ${({ theme }) => theme.tokens.color.border.default};
+  color: ${({ theme }) => theme.tokens.color.text.secondary};
   font-size: 0.9rem;
+  text-align: ${({ $align }) => $align ?? "left"};
 `;
 
 const ActionButton = styled.button<{ variant?: "edit" | "delete" }>`
   background: none;
-  border: 1px solid ${({ theme, variant }) => (variant === "delete" ? `${theme.colors.status.warning}33` : theme.colors.border)};
+  border: 1px solid
+    ${({ theme, variant }) =>
+      variant === "delete"
+        ? theme.tokens.color.status.warningBorder
+        : theme.tokens.color.border.default};
   cursor: pointer;
   padding: 0.4rem;
-  border-radius: 10px;
-  color: ${({ theme, variant }) => (variant === "delete" ? theme.colors.status.warning : theme.colors.primary)};
-  transition: background 0.2s ease, border-color 0.2s ease;
+  border-radius: ${({ theme }) => theme.borderRadius.small};
+  color: ${({ theme, variant }) =>
+    variant === "delete"
+      ? theme.tokens.color.status.warning
+      : theme.tokens.color.interactive.primary};
+  transition:
+    background ${({ theme }) => theme.motion.normal} ${({ theme }) => theme.motion.easing},
+    border-color ${({ theme }) => theme.motion.normal} ${({ theme }) => theme.motion.easing};
 
   &:hover {
-    background: ${({ theme, variant }) => (variant === "delete" ? `${theme.colors.status.warning}14` : `${theme.colors.primary}12`)};
-    border-color: ${({ theme, variant }) => (variant === "delete" ? `${theme.colors.status.warning}55` : `${theme.colors.primary}44`)};
+    background: ${({ theme, variant }) =>
+      variant === "delete"
+        ? theme.tokens.color.status.warningSurface
+        : theme.tokens.color.interactive.ghostHover};
+    border-color: ${({ theme, variant }) =>
+      variant === "delete"
+        ? theme.tokens.color.status.warningBorder
+        : theme.tokens.color.border.strong};
   }
 `;
 
 const EmptyState = styled.div`
   padding: 3rem;
   text-align: center;
-  color: ${({ theme }) => theme.colors.text.muted};
+  color: ${({ theme }) => theme.tokens.color.text.muted};
   font-size: 0.95rem;
 `;
 
@@ -113,7 +131,7 @@ const LoadingOverlay = styled.div`
   justify-content: center;
   align-items: center;
   padding: 3rem;
-  color: ${({ theme }) => theme.colors.text.muted};
+  color: ${({ theme }) => theme.tokens.color.text.muted};
 `;
 
 const ActionCell = styled.div`
@@ -155,9 +173,7 @@ export function DataTable<T extends { id: string | number }>({
     if (!searchTerm) return data;
     const lowerTerm = searchTerm.toLowerCase();
     return data.filter((item) =>
-      Object.values(item).some((val) =>
-        String(val).toLowerCase().includes(lowerTerm)
-      )
+      Object.values(item).some((val) => String(val).toLowerCase().includes(lowerTerm))
     );
   }, [data, searchTerm]);
 
@@ -190,9 +206,15 @@ export function DataTable<T extends { id: string | number }>({
             <thead>
               <tr>
                 {columns.map((col, index) => (
-                  <Th key={index} style={{ width: col.width }}>{col.header}</Th>
+                  <Th key={index} $width={col.width}>
+                    {col.header}
+                  </Th>
                 ))}
-                {(onEdit || onDelete) && <Th style={{ width: "100px", textAlign: "right" }}>Ações</Th>}
+                {(onEdit || onDelete) && (
+                  <Th $width="100px" $align="right">
+                    Ações
+                  </Th>
+                )}
               </tr>
             </thead>
             <tbody>
@@ -206,7 +228,7 @@ export function DataTable<T extends { id: string | number }>({
                     </Td>
                   ))}
                   {(onEdit || onDelete) && (
-                    <Td style={{ textAlign: "right" }}>
+                    <Td $align="right">
                       <ActionCell>
                         {onEdit && (
                           <ActionButton variant="edit" onClick={() => onEdit(item)} title="Editar">
@@ -232,3 +254,4 @@ export function DataTable<T extends { id: string | number }>({
     </Container>
   );
 }
+

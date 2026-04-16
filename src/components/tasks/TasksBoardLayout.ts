@@ -19,7 +19,7 @@ export const Title = styled.h1`
   margin: 0;
   font-size: 1.35rem;
   font-weight: 800;
-  color: ${({ theme }) => theme.colors.text.primary};
+  color: ${({ theme }) => theme.tokens.color.text.primary};
 `;
 
 export const Toolbar = styled.div`
@@ -43,5 +43,11 @@ export const KanbanGrid = styled.section`
   @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
     grid-template-columns: 1fr;
   }
+`;
+
+export const StatusHint = styled.p`
+  margin: 0 0 ${({ theme }) => theme.spacing[3]};
+  color: ${({ theme }) => theme.tokens.color.text.muted};
+  font-size: ${({ theme }) => theme.typography.size.sm};
 `;
 

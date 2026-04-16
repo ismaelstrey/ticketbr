@@ -2,8 +2,8 @@ import { createGlobalStyle } from "styled-components";
 
 export const GlobalStyles = createGlobalStyle`
   :root {
-    color-scheme: ${({ theme }) => (theme.colors.background === "#020617" ? "dark" : "light")};
-    font-family: Inter, system-ui, -apple-system, sans-serif;
+    color-scheme: ${({ theme }) => theme.mode};
+    font-family: ${({ theme }) => theme.typography.family.body};
   }
 
   * {
@@ -20,12 +20,14 @@ export const GlobalStyles = createGlobalStyle`
   body {
     margin: 0;
     background:
-      ${({ theme }) => theme.colors.backgroundAccent},
-      ${({ theme }) => theme.colors.background};
-    color: ${({ theme }) => theme.colors.text.primary};
+      ${({ theme }) => theme.tokens.color.bg.accent},
+      ${({ theme }) => theme.tokens.color.bg.default};
+    color: ${({ theme }) => theme.tokens.color.text.primary};
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    transition: background 0.25s ease, color 0.25s ease;
+    transition:
+      background ${({ theme }) => theme.motion.normal} ${({ theme }) => theme.motion.easing},
+      color ${({ theme }) => theme.motion.normal} ${({ theme }) => theme.motion.easing};
   }
 
   button,
@@ -41,8 +43,8 @@ export const GlobalStyles = createGlobalStyle`
   }
 
   ::selection {
-    background: ${({ theme }) => theme.colors.primary}55;
-    color: ${({ theme }) => theme.colors.text.white};
+    background: ${({ theme }) => `${theme.tokens.color.interactive.primary}55`};
+    color: ${({ theme }) => theme.tokens.color.text.inverse};
   }
 
   ::-webkit-scrollbar {
@@ -55,15 +57,20 @@ export const GlobalStyles = createGlobalStyle`
   }
 
   ::-webkit-scrollbar-thumb {
-    background: ${({ theme }) => theme.colors.borderStrong};
+    background: ${({ theme }) => theme.tokens.color.border.strong};
     border-radius: 999px;
     border: 2px solid transparent;
     background-clip: padding-box;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: ${({ theme }) => theme.colors.text.muted};
+    background: ${({ theme }) => theme.tokens.color.text.muted};
     border: 2px solid transparent;
     background-clip: padding-box;
+  }
+
+  :focus-visible {
+    outline: 2px solid ${({ theme }) => theme.tokens.color.interactive.primary};
+    outline-offset: 2px;
   }
 `;

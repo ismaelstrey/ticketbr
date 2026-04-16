@@ -8,15 +8,15 @@ import { useChatOpenConversations } from "@/context/ChatOpenConversationsContext
 import { IoLogoWhatsapp } from "react-icons/io";
 
 const floatPulse = keyframes`
-  0%, 100% { transform: translateY(0); box-shadow: 0 16px 30px rgba(37, 99, 235, 0.28); }
-  50% { transform: translateY(-2px); box-shadow: 0 20px 34px rgba(37, 99, 235, 0.36); }
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
 `;
 
 const FloatingButton = styled.button<{ $hasUnread: boolean }>`
   position: fixed;
   right: 1.5rem;
   bottom: 1.5rem;
-  z-index: 120;
+  z-index: ${({ theme }) => theme.zIndex.floating};
   border: none;
   border-radius: 999px;
   padding: 0.9rem 1rem;
@@ -27,17 +27,21 @@ const FloatingButton = styled.button<{ $hasUnread: boolean }>`
   justify-content: center;
   gap: 0.65rem;
   cursor: pointer;
-  color: ${({ theme }) => (theme.mode === "dark" ? theme.colors.text.white : theme.colors.text.primary)};
-  background: ${({ theme }) =>
-    theme.mode === "dark"
-      ? "linear-gradient(135deg, rgba(37, 99, 235, 0.65), rgba(139, 92, 246, 0.75))"
-      : "linear-gradient(135deg, rgba(15, 23, 42, 0.06), rgba(99, 102, 241, 0.18))"};
+  color: ${({ theme }) => theme.tokens.color.interactive.chatButtonText};
+  background: ${({ theme }) => theme.tokens.color.interactive.chatButton};
   box-shadow: ${({ theme }) => theme.shadows.card};
-  transition: transform 0.2s ease, opacity 0.2s ease;
+  transition:
+    transform ${({ theme }) => theme.motion.normal} ${({ theme }) => theme.motion.easing},
+    opacity ${({ theme }) => theme.motion.normal} ${({ theme }) => theme.motion.easing};
   animation: ${({ $hasUnread }) => ($hasUnread ? floatPulse : "none")} 2.2s ease-in-out infinite;
 
   &:hover {
     transform: translateY(-2px) scale(1.01);
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.tokens.color.interactive.primary};
+    outline-offset: 2px;
   }
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
@@ -65,14 +69,14 @@ const Badge = styled.span`
   height: 24px;
   padding: 0 0.35rem;
   border-radius: 999px;
-  background: ${({ theme }) => theme.colors.status.warning};
-  color: ${({ theme }) => theme.colors.text.white};
+  background: ${({ theme }) => theme.tokens.color.status.warning};
+  color: ${({ theme }) => theme.tokens.color.text.inverse};
   display: inline-flex;
   align-items: center;
   justify-content: center;
   font-size: 0.72rem;
   font-weight: 800;
-  border: 2px solid ${({ theme }) => theme.colors.surface};
+  border: 2px solid ${({ theme }) => theme.tokens.color.bg.surface};
 `;
 
 const IconWrap = styled.span`
@@ -108,7 +112,7 @@ export function GlobalChatButton() {
   return (
     <FloatingButton type="button" onClick={handleOpenChat} $hasUnread={openCount > 0} aria-label="Abrir chat">
       <IconWrap>
-        <IoLogoWhatsapp size={30} color="#25D366"/>
+        <IoLogoWhatsapp size={30} color="currentColor" />
         {badgeValue ? <Badge>{badgeValue}</Badge> : null}
       </IconWrap>
       <ButtonLabel>Chat</ButtonLabel>

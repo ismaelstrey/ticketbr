@@ -1,20 +1,30 @@
 import styled, { css } from "styled-components";
 
 const fieldStyles = css`
-  border: 1px solid ${({ theme }) => theme.colors.border};
+  border: 1px solid ${({ theme }) => theme.tokens.color.border.default};
   border-radius: ${({ theme }) => theme.borderRadius.small};
-  background: ${({ theme }) => theme.colors.surface};
-  color: ${({ theme }) => theme.colors.text.primary};
-  transition: border-color 0.2s ease, outline 0.2s ease, background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+  background: ${({ theme }) => theme.tokens.color.bg.surface};
+  color: ${({ theme }) => theme.tokens.color.text.primary};
+  transition:
+    border-color ${({ theme }) => theme.motion.normal} ${({ theme }) => theme.motion.easing},
+    outline ${({ theme }) => theme.motion.normal} ${({ theme }) => theme.motion.easing},
+    background ${({ theme }) => theme.motion.normal} ${({ theme }) => theme.motion.easing},
+    color ${({ theme }) => theme.motion.normal} ${({ theme }) => theme.motion.easing},
+    box-shadow ${({ theme }) => theme.motion.normal} ${({ theme }) => theme.motion.easing};
 
   &::placeholder {
-    color: ${({ theme }) => theme.colors.text.muted};
+    color: ${({ theme }) => theme.tokens.color.text.muted};
   }
 
-  &:focus {
-    outline: 2px solid ${({ theme }) => theme.colors.primary}33;
-    border-color: ${({ theme }) => theme.colors.primary};
-    box-shadow: 0 0 0 4px ${({ theme }) => theme.colors.primary}12;
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.tokens.color.interactive.focus};
+    border-color: ${({ theme }) => theme.tokens.color.interactive.primary};
+    box-shadow: 0 0 0 4px ${({ theme }) => `${theme.tokens.color.interactive.primary}1f`};
+  }
+
+  &[aria-invalid="true"] {
+    border-color: ${({ theme }) => theme.tokens.color.status.warningBorder};
+    box-shadow: 0 0 0 2px ${({ theme }) => `${theme.tokens.color.status.warning}1f`};
   }
 `;
 

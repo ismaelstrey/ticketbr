@@ -7,19 +7,25 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const StyledButton = styled.button<{ $variant?: string; $pillIndex?: number }>`
-  border: 1px solid transparent;
+  border: 1px solid ${({ theme }) => theme.tokens.color.border.default};
   border-radius: ${({ theme }) => theme.borderRadius.pill};
   padding: 0.62rem 1rem;
-  font-weight: 700;
+  font-weight: ${({ theme }) => theme.typography.weight.bold};
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.35rem;
-  transition: opacity 0.2s ease, transform 0.1s ease, background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  transition:
+    opacity ${({ theme }) => theme.motion.normal} ${({ theme }) => theme.motion.easing},
+    transform ${({ theme }) => theme.motion.fast} ${({ theme }) => theme.motion.easing},
+    background ${({ theme }) => theme.motion.normal} ${({ theme }) => theme.motion.easing},
+    border-color ${({ theme }) => theme.motion.normal} ${({ theme }) => theme.motion.easing},
+    color ${({ theme }) => theme.motion.normal} ${({ theme }) => theme.motion.easing};
+  white-space: nowrap;
 
   &:disabled {
-    opacity: 0.6;
+    opacity: 0.55;
     cursor: not-allowed;
   }
 
@@ -27,50 +33,69 @@ const StyledButton = styled.button<{ $variant?: string; $pillIndex?: number }>`
     transform: scale(0.98);
   }
 
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.tokens.color.interactive.primary};
+    outline-offset: 2px;
+  }
+
   ${({ $variant, theme, $pillIndex }) => {
     switch ($variant) {
       case "ghost":
         return css`
-          background: ${theme.colors.surfaceAlt};
-          border-color: ${theme.colors.border};
-          color: ${theme.colors.text.primary};
+          background: ${theme.tokens.color.bg.surfaceAlt};
+          border-color: ${theme.tokens.color.border.default};
+          color: ${theme.tokens.color.text.primary};
+
+          &:hover {
+            background: ${theme.tokens.color.interactive.ghostHover};
+            border-color: ${theme.tokens.color.border.strong};
+          }
         `;
       case "save":
         return css`
-          background: ${theme.colors.status.success};
-          color: ${theme.colors.text.white};
+          background: ${theme.tokens.color.status.success};
+          border-color: transparent;
+          color: ${theme.tokens.color.text.inverse};
+
+          &:hover {
+            opacity: 0.92;
+          }
         `;
       case "danger":
         return css`
           background: transparent;
-          border-color: ${theme.colors.border};
-          color: ${theme.colors.text.secondary};
+          border-color: ${theme.tokens.color.border.default};
+          color: ${theme.tokens.color.text.secondary};
 
           &:hover {
-            background: ${theme.colors.surfaceAlt};
-            color: ${theme.colors.status.warning};
-            border-color: ${theme.colors.borderStrong};
+            background: ${theme.tokens.color.status.warningSurface};
+            color: ${theme.tokens.color.status.warning};
+            border-color: ${theme.tokens.color.status.warningBorder};
           }
         `;
       case "pill": {
-        let background = "linear-gradient(135deg, #4285ff, #3f62d4)";
-        if ($pillIndex === 1) background = "linear-gradient(135deg, #27cd8e, #1fa267)";
-        if ($pillIndex === 2) background = "linear-gradient(135deg, #9b52d4, #7e3aa8)";
-        if ($pillIndex && $pillIndex > 2) background = "linear-gradient(135deg, #4db0ff, #2f80d9)";
+        const index = typeof $pillIndex === "number" ? Math.min(Math.max($pillIndex, 0), 3) : 0;
+        const background = theme.tokens.color.interactive.pillGradients[index];
 
         return css`
-          color: white;
+          border-color: transparent;
+          color: ${theme.tokens.color.text.inverse};
           background: ${background};
+
+          &:hover {
+            filter: brightness(1.04);
+          }
         `;
       }
       case "primary":
       default:
         return css`
-          background: ${theme.colors.primary};
-          color: ${theme.colors.text.white};
+          background: ${theme.tokens.color.interactive.primary};
+          border-color: transparent;
+          color: ${theme.tokens.color.text.inverse};
 
           &:hover {
-            background: ${theme.colors.primaryHover};
+            background: ${theme.tokens.color.interactive.primaryHover};
           }
         `;
     }

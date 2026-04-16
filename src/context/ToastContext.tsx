@@ -32,46 +32,105 @@ const ToastStack = styled.div`
   position: fixed;
   top: 1rem;
   right: 1rem;
-  z-index: 9999;
+  z-index: ${({ theme }) => theme.zIndex.toast};
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  pointer-events: none;
 `;
 
 const ToastCard = styled.div<{ $type: ToastType }>`
   min-width: 280px;
   max-width: 420px;
   padding: 0.75rem 0.9rem;
-  border-radius: 10px;
+  border-radius: ${({ theme }) => theme.borderRadius.medium};
   border: 1px solid
-    ${({ $type }) => ($type === "success" ? "#86efac" : $type === "error" ? "#fca5a5" : "#93c5fd")};
-  background: ${({ $type }) => ($type === "success" ? "#f0fdf4" : $type === "error" ? "#fef2f2" : "#eff6ff")};
-  color: ${({ $type }) => ($type === "success" ? "#166534" : $type === "error" ? "#991b1b" : "#1e3a8a")};
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-  animation: ${slideIn} 160ms ease;
+    ${({ $type, theme }) =>
+      $type === "success"
+        ? theme.tokens.color.status.successBorder
+        : $type === "error"
+          ? theme.tokens.color.status.warningBorder
+          : theme.tokens.color.status.infoBorder};
+  background: ${({ $type, theme }) =>
+    $type === "success"
+      ? theme.tokens.color.status.successSurface
+      : $type === "error"
+        ? theme.tokens.color.status.warningSurface
+        : theme.tokens.color.status.infoSurface};
+  color: ${({ $type, theme }) =>
+    $type === "success"
+      ? theme.tokens.color.status.successText
+      : $type === "error"
+        ? theme.tokens.color.status.warningText
+        : theme.tokens.color.status.infoText};
+  box-shadow: ${({ theme }) => theme.shadows.card};
+  animation: ${slideIn} ${({ theme }) => theme.motion.normal} ${({ theme }) => theme.motion.easing};
+  pointer-events: auto;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: ${({ theme }) => theme.spacing[3]};
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+`;
+
+const ToastMessage = styled.span`
+  flex: 1;
+`;
+
+const DismissButton = styled.button`
+  background: transparent;
+  border: 0;
+  color: inherit;
+  opacity: 0.75;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0.05rem;
+
+  &:hover {
+    opacity: 1;
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.tokens.color.interactive.primary};
+    outline-offset: 2px;
+  }
 `;
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
+
+  const dismissToast = useCallback((id: string) => {
+    setToasts((prev) => prev.filter((toast) => toast.id !== id));
+  }, []);
 
   const showToast = useCallback((message: string, type: ToastType = "info") => {
     const id = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
     setToasts((prev) => [...prev, { id, type, message }]);
 
     setTimeout(() => {
-      setToasts((prev) => prev.filter((toast) => toast.id !== id));
-    }, 3000);
-  }, []);
+      dismissToast(id);
+    }, 3500);
+  }, [dismissToast]);
 
   const value = useMemo(() => ({ showToast }), [showToast]);
 
   return (
     <ToastContext.Provider value={value}>
       {children}
-      <ToastStack>
+      <ToastStack role="status" aria-live="polite" aria-atomic="true">
         {toasts.map((toast) => (
-          <ToastCard key={toast.id} $type={toast.type} >
-            {toast.message}
+          <ToastCard key={toast.id} $type={toast.type} role={toast.type === "error" ? "alert" : "status"}>
+            <ToastMessage>{toast.message}</ToastMessage>
+            <DismissButton
+              type="button"
+              aria-label="Fechar notificação"
+              onClick={() => dismissToast(toast.id)}
+            >
+              ×
+            </DismissButton>
           </ToastCard>
         ))}
       </ToastStack>

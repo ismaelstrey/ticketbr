@@ -69,22 +69,27 @@ const UserRole = styled.span`
 
 const LogoutButton = styled.button`
   background: transparent;
-  border: 1px solid ${({ theme }) => theme.colors.border};
-  color: ${({ theme }) => theme.colors.text.secondary};
+  border: 1px solid ${({ theme }) => theme.tokens.color.border.default};
+  color: ${({ theme }) => theme.tokens.color.text.secondary};
   padding: 0.4rem 0.8rem;
   border-radius: 6px;
   font-size: 0.8rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all ${({ theme }) => theme.motion.normal} ${({ theme }) => theme.motion.easing};
   display: flex;
   align-items: center;
   gap: 0.3rem;
 
   &:hover {
-    background-color: #f3f4f6;
-    color: #dc2626;
-    border-color: #d1d5db;
+    background-color: ${({ theme }) => theme.tokens.color.status.warningSurface};
+    color: ${({ theme }) => theme.tokens.color.status.warning};
+    border-color: ${({ theme }) => theme.tokens.color.status.warningBorder};
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.tokens.color.interactive.primary};
+    outline-offset: 2px;
   }
 `;
 
@@ -100,7 +105,6 @@ export function UserHeader() {
   return (
     <HeaderContainer>
       <Brand>
-        {/* TicketBR <small style={{ fontWeight: 400, fontSize: "0.8rem", color: "#666" }}>v0.1.0</small> */}
       </Brand>
       
       <Controls>

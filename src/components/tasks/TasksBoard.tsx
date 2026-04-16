@@ -13,7 +13,7 @@ import { TaskModal } from "@/components/tasks/TaskModal";
 import { TasksFilters } from "@/components/tasks/TasksFilters";
 import { TasksListView } from "@/components/tasks/TasksListView";
 import { TasksAlertsModal } from "@/components/tasks/TasksAlertsModal";
-import { HeaderRow, KanbanGrid, Title, Toolbar } from "@/components/tasks/TasksBoardLayout";
+import { HeaderRow, KanbanGrid, StatusHint, Title, Toolbar } from "@/components/tasks/TasksBoardLayout";
 
 export default function TasksBoard() {
   const router = useRouter();
@@ -227,7 +227,7 @@ export default function TasksBoard() {
           onApply={applyFilters}
         />
 
-        {savingMove ? <div style={{ marginBottom: 10, opacity: 0.8, fontSize: 13 }}>Salvando mudança...</div> : null}
+        {savingMove ? <StatusHint role="status">Salvando mudança...</StatusHint> : null}
 
         {view === "kanban" ? (
           <KanbanGrid>

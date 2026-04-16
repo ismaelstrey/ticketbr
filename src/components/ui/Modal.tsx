@@ -7,18 +7,18 @@ import { FiX } from "react-icons/fi";
 const Overlay = styled.div`
   position: fixed;
   inset: 0;
-  background: ${({ theme }) => theme.colors.overlay};
+  background: ${({ theme }) => theme.tokens.color.bg.overlay};
   backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 50;
+  z-index: ${({ theme }) => theme.zIndex.overlay};
   padding: 1rem;
 `;
 
 const ModalContainer = styled.div`
-  background: ${({ theme }) => theme.colors.surfaceElevated};
-  border: 1px solid ${({ theme }) => theme.colors.border};
+  background: ${({ theme }) => theme.tokens.color.bg.surfaceElevated};
+  border: 1px solid ${({ theme }) => theme.tokens.color.border.default};
   border-radius: 20px;
   width: 100%;
   max-width: 600px;
@@ -27,20 +27,20 @@ const ModalContainer = styled.div`
   flex-direction: column;
   box-shadow: ${({ theme }) => theme.shadows.hover};
   overflow: hidden;
-  color: ${({ theme }) => theme.colors.text.primary};
+  color: ${({ theme }) => theme.tokens.color.text.primary};
 `;
 
 const Header = styled.div`
   padding: 1rem 1.5rem;
-  border-bottom: 1px solid ${({ theme }) => theme.colors.border};
+  border-bottom: 1px solid ${({ theme }) => theme.tokens.color.border.default};
   display: flex;
   justify-content: space-between;
   align-items: center;
 
   h2 {
     font-size: 1.1rem;
-    font-weight: 700;
-    color: ${({ theme }) => theme.colors.text.primary};
+    font-weight: ${({ theme }) => theme.typography.weight.bold};
+    color: ${({ theme }) => theme.tokens.color.text.primary};
     margin: 0;
   }
 
@@ -48,14 +48,21 @@ const Header = styled.div`
     background: none;
     border: none;
     cursor: pointer;
-    color: ${({ theme }) => theme.colors.text.muted};
+    color: ${({ theme }) => theme.tokens.color.text.muted};
     font-size: 1.2rem;
     padding: 0;
     display: flex;
     align-items: center;
+    border-radius: ${({ theme }) => theme.borderRadius.small};
 
     &:hover {
-      color: ${({ theme }) => theme.colors.text.primary};
+      color: ${({ theme }) => theme.tokens.color.text.primary};
+      background: ${({ theme }) => theme.tokens.color.interactive.ghostHover};
+    }
+
+    &:focus-visible {
+      outline: 2px solid ${({ theme }) => theme.tokens.color.interactive.primary};
+      outline-offset: 2px;
     }
   }
 `;

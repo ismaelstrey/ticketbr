@@ -3,7 +3,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
 import { Button } from "@/components/ui/Button";
-import { Card } from "@/components/ui/Card";
 import { DashboardFilters, DashboardFilterOptions } from "@/components/dashboard/DashboardFilters";
 import { KpiCards } from "@/components/dashboard/KpiCards";
 import { StatusDonut } from "@/components/dashboard/charts/StatusDonut";
@@ -12,6 +11,7 @@ import { VolumeLine } from "@/components/dashboard/charts/VolumeLine";
 import { CategoryStackedArea } from "@/components/dashboard/charts/CategoryStackedArea";
 import { TicketsHeatmap } from "@/components/dashboard/charts/TicketsHeatmap";
 import { DashboardTables } from "@/components/dashboard/Tables";
+import { ErrorState, LoadingState } from "@/components/ui/FeedbackState";
 import { api } from "@/services/api";
 import { TicketDashboardFilters, TicketOperationalDashboardResponse } from "@/types/ticketsDashboard";
 
@@ -33,13 +33,24 @@ const Title = styled.h1`
   margin: 0;
   font-size: 1.25rem;
   font-weight: 950;
-  color: ${({ theme }) => theme.colors.text.primary};
+  color: ${({ theme }) => theme.tokens.color.text.primary};
 `;
 
 const Sub = styled.div`
   margin-top: 6px;
-  color: ${({ theme }) => theme.colors.text.muted};
+  color: ${({ theme }) => theme.tokens.color.text.muted};
   font-size: 0.92rem;
+`;
+
+const HeaderActions = styled.div`
+  display: flex;
+  gap: ${({ theme }) => theme.spacing[2]};
+  flex-wrap: wrap;
+`;
+
+const NoticeActions = styled.div`
+  display: flex;
+  justify-content: flex-end;
 `;
 
 const ChartsGrid = styled.div`
@@ -226,12 +237,18 @@ export function TicketOperationalDashboard() {
           <Title>Dashboard operacional</Title>
           <Sub>
             {windowLabel ? `Janela: ${windowLabel} · ` : ""}
-            {lastUpdated ? `Atualizado: ${new Date(lastUpdated).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}` : ""}
+            {lastUpdated
+              ? `Atualizado: ${new Date(lastUpdated).toLocaleTimeString("pt-BR", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  second: "2-digit"
+                })}`
+              : ""}
             {refreshing ? " · atualizando..." : ""}
           </Sub>
         </div>
 
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+        <HeaderActions>
           <Button type="button" variant={autoRefresh ? "primary" : "ghost"} onClick={() => setAutoRefresh((v) => !v)}>
             {autoRefresh ? "Auto-refresh: 30s" : "Auto-refresh: off"}
           </Button>
@@ -244,30 +261,36 @@ export function TicketOperationalDashboard() {
           <Button type="button" variant="ghost" onClick={() => download("pdf").catch((e) => setError(e.message))}>
             Exportar PDF
           </Button>
-        </div>
+        </HeaderActions>
       </HeaderRow>
 
-      <DashboardFilters value={filtersDraft} options={options} onChange={setFiltersDraft} onApply={apply} onReset={reset} applying={loading || refreshing} />
+      <DashboardFilters
+        value={filtersDraft}
+        options={options}
+        onChange={setFiltersDraft}
+        onApply={apply}
+        onReset={reset}
+        applying={loading || refreshing}
+      />
 
       {error ? (
-        <Card style={{ padding: "1rem" }} role="alert">
-          <div style={{ fontWeight: 950, marginBottom: 6 }}>Erro ao carregar</div>
-          <div style={{ opacity: 0.78 }}>{error}</div>
-          <div style={{ marginTop: 12, display: "flex", gap: 8, flexWrap: "wrap" }}>
-            <Button type="button" variant="ghost" onClick={() => fetchDashboard(false)}>
-              Tentar novamente
-            </Button>
+        <>
+          <ErrorState
+            title="Erro ao carregar dashboard"
+            description={error}
+            actionLabel="Tentar novamente"
+            onAction={() => fetchDashboard(false)}
+          />
+          <NoticeActions>
             <Button type="button" variant="ghost" onClick={() => setError(null)}>
-              Fechar
+              Fechar aviso
             </Button>
-          </div>
-        </Card>
+          </NoticeActions>
+        </>
       ) : null}
 
       {loading && !data ? (
-        <Card style={{ padding: "1rem" }}>
-          <div style={{ opacity: 0.75 }}>Carregando dashboard...</div>
-        </Card>
+        <LoadingState title="Carregando dashboard" description="Buscando métricas e indicadores..." />
       ) : data ? (
         <>
           <KpiCards kpis={data.data.kpis} onQuickFilter={quickFilter} />

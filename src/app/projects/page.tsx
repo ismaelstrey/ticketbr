@@ -1,12 +1,11 @@
-"use client";
+﻿"use client";
 
 import React, { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import styled from "styled-components";
-import { AppShellContainer, MainContent } from "@/components/layout/AppShell";
-import { Sidebar } from "@/components/layout/Sidebar";
+import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/Button";
-import { Card } from "@/components/ui/Card";
+import { ErrorState, LoadingState } from "@/components/ui/FeedbackState";
 import { api } from "@/services/api";
 import { Project } from "@/types/project";
 import { ProjectsFilters, ProjectsFiltersState } from "@/components/projects/ProjectsFilters";
@@ -39,6 +38,12 @@ const Sub = styled.div`
   font-size: 0.92rem;
 `;
 
+const HeaderActions = styled.div`
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+`;
+
 function spToState(sp: URLSearchParams): ProjectsFiltersState {
   return {
     q: sp.get("q") ?? "",
@@ -63,20 +68,20 @@ export default function ProjectsListPage() {
   return (
     <Suspense
       fallback={
-        <AppShellContainer>
-          <Sidebar />
-          <MainContent>
-            <Page>
-              <HeaderRow>
-                <div>
-                  <Title>Projetos</Title>
-                  <Sub>Carregando...</Sub>
-                </div>
-              </HeaderRow>
-              <ProjectsTable projects={[]} loading={true} onOpen={() => {}} />
-            </Page>
-          </MainContent>
-        </AppShellContainer>
+        <AppLayout>
+          <Page>
+            <HeaderRow>
+              <div>
+                <Title>Projetos</Title>
+                <Sub>Atualizando dados...</Sub>
+              </div>
+            </HeaderRow>
+            <LoadingState
+              title="Carregando projetos"
+              description="Estamos preparando sua visão de projetos."
+            />
+          </Page>
+        </AppLayout>
       }
     >
       <ProjectsListInner />
@@ -101,7 +106,10 @@ function ProjectsListInner() {
   const loadOwners = useCallback(async () => {
     try {
       const list = await api.users.list();
-      const normalized = (Array.isArray(list) ? list : []).map((u: any) => ({ id: String(u.id), name: String(u.name || u.email || u.id) }));
+      const normalized = (Array.isArray(list) ? list : []).map((u: any) => ({
+        id: String(u.id),
+        name: String(u.name || u.email || u.id)
+      }));
       setOwners(normalized);
     } catch {
       setOwners([]);
@@ -112,7 +120,11 @@ function ProjectsListInner() {
     setLoading(true);
     setError(null);
     try {
-      const res = await api.projects.list({ ...currentParams, page: sp.get("page") ?? "1", pageSize: sp.get("pageSize") ?? "20" });
+      const res = await api.projects.list({
+        ...currentParams,
+        page: sp.get("page") ?? "1",
+        pageSize: sp.get("pageSize") ?? "20"
+      });
       setProjects(res.data);
       setMeta(res.meta);
     } catch (err: any) {
@@ -147,43 +159,58 @@ function ProjectsListInner() {
   };
 
   const reset = () => {
-    const next: ProjectsFiltersState = { q: "", status: "", ownerUserId: "", startDateFrom: "", endDateTo: "" };
+    const next: ProjectsFiltersState = {
+      q: "",
+      status: "",
+      ownerUserId: "",
+      startDateFrom: "",
+      endDateTo: ""
+    };
     setFilters(next);
     router.push("/projects");
   };
 
   return (
-    <AppShellContainer>
-      <Sidebar />
-      <MainContent>
-        <Page>
-          <HeaderRow>
-            <div>
-              <Title>Projetos</Title>
-              <Sub>{meta ? `${meta.total} registro(s)` : ""}</Sub>
-            </div>
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-              <Button type="button" variant="ghost" onClick={() => router.push("/projects/dashboard")}>Dashboard</Button>
-              <Button type="button" variant="ghost" onClick={() => router.push("/projects/reports")}>Relatórios</Button>
-              <Button type="button" variant="primary" onClick={() => router.push("/projects/new")}>Novo projeto</Button>
-            </div>
-          </HeaderRow>
+    <AppLayout>
+      <Page>
+        <HeaderRow>
+          <div>
+            <Title>Projetos</Title>
+            <Sub>{meta ? `${meta.total} registro(s)` : ""}</Sub>
+          </div>
+          <HeaderActions>
+            <Button type="button" variant="ghost" onClick={() => router.push("/projects/dashboard")}>
+              Dashboard
+            </Button>
+            <Button type="button" variant="ghost" onClick={() => router.push("/projects/reports")}>
+              Relatórios
+            </Button>
+            <Button type="button" variant="primary" onClick={() => router.push("/projects/new")}>
+              Novo projeto
+            </Button>
+          </HeaderActions>
+        </HeaderRow>
 
-          <ProjectsFilters value={filters} owners={owners} onChange={setFilters} onApply={apply} onReset={reset} applying={applying} />
+        <ProjectsFilters
+          value={filters}
+          owners={owners}
+          onChange={setFilters}
+          onApply={apply}
+          onReset={reset}
+          applying={applying}
+        />
 
-          {error ? (
-            <Card style={{ padding: "1rem" }} role="alert">
-              <div style={{ fontWeight: 900, marginBottom: 6 }}>Erro</div>
-              <div style={{ opacity: 0.8 }}>{error}</div>
-              <div style={{ marginTop: 10 }}>
-                <Button type="button" variant="ghost" onClick={load}>Tentar novamente</Button>
-              </div>
-            </Card>
-          ) : (
-            <ProjectsTable projects={projects} loading={loading} onOpen={(id) => router.push(`/projects/${id}`)} />
-          )}
-        </Page>
-      </MainContent>
-    </AppShellContainer>
+        {error ? (
+          <ErrorState
+            title="Erro ao carregar projetos"
+            description={error}
+            actionLabel="Tentar novamente"
+            onAction={load}
+          />
+        ) : (
+          <ProjectsTable projects={projects} loading={loading} onOpen={(id) => router.push(`/projects/${id}`)} />
+        )}
+      </Page>
+    </AppLayout>
   );
 }

@@ -18,9 +18,9 @@ const TopbarContainer = styled.header`
 `;
 
 const SearchWrapper = styled.div`
-  border: 1px solid ${({ theme }) => theme.colors.border};
+  border: 1px solid ${({ theme }) => theme.tokens.color.border.default};
   border-radius: ${({ theme }) => theme.borderRadius.pill};
-  background: ${({ theme }) => theme.colors.surface};
+  background: ${({ theme }) => theme.tokens.color.bg.surface};
   min-width: 280px;
   display: flex;
   align-items: center;
@@ -43,6 +43,11 @@ const SearchInput = styled.input`
   width: 100%;
   outline: none;
   font-family: inherit;
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.tokens.color.interactive.primary};
+    outline-offset: 2px;
+  }
 
   @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
     width: 100%;
@@ -75,6 +80,7 @@ export function Topbar({ query, setQuery, onNewTicket }: TopbarProps) {
       <SearchWrapper>
         <FiSearch aria-hidden="true" />
         <SearchInput
+          aria-label="Buscar tickets"
           placeholder="Buscar ticket, empresa ou assunto"
           value={query}
           onChange={(event) => setQuery(event.target.value)}
