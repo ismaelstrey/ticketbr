@@ -67,6 +67,23 @@ interface FeedbackStateProps {
   tone: "loading" | "error" | "empty";
 }
 
+interface LoadingStateProps {
+  title?: string;
+  description?: string;
+}
+
+interface ErrorStateProps {
+  title?: string;
+  description?: string;
+  actionLabel?: string;
+  onAction?: () => void;
+}
+
+interface EmptyStateProps {
+  title?: string;
+  description?: string;
+}
+
 function FeedbackState({ title, description, actionLabel, onAction, role, tone }: FeedbackStateProps) {
   const icon = tone === "error" ? <FiAlertCircle aria-hidden="true" /> : tone === "empty" ? <FiHash aria-hidden="true" /> : <FiClock aria-hidden="true" />;
   return (
@@ -85,7 +102,7 @@ function FeedbackState({ title, description, actionLabel, onAction, role, tone }
   );
 }
 
-export function LoadingState({ title = "Carregando", description = "Aguarde um momento..." }) {
+export function LoadingState({ title = "Carregando", description = "Aguarde um momento..." }: LoadingStateProps) {
   return <FeedbackState title={title} description={description} role="status" tone="loading" />;
 }
 
@@ -94,7 +111,7 @@ export function ErrorState({
   description = "Tente novamente em instantes.",
   actionLabel = "Tentar novamente",
   onAction
-}: Omit<FeedbackStateProps, "role" | "tone">) {
+}: ErrorStateProps) {
   return (
     <FeedbackState
       title={title}
@@ -110,6 +127,6 @@ export function ErrorState({
 export function EmptyState({
   title = "Nada por aqui",
   description = "Ajuste os filtros para ver resultados."
-}: Omit<FeedbackStateProps, "role" | "actionLabel" | "onAction" | "tone">) {
+}: EmptyStateProps) {
   return <FeedbackState title={title} description={description} tone="empty" />;
 }

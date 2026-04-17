@@ -1,7 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { Prisma, prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { requireStaffSession } from "@/server/services/staff-context";
+import { createRequestContext, jsonWithRequestId, logRouteEvent } from "@/lib/observability";
 
 const TaskPrioritySchema = z.enum(["HIGH", "MEDIUM", "LOW"]);
 const TaskStatusSchema = z.enum(["PENDING", "IN_PROGRESS", "DONE"]);
@@ -17,6 +18,8 @@ const CreateTaskSchema = z.object({
 });
 
 export async function GET(request: NextRequest) {
+  const context = createRequestContext();
+
   try {
     await requireStaffSession();
 
@@ -76,21 +79,26 @@ export async function GET(request: NextRequest) {
       }
     });
 
-    return NextResponse.json({ data: tasks });
+    logRouteEvent("[tasks] GET ok", "info", context, { count: tasks.length });
+    return jsonWithRequestId({ data: tasks }, context);
   } catch (error: any) {
     const code = String(error?.message || "");
     if (code === "FORBIDDEN") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      logRouteEvent("[tasks] GET forbidden", "warn", context);
+      return jsonWithRequestId({ error: "Forbidden" }, context, { status: 403 });
     }
     if (code === "UNAUTHORIZED") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      logRouteEvent("[tasks] GET unauthorized", "warn", context);
+      return jsonWithRequestId({ error: "Unauthorized" }, context, { status: 401 });
     }
-    console.error("[tasks] GET failed", error);
-    return NextResponse.json({ error: "Erro interno" }, { status: 500 });
+    logRouteEvent("[tasks] GET failed", "error", context, { error });
+    return jsonWithRequestId({ error: "Erro interno" }, context, { status: 500 });
   }
 }
 
 export async function POST(request: NextRequest) {
+  const context = createRequestContext();
+
   try {
     const session = await requireStaffSession();
     const body = await request.json().catch(() => ({}));
@@ -134,29 +142,32 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    return NextResponse.json({ data: task }, { status: 201 });
+    logRouteEvent("[tasks] POST ok", "info", context, { id: task.id });
+    return jsonWithRequestId({ data: task }, context, { status: 201 });
   } catch (error: any) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: "Payload inválido", details: error.flatten() }, { status: 400 });
+      logRouteEvent("[tasks] POST validation_error", "info", context);
+      return jsonWithRequestId({ error: "Payload inválido", details: error.flatten() }, context, { status: 400 });
     }
 
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
       if (error.code === "P2002") {
-        return NextResponse.json({ error: "Conflito de dados" }, { status: 409 });
+        return jsonWithRequestId({ error: "Conflito de dados" }, context, { status: 409 });
       }
       if (error.code === "P2003") {
         const metaField = String((error.meta as any)?.field_name || (error.meta as any)?.constraint || "").toLowerCase();
         if (metaField.includes("assignee") || metaField.includes("assignee_id")) {
-          return NextResponse.json({ error: "Responsável inválido" }, { status: 400 });
+          return jsonWithRequestId({ error: "Responsável inválido" }, context, { status: 400 });
         }
         if (metaField.includes("created_by") || metaField.includes("created_by_id")) {
-          return NextResponse.json({ error: "Sessão inválida (usuário não encontrado)" }, { status: 401 });
+          return jsonWithRequestId({ error: "Sessão inválida (usuário não encontrado)" }, context, { status: 401 });
         }
-        return NextResponse.json({ error: "Referência inválida" }, { status: 400 });
+        return jsonWithRequestId({ error: "Referência inválida" }, context, { status: 400 });
       }
       if (error.code === "P2021") {
-        return NextResponse.json(
+        return jsonWithRequestId(
           { error: "Banco de dados sem migrations. Rode npm run db:migrate" },
+          context,
           { status: 500 }
         );
       }
@@ -164,8 +175,9 @@ export async function POST(request: NextRequest) {
 
     const rawMessage = String(error?.message || "");
     if (/P1001|Can't reach database server|ECONNREFUSED|connect ECONNREFUSED/i.test(rawMessage)) {
-      return NextResponse.json(
+      return jsonWithRequestId(
         { error: "Banco de dados indisponível. Verifique DATABASE_URL e se o Postgres está rodando." },
+        context,
         { status: 503 }
       );
     }
@@ -173,12 +185,12 @@ export async function POST(request: NextRequest) {
     const code = rawMessage;
     const status = code === "FORBIDDEN" ? 403 : code === "UNAUTHORIZED" ? 401 : 500;
     if (status === 403) {
-      return NextResponse.json({ error: "Forbidden" }, { status });
+      return jsonWithRequestId({ error: "Forbidden" }, context, { status });
     }
     if (status === 401) {
-      return NextResponse.json({ error: "Unauthorized" }, { status });
+      return jsonWithRequestId({ error: "Unauthorized" }, context, { status });
     }
-    console.error("[tasks] POST failed", error);
-    return NextResponse.json({ error: "Erro interno" }, { status: 500 });
+    logRouteEvent("[tasks] POST failed", "error", context, { error });
+    return jsonWithRequestId({ error: "Erro interno" }, context, { status: 500 });
   }
 }

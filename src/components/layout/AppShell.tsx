@@ -1,5 +1,22 @@
 import styled from "styled-components";
 
+export const SkipToContentLink = styled.a`
+  position: fixed;
+  top: -120px;
+  left: ${({ theme }) => theme.spacing[3]};
+  z-index: calc(${({ theme }) => theme.zIndex.sidebar} + 2);
+  background: ${({ theme }) => theme.tokens.color.interactive.primary};
+  color: ${({ theme }) => theme.tokens.color.text.inverse};
+  padding: ${({ theme }) => `${theme.spacing[2]} ${theme.spacing[3]}`};
+  border-radius: ${({ theme }) => theme.borderRadius.medium};
+  font-weight: ${({ theme }) => theme.typography.weight.bold};
+  transition: top ${({ theme }) => theme.motion.fast} ${({ theme }) => theme.motion.easing};
+
+  &:focus-visible {
+    top: ${({ theme }) => theme.spacing[3]};
+  }
+`;
+
 export const AppShellContainer = styled.div`
   display: flex;
   min-height: 100vh;
@@ -17,7 +34,7 @@ export const AppShellContainer = styled.div`
     color ${({ theme }) => theme.motion.normal} ${({ theme }) => theme.motion.easing};
 `;
 
-export const MainContent = styled.section`
+export const MainContent = styled.main`
   flex: 1;
   min-width: 0;
   padding: ${({ theme }) => theme.spacing[4]};

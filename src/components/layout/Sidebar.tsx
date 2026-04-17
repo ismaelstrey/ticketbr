@@ -58,6 +58,10 @@ const SidebarContainer = styled.aside<{ $isExpanded: boolean }>`
     width: ${({ $isExpanded }) => ($isExpanded ? EXPANDED_WIDTH : "0")};
     border-right-width: ${({ $isExpanded }) => ($isExpanded ? "1px" : "0")};
   }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
 `;
 
 const SidebarHeader = styled.div<{ $isExpanded: boolean }>`
@@ -92,13 +96,23 @@ const HeaderIconButton = styled.button`
   }
 `;
 
-const Brand = styled.div<{ $isExpanded: boolean }>`
+const Brand = styled.button<{ $isExpanded: boolean }>`
   display: flex;
   align-items: center;
   gap: 0.85rem;
   min-width: 0;
   opacity: ${({ $isExpanded }) => ($isExpanded ? 1 : 0.96)};
   cursor: pointer;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  text-align: left;
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.tokens.color.interactive.primary};
+    outline-offset: 2px;
+    border-radius: ${({ theme }) => theme.borderRadius.small};
+  }
 `;
 
 const BrandMark = styled.div`
@@ -202,6 +216,14 @@ const MenuItem = styled.button<{ $isActive: boolean; $isExpanded: boolean }>`
   &:hover::before {
     opacity: 1;
   }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+
+    &:hover {
+      transform: none;
+    }
+  }
 `;
 
 const IconWrap = styled.span`
@@ -254,17 +276,19 @@ const SubMenu = styled.div<{ $isOpen: boolean; $isExpanded: boolean }>`
   gap: 0.15rem;
 `;
 
-const SubMenuItem = styled.a<{ $isActive: boolean }>`
+const SubMenuItem = styled.button<{ $isActive: boolean }>`
   display: block;
+  width: 100%;
+  text-align: left;
   padding: 0.5rem 0.65rem;
   color: ${({ theme }) => theme.tokens.color.text.primary};
   opacity: ${({ $isActive }) => ($isActive ? 1 : 0.72)};
   font-size: 0.84rem;
-  text-decoration: none;
   border-radius: 10px;
   background: ${({ $isActive, theme }) =>
     $isActive ? theme.tokens.color.interactive.ghostHover : "transparent"};
   border: 1px solid transparent;
+  cursor: pointer;
   transition: all ${({ theme }) => theme.motion.normal} ${({ theme }) => theme.motion.easing};
 
   &:hover {
@@ -535,7 +559,12 @@ export function Sidebar() {
         onMouseLeave={handleDesktopCollapse}
       >
         <SidebarHeader $isExpanded={isExpanded}>
-          <Brand $isExpanded={isExpanded} onClick={() => router.push("/ticket/kanban")}>
+          <Brand
+            type="button"
+            $isExpanded={isExpanded}
+            onClick={() => router.push("/ticket/kanban")}
+            aria-label="Ir para Kanban"
+          >
             <BrandMark>T</BrandMark>
             <BrandText $isExpanded={isExpanded}>
               <BrandTitle>TicketBR</BrandTitle>
@@ -554,7 +583,7 @@ export function Sidebar() {
         </SidebarHeader>
 
         <SectionLabel $isExpanded={isExpanded}>Navegação</SectionLabel>
-        <MenuList>
+        <MenuList aria-label="Menu principal">
           {menuItems.map((item) => {
             const isActive =
               activePath === item.path ||
@@ -570,9 +599,11 @@ export function Sidebar() {
                   $isExpanded={isExpanded}
                   onClick={() => handleMenuClick(item)}
                   title={!isExpanded ? item.label : ""}
+                  aria-label={item.label}
                   aria-expanded={hasSubItems ? isSubMenuOpen : undefined}
                   aria-haspopup={hasSubItems ? "menu" : undefined}
                   aria-controls={hasSubItems ? `submenu-${item.label}` : undefined}
+                  aria-current={!hasSubItems && isActive ? "page" : undefined}
                 >
                   <IconWrap>
                     <item.icon />
@@ -590,10 +621,11 @@ export function Sidebar() {
                     {item.subItems!.map((sub) => (
                       <SubMenuItem
                         key={sub.path}
-                        href={sub.path}
                         $isActive={activePath === sub.path || activePath.startsWith(`${sub.path}/`)}
-                        onClick={(e) => {
-                          e.preventDefault();
+                        aria-current={
+                          activePath === sub.path || activePath.startsWith(`${sub.path}/`) ? "page" : undefined
+                        }
+                        onClick={() => {
                           router.push(sub.path);
                           if (typeof window !== "undefined" && window.innerWidth <= 768) {
                             setIsExpanded(false);

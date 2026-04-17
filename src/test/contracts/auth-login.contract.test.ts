@@ -95,4 +95,24 @@ describe("API Contract - POST /api/auth/login", () => {
     expect(res.headers.get("X-RateLimit-Limit")).toBe("5");
     expect(res.headers.get("X-RateLimit-Remaining")).toBe("4");
   });
+
+  it("returns 429 contract with retry/rate-limit headers when blocked", async () => {
+    consumeMock.mockReturnValueOnce({
+      allowed: false,
+      retryAfterSeconds: 120,
+      remaining: 0,
+      limit: 5,
+      resetAt: 2_000_000_000_000,
+    });
+
+    const { POST } = await import("@/app/api/auth/login/route");
+    const res = await POST(makeRequest({ email: "ok@user.com", password: "123" }));
+    const body = await res.json();
+
+    expect(res.status).toBe(429);
+    expect(AuthLoginErrorSchema.safeParse(body).success).toBe(true);
+    expect(res.headers.get("Retry-After")).toBe("120");
+    expect(res.headers.get("X-RateLimit-Limit")).toBe("5");
+    expect(res.headers.get("X-RateLimit-Remaining")).toBe("0");
+  });
 });

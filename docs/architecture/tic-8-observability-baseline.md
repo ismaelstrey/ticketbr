@@ -44,8 +44,15 @@ Padrao inicial adotado:
 - Visibilidade objetiva de degradacao de dependencia critica (DB).
 - Fundacao para expandir padrao para endpoints de negocio.
 
+## Evolucao aplicada neste ciclo
+
+- Rollout do padrao de observabilidade para:
+  - `GET|POST /api/tickets`
+  - `GET|POST /api/tasks`
+- Resultado: respostas desses endpoints agora incluem `requestId` no payload e `x-request-id` no header de forma consistente.
+
 ## Evidencias obrigatorias
 
 - `npm run lint`
-- `npm run test -- src/app/api/health/route.test.ts`
+- `npm run test -- src/app/api/health/route.test.ts src/app/api/tasks/route.test.ts src/app/api/tickets/route.test.ts`
 - `npm run build`

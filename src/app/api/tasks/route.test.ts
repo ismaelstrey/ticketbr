@@ -39,6 +39,8 @@ describe("/api/tasks", () => {
     const body = await res.json();
 
     expect(res.status).toBe(200);
+    expect(res.headers.get("x-request-id")).toBeTruthy();
+    expect(typeof body.requestId).toBe("string");
     expect(Array.isArray(body.data)).toBe(true);
     expect(requireStaffSessionMock).toHaveBeenCalledTimes(1);
     expect(taskFindManyMock).toHaveBeenCalledTimes(1);
@@ -54,8 +56,11 @@ describe("/api/tasks", () => {
       json: async () => ({ title: "Nova", description: "", priority: "MEDIUM", status: "PENDING", dueAt: null, assigneeId: null })
     } as any;
     const res = await POST(req);
+    const body = await res.json();
 
     expect(res.status).toBe(201);
+    expect(res.headers.get("x-request-id")).toBeTruthy();
+    expect(typeof body.requestId).toBe("string");
     expect(taskCreateMock).toHaveBeenCalledTimes(1);
     expect(taskCreateMock.mock.calls[0][0].data.sortOrder).toBe(3000);
   });
