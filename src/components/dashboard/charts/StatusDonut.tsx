@@ -4,6 +4,7 @@ import React, { useMemo } from "react";
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from "recharts";
 import styled, { useTheme } from "styled-components";
 import { Card } from "@/components/ui/Card";
+import { getPortalStatusLabel } from "@/lib/tickets/portal-status-taxonomy";
 
 const Wrap = styled(Card)`
   padding: 1rem;
@@ -40,14 +41,6 @@ const Swatch = styled.span<{ $color: string }>`
   margin-right: 8px;
 `;
 
-function labelForStatus(status: string) {
-  if (status === "TODO") return "Aberto";
-  if (status === "DOING") return "Em andamento";
-  if (status === "PAUSED") return "Pausado";
-  if (status === "DONE") return "Concluído";
-  return status;
-}
-
 export function StatusDonut({ data }: { data: Array<{ status: string; count: number }> }) {
   const theme = useTheme() as any;
   const colors = useMemo(
@@ -56,7 +49,7 @@ export function StatusDonut({ data }: { data: Array<{ status: string; count: num
   );
 
   const total = data.reduce((a, b) => a + b.count, 0);
-  const series = data.map((d, idx) => ({ ...d, name: labelForStatus(d.status), color: colors[idx % colors.length] }));
+  const series = data.map((d, idx) => ({ ...d, name: getPortalStatusLabel(d.status), color: colors[idx % colors.length] }));
 
   return (
     <Wrap aria-label="Distribuição por status">
@@ -102,4 +95,3 @@ export function StatusDonut({ data }: { data: Array<{ status: string; count: num
     </Wrap>
   );
 }
-

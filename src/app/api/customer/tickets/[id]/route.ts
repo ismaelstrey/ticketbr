@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getPortalStatusCopy, getPortalStatusKey } from "@/lib/tickets/portal-status-taxonomy";
 import { requireCustomerContext } from "@/server/services/customer-context";
 
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -36,6 +37,8 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
         subject: ticket.subject,
         description: ticket.description,
         status: ticket.status,
+        portalStatusKey: getPortalStatusKey(ticket.status),
+        portalStatus: getPortalStatusCopy(ticket.status),
         priority: ticket.priority,
         category: ticket.categoria ? { id: ticket.categoria.id, name: ticket.categoria.nome } : null,
         createdAt: ticket.createdAt,
@@ -49,4 +52,3 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     return NextResponse.json({ error: status === 403 ? "Forbidden" : "Unauthorized" }, { status });
   }
 }
-

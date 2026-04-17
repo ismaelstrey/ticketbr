@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { getPortalStatusCopy, getPortalStatusKey } from "@/lib/tickets/portal-status-taxonomy";
 import { requireCustomerContext } from "@/server/services/customer-context";
 import { writeAuditLog } from "@/server/services/audit-log";
 import { notifyTicketCreated } from "@/server/services/customer-notifications";
@@ -57,6 +58,8 @@ export async function GET(request: NextRequest) {
         subject: t.subject,
         description: t.description,
         status: t.status,
+        portalStatusKey: getPortalStatusKey(t.status),
+        portalStatus: getPortalStatusCopy(t.status),
         priority: t.priority,
         category: t.categoria ? { id: t.categoria.id, name: t.categoria.nome } : null,
         createdAt: t.createdAt,
@@ -140,4 +143,3 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: status === 500 ? "Erro interno" : status === 403 ? "Forbidden" : "Unauthorized" }, { status });
   }
 }
-

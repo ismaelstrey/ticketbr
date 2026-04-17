@@ -8,12 +8,21 @@ import { Button } from "@/components/ui/Button";
 import { Input, Select } from "@/components/ui/Input";
 import { Badge } from "@/components/ui/Badge";
 import { Modal } from "@/components/ui/Modal";
+import { portalStatusFilterOptions } from "@/lib/tickets/portal-status-taxonomy";
 
 type TicketListItem = {
   id: string;
   number: number;
   subject: string;
   status: string;
+  portalStatus: {
+    key: string;
+    tone: "info" | "warning" | "success";
+    label: string;
+    timelineTitle: string;
+    description: string;
+    nextActionHint: string;
+  } | null;
   priority: string;
   category: { id: string; name: string } | null;
   updatedAt: string;
@@ -164,10 +173,9 @@ export default function CustomerDashboardPage() {
           <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar tickets" style={{ width: 260 }} />
           <Select value={status} onChange={(e) => setStatus(e.target.value)} style={{ width: 170 }}>
             <option value="">Todos</option>
-            <option value="TODO">Aberto</option>
-            <option value="DOING">Em atendimento</option>
-            <option value="PAUSED">Pausado</option>
-            <option value="DONE">Concluído</option>
+            {portalStatusFilterOptions.map((option) => (
+              <option key={option.value} value={option.value}>{option.label}</option>
+            ))}
           </Select>
           <Button type="button" variant="ghost" onClick={() => loadTickets()} disabled={loading}>
             Atualizar
@@ -214,7 +222,7 @@ export default function CustomerDashboardPage() {
                 <Td>{t.number}</Td>
                 <Td style={{ fontWeight: 700 }}>{t.subject}</Td>
                 <Td>{t.category?.name || "-"}</Td>
-                <Td><Badge>{t.status}</Badge></Td>
+                <Td><Badge>{t.portalStatus?.label || t.status}</Badge></Td>
                 <Td>{formatDate(t.updatedAt)}</Td>
               </RowLink>
             ))}

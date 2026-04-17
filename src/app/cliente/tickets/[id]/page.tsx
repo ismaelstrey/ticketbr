@@ -13,6 +13,14 @@ type TicketDetail = {
   subject: string;
   description: string | null;
   status: string;
+  portalStatus: {
+    key: string;
+    tone: "info" | "warning" | "success";
+    label: string;
+    timelineTitle: string;
+    description: string;
+    nextActionHint: string;
+  } | null;
   priority: string;
   category: { id: string; name: string } | null;
   createdAt: string;
@@ -96,7 +104,7 @@ export default function CustomerTicketPage() {
             <div style={{ opacity: 0.75, fontSize: 13, marginTop: 4 }}>Atualizado em {formatDate(ticket.updatedAt)}</div>
           </div>
           <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-            <Badge>{ticket.status}</Badge>
+            <Badge>{ticket.portalStatus?.label || ticket.status}</Badge>
             <Badge>{ticket.priority}</Badge>
           </div>
         </div>
@@ -141,4 +149,3 @@ export default function CustomerTicketPage() {
     </Layout>
   );
 }
-

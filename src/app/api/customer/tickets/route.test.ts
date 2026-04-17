@@ -71,6 +71,8 @@ describe("/api/customer/tickets", () => {
 
     expect(res.status).toBe(200);
     expect(Array.isArray(body.data)).toBe(true);
+    expect(body.data[0].portalStatusKey).toBe("REQUEST_RECEIVED");
+    expect(body.data[0].portalStatus?.label).toBe("Solicitação recebida");
     expect(ticketFindManyMock).toHaveBeenCalledTimes(1);
     expect(ticketFindManyMock.mock.calls[0][0].where.solicitante_id).toBe("s1");
   }, 15_000);
