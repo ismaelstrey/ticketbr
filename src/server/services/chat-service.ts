@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+import { Prisma, prisma } from "@/lib/prisma";
 import { buildConversationContext } from "@/server/services/chat-context";
 
 export interface ChatAction {
@@ -32,6 +32,11 @@ export interface ChatResponse {
   };
   actions: ChatAction[];
   suggestions: Array<{ text: string }>;
+}
+
+export interface ProcessInboundMessageResult {
+  response: ChatResponse;
+  isDuplicate: boolean;
 }
 
 export interface InboundPayload {
@@ -87,24 +92,36 @@ export class ChatService {
     mimetype: string | null;
     status: string;
   }) {
-    // Upsert to avoid duplicates
-    return prisma.message.upsert({
-      where: { waMessageId: data.waMessageId },
-      update: {
-        status: data.status,
-        mediaUrl: data.mediaUrl, // Update stable URL if changed
-      },
-      create: {
-        waMessageId: data.waMessageId,
-        conversationId: data.conversationId,
-        direction: data.direction,
-        type: data.type,
-        body: data.body,
-        mediaUrl: data.mediaUrl,
-        mimetype: data.mimetype,
-        status: data.status,
-      },
-    });
+    try {
+      const created = await prisma.message.create({
+        data: {
+          waMessageId: data.waMessageId,
+          conversationId: data.conversationId,
+          direction: data.direction,
+          type: data.type,
+          body: data.body,
+          mediaUrl: data.mediaUrl,
+          mimetype: data.mimetype,
+          status: data.status,
+        },
+      });
+
+      return { message: created, isDuplicate: false };
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+        const updated = await prisma.message.update({
+          where: { waMessageId: data.waMessageId },
+          data: {
+            status: data.status,
+            mediaUrl: data.mediaUrl,
+          },
+        });
+
+        return { message: updated, isDuplicate: true };
+      }
+
+      throw error;
+    }
   }
 
   async updateMessageStatus(waMessageId: string, status: string) {
@@ -119,14 +136,14 @@ export class ChatService {
     }
   }
 
-  async processInboundMessage(payload: InboundPayload): Promise<ChatResponse> {
+  async processInboundMessage(payload: InboundPayload): Promise<ProcessInboundMessageResult> {
     const { wa_chat_id, wa_message_id, message, instance } = payload;
 
     // 1. Find or create conversation
     const conversation = await this.findOrCreateConversation(wa_chat_id, instance);
 
     // 2. Save inbound message
-    await this.saveMessage({
+    const { isDuplicate } = await this.saveMessage({
       waMessageId: wa_message_id,
       conversationId: conversation.id,
       direction: "in",
@@ -136,6 +153,26 @@ export class ChatService {
       mimetype: message.media?.mimetype || null,
       status: "delivered",
     });
+
+    if (isDuplicate) {
+      return {
+        isDuplicate: true,
+        response: {
+          mode: "hybrid",
+          handoff: {
+            required: false,
+            reason: null,
+          },
+          routing: {
+            queue: "default",
+            priority: "normal",
+            assignee: conversation.assignedTo ?? null,
+          },
+          actions: [],
+          suggestions: [],
+        }
+      };
+    }
 
     // 3. Update conversation last message
     await prisma.conversation.update({
@@ -184,18 +221,21 @@ export class ChatService {
     }
 
     return {
-      mode,
-      handoff: {
-        required: handoffRequired,
-        reason: null,
-      },
-      routing: {
-        queue: "default",
-        priority: "normal",
-        assignee: context.assignedTo,
-      },
-      actions,
-      suggestions,
+      isDuplicate: false,
+      response: {
+        mode,
+        handoff: {
+          required: handoffRequired,
+          reason: null,
+        },
+        routing: {
+          queue: "default",
+          priority: "normal",
+          assignee: context.assignedTo,
+        },
+        actions,
+        suggestions,
+      }
     };
   }
 

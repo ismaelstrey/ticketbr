@@ -191,7 +191,7 @@ export async function POST(request: NextRequest) {
           }
         });
       }
-      const savedMessage = await chatService.saveMessage({
+      const { message: savedMessage } = await chatService.saveMessage({
         waMessageId,
         conversationId: conversation.id,
         direction: "out",

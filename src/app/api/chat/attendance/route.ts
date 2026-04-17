@@ -1,17 +1,65 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
+import { createRequestContext, jsonWithRequestId, logRouteEvent } from "@/lib/observability";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { chatService } from "@/server/services/chat-service";
+import { recordCriticalFlowEvent } from "@/server/services/critical-flow-observability";
 
 function normalizeWaChatId(value: string) {
   return value.trim();
 }
 
+type AttendanceOutcome = {
+  status: number;
+  body: Record<string, unknown>;
+};
+
 export async function POST(request: NextRequest) {
+  const context = createRequestContext();
+
+  const respond = async (
+    outcome: AttendanceOutcome,
+    event: {
+      outcome: "success" | "failure";
+      action: string;
+      actorUserId?: string;
+      entityId?: string;
+      metadata?: Record<string, unknown>;
+    }
+  ) => {
+    await recordCriticalFlowEvent({
+      stage: "chat_attendance",
+      outcome: event.outcome,
+      action: event.action,
+      latencyMs: Date.now() - context.startedAt,
+      statusCode: outcome.status,
+      actorUserId: event.actorUserId,
+      entityId: event.entityId,
+      metadata: event.metadata
+    });
+
+    if (event.outcome === "success") {
+      logRouteEvent("[chat.attendance] success", "info", context, {
+        action: event.action,
+        statusCode: outcome.status
+      });
+    } else {
+      logRouteEvent("[chat.attendance] failure", "warn", context, {
+        action: event.action,
+        statusCode: outcome.status
+      });
+    }
+
+    return jsonWithRequestId(outcome.body, context, { status: outcome.status });
+  };
+
   try {
     const session = await getSession();
     if (!session?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return respond(
+        { status: 401, body: { error: "Unauthorized" } },
+        { outcome: "failure", action: "unauthorized" }
+      );
     }
 
     const body = await request.json();
@@ -21,7 +69,10 @@ export async function POST(request: NextRequest) {
     const currentUserName = String(session.name || "Atendente");
 
     if (!waChatId || !["claim", "transfer"].includes(action)) {
-      return NextResponse.json({ error: "waChatId e action válidos são obrigatórios" }, { status: 400 });
+      return respond(
+        { status: 400, body: { error: "waChatId e action validos sao obrigatorios" } },
+        { outcome: "failure", action: "validation", actorUserId: currentUserId }
+      );
     }
 
     let conversation = await prisma.conversation.findUnique({ where: { waChatId } });
@@ -30,7 +81,15 @@ export async function POST(request: NextRequest) {
     }
 
     if (!conversation) {
-      return NextResponse.json({ error: "Conversa não encontrada" }, { status: 404 });
+      return respond(
+        { status: 404, body: { error: "Conversa nao encontrada" } },
+        {
+          outcome: "failure",
+          action,
+          actorUserId: currentUserId,
+          metadata: { waChatId }
+        }
+      );
     }
 
     if (action === "claim") {
@@ -39,9 +98,18 @@ export async function POST(request: NextRequest) {
           where: { id: conversation.assignedTo },
           select: { name: true }
         });
-        return NextResponse.json({
-          error: `Esta conversa já está em atendimento por ${assignedUser?.name || "outro atendente"}`
-        }, { status: 409 });
+        return respond(
+          {
+            status: 409,
+            body: { error: `Esta conversa ja esta em atendimento por ${assignedUser?.name || "outro atendente"}` }
+          },
+          {
+            outcome: "failure",
+            action: "claim",
+            actorUserId: currentUserId,
+            entityId: conversation.id
+          }
+        );
       }
 
       const updated = await prisma.conversation.update({
@@ -54,24 +122,52 @@ export async function POST(request: NextRequest) {
         }
       });
 
-      return NextResponse.json({
-        data: {
-          conversationId: updated.id,
-          assignedTo: currentUserId,
-          assignedUserName: currentUserName,
-          humanActive: updated.humanActive,
-          botActive: updated.botActive
+      return respond(
+        {
+          status: 200,
+          body: {
+            data: {
+              conversationId: updated.id,
+              assignedTo: currentUserId,
+              assignedUserName: currentUserName,
+              humanActive: updated.humanActive,
+              botActive: updated.botActive
+            }
+          }
+        },
+        {
+          outcome: "success",
+          action: "claim",
+          actorUserId: currentUserId,
+          entityId: updated.id,
+          metadata: { waChatId }
         }
-      });
+      );
     }
 
     if (conversation.assignedTo !== currentUserId) {
-      return NextResponse.json({ error: "Apenas o atendente responsável pode transferir esta conversa" }, { status: 403 });
+      return respond(
+        { status: 403, body: { error: "Apenas o atendente responsavel pode transferir esta conversa" } },
+        {
+          outcome: "failure",
+          action: "transfer",
+          actorUserId: currentUserId,
+          entityId: conversation.id
+        }
+      );
     }
 
     const targetUserId = String(body?.targetUserId || "").trim();
     if (!targetUserId) {
-      return NextResponse.json({ error: "Selecione o atendente de destino" }, { status: 400 });
+      return respond(
+        { status: 400, body: { error: "Selecione o atendente de destino" } },
+        {
+          outcome: "failure",
+          action: "transfer",
+          actorUserId: currentUserId,
+          entityId: conversation.id
+        }
+      );
     }
 
     const targetUser = await prisma.user.findUnique({
@@ -80,7 +176,16 @@ export async function POST(request: NextRequest) {
     });
 
     if (!targetUser) {
-      return NextResponse.json({ error: "Atendente de destino não encontrado" }, { status: 404 });
+      return respond(
+        { status: 404, body: { error: "Atendente de destino nao encontrado" } },
+        {
+          outcome: "failure",
+          action: "transfer",
+          actorUserId: currentUserId,
+          entityId: conversation.id,
+          metadata: { targetUserId }
+        }
+      );
     }
 
     const updated = await prisma.conversation.update({
@@ -93,17 +198,40 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    return NextResponse.json({
-      data: {
-        conversationId: updated.id,
-        assignedTo: targetUser.id,
-        assignedUserName: targetUser.name,
-        humanActive: updated.humanActive,
-        botActive: updated.botActive
+    return respond(
+      {
+        status: 200,
+        body: {
+          data: {
+            conversationId: updated.id,
+            assignedTo: targetUser.id,
+            assignedUserName: targetUser.name,
+            humanActive: updated.humanActive,
+            botActive: updated.botActive
+          }
+        }
+      },
+      {
+        outcome: "success",
+        action: "transfer",
+        actorUserId: currentUserId,
+        entityId: updated.id,
+        metadata: { targetUserId }
       }
-    });
+    );
   } catch (error) {
+    await recordCriticalFlowEvent({
+      stage: "chat_attendance",
+      outcome: "failure",
+      action: "exception",
+      latencyMs: Date.now() - context.startedAt,
+      statusCode: 500,
+      metadata: { error: error instanceof Error ? error.message : "unknown" }
+    });
     console.error("Error handling chat attendance", error);
-    return NextResponse.json({ error: "Erro ao atualizar atendimento da conversa" }, { status: 500 });
+    logRouteEvent("[chat.attendance] failed", "error", context, {
+      error: error instanceof Error ? error.message : "unknown"
+    });
+    return jsonWithRequestId({ error: "Erro ao atualizar atendimento da conversa" }, context, { status: 500 });
   }
 }

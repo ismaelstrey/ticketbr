@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { writeAuditLog } from "@/server/services/audit-log";
+import { enforceAdminRouteSecurity, withRateLimitHeaders } from "@/server/services/sensitive-route-guard";
 
 function trimUrl(value: string) {
   return value.trim().replace(/\/+$/, "");
@@ -45,10 +47,15 @@ async function fetchWithRetry(input: string, init: RequestInit & { timeoutMs: nu
       throw error;
     }
   }
-  throw lastError instanceof Error ? lastError : new Error("Falha ao testar conexão");
+  throw lastError instanceof Error ? lastError : new Error("Falha ao testar conexao");
 }
 
 export async function POST(request: NextRequest) {
+  const guard = await enforceAdminRouteSecurity(request, "settings.integrations.n8n.test");
+  if (!guard.ok) {
+    return guard.response;
+  }
+
   try {
     const body = await request.json().catch(() => ({}));
     const baseUrl = trimUrl(String(body?.baseUrl ?? ""));
@@ -60,7 +67,7 @@ export async function POST(request: NextRequest) {
     const logEnabled = Boolean(body?.logEnabled);
 
     if (!baseUrl) {
-      return NextResponse.json({ ok: false, message: "Informe a URL do serviço." }, { status: 400 });
+      return withRateLimitHeaders(NextResponse.json({ ok: false, message: "Informe a URL do servico." }, { status: 400 }), guard.rate);
     }
 
     const url = apiKey ? `${baseUrl}/api/v1/workflows?limit=1` : `${baseUrl}/healthz/readiness`;
@@ -81,63 +88,86 @@ export async function POST(request: NextRequest) {
     );
 
     const isOk = res.ok || res.status === 304;
+
+    await writeAuditLog({
+      actorUserId: guard.actorUserId,
+      action: "integration_n8n_test",
+      entity: "n8n",
+      metadata: {
+        baseUrl,
+        statusCode: res.status,
+        latencyMs,
+        retries,
+        ok: isOk
+      }
+    });
+
     if (!isOk) {
       const msg = String((json as any)?.message ?? (json as any)?.error ?? `Falha ao conectar (HTTP ${res.status}).`);
-      return NextResponse.json(
-        {
-          ok: false,
-          message: msg,
-          statusCode: res.status,
-          latencyMs,
-          details: logEnabled
-            ? {
-                request: {
-                  method: "GET",
-                  url,
-                  headers: apiKey ? { accept: "application/json", "X-N8N-API-KEY": "••••" } : { accept: "application/json" },
-                  timeoutMs,
-                  retries,
-                  retryDelayMs
-                },
-                response: { status: res.status }
-              }
-            : undefined
-        },
-        { status: 200 }
+      return withRateLimitHeaders(
+        NextResponse.json(
+          {
+            ok: false,
+            message: msg,
+            statusCode: res.status,
+            latencyMs,
+            details: logEnabled
+              ? {
+                  request: {
+                    method: "GET",
+                    url,
+                    headers: apiKey ? { accept: "application/json", "X-N8N-API-KEY": "****" } : { accept: "application/json" },
+                    timeoutMs,
+                    retries,
+                    retryDelayMs
+                  },
+                  response: { status: res.status }
+                }
+              : undefined
+          },
+          { status: 200 }
+        ),
+        guard.rate
       );
     }
 
     const count =
       apiKey ? (Array.isArray(json) ? json.length : Array.isArray((json as any)?.data) ? (json as any).data.length : undefined) : undefined;
-    return NextResponse.json({
-      ok: true,
-      message: apiKey
-        ? (typeof count === "number" ? `Conexão OK. Itens retornados: ${count}.` : "Conexão OK.")
-        : "Conexão OK. Instância acessível via /healthz/readiness (API Key não informada).",
-      statusCode: res.status,
-      latencyMs,
-      details: logEnabled
-        ? {
-            request: {
-              method: "GET",
-              url,
-              headers: apiKey ? { accept: "application/json", "X-N8N-API-KEY": "••••" } : { accept: "application/json" },
-              timeoutMs,
-              retries,
-              retryDelayMs
-            },
-            response: { status: res.status }
-          }
-        : undefined
-    });
+    return withRateLimitHeaders(
+      NextResponse.json({
+        ok: true,
+        message: apiKey
+          ? (typeof count === "number" ? `Conexao OK. Itens retornados: ${count}.` : "Conexao OK.")
+          : "Conexao OK. Instancia acessivel via /healthz/readiness (API Key nao informada).",
+        statusCode: res.status,
+        latencyMs,
+        details: logEnabled
+          ? {
+              request: {
+                method: "GET",
+                url,
+                headers: apiKey ? { accept: "application/json", "X-N8N-API-KEY": "****" } : { accept: "application/json" },
+                timeoutMs,
+                retries,
+                retryDelayMs
+              },
+              response: { status: res.status }
+            }
+          : undefined
+      }),
+      guard.rate
+    );
   } catch (error: any) {
-    return NextResponse.json(
-      {
-        ok: false,
-        message: error?.message ?? "Falha ao testar conexão.",
-        statusCode: 0
-      },
-      { status: 200 }
+    return withRateLimitHeaders(
+      NextResponse.json(
+        {
+          ok: false,
+          message: error?.message ?? "Falha ao testar conexao.",
+          statusCode: 0
+        },
+        { status: 200 }
+      ),
+      guard.rate
     );
   }
 }

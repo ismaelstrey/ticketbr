@@ -8,31 +8,49 @@ import {
   saveWhatsAppConfigToDatabase,
   sanitizeWhatsAppConfig
 } from "@/server/services/whatsapp-settings";
+import { writeAuditLog } from "@/server/services/audit-log";
+import { enforceAdminRouteSecurity, withRateLimitHeaders } from "@/server/services/sensitive-route-guard";
 
 export async function GET(request: NextRequest) {
+  const guard = await enforceAdminRouteSecurity(request, "settings.whatsapp.config.read");
+  if (!guard.ok) {
+    return guard.response;
+  }
+
   const cookieValue = request.cookies.get(WHATSAPP_CONFIG_COOKIE)?.value;
   const cookieConfig = decodeWhatsAppConfigCookie(cookieValue);
   const config = cookieConfig ?? await getWhatsAppConfigFromDatabase();
   if (!config) {
-    return NextResponse.json({ data: null });
+    return withRateLimitHeaders(NextResponse.json({ data: null }), guard.rate);
   }
-  return NextResponse.json({ data: sanitizeWhatsAppConfig(config) });
+  return withRateLimitHeaders(NextResponse.json({ data: sanitizeWhatsAppConfig(config) }), guard.rate);
 }
 
 export async function POST(request: NextRequest) {
+  const guard = await enforceAdminRouteSecurity(request, "settings.whatsapp.config.write");
+  if (!guard.ok) {
+    return guard.response;
+  }
+
   try {
     const body = await request.json();
     const config = normalizeWhatsAppConfig(body);
 
     if (!config) {
-      return NextResponse.json({ error: "Informe configuração Evolution completa, parâmetros n8n (n8nBaseUrl/n8nWebhookUrl) ou UAZAPI (uazapiToken + uazapiBaseUrl/uazapiSubdomain)" }, { status: 400 });
+      return withRateLimitHeaders(
+        NextResponse.json(
+          { error: "Informe configuracao Evolution completa, parametros n8n (n8nBaseUrl/n8nWebhookUrl) ou UAZAPI (uazapiToken + uazapiBaseUrl/uazapiSubdomain)" },
+          { status: 400 }
+        ),
+        guard.rate
+      );
     }
 
     const cookieValue = request.cookies.get(WHATSAPP_CONFIG_COOKIE)?.value;
     const cookieConfig = decodeWhatsAppConfigCookie(cookieValue);
     const previous = cookieConfig ?? await getWhatsAppConfigFromDatabase();
 
-    const keepSecret = (nextValue: unknown) => typeof nextValue === "string" && nextValue.includes("••••");
+    const keepSecret = (nextValue: unknown) => typeof nextValue === "string" && nextValue.includes("����");
 
     if (previous) {
       if (keepSecret(body.apiKey) && previous.apiKey) config.apiKey = previous.apiKey;
@@ -42,6 +60,18 @@ export async function POST(request: NextRequest) {
     }
 
     await saveWhatsAppConfigToDatabase(config);
+    await writeAuditLog({
+      actorUserId: guard.actorUserId,
+      action: "whatsapp_config_update",
+      entity: "whatsapp_config",
+      metadata: {
+        provider: config.whatsappProvider,
+        evolutionBaseUrl: config.baseUrl,
+        n8nBaseUrl: config.n8nBaseUrl,
+        uazapiBaseUrl: config.uazapiBaseUrl,
+        uazapiSubdomain: config.uazapiSubdomain
+      }
+    });
 
     const response = NextResponse.json({ data: sanitizeWhatsAppConfig(config) });
     response.cookies.set({
@@ -54,9 +84,9 @@ export async function POST(request: NextRequest) {
       maxAge: 60 * 60 * 24 * 30
     });
 
-    return response;
+    return withRateLimitHeaders(response, guard.rate);
   } catch (error) {
     console.error("Error saving WhatsApp config", error);
-    return NextResponse.json({ error: "Erro ao salvar configuração" }, { status: 500 });
+    return withRateLimitHeaders(NextResponse.json({ error: "Erro ao salvar configuracao" }, { status: 500 }), guard.rate);
   }
 }

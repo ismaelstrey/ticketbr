@@ -176,3 +176,4 @@ function createRateLimitStore(): RateLimitStore {
 }
 
 export const loginRateLimiter = new FixedWindowRateLimiter(5, 15 * 60 * 1000, createRateLimitStore());
+export const sensitiveRouteRateLimiter = new FixedWindowRateLimiter(30, 60 * 1000, createRateLimitStore());

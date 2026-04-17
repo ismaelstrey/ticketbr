@@ -25,7 +25,12 @@ export async function processNormalizedInboundEvent(normalized: NormalizedInboun
     return { ok: true, kind: normalized.kind, source: normalized.source };
   }
 
-  await chatService.processInboundMessage(normalized.payload);
+  const inbound = await chatService.processInboundMessage(normalized.payload);
+
+  if (inbound.isDuplicate) {
+    return { ok: true, kind: normalized.kind, source: normalized.source, deduplicated: true };
+  }
+
   await upsertInboundConversation(normalized);
 
   if (!normalized.payload.fromMe) {
