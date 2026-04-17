@@ -40,6 +40,25 @@ const Title = styled.h1`
   font-weight: 800;
 `;
 
+const StatusSummary = styled.div`
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: ${({ theme }) => theme.borderRadius.medium};
+  background: ${({ theme }) => theme.colors.surfaceAlt};
+  padding: 0.75rem 0.85rem;
+  display: grid;
+  gap: 0.35rem;
+`;
+
+const StatusSummaryTitle = styled.div`
+  font-weight: 800;
+  color: ${({ theme }) => theme.colors.text.primary};
+`;
+
+const StatusSummaryBody = styled.div`
+  font-size: 0.9rem;
+  color: ${({ theme }) => theme.colors.text.secondary};
+`;
+
 function formatDate(value: string) {
   try {
     return new Date(value).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
@@ -108,6 +127,14 @@ export default function CustomerTicketPage() {
             <Badge>{ticket.priority}</Badge>
           </div>
         </div>
+
+        {ticket.portalStatus ? (
+          <StatusSummary aria-label="Resumo do status do ticket">
+            <StatusSummaryTitle>{ticket.portalStatus.timelineTitle}</StatusSummaryTitle>
+            <StatusSummaryBody>{ticket.portalStatus.description}</StatusSummaryBody>
+            <StatusSummaryBody>{ticket.portalStatus.nextActionHint}</StatusSummaryBody>
+          </StatusSummary>
+        ) : null}
 
         <div style={{ whiteSpace: "pre-wrap", opacity: 0.9 }}>{ticket.description || ""}</div>
 
