@@ -5,10 +5,11 @@ import Link from "next/link";
 import styled from "styled-components";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { Input, Select } from "@/components/ui/Input";
+import { Input, Select, Textarea } from "@/components/ui/Input";
 import { Badge } from "@/components/ui/Badge";
 import { Modal } from "@/components/ui/Modal";
 import { portalStatusFilterOptions } from "@/lib/tickets/portal-status-taxonomy";
+import { EmptyState, LoadingState } from "@/components/ui/FeedbackState";
 
 type TicketListItem = {
   id: string;
@@ -33,14 +34,19 @@ type Category = { id: string; name: string; description: string };
 const Grid = styled.div`
   display: grid;
   grid-template-columns: 1fr;
-  gap: 1rem;
+  gap: ${({ theme }) => theme.spacing[4]};
 `;
 
 const HeaderRow = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
+  gap: ${({ theme }) => theme.spacing[3]};
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
+    flex-direction: column;
+    align-items: stretch;
+  }
 `;
 
 const Title = styled.h1`
@@ -52,12 +58,68 @@ const Title = styled.h1`
 
 const Toolbar = styled.div`
   display: flex;
-  gap: 0.5rem;
+  gap: ${({ theme }) => theme.spacing[2]};
   align-items: center;
   flex-wrap: wrap;
 `;
 
+const SearchInput = styled(Input)`
+  width: 260px;
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    width: 100%;
+  }
+`;
+
+const StatusSelect = styled(Select)`
+  width: 190px;
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    width: 100%;
+  }
+`;
+
+const KpiGrid = styled.section`
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: ${({ theme }) => theme.spacing[3]};
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const KpiCard = styled(Card)`
+  padding: ${({ theme }) => theme.spacing[3]};
+  display: grid;
+  gap: ${({ theme }) => theme.spacing[1]};
+`;
+
+const KpiLabel = styled.div`
+  font-size: ${({ theme }) => theme.typography.size.xs};
+  color: ${({ theme }) => theme.tokens.color.text.secondary};
+`;
+
+const KpiValue = styled.div`
+  font-size: ${({ theme }) => theme.typography.size["2xl"]};
+  font-weight: ${({ theme }) => theme.typography.weight.extrabold};
+  color: ${({ theme }) => theme.tokens.color.text.primary};
+`;
+
+const ListCard = styled(Card)`
+  padding: ${({ theme }) => theme.spacing[3]};
+`;
+
+const TableWrap = styled.div`
+  overflow-x: auto;
+`;
+
 const Table = styled.div`
+  min-width: 680px;
   display: grid;
   grid-template-columns: 90px 1fr 160px 140px 140px;
   gap: 0;
@@ -83,6 +145,48 @@ const Td = styled.div`
   font-size: 0.9rem;
   display: flex;
   align-items: center;
+`;
+
+const Subject = styled.div`
+  font-weight: ${({ theme }) => theme.typography.weight.bold};
+`;
+
+const FormGrid = styled.div`
+  display: grid;
+  gap: ${({ theme }) => theme.spacing[3]};
+`;
+
+const ErrorText = styled.div`
+  color: ${({ theme }) => theme.tokens.color.status.warning};
+  font-size: ${({ theme }) => theme.typography.size.sm};
+`;
+
+const Field = styled.div`
+  display: grid;
+  gap: ${({ theme }) => theme.spacing[1]};
+`;
+
+const FieldLabel = styled.label`
+  font-size: ${({ theme }) => theme.typography.size.xs};
+  font-weight: ${({ theme }) => theme.typography.weight.bold};
+  color: ${({ theme }) => theme.tokens.color.text.secondary};
+`;
+
+const FormRow = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 160px;
+  gap: ${({ theme }) => theme.spacing[3]};
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const FormActions = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  gap: ${({ theme }) => theme.spacing[2]};
+  margin-top: ${({ theme }) => theme.spacing[2]};
 `;
 
 const RowLink = styled(Link)`
@@ -170,13 +274,13 @@ export default function CustomerDashboardPage() {
       <HeaderRow>
         <Title>Painel</Title>
         <Toolbar>
-          <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar tickets" style={{ width: 260 }} />
-          <Select value={status} onChange={(e) => setStatus(e.target.value)} style={{ width: 170 }}>
+          <SearchInput value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar tickets" />
+          <StatusSelect value={status} onChange={(e) => setStatus(e.target.value)}>
             <option value="">Todos</option>
             {portalStatusFilterOptions.map((option) => (
               <option key={option.value} value={option.value}>{option.label}</option>
             ))}
-          </Select>
+          </StatusSelect>
           <Button type="button" variant="ghost" onClick={() => loadTickets()} disabled={loading}>
             Atualizar
           </Button>
@@ -186,89 +290,92 @@ export default function CustomerDashboardPage() {
         </Toolbar>
       </HeaderRow>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: "1rem" }}>
-        <Card style={{ padding: "1rem" }}>
-          <div style={{ fontSize: 12, opacity: 0.7 }}>Total</div>
-          <div style={{ fontSize: 20, fontWeight: 800 }}>{counts.total}</div>
-        </Card>
-        <Card style={{ padding: "1rem" }}>
-          <div style={{ fontSize: 12, opacity: 0.7 }}>Abertos</div>
-          <div style={{ fontSize: 20, fontWeight: 800 }}>{counts.todo}</div>
-        </Card>
-        <Card style={{ padding: "1rem" }}>
-          <div style={{ fontSize: 12, opacity: 0.7 }}>Em atendimento</div>
-          <div style={{ fontSize: 20, fontWeight: 800 }}>{counts.doing}</div>
-        </Card>
-        <Card style={{ padding: "1rem" }}>
-          <div style={{ fontSize: 12, opacity: 0.7 }}>Concluídos</div>
-          <div style={{ fontSize: 20, fontWeight: 800 }}>{counts.done}</div>
-        </Card>
-      </div>
+      <KpiGrid>
+        <KpiCard>
+          <KpiLabel>Total</KpiLabel>
+          <KpiValue>{counts.total}</KpiValue>
+        </KpiCard>
+        <KpiCard>
+          <KpiLabel>Abertos</KpiLabel>
+          <KpiValue>{counts.todo}</KpiValue>
+        </KpiCard>
+        <KpiCard>
+          <KpiLabel>Em atendimento</KpiLabel>
+          <KpiValue>{counts.doing}</KpiValue>
+        </KpiCard>
+        <KpiCard>
+          <KpiLabel>Concluídos</KpiLabel>
+          <KpiValue>{counts.done}</KpiValue>
+        </KpiCard>
+      </KpiGrid>
 
-      <Card style={{ padding: "1rem" }}>
+      <ListCard>
         {loading ? (
-          <div style={{ padding: "1rem", opacity: 0.8 }}>Carregando...</div>
+          <LoadingState title="Carregando tickets" description="Estamos consultando suas solicitações." />
         ) : tickets.length === 0 ? (
-          <div style={{ padding: "1rem", opacity: 0.8 }}>Nenhum ticket encontrado.</div>
+          <EmptyState title="Nenhum ticket encontrado" description="Tente outro filtro ou crie um novo ticket." />
         ) : (
-          <Table>
-            <Th>#</Th>
-            <Th>Assunto</Th>
-            <Th>Categoria</Th>
-            <Th>Status</Th>
-            <Th>Atualizado</Th>
-            {tickets.map((t) => (
-              <RowLink key={t.id} href={`/cliente/tickets/${t.id}`}>
-                <Td>{t.number}</Td>
-                <Td style={{ fontWeight: 700 }}>{t.subject}</Td>
-                <Td>{t.category?.name || "-"}</Td>
-                <Td><Badge>{t.portalStatus?.label || "Status indisponível"}</Badge></Td>
-                <Td>{formatDate(t.updatedAt)}</Td>
-              </RowLink>
-            ))}
-          </Table>
+          <TableWrap>
+            <Table>
+              <Th>#</Th>
+              <Th>Assunto</Th>
+              <Th>Categoria</Th>
+              <Th>Status</Th>
+              <Th>Atualizado</Th>
+              {tickets.map((t) => (
+                <RowLink key={t.id} href={`/cliente/tickets/${t.id}`}>
+                  <Td>{t.number}</Td>
+                  <Td><Subject>{t.subject}</Subject></Td>
+                  <Td>{t.category?.name || "-"}</Td>
+                  <Td><Badge>{t.portalStatus?.label || "Status indisponível"}</Badge></Td>
+                  <Td>{formatDate(t.updatedAt)}</Td>
+                </RowLink>
+              ))}
+            </Table>
+          </TableWrap>
         )}
-      </Card>
+      </ListCard>
 
       <Modal isOpen={createOpen} onClose={() => setCreateOpen(false)} title="Novo ticket">
-        <div style={{ display: "grid", gap: "0.75rem" }}>
-          {createError ? <div style={{ color: "#DC2626", fontSize: 14 }}>{createError}</div> : null}
-          <div>
-            <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 6 }}>Título</div>
-            <Input value={createForm.subject} onChange={(e) => setCreateForm((s) => ({ ...s, subject: e.target.value }))} />
-          </div>
-          <div>
-            <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 6 }}>Descrição</div>
-            <textarea
+        <FormGrid>
+          {createError ? <ErrorText role="alert">{createError}</ErrorText> : null}
+          <Field>
+            <FieldLabel htmlFor="customer-ticket-subject">Título</FieldLabel>
+            <Input id="customer-ticket-subject" value={createForm.subject} onChange={(e) => setCreateForm((s) => ({ ...s, subject: e.target.value }))} />
+          </Field>
+          <Field>
+            <FieldLabel htmlFor="customer-ticket-description">Descrição</FieldLabel>
+            <Textarea
+              id="customer-ticket-description"
               value={createForm.description}
               onChange={(e) => setCreateForm((s) => ({ ...s, description: e.target.value }))}
-              style={{ width: "100%", minHeight: 140, borderRadius: 12, border: "1px solid rgba(148,163,184,0.35)", padding: 12, background: "transparent", color: "inherit" }}
+              style={{ minHeight: 140 }}
             />
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 160px", gap: "0.75rem" }}>
-            <div>
-              <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 6 }}>Categoria</div>
-              <Select value={createForm.categoriaId} onChange={(e) => setCreateForm((s) => ({ ...s, categoriaId: e.target.value }))}>
+          </Field>
+          <FormRow>
+            <Field>
+              <FieldLabel htmlFor="customer-ticket-category">Categoria</FieldLabel>
+              <Select id="customer-ticket-category" value={createForm.categoriaId} onChange={(e) => setCreateForm((s) => ({ ...s, categoriaId: e.target.value }))}>
                 <option value="">Selecione</option>
                 {categories.map((c) => (
                   <option key={c.id} value={c.id}>{c.name}</option>
                 ))}
               </Select>
-            </div>
-            <div>
-              <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 6 }}>Prioridade</div>
-              <Select value={createForm.priority} onChange={(e) => setCreateForm((s) => ({ ...s, priority: e.target.value }))}>
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="customer-ticket-priority">Prioridade</FieldLabel>
+              <Select id="customer-ticket-priority" value={createForm.priority} onChange={(e) => setCreateForm((s) => ({ ...s, priority: e.target.value }))}>
                 <option value="NONE">Normal</option>
                 <option value="MEDIUM">Média</option>
                 <option value="HIGH">Alta</option>
               </Select>
-            </div>
-          </div>
-          <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 8 }}>
+            </Field>
+          </FormRow>
+          <FormActions>
             <Button type="button" variant="ghost" onClick={() => setCreateOpen(false)}>Cancelar</Button>
             <Button type="button" variant="primary" onClick={() => submitNewTicket()}>Criar</Button>
-          </div>
-        </div>
+          </FormActions>
+        </FormGrid>
       </Modal>
     </Grid>
   );
