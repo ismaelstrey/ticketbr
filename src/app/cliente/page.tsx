@@ -222,7 +222,7 @@ export default function CustomerDashboardPage() {
                 <Td>{t.number}</Td>
                 <Td style={{ fontWeight: 700 }}>{t.subject}</Td>
                 <Td>{t.category?.name || "-"}</Td>
-                <Td><Badge>{t.portalStatus?.label || t.status}</Badge></Td>
+                <Td><Badge>{t.portalStatus?.label || "Status indisponível"}</Badge></Td>
                 <Td>{formatDate(t.updatedAt)}</Td>
               </RowLink>
             ))}

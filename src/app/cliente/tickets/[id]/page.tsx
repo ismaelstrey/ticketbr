@@ -123,7 +123,7 @@ export default function CustomerTicketPage() {
             <div style={{ opacity: 0.75, fontSize: 13, marginTop: 4 }}>Atualizado em {formatDate(ticket.updatedAt)}</div>
           </div>
           <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-            <Badge>{ticket.portalStatus?.label || ticket.status}</Badge>
+            <Badge>{ticket.portalStatus?.label || "Status indisponível"}</Badge>
             <Badge>{ticket.priority}</Badge>
           </div>
         </div>
