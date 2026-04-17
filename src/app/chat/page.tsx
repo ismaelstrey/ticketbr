@@ -574,7 +574,16 @@ export default function ChatPage() {
   const { showToast } = useToast();
   const { user } = useAuth();
   const [contacts, setContacts] = useState<ChatContact[]>([]);
-  const [tickets, setTickets] = useState<Array<{ id: string; number: number; subject: string; companyId?: string | null; companyName?: string | null }>>([]);
+  const [tickets, setTickets] = useState<Array<{
+    id: string;
+    number: number;
+    subject: string;
+    priorityLabel?: string;
+    slaLabel?: string;
+    slaProgress?: number;
+    companyId?: string | null;
+    companyName?: string | null;
+  }>>([]);
   const [links, setLinks] = useState<ChatTicketLink[]>([]);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [agents, setAgents] = useState<ChatAgent[]>([]);
@@ -1558,7 +1567,13 @@ export default function ChatPage() {
             </MessageList>
 
             <ChatConversationFooter
-              tickets={filteredTickets.map((ticket) => ({ id: ticket.id, number: ticket.number, subject: ticket.subject }))}
+              tickets={filteredTickets.map((ticket) => ({
+                id: ticket.id,
+                number: ticket.number,
+                subject: ticket.subject,
+                priorityLabel: ticket.priorityLabel,
+                slaLabel: ticket.slaLabel
+              }))}
               selectedTicketId={selectedTicket}
               onSelectedTicketIdChange={setSelectedTicket}
               onAssociate={() => linkToTicket().catch((error) => showToast(error.message, "error"))}

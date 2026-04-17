@@ -83,13 +83,22 @@ export const ChatConversationFooter = memo(function ChatConversationFooter(props
     });
   }, [archivedConversations]);
 
+  const selectedTicket = useMemo(
+    () => tickets.find((ticket) => ticket.id === selectedTicketId) ?? null,
+    [tickets, selectedTicketId]
+  );
+
   return (
     <FooterSurface aria-label="Chat footer controls">
       <FooterGrid>
         <FieldGroup>
           <LabelRow>
             <Label id={ticketLabelId}>Ticket</Label>
-            <SubtleHint>Vincular conversa</SubtleHint>
+            <SubtleHint>
+              {selectedTicket
+                ? `${selectedTicket.priorityLabel ?? "Sem prioridade"} • ${selectedTicket.slaLabel ?? "SLA não definido"}`
+                : "Vincular conversa"}
+            </SubtleHint>
           </LabelRow>
           <MinimalSelect
             aria-labelledby={ticketLabelId}

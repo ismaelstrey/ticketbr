@@ -16,6 +16,7 @@ import { Ticket, TicketPriority, TicketStatus } from "@/types/ticket";
 import { Button } from "@/components/ui/Button";
 import { Input, Select, Textarea } from "@/components/ui/Input";
 import { Card } from "@/components/ui/Card";
+import { getPriorityChipLabel, getSlaChipLabel, getSlaToneFromProgress } from "@/lib/tickets/sla-chip";
 import NewCommentModal from "./NewCommentModal";
 
 const Container = styled.section`
@@ -188,6 +189,21 @@ const Metric = styled.div`
   }
 `;
 
+const SummaryChips = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+`;
+
+const SummaryChip = styled.span<{ $tone: string }>`
+  border: 1px solid ${({ $tone }) => $tone};
+  color: ${({ $tone }) => $tone};
+  border-radius: ${({ theme }) => theme.borderRadius.pill};
+  padding: 0.2rem 0.55rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+`;
+
 const FormLabel = styled.label`
   display: flex;
   flex-direction: column;
@@ -234,6 +250,14 @@ function formatRoadmapDate(value: string | Date) {
   const date = value instanceof Date ? value : new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
   return date.toLocaleString("pt-BR");
+}
+
+function getSlaChipColor(progress: number) {
+  const tone = getSlaToneFromProgress(progress);
+  if (tone === "breach") return "#dc2626";
+  if (tone === "danger") return "#ef4444";
+  if (tone === "warning") return "#f59e0b";
+  return "#22c55e";
 }
 
 export default function TicketDetails({
@@ -351,6 +375,13 @@ export default function TicketDetails({
             <p>SLA Solução</p>
             <strong>{ticket.slaSolucao ?? "-"}</strong>
           </Metric>
+
+          <SummaryChips>
+            <SummaryChip $tone={getSlaChipColor(ticket.progressoSla)}>
+              {getSlaChipLabel(getSlaToneFromProgress(ticket.progressoSla))}
+            </SummaryChip>
+            <SummaryChip $tone="#6366f1">{getPriorityChipLabel(ticket.prioridade)}</SummaryChip>
+          </SummaryChips>
 
           <FormLabel>
             Prioridade

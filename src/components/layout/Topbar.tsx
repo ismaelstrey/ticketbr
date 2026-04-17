@@ -1,7 +1,7 @@
 "use client";
 
 import styled from "styled-components";
-import { FiSearch, FiTool, FiCheckCircle, FiFilter, FiHelpCircle, FiPlus } from "@/components/icons";
+import { FiSearch, FiCheckCircle, FiFilter, FiHelpCircle, FiPlus } from "@/components/icons";
 import { Button } from "@/components/ui/Button";
 
 const TopbarContainer = styled.header`
@@ -73,20 +73,23 @@ const ActionsWrapper = styled.div`
   gap: ${({ theme }) => theme.spacing[2]};
 `;
 
-const actionButtons = [
-  { label: "Ticket", icon: FiTool },
-  { label: "Tarefa", icon: FiCheckCircle },
-  { label: "Filtros", icon: FiFilter },
-  { label: "Ajuda", icon: FiHelpCircle }
-];
-
 interface TopbarProps {
   query: string;
   setQuery: (query: string) => void;
   onNewTicket?: () => void;
+  onOpenTasks?: () => void;
+  onOpenFilters?: () => void;
+  onOpenHelp?: () => void;
 }
 
-export function Topbar({ query, setQuery, onNewTicket }: TopbarProps) {
+export function Topbar({ query, setQuery, onNewTicket, onOpenTasks, onOpenFilters, onOpenHelp }: TopbarProps) {
+  const actionButtons = [
+    { label: "Ticket", icon: FiPlus, onClick: onNewTicket, variant: "primary" as const },
+    { label: "Tarefa", icon: FiCheckCircle, onClick: onOpenTasks, variant: "pill" as const },
+    { label: "Filtros", icon: FiFilter, onClick: onOpenFilters, variant: "pill" as const },
+    { label: "Ajuda", icon: FiHelpCircle, onClick: onOpenHelp, variant: "pill" as const }
+  ].filter((action) => typeof action.onClick === "function");
+
   return (
     <TopbarContainer>
       <SearchWrapper>
@@ -99,16 +102,18 @@ export function Topbar({ query, setQuery, onNewTicket }: TopbarProps) {
         />
       </SearchWrapper>
       <ActionsWrapper>
-        <Button variant="primary" onClick={onNewTicket} type="button">
-          <FiPlus aria-hidden="true" />
-          Novo Ticket
-        </Button>
-        {actionButtons.map(({ label, icon: Icon }, index) => (
-          <Button key={label} variant="pill" pillIndex={index} type="button">
+        {actionButtons.map(({ label, icon: Icon, onClick, variant }, index) => (
+          <Button key={label} variant={variant} pillIndex={index} type="button" onClick={onClick}>
             <Icon aria-hidden="true" />
-            {label}
+            {label === "Ticket" ? "Novo Ticket" : label}
           </Button>
         ))}
+        {actionButtons.length === 0 ? (
+          <Button variant="primary" type="button" disabled aria-disabled="true" title="Ações indisponíveis no momento">
+            <FiPlus aria-hidden="true" />
+            Novo Ticket
+          </Button>
+        ) : null}
       </ActionsWrapper>
     </TopbarContainer>
   );

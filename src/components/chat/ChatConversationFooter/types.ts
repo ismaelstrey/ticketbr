@@ -2,6 +2,8 @@ export interface ChatConversationFooterTicket {
   id: string;
   number: number;
   subject: string;
+  priorityLabel?: string;
+  slaLabel?: string;
 }
 
 export interface ChatConversationFooterArchivedConversation {
@@ -26,4 +28,3 @@ export interface ChatConversationFooterProps {
   finalizeDisabled?: boolean;
   finalizeLabel?: string;
 }
-

@@ -1,5 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getPriorityChipLabel, getSlaChipLabel, getSlaToneFromProgress } from "@/lib/tickets/sla-chip";
+
+function getSlaProgress(createdAt: Date, responseSlaAt: Date | null): number {
+  if (!responseSlaAt) return 0;
+  const totalWindowMs = responseSlaAt.getTime() - createdAt.getTime();
+  if (totalWindowMs <= 0) return 100;
+  const elapsedMs = Date.now() - createdAt.getTime();
+  const progress = (elapsedMs / totalWindowMs) * 100;
+  return Math.max(0, Math.round(progress));
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -47,6 +57,9 @@ export async function GET(request: NextRequest) {
         id: true,
         number: true,
         subject: true,
+        priority: true,
+        createdAt: true,
+        responseSlaAt: true,
         company: true,
         solicitante_id: true,
         solicitante: {
@@ -60,13 +73,19 @@ export async function GET(request: NextRequest) {
     });
 
     return NextResponse.json({
-      data: tickets.map((ticket) => ({
-        id: ticket.id,
-        number: ticket.number,
-        subject: ticket.subject,
-        companyId: ticket.solicitante?.id ?? ticket.solicitante_id ?? null,
-        companyName: ticket.solicitante?.nome_fantasia || ticket.solicitante?.razao_social || ticket.company || null
-      }))
+      data: tickets.map((ticket) => {
+        const slaProgress = getSlaProgress(ticket.createdAt, ticket.responseSlaAt);
+        return {
+          slaProgress,
+          slaLabel: getSlaChipLabel(getSlaToneFromProgress(slaProgress)),
+          priorityLabel: getPriorityChipLabel(ticket.priority),
+          id: ticket.id,
+          number: ticket.number,
+          subject: ticket.subject,
+          companyId: ticket.solicitante?.id ?? ticket.solicitante_id ?? null,
+          companyName: ticket.solicitante?.nome_fantasia || ticket.solicitante?.razao_social || ticket.company || null
+        };
+      })
     });
   } catch (error) {
     console.error("Error loading chat tickets", error);
