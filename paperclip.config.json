@@ -1,0 +1,13 @@
+{
+  "srcDir": "src",
+  "designsDir": "src/designs",
+  "compilerOptions": [
+    {
+      "emit": [
+        "css",
+        "react.js:js"
+      ],
+      "outDir": "lib"
+    }
+  ]
+}
