@@ -28,7 +28,7 @@
     "@aws-sdk/client-sts": "^3.1030.0",
     "@aws-sdk/s3-request-presigner": "^3.1030.0",
     "@faker-js/faker": "^9.9.0",
-    "@prisma/adapter-pg": "^7.4.1",
+    "@prisma/adapter-pg": "^7.7.0",
     "@prisma/adapter-ppg": "^7.4.1",
     "@prisma/client": "^7.7.0",
     "@vercel/analytics": "^2.0.1",
