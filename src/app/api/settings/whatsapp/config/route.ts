@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
     const cookieConfig = decodeWhatsAppConfigCookie(cookieValue);
     const previous = cookieConfig ?? await getWhatsAppConfigFromDatabase();
 
-    const keepSecret = (nextValue: unknown) => typeof nextValue === "string" && nextValue.includes("••••");
+    const keepSecret = (nextValue: unknown) => typeof nextValue === "string" && nextValue.includes("\u2022");
 
     if (previous) {
       if (keepSecret(body.apiKey) && previous.apiKey) config.apiKey = previous.apiKey;

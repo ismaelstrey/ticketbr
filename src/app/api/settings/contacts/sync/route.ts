@@ -12,7 +12,7 @@ import { writeAuditLog } from "@/server/services/audit-log";
 import { enforceAdminRouteSecurity, withRateLimitHeaders } from "@/server/services/sensitive-route-guard";
 
 function isMaskedSecret(value: unknown) {
-  return typeof value === "string" && value.includes("••••");
+  return typeof value === "string" && value.includes("\u2022");
 }
 
 export async function POST(request: NextRequest) {
