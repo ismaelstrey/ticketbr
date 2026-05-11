@@ -9,7 +9,7 @@ export async function GET() {
       orderBy: { nome: "asc" },
     });
     return NextResponse.json(mesas);
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: "Failed to fetch workbenches" }, { status: 500 });
   }
 }
@@ -21,7 +21,7 @@ export async function POST(request: Request) {
       data: body,
     });
     return NextResponse.json(mesa, { status: 201 });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: "Failed to create workbench" }, { status: 500 });
   }
 }

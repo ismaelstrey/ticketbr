@@ -22,7 +22,7 @@ export async function verifyJWT(token: string) {
   try {
     const { payload } = await jwtVerify(token, key);
     return payload;
-  } catch (error) {
+  } catch {
     return null;
   }
 }

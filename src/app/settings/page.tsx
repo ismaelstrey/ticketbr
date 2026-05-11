@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 import { AppShellContainer, MainContent } from "@/components/layout/AppShell";
@@ -415,7 +416,7 @@ export default function SettingsPage() {
               <StatusPanel>
                 <strong>Status:</strong> {connectionStatus}
                 {pairingCode ? <p><strong>Código:</strong> {pairingCode}</p> : null}
-                {qrCode ? <img src={qrCode} alt="QR Code do WhatsApp" style={{ width: 280, maxWidth: "100%", border: "1px solid rgba(148,163,184,0.2)", borderRadius: 8, marginTop: 12 }} /> : null}
+                {qrCode ? <Image src={qrCode} alt="QR Code do WhatsApp" width={280} height={280} unoptimized style={{ width: 280, maxWidth: "100%", height: "auto", border: "1px solid rgba(148,163,184,0.2)", borderRadius: 8, marginTop: 12 }} /> : null}
               </StatusPanel>
             </div>
           )}

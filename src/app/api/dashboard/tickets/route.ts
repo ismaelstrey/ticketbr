@@ -15,6 +15,13 @@ const QuerySchema = z.object({
   q: z.string().optional()
 });
 
+const DASHBOARD_CACHE_TTL_MS = 15_000;
+const dashboardCache = new Map<string, { expiresAt: number; value: unknown }>();
+
+function cacheKeyFromQuery(filters: z.infer<typeof QuerySchema>) {
+  return JSON.stringify(Object.entries(filters).sort(([a], [b]) => a.localeCompare(b)));
+}
+
 export async function GET(request: NextRequest) {
   const raw = Object.fromEntries(request.nextUrl.searchParams.entries());
   const parsed = QuerySchema.safeParse(raw);
@@ -26,10 +33,31 @@ export async function GET(request: NextRequest) {
   const requestId = crypto.randomUUID();
 
   try {
+    const cacheKey = cacheKeyFromQuery(parsed.data);
+    const cached = dashboardCache.get(cacheKey);
+    const now = Date.now();
+    if (cached && cached.expiresAt > now) {
+      return NextResponse.json(cached.value, {
+        headers: {
+          "Cache-Control": "private, max-age=15",
+          "X-Cache": "HIT"
+        }
+      });
+    }
+
     const result = await getTicketsOperationalDashboard(parsed.data);
+    dashboardCache.set(cacheKey, { value: result, expiresAt: now + DASHBOARD_CACHE_TTL_MS });
+
+    if (dashboardCache.size > 50) {
+      for (const [key, entry] of dashboardCache) {
+        if (entry.expiresAt <= now || dashboardCache.size > 50) dashboardCache.delete(key);
+      }
+    }
+
     return NextResponse.json(result, {
       headers: {
-        "Cache-Control": "no-store"
+        "Cache-Control": "private, max-age=15",
+        "X-Cache": "MISS"
       }
     });
   } catch (error) {

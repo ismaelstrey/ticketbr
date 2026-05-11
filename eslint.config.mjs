@@ -40,6 +40,31 @@ const config = [
         }
       ]
     }
+  },
+  {
+    files: [
+      "scripts/**/*.{js,cjs,mjs,ts}",
+      "check-*.{js,cjs,mjs,ts}",
+      "test-*.{js,cjs,mjs,ts}",
+      "prisma/seed.ts",
+      "**/*.{test,spec}.{ts,tsx,js,jsx}"
+    ],
+    rules: {
+      "no-console": "off",
+      "@typescript-eslint/no-unused-vars": "off",
+      "@typescript-eslint/no-unused-expressions": "off"
+    }
+  },
+  {
+    files: ["src/app/api/**/*.{ts,tsx}", "src/server/**/*.{ts,tsx}", "src/lib/observability.ts"],
+    rules: {
+      "no-console": [
+        "warn",
+        {
+          "allow": ["warn", "error", "info"]
+        }
+      ]
+    }
   }
 ];
 

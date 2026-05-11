@@ -1,7 +1,7 @@
 "use client";
 
 import styled from "styled-components";
-import { FiLogOut, FiUser } from "@/components/icons";
+import { FiLogOut } from "@/components/icons";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 

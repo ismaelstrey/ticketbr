@@ -8,7 +8,7 @@ export async function GET() {
       orderBy: { nome: "asc" },
     });
     return NextResponse.json(tipos);
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: "Failed to fetch types" }, { status: 500 });
   }
 }
@@ -20,7 +20,7 @@ export async function POST(request: Request) {
       data: body,
     });
     return NextResponse.json(tipo, { status: 201 });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: "Failed to create type" }, { status: 500 });
   }
 }

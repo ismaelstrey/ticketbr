@@ -584,7 +584,7 @@ export default function ChatPage() {
     companyId?: string | null;
     companyName?: string | null;
   }>>([]);
-  const [links, setLinks] = useState<ChatTicketLink[]>([]);
+  const [, setLinks] = useState<ChatTicketLink[]>([]);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [agents, setAgents] = useState<ChatAgent[]>([]);
   const [conversationAttendance, setConversationAttendance] = useState<ConversationAttendanceMeta | null>(null);
@@ -623,7 +623,7 @@ export default function ChatPage() {
 
   const selectedContact = useMemo(() => contacts.find((c) => c.id === contactId), [contacts, contactId]);
 
-  function resolveActiveWaChatId() {
+  const resolveActiveWaChatId = useCallback(() => {
     if (channel !== "whatsapp") return null;
     const fromContact = selectedContact?.conversationId ? String(selectedContact.conversationId) : "";
     if (fromContact.includes("@")) return fromContact;
@@ -631,7 +631,7 @@ export default function ChatPage() {
     const phoneDigits = String(selectedContact?.phone || "").replace(/\D/g, "");
     if (phoneDigits) return `${phoneDigits}@s.whatsapp.net`;
     return null;
-  }
+  }, [channel, contactId, selectedContact]);
   const activeArchivedConversation = useMemo(() => archivedConversations.find((item) => item.id === activeArchivedId), [archivedConversations, activeArchivedId]);
   const isAssignedToMe = Boolean(conversationAttendance?.assignedTo && user?.id && conversationAttendance.assignedTo === user.id);
   const isAssignedToOther = Boolean(conversationAttendance?.assignedTo && user?.id && conversationAttendance.assignedTo !== user.id);
@@ -642,7 +642,7 @@ export default function ChatPage() {
     const id = resolveActiveWaChatId() ?? contactId;
     if (!id) return null;
     return `${channel}:${id}`;
-  }, [channel, contactId, selectedContact?.conversationId, selectedContact?.phone]);
+  }, [channel, contactId, resolveActiveWaChatId]);
 
   const displayedMessages = useMemo(() => {
     if (!activeArchivedConversation) return messages;
@@ -787,7 +787,7 @@ export default function ChatPage() {
       : contact));
   }, [contactId]);
 
-  async function loadBase() {
+  const loadBase = useCallback(async () => {
     const contactsRes = await fetch("/api/chat/contacts");
 
     const contactsJson = await contactsRes.json();
@@ -801,10 +801,10 @@ export default function ChatPage() {
       setContactId(nextContacts[0].id);
       setConversationId(nextContacts[0].conversationId || `whatsapp:${nextContacts[0].id}`);
     }
-  }
+  }, [contactId]);
 
 
-  async function loadTicketsForContact(contact?: ChatContact) {
+  const loadTicketsForContact = useCallback(async (contact?: ChatContact) => {
     if (!contact) {
       setTickets([]);
       return;
@@ -825,18 +825,18 @@ export default function ChatPage() {
     const json = await res.json();
     if (!res.ok) throw new Error(json?.error || "Erro ao carregar tickets");
     setTickets(Array.isArray(json.data) ? json.data : []);
-  }
+  }, []);
 
-  function sortChatMessages(input: ChatMessage[]) {
+  const sortChatMessages = useCallback((input: ChatMessage[]) => {
     input.sort((a, b) => {
       const aTime = new Date(a.createdAt).getTime();
       const bTime = new Date(b.createdAt).getTime();
       if (aTime !== bTime) return aTime - bTime;
       return String(a.id).localeCompare(String(b.id));
     });
-  }
+  }, []);
 
-  async function loadMessages(options?: { reset?: boolean }) {
+  const loadMessages = useCallback(async (options?: { reset?: boolean }) => {
     if (!contactId) return;
     if (activeArchivedId) return;
     const reset = Boolean(options?.reset);
@@ -892,9 +892,9 @@ export default function ChatPage() {
       if (!appended.length) return current;
       return [...current, ...appended];
     });
-  }
+  }, [activeArchivedId, channel, contactId, enableAlert, enableSound, resolveActiveWaChatId, selectedContact, showToast, sortChatMessages]);
 
-  async function loadOlderMessages() {
+  const loadOlderMessages = useCallback(async () => {
     if (!contactId) return;
     if (!showArchived) return;
     if (activeArchivedId || activeArchivedConversation) return;
@@ -949,7 +949,7 @@ export default function ChatPage() {
         skipAutoScrollRef.current = false;
       }, 0);
     }
-  }
+  }, [activeArchivedConversation, activeArchivedId, channel, contactId, loadingOlderMessages, messagesOlderCursor, resolveActiveWaChatId, selectedContact, showArchived, sortChatMessages]);
 
   const onMessageListScroll = useCallback(() => {
     if (!contactId) return;
@@ -981,7 +981,7 @@ export default function ChatPage() {
     };
   }, []);
 
-  async function loadLinks() {
+  const loadLinks = useCallback(async () => {
     if (!contactId) return;
     const waChatId = resolveActiveWaChatId();
     const id = waChatId ?? contactId;
@@ -989,9 +989,9 @@ export default function ChatPage() {
     const json = await res.json();
     if (!res.ok) throw new Error(json?.error || "Erro ao carregar vínculos");
     setLinks(Array.isArray(json.data) ? json.data : []);
-  }
+  }, [contactId, resolveActiveWaChatId]);
 
-  async function loadArchivedConversations() {
+  const loadArchivedConversations = useCallback(async () => {
     if (!contactId) {
       setArchivedConversations([]);
       return;
@@ -1015,16 +1015,16 @@ export default function ChatPage() {
         }));
       upsertSeparators(incoming);
     }
-  }
+  }, [channel, contactId, conversationStorageKey, resolveActiveWaChatId, upsertSeparators]);
 
-  async function loadAgents() {
+  const loadAgents = useCallback(async () => {
     const res = await fetch("/api/chat/agents", { cache: "no-store" });
     const json = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(json?.error || "Erro ao carregar atendentes");
     setAgents(Array.isArray(json.data) ? json.data : []);
-  }
+  }, []);
 
-  async function loadInteractionPreferences() {
+  const loadInteractionPreferences = useCallback(async () => {
     const res = await fetch("/api/chat/preferences", { cache: "no-store" });
     const json = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(json?.error || "Erro ao carregar preferências do chat");
@@ -1036,7 +1036,7 @@ export default function ChatPage() {
     }
 
     preferencesLoadedRef.current = true;
-  }
+  }, []);
 
   useEffect(() => {
     Promise.all([
@@ -1044,7 +1044,7 @@ export default function ChatPage() {
       loadInteractionPreferences(),
       loadAgents()
     ]).catch((error) => showToast(error.message, "error"));
-  }, []);
+  }, [loadAgents, loadBase, loadInteractionPreferences, showToast]);
 
   useEffect(() => {
     if (!contactId) return;
@@ -1059,7 +1059,7 @@ export default function ChatPage() {
     loadMessages({ reset: true }).catch((error) => showToast(error.message, "error"));
     loadLinks().catch((error) => showToast(error.message, "error"));
     loadArchivedConversations().catch((error) => showToast(error.message, "error"));
-  }, [contactId, channel]);
+  }, [channel, contactId, loadArchivedConversations, loadLinks, loadMessages, showToast]);
 
   useEffect(() => {
     if (!conversationStorageKey) return;
@@ -1077,14 +1077,14 @@ export default function ChatPage() {
     if (!contactId || activeArchivedId) return;
     const timer = setInterval(() => loadMessages().catch(() => undefined), 5000);
     return () => clearInterval(timer);
-  }, [contactId, channel, selectedContact?.phone, enableSound, enableAlert, activeArchivedId]);
+  }, [activeArchivedId, contactId, loadMessages]);
 
   useEffect(() => {
     const timer = setInterval(() => {
       loadBase().catch(() => undefined);
     }, 10000);
     return () => clearInterval(timer);
-  }, [channel]);
+  }, [loadBase]);
 
   useEffect(() => {
     if (skipAutoScrollRef.current) return;
@@ -1110,7 +1110,7 @@ export default function ChatPage() {
 
   useEffect(() => {
     loadTicketsForContact(selectedContact).catch((error) => showToast(error.message, "error"));
-  }, [selectedContact?.id, selectedContact?.companyId, selectedContact?.company]);
+  }, [loadTicketsForContact, selectedContact, showToast]);
 
   useEffect(() => {
     if (!filteredContacts.length) {

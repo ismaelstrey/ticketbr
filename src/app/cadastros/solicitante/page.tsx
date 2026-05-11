@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import styled from "styled-components";
 import { AppShellContainer, MainContent } from "@/components/layout/AppShell";
@@ -198,7 +198,7 @@ export default function SolicitantePage() {
 
   const totalPages = useMemo(() => Math.max(1, Math.ceil(total / pageSize)), [total, pageSize]);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     setMessage(null);
     try {
@@ -223,11 +223,11 @@ export default function SolicitantePage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, pageSize, search, sortBy, sortDir]);
 
   useEffect(() => {
     fetchData();
-  }, [page, pageSize, sortBy, sortDir]);
+  }, [fetchData]);
 
   useEffect(() => {
     const t = setTimeout(() => {
@@ -235,7 +235,7 @@ export default function SolicitantePage() {
       fetchData();
     }, 300);
     return () => clearTimeout(t);
-  }, [search]);
+  }, [fetchData, search]);
 
   const toggleSort = (next: SortBy) => {
     if (sortBy === next) {

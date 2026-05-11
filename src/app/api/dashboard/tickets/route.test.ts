@@ -47,5 +47,44 @@ describe("GET /api/dashboard/tickets", () => {
     expect(body.data.kpis.openTotal).toBe(10);
     expect(Array.isArray(body.data.charts.statusDonut)).toBe(true);
   });
-});
 
+  it("reutiliza cache curto para evitar consultas repetidas ao banco", async () => {
+    const svc = await import("@/server/services/tickets-operational-dashboard");
+    (svc.getTicketsOperationalDashboard as any).mockResolvedValue({
+      data: {
+        window: { from: new Date().toISOString(), to: new Date().toISOString() },
+        generatedAt: new Date().toISOString(),
+        kpis: {
+          openTotal: 7,
+          openDeltaPct: null,
+          inProgressByStatus: {},
+          overdue: 0,
+          avgResolutionHours: null,
+          firstContactResolutionRate: null
+        },
+        charts: {
+          statusDonut: [],
+          topClients: [],
+          volume: [],
+          categoryTrend: [],
+          heatmap: []
+        },
+        tables: {
+          criticalTickets: [],
+          topAgents: [],
+          topCategories: []
+        }
+      }
+    });
+
+    const { GET } = await import("./route");
+    const req = { nextUrl: { searchParams: new URLSearchParams({ preset: "7d", q: "cache-regression" }) } } as any;
+
+    const first = await GET(req);
+    const second = await GET(req);
+
+    expect(first.headers.get("X-Cache")).toBe("MISS");
+    expect(second.headers.get("X-Cache")).toBe("HIT");
+    expect(svc.getTicketsOperationalDashboard).toHaveBeenCalledTimes(1);
+  });
+});

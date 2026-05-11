@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 import { AppShellContainer, MainContent } from "@/components/layout/AppShell";
 import { Sidebar } from "@/components/layout/Sidebar";
@@ -126,7 +126,7 @@ export default function WhatsAppContatosPage() {
   const [contacts, setContacts] = useState<SyncedContact[]>([]);
   const [search, setSearch] = useState("");
 
-  const loadContacts = async () => {
+  const loadContacts = useCallback(async () => {
     try {
       setLoading(true);
       const res = await fetch("/api/settings/contacts?limit=1000");
@@ -138,7 +138,7 @@ export default function WhatsAppContatosPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [showToast]);
 
   const syncContacts = async () => {
     try {
@@ -157,7 +157,7 @@ export default function WhatsAppContatosPage() {
 
   useEffect(() => {
     loadContacts().catch(() => undefined);
-  }, []);
+  }, [loadContacts]);
 
   const filteredContacts = useMemo(() => {
     const query = search.trim().toLowerCase();

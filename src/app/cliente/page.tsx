@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import styled from "styled-components";
 import { Card } from "@/components/ui/Card";
@@ -227,13 +227,13 @@ export default function CustomerDashboardPage() {
     };
   }, [tickets]);
 
-  const loadCategories = async () => {
+  const loadCategories = useCallback(async () => {
     const res = await fetch("/api/customer/categories");
     const json = await res.json().catch(() => ({}));
     setCategories(Array.isArray(json.data) ? json.data : []);
-  };
+  }, []);
 
-  const loadTickets = async () => {
+  const loadTickets = useCallback(async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams();
@@ -245,12 +245,12 @@ export default function CustomerDashboardPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [q, status]);
 
   useEffect(() => {
     loadCategories();
     loadTickets();
-  }, []);
+  }, [loadCategories, loadTickets]);
 
   const submitNewTicket = async () => {
     setCreateError("");

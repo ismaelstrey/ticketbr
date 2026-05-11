@@ -20,16 +20,6 @@ function normalizeText(value: unknown) {
   return trimmed || null;
 }
 
-function normalizeUtf8(value: unknown) {
-  if (typeof value !== "string") return null;
-  const normalized = value.normalize("NFC");
-  const encoder = new TextEncoder();
-  const bytes = encoder.encode(normalized);
-  const decoded = new TextDecoder("utf-8", { fatal: false }).decode(bytes);
-  const trimmed = decoded.trim();
-  return trimmed || null;
-}
-
 function mapIncomingContact(item: unknown): WhatsAppContactRecord | null {
   if (!item || typeof item !== "object") return null;
   const raw = item as Record<string, unknown>;
@@ -258,7 +248,7 @@ export async function syncWhatsAppContactsFromUazapi(config?: WhatsAppRuntimeCon
 
   try {
     payload = await requestUazapi({ pathOrUrl: "/contacts", method: "GET" }, config);
-  } catch (error) {
+  } catch {
     usedEndpoint = "/contacts/list";
     payload = await requestUazapi({ pathOrUrl: "/contacts/list", method: "POST", body: { page: 1, pageSize: 500 } }, config);
   }

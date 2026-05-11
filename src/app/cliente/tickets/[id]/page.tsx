@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import styled from "styled-components";
 import { Card } from "@/components/ui/Card";
@@ -193,7 +193,7 @@ export default function CustomerTicketPage() {
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     try {
       const res = await fetch(`/api/customer/tickets/${encodeURIComponent(id)}`);
@@ -202,11 +202,11 @@ export default function CustomerTicketPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
 
   useEffect(() => {
     if (id) load();
-  }, [id]);
+  }, [id, load]);
 
   const send = async () => {
     if (!message.trim()) return;
