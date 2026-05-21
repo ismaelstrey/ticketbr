@@ -11,6 +11,10 @@ const Shell = styled.div`
   display: grid;
   grid-template-columns: 260px 1fr;
   background: ${({ theme }) => theme.colors.background};
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
+    grid-template-columns: 1fr;
+  }
 `;
 
 const Sidebar = styled.aside`
@@ -20,6 +24,13 @@ const Sidebar = styled.aside`
   display: flex;
   flex-direction: column;
   gap: 1rem;
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
+    position: sticky;
+    top: 0;
+    z-index: ${({ theme }) => theme.zIndex.sidebar};
+    padding: 0.9rem 1rem;
+  }
 `;
 
 const Brand = styled.div`
@@ -37,13 +48,20 @@ const Nav = styled.nav`
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
+    flex-direction: row;
+    overflow-x: auto;
+  }
 `;
 
 const NavLink = styled(Link)`
   padding: 0.6rem 0.75rem;
-  border-radius: 12px;
+  border-radius: ${({ theme }) => theme.borderRadius.small};
   color: ${({ theme }) => theme.colors.text.primary};
   text-decoration: none;
+  white-space: nowrap;
+
   &:hover {
     background: ${({ theme }) => theme.colors.surfaceAlt};
   }
@@ -51,6 +69,10 @@ const NavLink = styled(Link)`
 
 const Content = styled.main`
   padding: 1.5rem;
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    padding: 1rem;
+  }
 `;
 
 function SidebarInner() {
@@ -59,13 +81,15 @@ function SidebarInner() {
   return (
     <Sidebar>
       <div>
-        <Brand>TicketBR · Cliente</Brand>
+        <Brand>TicketBR Cliente</Brand>
         <CompanyName>{loading ? "" : (company?.name || "")}</CompanyName>
       </div>
 
       <Nav>
-        <NavLink href="/cliente">Painel</NavLink>
-        {member?.isAdmin ? <NavLink href="/cliente/admin">Administração</NavLink> : null}
+        <NavLink href="/cliente">Solicitacoes</NavLink>
+        <NavLink href="/cliente/chat">Chat</NavLink>
+        <NavLink href="/cliente/dashboard">Dashboard</NavLink>
+        {member?.isAdmin ? <NavLink href="/cliente/admin">Administracao</NavLink> : null}
       </Nav>
 
       <div style={{ marginTop: "auto" }}>
@@ -87,4 +111,3 @@ export default function CustomerLayout({ children }: { children: ReactNode }) {
     </CustomerAuthProvider>
   );
 }
-

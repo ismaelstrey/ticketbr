@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getPortalStatusCopy, getPortalStatusKey } from "@/lib/tickets/portal-status-taxonomy";
 import { requireCustomerContext } from "@/server/services/customer-context";
+import { computeCustomerSla } from "@/lib/customerPortal";
 
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -40,6 +41,9 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
         portalStatusKey: getPortalStatusKey(ticket.status),
         portalStatus: getPortalStatusCopy(ticket.status),
         priority: ticket.priority,
+        sla: computeCustomerSla(ticket),
+        responseSlaAt: ticket.responseSlaAt,
+        solutionSlaAt: ticket.solutionSlaAt,
         category: ticket.categoria ? { id: ticket.categoria.id, name: ticket.categoria.nome } : null,
         createdAt: ticket.createdAt,
         updatedAt: ticket.updatedAt,

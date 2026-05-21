@@ -123,6 +123,7 @@ export async function GET(request: NextRequest) {
       const tags = inferTags(f.nome);
       if (f.remoteJid || f.whatsappId) tags.push("WhatsApp");
       if (f.email) tags.push("Email");
+      tags.push("Portal");
 
       return {
         id: f.id,
@@ -133,6 +134,7 @@ export async function GET(request: NextRequest) {
         phone: f.telefone,
         tags,
         hasWhatsApp: Boolean(f.remoteJid || f.whatsappId),
+        hasPortal: true,
         conversationId: f.remoteJid || (f.telefone ? `${onlyDigits(f.telefone)}@s.whatsapp.net` : undefined),
         lastMessagePreview: undefined,
         lastMessageAt: undefined,
@@ -140,6 +142,33 @@ export async function GET(request: NextRequest) {
           || hasOpenConversation("email", [f.email])
       };
     });
+
+    const portalConversationIds = baseContacts.map((contact) => `portal:${contact.id}`);
+    const portalConversations = portalConversationIds.length
+      ? await prisma.conversation.findMany({
+          where: { waChatId: { in: portalConversationIds } },
+          include: {
+            messages: {
+              take: 1,
+              orderBy: { createdAt: "desc" }
+            }
+          }
+        })
+      : [];
+    const portalByContactId = new Map(
+      portalConversations.map((conversation) => [conversation.waChatId.replace(/^portal:/, ""), conversation])
+    );
+
+    for (const contact of baseContacts) {
+      const portalConversation = portalByContactId.get(contact.id);
+      const lastMessage = portalConversation?.messages?.[0];
+      if (!portalConversation || !lastMessage) continue;
+      if (!contact.lastMessageAt || new Date(lastMessage.createdAt) > new Date(contact.lastMessageAt)) {
+        contact.lastMessagePreview = lastMessage.body ?? undefined;
+        contact.lastMessageAt = lastMessage.createdAt.toISOString();
+      }
+      contact.hasOpenConversation = contact.hasOpenConversation || portalConversation.status === "open";
+    }
 
     const provider = resolveWhatsAppProvider(config, ["uazapi", "evolution", "n8n"]);
 
