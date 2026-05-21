@@ -144,7 +144,7 @@ export async function GET(request: NextRequest) {
     });
 
     const portalConversationIds = baseContacts.map((contact) => `portal:${contact.id}`);
-    const portalConversations = portalConversationIds.length
+    const portalConversations = portalConversationIds.length && prisma.conversation?.findMany
       ? await prisma.conversation.findMany({
           where: { waChatId: { in: portalConversationIds } },
           include: {
