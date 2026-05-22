@@ -34,4 +34,13 @@ describe("chat-provider", () => {
     const { resolveWhatsAppProvider } = await import("./chat-provider");
     expect(resolveWhatsAppProvider({ whatsappProvider: "uazapi" }, ["evolution", "n8n"])).toBe("n8n");
   });
+
+  it("nao seleciona adapter externo quando o provider e none", async () => {
+    isN8nConfiguredMock.mockReturnValue(true);
+    evolutionIsConfiguredMock.mockReturnValue(true);
+    uazapiIsConfiguredMock.mockReturnValue(true);
+
+    const { resolveWhatsAppProvider } = await import("./chat-provider");
+    expect(resolveWhatsAppProvider({ whatsappProvider: "none" })).toBeNull();
+  });
 });

@@ -39,6 +39,16 @@ export async function POST(request: NextRequest) {
 
     const config = await resolveWhatsAppConfig(request, merged);
 
+    if (!config || config.whatsappProvider === "none") {
+      return withRateLimitHeaders(
+        NextResponse.json(
+          { error: "Sincronizacao de contatos exige uma integracao externa. No modo Nenhum, use o chat nativo web sem sincronizar WhatsApp." },
+          { status: 400 }
+        ),
+        guard.rate
+      );
+    }
+
     if (config?.whatsappProvider === "uazapi" && !isUazapiConfigured(config)) {
       return withRateLimitHeaders(
         NextResponse.json(

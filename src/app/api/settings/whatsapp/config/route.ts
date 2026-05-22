@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     if (!config) {
       return withRateLimitHeaders(
         NextResponse.json(
-          { error: "Informe configuracao Evolution completa, parametros n8n (n8nBaseUrl/n8nWebhookUrl) ou UAZAPI (uazapiToken + uazapiBaseUrl/uazapiSubdomain)" },
+          { error: "Selecione Nenhum para usar somente o chat nativo web ou informe configuracao Evolution, n8n ou UAZAPI." },
           { status: 400 }
         ),
         guard.rate

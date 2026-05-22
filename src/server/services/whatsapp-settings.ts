@@ -1,8 +1,11 @@
 import type { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+export type WhatsAppProvider = "none" | "n8n" | "evolution" | "uazapi";
+export type ExternalWhatsAppProvider = Exclude<WhatsAppProvider, "none">;
+
 export interface WhatsAppRuntimeConfig {
-  whatsappProvider?: "n8n" | "evolution" | "uazapi";
+  whatsappProvider?: WhatsAppProvider;
 
   // Evolution (opcional quando fluxo é n8n-first)
   baseUrl?: string;
@@ -65,9 +68,9 @@ export function normalizeWhatsAppConfig(input: unknown): WhatsAppRuntimeConfig |
   if (!input || typeof input !== "object") return null;
   const raw = input as Record<string, unknown>;
 
-  const toProviderOrUndefined = (value: unknown) => {
+  const toProviderOrUndefined = (value: unknown): WhatsAppProvider | undefined => {
     const v = String(value ?? "").trim();
-    if (v === "n8n" || v === "evolution" || v === "uazapi") return v;
+    if (v === "none" || v === "n8n" || v === "evolution" || v === "uazapi") return v;
     return undefined;
   };
 
@@ -148,6 +151,13 @@ export function normalizeWhatsAppConfig(input: unknown): WhatsAppRuntimeConfig |
   const hasEvolution = Boolean(config.baseUrl && config.apiKey && config.instance);
   const hasN8n = Boolean(config.n8nWebhookUrl || config.n8nBaseUrl);
   const hasUazapi = Boolean((config.uazapiBaseUrl || config.uazapiSubdomain) && config.uazapiToken);
+
+  if (config.whatsappProvider === "none") {
+    return {
+      whatsappProvider: "none",
+      autoLinkTickets: config.autoLinkTickets
+    };
+  }
 
   if (!hasEvolution && !hasN8n && !hasUazapi) {
     return null;

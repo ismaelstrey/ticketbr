@@ -358,13 +358,14 @@ export default function SettingsPage() {
                 </ThemeSwitch>
               </ToggleCard>
 
-              <h3 style={{ marginTop: 24 }}>Canal WhatsApp</h3>
-              <Info>Seleciona qual integração será usada como padrão para enviar mensagens no chat.</Info>
+              <h3 style={{ marginTop: 24 }}>Canal externo do chat</h3>
+              <Info>Use Nenhum para operar somente com o chat nativo web/portal. N8N, Evolution e UAZAPI ficam disponíveis como adapters externos para ativar depois.</Info>
 
               <FormGrid>
                 <Field>
                   Provider padrão
                   <Select value={settings.whatsappProvider} onChange={(e) => update({ whatsappProvider: e.target.value as any })}>
+                    <option value="none">Nenhum (chat nativo web)</option>
                     <option value="n8n">N8N</option>
                     <option value="evolution">Evolution</option>
                     <option value="uazapi">UAZAPI</option>

@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const normalizeWhatsAppConfigMock = vi.fn();
 const resolveWhatsAppConfigMock = vi.fn();
@@ -48,7 +48,7 @@ describe("POST /api/settings/contacts/sync", () => {
     });
   });
 
-  it("retorna 400 quando provider é uazapi mas não está configurado", async () => {
+  it("retorna 400 quando provider e uazapi mas nao esta configurado", async () => {
     const { POST } = await import("./route");
 
     const req = {
@@ -66,7 +66,25 @@ describe("POST /api/settings/contacts/sync", () => {
     expect(writeAuditLogMock).toHaveBeenCalledTimes(0);
   });
 
-  it("executa sync quando provider não é uazapi", async () => {
+  it("retorna 400 no modo none porque nao ha adapter externo para sincronizar", async () => {
+    const { POST } = await import("./route");
+
+    const req = {
+      json: async () => ({ whatsappProvider: "none" }),
+      cookies: { get: () => undefined }
+    } as any;
+
+    resolveWhatsAppConfigMock.mockResolvedValueOnce({ whatsappProvider: "none" });
+    const res = await POST(req);
+    const body = await res.json();
+
+    expect(res.status).toBe(400);
+    expect(String(body.error)).toContain("chat nativo");
+    expect(syncWhatsAppContactsMock).toHaveBeenCalledTimes(0);
+    expect(writeAuditLogMock).toHaveBeenCalledTimes(0);
+  });
+
+  it("executa sync quando provider nao e uazapi", async () => {
     const { POST } = await import("./route");
 
     const req = {
