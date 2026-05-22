@@ -16,6 +16,10 @@ const ADMIN_API_PREFIXES = [
   "/api/categorias-ticket"
 ];
 
+const CUSTOMER_API_PREFIXES = [
+  "/api/customer"
+];
+
 const PUBLIC_API_PATHS = [
   "/api/auth/login",
   "/api/customer/auth/login",
@@ -54,6 +58,9 @@ async function getPayload(token: string): Promise<SessionPayload | null> {
 
 const isAdminApiPath = (pathname: string) =>
   ADMIN_API_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+
+const isCustomerApiPath = (pathname: string) =>
+  CUSTOMER_API_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
 
 const isPublicApiPath = (pathname: string) =>
   PUBLIC_API_PATHS.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
@@ -119,6 +126,10 @@ export async function proxy(request: NextRequest) {
       return applyCorsHeaders(request, NextResponse.json({ error: "Unauthorized" }, { status: 401 }));
     }
 
+    if (payload.role === "CUSTOMER" && !isCustomerApiPath(pathname)) {
+      return applyCorsHeaders(request, NextResponse.json({ error: "Forbidden" }, { status: 403 }));
+    }
+
     if (isAdminApiPath(pathname) && payload.role !== "ADMIN") {
       return applyCorsHeaders(request, NextResponse.json({ error: "Forbidden" }, { status: 403 }));
     }
@@ -134,10 +145,20 @@ export async function proxy(request: NextRequest) {
   }
 
   if (isAuthenticated && pathname === "/login") {
+    if (payload?.role === "CUSTOMER") {
+      return NextResponse.redirect(new URL("/cliente", request.url));
+    }
     return NextResponse.redirect(new URL("/", request.url));
   }
 
   if (isAuthenticated && pathname === "/cliente/login") {
+    if (payload?.role !== "CUSTOMER") {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+    return NextResponse.redirect(new URL("/cliente", request.url));
+  }
+
+  if (payload?.role === "CUSTOMER" && !pathname.startsWith("/cliente")) {
     return NextResponse.redirect(new URL("/cliente", request.url));
   }
 
