@@ -185,6 +185,7 @@ export default function SolicitantePage() {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [sortBy, setSortBy] = useState<SortBy>("data_cadastro");
@@ -205,7 +206,7 @@ export default function SolicitantePage() {
       const params = new URLSearchParams({
         page: String(page),
         pageSize: String(pageSize),
-        search,
+        search: debouncedSearch,
         sortBy,
         sortDir
       });
@@ -223,7 +224,7 @@ export default function SolicitantePage() {
     } finally {
       setLoading(false);
     }
-  }, [page, pageSize, search, sortBy, sortDir]);
+  }, [debouncedSearch, page, pageSize, sortBy, sortDir]);
 
   useEffect(() => {
     fetchData();
@@ -232,10 +233,10 @@ export default function SolicitantePage() {
   useEffect(() => {
     const t = setTimeout(() => {
       setPage(1);
-      fetchData();
+      setDebouncedSearch(search);
     }, 300);
     return () => clearTimeout(t);
-  }, [fetchData, search]);
+  }, [search]);
 
   const toggleSort = (next: SortBy) => {
     if (sortBy === next) {

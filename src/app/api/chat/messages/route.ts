@@ -17,6 +17,30 @@ function normalizeWaChatId(value: string) {
   return trimmed;
 }
 
+async function findConversationByIdentifiers(input: {
+  conversationId?: string | null;
+  waChatId?: string | null;
+  contactId?: string | null;
+}) {
+  if (input.conversationId) {
+    const byId = await prisma.conversation.findUnique({ where: { id: String(input.conversationId) } }).catch(() => null);
+    if (byId) return byId;
+  }
+
+  if (input.waChatId) {
+    return prisma.conversation.findUnique({ where: { waChatId: normalizeWaChatId(String(input.waChatId)) } }).catch(() => null);
+  }
+
+  if (input.contactId) {
+    const raw = String(input.contactId);
+    const byId = await prisma.conversation.findUnique({ where: { id: raw } }).catch(() => null);
+    if (byId) return byId;
+    return prisma.conversation.findUnique({ where: { waChatId: normalizeWaChatId(raw) } }).catch(() => null);
+  }
+
+  return null;
+}
+
 export async function GET(request: NextRequest) {
   try {
     const contactId = request.nextUrl.searchParams.get("contactId");
@@ -33,9 +57,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const conversation = identifier.includes("@")
-      ? await prisma.conversation.findUnique({ where: { waChatId: normalizeWaChatId(identifier) } })
-      : await prisma.conversation.findUnique({ where: { id: String(identifier) } });
+    const conversation = await findConversationByIdentifiers({ conversationId, waChatId, contactId });
 
     if (!conversation) {
       return NextResponse.json({
@@ -44,7 +66,7 @@ export async function GET(request: NextRequest) {
           totalMessages: 0,
           usersTotal: 0,
           conversationId: null,
-          waChatId: identifier.includes("@") ? identifier : null
+          waChatId: waChatId ?? null
         },
         paging: { limit, cursor: null, nextCursor: null }
       });
@@ -80,11 +102,12 @@ export async function GET(request: NextRequest) {
     const hasOut = (directionCounts as any[]).some((row) => row.direction === "out" && (row as any)?._count?._all > 0);
     const usersTotal = hasIn && hasOut ? 2 : (hasIn || hasOut ? 1 : 0);
 
+    const resolvedChannel = conversation.waChatId.startsWith("portal:") ? "portal" : "whatsapp";
     const mappedMessages = messages.map((msg) => ({
       id: msg.id,
       waMessageId: msg.waMessageId ?? undefined,
       contactId: conversation.waChatId,
-      channel: "whatsapp",
+      channel: resolvedChannel,
       direction: msg.direction,
       text: msg.body ?? undefined,
       message: msg.body ?? undefined,
@@ -136,6 +159,8 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { contactId, text, attachment, contactPhone } = body; // contactId aqui é o JID (wa_chat_id)
 
+    const channel = String((body as any)?.channel || "whatsapp");
+
     if (!contactId) {
       return NextResponse.json({ error: "contactId (JID) é obrigatório" }, { status: 400 });
     }
@@ -156,6 +181,51 @@ export async function POST(request: NextRequest) {
 
     if (currentConversation && !currentConversation.assignedTo) {
       return NextResponse.json({ error: "Inicie o atendimento antes de responder esta conversa" }, { status: 409 });
+    }
+
+    if (channel === "portal") {
+      const conversation = await chatService.findOrCreateConversation(normalizeWaChatId(String(contactId)), "portal");
+      if (!conversation.assignedTo || conversation.assignedTo !== String(session.id)) {
+        await prisma.conversation.update({
+          where: { id: conversation.id },
+          data: {
+            assignedTo: String(session.id),
+            humanActive: true,
+            botActive: false,
+            status: "open",
+            lastMessageAt: new Date()
+          }
+        });
+      } else {
+        await prisma.conversation.update({
+          where: { id: conversation.id },
+          data: { status: "open", lastMessageAt: new Date() }
+        });
+      }
+
+      const { message: savedMessage } = await chatService.saveMessage({
+        waMessageId: `portal:${crypto.randomUUID()}`,
+        conversationId: conversation.id,
+        direction: "out",
+        type: attachment ? (attachment.type || "document") : "text",
+        body: text,
+        mediaUrl: attachment?.url || null,
+        mimetype: attachment?.mimeType || null,
+        status: "sent",
+      });
+
+      return NextResponse.json(
+        {
+          data: {
+            id: savedMessage.id,
+            text: savedMessage.body,
+            createdAt: savedMessage.createdAt,
+            direction: "out",
+            status: "sent",
+          },
+        },
+        { status: 201 },
+      );
     }
 
     const config = await resolveWhatsAppConfig(request);

@@ -9,7 +9,7 @@ import { Input, Select, Textarea } from "@/components/ui/Input";
 import { ThinScrollArea } from "@/components/ui/ThinScrollArea";
 import { useToast } from "@/context/ToastContext";
 import { useAuth } from "@/context/AuthContext";
-import { ArchivedChatConversation, ChatContact, ChatMessage, ChatTicketLink } from "@/types/chat";
+import { ArchivedChatConversation, ChatChannel, ChatContact, ChatMessage, ChatTicketLink } from "@/types/chat";
 import { buildChatTimeline, mergeSeparators } from "@/lib/chatTimeline";
 import { getPersistedBoolean, setPersistedBoolean } from "@/lib/persistedBoolean";
 import { computeCurrentConversationCutoffMs, filterMessagesByCutoff } from "@/lib/chatHistoryVisibility";
@@ -602,7 +602,7 @@ export default function ChatPage() {
   const [animatedMessageId, setAnimatedMessageId] = useState<string | null>(null);
   const [savingConversation, setSavingConversation] = useState(false);
   const [contactId, setContactId] = useState("");
-  const [channel, setChannel] = useState<"whatsapp" | "email">("whatsapp");
+  const [channel, setChannel] = useState<ChatChannel>("portal");
   const [search, setSearch] = useState("");
   const [companyTab, setCompanyTab] = useState("all");
   const [text, setText] = useState("");
@@ -624,6 +624,7 @@ export default function ChatPage() {
   const selectedContact = useMemo(() => contacts.find((c) => c.id === contactId), [contacts, contactId]);
 
   const resolveActiveWaChatId = useCallback(() => {
+    if (channel === "portal") return contactId ? `portal:${contactId}` : null;
     if (channel !== "whatsapp") return null;
     const fromContact = selectedContact?.conversationId ? String(selectedContact.conversationId) : "";
     if (fromContact.includes("@")) return fromContact;
@@ -772,7 +773,9 @@ export default function ChatPage() {
 
         const channelPass = channel === "whatsapp"
           ? Boolean(contact.hasWhatsApp)
-          : Boolean(contact.email && contact.email.trim());
+          : channel === "portal"
+            ? Boolean(contact.hasPortal)
+            : Boolean(contact.email && contact.email.trim());
 
         return companyPass && searchPass && channelPass;
       })
@@ -799,9 +802,9 @@ export default function ChatPage() {
 
     if (!contactId && nextContacts.length) {
       setContactId(nextContacts[0].id);
-      setConversationId(nextContacts[0].conversationId || `whatsapp:${nextContacts[0].id}`);
+      setConversationId(channel === "portal" ? `portal:${nextContacts[0].id}` : nextContacts[0].conversationId || `${channel}:${nextContacts[0].id}`);
     }
-  }, [contactId]);
+  }, [channel, contactId]);
 
 
   const loadTicketsForContact = useCallback(async (contact?: ChatContact) => {
@@ -1032,7 +1035,7 @@ export default function ChatPage() {
     if (json?.data) {
       setEnableSound(Boolean(json.data.enableSound));
       setEnableAlert(Boolean(json.data.enableAlert));
-      setChannel(json.data.preferredChannel === "email" ? "email" : "whatsapp");
+      setChannel(json.data.preferredChannel === "email" || json.data.preferredChannel === "portal" ? json.data.preferredChannel : "whatsapp");
     }
 
     preferencesLoadedRef.current = true;
@@ -1121,9 +1124,9 @@ export default function ChatPage() {
     const stillVisible = filteredContacts.some((c) => c.id === contactId);
     if (!stillVisible) {
       setContactId(filteredContacts[0].id);
-      setConversationId(filteredContacts[0].conversationId || `whatsapp:${filteredContacts[0].id}`);
+      setConversationId(channel === "portal" ? `portal:${filteredContacts[0].id}` : filteredContacts[0].conversationId || `${channel}:${filteredContacts[0].id}`);
     }
-  }, [filteredContacts, contactId]);
+  }, [filteredContacts, contactId, channel]);
 
   useEffect(() => {
     if (!preferencesLoadedRef.current) return;
@@ -1389,7 +1392,8 @@ export default function ChatPage() {
           <SidebarPane>
             <TopBar>
               <strong>Conversas</strong>
-              <Select value={channel} onChange={(e) => setChannel(e.target.value as any)}>
+              <Select value={channel} onChange={(e) => setChannel(e.target.value as ChatChannel)}>
+                <option value="portal">Portal</option>
                 <option value="whatsapp">WhatsApp</option>
                 <option value="email">E-mail</option>
               </Select>

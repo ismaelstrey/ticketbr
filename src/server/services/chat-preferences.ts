@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 export interface ChatInteractionPreferences {
   enableSound: boolean;
   enableAlert: boolean;
-  preferredChannel: "whatsapp" | "email";
+  preferredChannel: "whatsapp" | "email" | "portal";
 }
 
 const CHAT_PREFERENCES_PREFIX = "chat_interaction_preferences:";
@@ -20,7 +20,7 @@ function normalizePreferences(input: unknown): ChatInteractionPreferences {
   return {
     enableSound: raw.enableSound === undefined ? defaultChatInteractionPreferences.enableSound : Boolean(raw.enableSound),
     enableAlert: raw.enableAlert === undefined ? defaultChatInteractionPreferences.enableAlert : Boolean(raw.enableAlert),
-    preferredChannel: raw.preferredChannel === "email" ? "email" : "whatsapp"
+    preferredChannel: raw.preferredChannel === "email" || raw.preferredChannel === "portal" ? raw.preferredChannel : "whatsapp"
   };
 }
 
