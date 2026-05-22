@@ -86,7 +86,7 @@ class PerformanceMonitor {
     }
 
     if (avgDuration > this.RESPONSE_TIME_THRESHOLD) {
-      console.warn(`[Alert] Average API Response Time is high: ${avgDuration.toFixed(2)}ms`);
+      console.warn(`[Alert] Average API Response Time is high: ${avgDuration.toFixed(2)}ms (${slowCalls}/${recentMetrics.length} slow calls)`);
     }
   }
 

@@ -57,7 +57,7 @@ export default function UazapiIntegrationDocPage() {
 
       <h2>6. Como evitar loops</h2>
       <p>
-        Use <code>excludeMessages: ["wasSentByApi"]</code> no webhook da UAZAPI. Assim, mensagens enviadas pelo próprio
+        Use <code>{'excludeMessages: ["wasSentByApi"]'}</code> no webhook da UAZAPI. Assim, mensagens enviadas pelo próprio
         TicketBR não retornam como novas entradas e não duplicam conversa ou automações.
       </p>
 

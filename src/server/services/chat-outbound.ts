@@ -67,7 +67,7 @@ export async function sendOutboundMessage(input: SendOutboundMessageInput, confi
   const targetPhone = resolveTargetPhone(input.contactId, input.contactPhone);
 
   if (process.env.CHAT_ROUTING_DEBUG === "true") {
-    console.log("[chat-routing] outbound", {
+    console.info("[chat-routing] outbound", {
       waMessageId,
       provider,
       configProvider: config?.whatsappProvider ?? null,

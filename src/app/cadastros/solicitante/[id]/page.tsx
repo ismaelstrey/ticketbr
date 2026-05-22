@@ -161,6 +161,15 @@ const ModalActions = styled.div`
   gap: 0.6rem;
 `;
 
+const FieldGroup = styled.div`
+  display: grid;
+  gap: 0.3rem;
+`;
+
+const FieldHint = styled.small`
+  color: ${({ theme }) => theme.colors.text.muted};
+`;
+
 export default function SolicitanteDetalhesPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
@@ -339,9 +348,15 @@ export default function SolicitanteDetalhesPage() {
               <Input placeholder="E-mail" type="email" value={form.email} onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))} />
               <Input placeholder="Telefone" value={form.telefone} onChange={(e) => setForm((prev) => ({ ...prev, telefone: e.target.value }))} />
               <Input placeholder="Celular com WhatsApp (ex: 5511999999999)" value={form.whatsappNumber} onChange={(e) => setForm((prev) => ({ ...prev, whatsappNumber: e.target.value }))} />
-              {!editingFuncionario && (
-                <Input placeholder="Senha inicial (opcional)" type="password" value={form.password} onChange={(e) => setForm((prev) => ({ ...prev, password: e.target.value }))} />
-              )}
+              <FieldGroup>
+                <Input
+                  placeholder={editingFuncionario ? "Nova senha (opcional)" : "Senha inicial (opcional)"}
+                  type="password"
+                  value={form.password}
+                  onChange={(e) => setForm((prev) => ({ ...prev, password: e.target.value }))}
+                />
+                {editingFuncionario ? <FieldHint>Deixe em branco para manter a senha atual.</FieldHint> : null}
+              </FieldGroup>
               <ModalActions>
                 <Button variant="ghost" onClick={() => setIsModalOpen(false)} disabled={saving}>Cancelar</Button>
                 <Button variant="primary" onClick={handleSubmitFuncionario} disabled={saving}>

@@ -92,9 +92,9 @@ export const api = {
     })
   },
   dashboard: {
-    ticketsOperational: (params?: TicketDashboardFilters) => {
+    ticketsOperational: (params?: TicketDashboardFilters, options?: RequestInit) => {
       const qs = params ? `?${new URLSearchParams(params as any).toString()}` : "";
-      return fetchJson<TicketOperationalDashboardResponse>(`/dashboard/tickets${qs}`);
+      return fetchJson<TicketOperationalDashboardResponse>(`/dashboard/tickets${qs}`, options);
     },
     exportTicketsOperational: (params: TicketDashboardFilters & { format: "xlsx" | "pdf" | "json" }) => {
       const qs = `?${new URLSearchParams(params as any).toString()}`;

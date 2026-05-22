@@ -1,4 +1,4 @@
-export type ChatChannel = "whatsapp" | "email";
+export type ChatChannel = "whatsapp" | "email" | "portal";
 
 export interface ChatContact {
   id: string;
@@ -9,6 +9,7 @@ export interface ChatContact {
   companyId?: string;
   tags?: string[];
   hasWhatsApp?: boolean;
+  hasPortal?: boolean;
   conversationId?: string;
   lastMessagePreview?: string;
   lastMessageAt?: string;

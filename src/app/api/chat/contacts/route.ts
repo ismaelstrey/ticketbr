@@ -57,30 +57,6 @@ function compareContactsByPriority(a: Pick<ChatContact, "hasOpenConversation" | 
   return a.name.localeCompare(b.name, "pt-BR");
 }
 
-function toContact(
-  conversation: EvolutionConversation | ChatContact,
-  provider: string
-): ChatContact {
-  const normalized = toConversationView(conversation);
-  const tags = Array.isArray((conversation as any).tags) ? (conversation as any).tags.map(String) : [];
-  const baseTags = tags.length ? tags : ["WhatsApp"];
-  if (!baseTags.includes(provider)) baseTags.push(provider);
-  if (!baseTags.includes("WhatsApp")) baseTags.push("WhatsApp");
-
-  return {
-    id: normalized.id,
-    name: normalized.name,
-    company: (conversation as any).company ?? "Sem empresa",
-    email: normalized.email,
-    phone: normalized.phone,
-    tags: baseTags,
-    hasWhatsApp: true,
-    conversationId: normalized.conversationId,
-    lastMessagePreview: normalized.lastMessagePreview,
-    lastMessageAt: normalized.lastMessageAt
-  };
-}
-
 export async function GET(request: NextRequest) {
   try {
     const config = await resolveWhatsAppConfig(request);
@@ -147,6 +123,7 @@ export async function GET(request: NextRequest) {
       const tags = inferTags(f.nome);
       if (f.remoteJid || f.whatsappId) tags.push("WhatsApp");
       if (f.email) tags.push("Email");
+      tags.push("Portal");
 
       return {
         id: f.id,
@@ -157,6 +134,7 @@ export async function GET(request: NextRequest) {
         phone: f.telefone,
         tags,
         hasWhatsApp: Boolean(f.remoteJid || f.whatsappId),
+        hasPortal: true,
         conversationId: f.remoteJid || (f.telefone ? `${onlyDigits(f.telefone)}@s.whatsapp.net` : undefined),
         lastMessagePreview: undefined,
         lastMessageAt: undefined,
@@ -164,6 +142,33 @@ export async function GET(request: NextRequest) {
           || hasOpenConversation("email", [f.email])
       };
     });
+
+    const portalConversationIds = baseContacts.map((contact) => `portal:${contact.id}`);
+    const portalConversations = portalConversationIds.length && prisma.conversation?.findMany
+      ? await prisma.conversation.findMany({
+          where: { waChatId: { in: portalConversationIds } },
+          include: {
+            messages: {
+              take: 1,
+              orderBy: { createdAt: "desc" }
+            }
+          }
+        })
+      : [];
+    const portalByContactId = new Map(
+      portalConversations.map((conversation) => [conversation.waChatId.replace(/^portal:/, ""), conversation])
+    );
+
+    for (const contact of baseContacts) {
+      const portalConversation = portalByContactId.get(contact.id);
+      const lastMessage = portalConversation?.messages?.[0];
+      if (!portalConversation || !lastMessage) continue;
+      if (!contact.lastMessageAt || new Date(lastMessage.createdAt) > new Date(contact.lastMessageAt)) {
+        contact.lastMessagePreview = lastMessage.body ?? undefined;
+        contact.lastMessageAt = lastMessage.createdAt.toISOString();
+      }
+      contact.hasOpenConversation = contact.hasOpenConversation || portalConversation.status === "open";
+    }
 
     const provider = resolveWhatsAppProvider(config, ["uazapi", "evolution", "n8n"]);
 

@@ -6,8 +6,6 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { wa_message_id, stable_url } = body;
 
-    console.log("Received media-ready update:", body);
-
     if (!wa_message_id || !stable_url) {
       return NextResponse.json(
         { error: "Invalid payload: wa_message_id or stable_url missing" },

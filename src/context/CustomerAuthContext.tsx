@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useState, ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, ReactNode } from "react";
 import { useRouter } from "next/navigation";
 
 type CustomerUser = { id: string; email: string; name: string; role: string };
@@ -35,7 +35,7 @@ export function CustomerAuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  const refresh = async () => {
+  const refresh = useCallback(async () => {
     const { res, json } = await fetchJson("/api/customer/me");
     if (!res.ok) {
       setUser(null);
@@ -46,7 +46,7 @@ export function CustomerAuthProvider({ children }: { children: ReactNode }) {
     setUser(json.user || null);
     setCompany(json.company || null);
     setMember(json.member || null);
-  };
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -56,9 +56,9 @@ export function CustomerAuthProvider({ children }: { children: ReactNode }) {
         setLoading(false);
       }
     })();
-  }, []);
+  }, [refresh]);
 
-  const login = async (email: string, password: string) => {
+  const login = useCallback(async (email: string, password: string) => {
     const { res, json } = await fetchJson("/api/customer/auth/login", {
       method: "POST",
       body: JSON.stringify({ email, password })
@@ -70,15 +70,15 @@ export function CustomerAuthProvider({ children }: { children: ReactNode }) {
 
     await refresh();
     router.push("/cliente");
-  };
+  }, [refresh, router]);
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     await fetchJson("/api/customer/auth/logout", { method: "POST" });
     setUser(null);
     setCompany(null);
     setMember(null);
     router.push("/cliente/login");
-  };
+  }, [router]);
 
   const value = useMemo<CustomerAuthState>(() => ({
     user,
@@ -88,7 +88,7 @@ export function CustomerAuthProvider({ children }: { children: ReactNode }) {
     login,
     logout,
     refresh
-  }), [user, company, member, loading]);
+  }), [user, company, member, loading, login, logout, refresh]);
 
   return (
     <CustomerAuthContext.Provider value={value}>
@@ -102,4 +102,3 @@ export function useCustomerAuth() {
   if (!ctx) throw new Error("useCustomerAuth must be used within CustomerAuthProvider");
   return ctx;
 }
-

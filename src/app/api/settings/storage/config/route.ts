@@ -6,7 +6,7 @@ import { getStorageConfigFromDatabase, normalizeStorageConfig, sanitizeStorageCo
 import { enforceAdminRouteSecurity, withRateLimitHeaders } from "@/server/services/sensitive-route-guard";
 
 function keepSecret(value: string) {
-  return value.includes("•");
+  return value.includes("\u2022");
 }
 
 export async function GET(request: NextRequest) {

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import styled from "styled-components";
 import { AppShellContainer, MainContent } from "@/components/layout/AppShell";
@@ -185,6 +185,7 @@ export default function SolicitantePage() {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [sortBy, setSortBy] = useState<SortBy>("data_cadastro");
@@ -198,14 +199,14 @@ export default function SolicitantePage() {
 
   const totalPages = useMemo(() => Math.max(1, Math.ceil(total / pageSize)), [total, pageSize]);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     setMessage(null);
     try {
       const params = new URLSearchParams({
         page: String(page),
         pageSize: String(pageSize),
-        search,
+        search: debouncedSearch,
         sortBy,
         sortDir
       });
@@ -223,16 +224,16 @@ export default function SolicitantePage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [debouncedSearch, page, pageSize, sortBy, sortDir]);
 
   useEffect(() => {
     fetchData();
-  }, [page, pageSize, sortBy, sortDir]);
+  }, [fetchData]);
 
   useEffect(() => {
     const t = setTimeout(() => {
       setPage(1);
-      fetchData();
+      setDebouncedSearch(search);
     }, 300);
     return () => clearTimeout(t);
   }, [search]);

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { createRequestContext, jsonWithRequestId, logRouteEvent } from "@/lib/observability";
 import { normalizeInboundPayload } from "@/server/services/chat-inbound-normalizer";
 import { processNormalizedInboundEvent } from "@/server/services/chat-inbound-processing";

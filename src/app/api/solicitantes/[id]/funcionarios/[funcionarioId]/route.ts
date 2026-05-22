@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import bcrypt from "bcryptjs";
 
 const UpdateFuncionarioSchema = z.object({
   nome: z.string().min(2).optional(),
   email: z.string().email().optional(),
   telefone: z.string().min(8).optional(),
   whatsappNumber: z.string().optional(),
+  password: z.union([z.literal(""), z.string().min(6, "Senha deve ter pelo menos 6 caracteres")]).optional(),
 });
 
 function normalizePhone(value: string) {
@@ -74,6 +76,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
     const phone = parsed.data.telefone ? normalizePhone(parsed.data.telefone) : existing.telefone;
     const whatsappContact = await findWhatsAppContactByPhone(parsed.data.whatsappNumber || phone);
+    const passwordHash = parsed.data.password ? await bcrypt.hash(parsed.data.password, 10) : null;
 
     const updated = await prisma.$transaction(async (tx) => {
       const funcionario = await tx.funcionario.update({
@@ -100,6 +103,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
         data: {
           ...(parsed.data.nome ? { name: parsed.data.nome } : {}),
           ...(parsed.data.email ? { email: parsed.data.email } : {}),
+          ...(passwordHash ? { password: passwordHash } : {}),
           ...(whatsappContact
             ? {
                 remoteJid: whatsappContact.remoteJid,

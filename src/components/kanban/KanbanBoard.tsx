@@ -134,7 +134,6 @@ export default function KanbanBoard({ initialTicketId }: { initialTicketId?: str
   const {
     tickets,
     setTickets,
-    loading,
     loadError,
     refreshTickets,
     dragOverColumn,
@@ -199,7 +198,7 @@ export default function KanbanBoard({ initialTicketId }: { initialTicketId?: str
           return exists ? current : [...current, response.data];
         });
         setTicketNotFound(false);
-      } catch (error) {
+      } catch {
         if (cancelled) return;
         setTicketNotFound(true);
       }

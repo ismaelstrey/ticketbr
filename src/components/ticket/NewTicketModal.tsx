@@ -415,7 +415,7 @@ export default function NewTicketModal({ isOpen, onClose, onCreated }: NewTicket
       }).catch((err) => console.error("Failed to load domain data", err))
         .finally(() => setLoading(false));
     }
-  }, [isOpen]);
+  }, [isOpen, user, workTable]);
 
   useEffect(() => {
     if (workTable && user) {
@@ -469,8 +469,7 @@ export default function NewTicketModal({ isOpen, onClose, onCreated }: NewTicket
         throw new Error(errorData.error || "Erro ao criar ticket");
       }
 
-      const data = await res.json();
-      console.log("Ticket criado:", data);
+      await res.json();
       showToast("Ticket criado com sucesso.", "success");
       if (onCreated) await onCreated();
       onClose();

@@ -186,7 +186,7 @@ export class ChatService {
     const actions: ChatAction[] = [];
     const suggestions: Array<{ text: string }> = [];
     let mode: "bot" | "human" | "hybrid" = "hybrid";
-    let handoffRequired = false;
+    const handoffRequired = false;
 
     // Default: Mark as read
     actions.push({ type: "mark_read", wa_message_id });

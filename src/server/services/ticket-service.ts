@@ -230,7 +230,7 @@ function mapTicket(ticket: any) {
 export async function listTickets() {
   try {
     const tickets = await findTicketsWithCompatibility();
-    console.log(`[Service] Found ${tickets.length} tickets`);
+    console.info(`[Service] Found ${tickets.length} tickets`);
     return tickets.map(mapTicket);
   } catch (error) {
     console.error("[Service] Error listing tickets:", error);

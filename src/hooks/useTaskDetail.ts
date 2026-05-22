@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { api } from "@/services/api";
-import { Task, TaskPriority, TaskStatus } from "@/types/task";
+import { TaskPriority, TaskStatus } from "@/types/task";
 import { getDueState } from "@/components/tasks/task-constants";
 
 function toDatetimeLocal(value: string | null) {
@@ -39,7 +39,7 @@ export function useTaskDetail(taskId: string) {
 
   const dueState = useMemo(() => getDueState(task?.dueAt || null, task?.status || "PENDING"), [task]);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     try {
       const [detailRes, assigneesRes] = await Promise.all([api.tasks.get(taskId), api.tasks.assignees()]);
@@ -60,12 +60,12 @@ export function useTaskDetail(taskId: string) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [taskId]);
 
   useEffect(() => {
     if (!taskId) return;
     load();
-  }, [taskId]);
+  }, [load, taskId]);
 
   const save = async () => {
     setSaving(true);
@@ -154,4 +154,3 @@ export function useTaskDetail(taskId: string) {
     }
   };
 }
-

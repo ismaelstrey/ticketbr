@@ -5,6 +5,7 @@ import { getPortalStatusCopy, getPortalStatusKey } from "@/lib/tickets/portal-st
 import { requireCustomerContext } from "@/server/services/customer-context";
 import { writeAuditLog } from "@/server/services/audit-log";
 import { notifyTicketCreated } from "@/server/services/customer-notifications";
+import { computeCustomerSla } from "@/lib/customerPortal";
 
 const CreateTicketSchema = z.object({
   subject: z.string().min(3),
@@ -18,6 +19,11 @@ export async function GET(request: NextRequest) {
     const ctx = await requireCustomerContext();
     const q = String(request.nextUrl.searchParams.get("q") || "").trim();
     const status = String(request.nextUrl.searchParams.get("status") || "").trim();
+    const priority = String(request.nextUrl.searchParams.get("priority") || "").trim();
+    const categoryId = String(request.nextUrl.searchParams.get("categoryId") || "").trim();
+    const preset = String(request.nextUrl.searchParams.get("preset") || "").trim();
+    const from = String(request.nextUrl.searchParams.get("from") || "").trim();
+    const to = String(request.nextUrl.searchParams.get("to") || "").trim();
 
     const where: any = {
       solicitante_id: ctx.solicitante.id,
@@ -26,6 +32,40 @@ export async function GET(request: NextRequest) {
 
     if (status) {
       where.status = status;
+    }
+
+    if (priority) {
+      where.priority = priority;
+    }
+
+    if (categoryId) {
+      where.categoria_id = categoryId;
+    }
+
+    const now = new Date();
+    const dateRange = (() => {
+      if (preset === "today") {
+        const start = new Date(now);
+        start.setHours(0, 0, 0, 0);
+        return { gte: start, lte: now };
+      }
+      if (preset === "7d" || preset === "30d") {
+        const start = new Date(now);
+        start.setDate(start.getDate() - (preset === "30d" ? 30 : 7));
+        return { gte: start, lte: now };
+      }
+      if (preset === "custom" && from && to) {
+        const start = new Date(from);
+        const end = new Date(to);
+        if (!Number.isNaN(start.getTime()) && !Number.isNaN(end.getTime())) {
+          return start <= end ? { gte: start, lte: end } : { gte: end, lte: start };
+        }
+      }
+      return null;
+    })();
+
+    if (dateRange) {
+      where.createdAt = dateRange;
     }
 
     if (q) {
@@ -45,6 +85,8 @@ export async function GET(request: NextRequest) {
         description: true,
         status: true,
         priority: true,
+        responseSlaAt: true,
+        solutionSlaAt: true,
         createdAt: true,
         updatedAt: true,
         categoria: { select: { id: true, nome: true } }
@@ -61,6 +103,9 @@ export async function GET(request: NextRequest) {
         portalStatusKey: getPortalStatusKey(t.status),
         portalStatus: getPortalStatusCopy(t.status),
         priority: t.priority,
+        sla: computeCustomerSla(t),
+        responseSlaAt: t.responseSlaAt,
+        solutionSlaAt: t.solutionSlaAt,
         category: t.categoria ? { id: t.categoria.id, name: t.categoria.nome } : null,
         createdAt: t.createdAt,
         updatedAt: t.updatedAt

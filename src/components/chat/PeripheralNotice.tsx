@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useEffect, useRef, useState } from "react";
+import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 
 const Wrap = styled.div`
@@ -106,23 +106,23 @@ export function PeripheralNotice({
   const [open, setOpen] = useState(true);
   const timerRef = useRef<number | null>(null);
 
-  const clearTimer = () => {
+  const clearTimer = useCallback(() => {
     if (timerRef.current !== null) {
       window.clearTimeout(timerRef.current);
       timerRef.current = null;
     }
-  };
+  }, []);
 
-  const armTimer = () => {
+  const armTimer = useCallback(() => {
     clearTimer();
     timerRef.current = window.setTimeout(() => setOpen(false), idleMs);
-  };
+  }, [clearTimer, idleMs]);
 
   useEffect(() => {
     if (!open) return;
     armTimer();
     return () => clearTimer();
-  }, [idleMs, open]);
+  }, [armTimer, clearTimer, open]);
 
   return (
     <Wrap onMouseEnter={() => setOpen(true)} onMouseMove={() => open && armTimer()}>
@@ -152,4 +152,3 @@ export function PeripheralNotice({
     </Wrap>
   );
 }
-

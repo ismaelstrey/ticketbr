@@ -322,6 +322,9 @@ export function useSettings() {
         }
       }
 
+      const uazapiToken = settings.uazapiToken.includes("â€¢") ? undefined : settings.uazapiToken;
+      const uazapiAdminToken = settings.uazapiAdminToken.includes("â€¢") ? undefined : settings.uazapiAdminToken;
+
       const res = await fetch("/api/settings/whatsapp/config", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -348,8 +351,8 @@ export function useSettings() {
 
           uazapiBaseUrl: settings.uazapiBaseUrl,
           uazapiSubdomain: settings.uazapiSubdomain,
-          uazapiToken: settings.uazapiToken,
-          uazapiAdminToken: settings.uazapiAdminToken,
+          uazapiToken,
+          uazapiAdminToken,
           uazapiTransport: settings.uazapiTransport
         })
       });
@@ -449,8 +452,8 @@ export function useSettings() {
           n8nContactsPath: settings.n8nContactsPath,
           uazapiBaseUrl: settings.uazapiBaseUrl,
           uazapiSubdomain: settings.uazapiSubdomain,
-          uazapiToken: settings.uazapiToken,
-          uazapiAdminToken: settings.uazapiAdminToken,
+          uazapiToken,
+          uazapiAdminToken,
           uazapiTransport: settings.uazapiTransport
         })
       });
@@ -515,8 +518,8 @@ export function useSettings() {
           n8nUseTestWebhook: settings.n8nUseTestWebhook,
           uazapiBaseUrl: settings.uazapiBaseUrl,
           uazapiSubdomain: settings.uazapiSubdomain,
-          uazapiToken: settings.uazapiToken,
-          uazapiAdminToken: settings.uazapiAdminToken,
+          uazapiToken,
+          uazapiAdminToken,
           uazapiTransport: settings.uazapiTransport
         })
       });

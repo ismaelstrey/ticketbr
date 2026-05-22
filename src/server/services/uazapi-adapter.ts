@@ -187,7 +187,7 @@ export async function requestUazapi(input: {
       if (logEnabled) {
         const ms = Date.now() - start;
         const safeUrl = url.replace(token, "****").replace(adminToken, "****");
-        console.log(`[uazapi] ${method} ${safeUrl} -> ${response.status} (${ms}ms)`);
+        console.info(`[uazapi] ${method} ${safeUrl} -> ${response.status} (${ms}ms)`);
       }
 
       if (!response.ok) {

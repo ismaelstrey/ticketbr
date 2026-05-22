@@ -9,8 +9,6 @@ export async function POST(req: NextRequest) {
     body = await req.json();
     const { wa_message_id, status } = body;
 
-    console.log("Received status update:", body);
-
     if (!wa_message_id || !status) {
       logWebhookRequest({ request: req, payload: body, route: "chat.status", source: "status-webhook", status: 400 });
       return NextResponse.json(

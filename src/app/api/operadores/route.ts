@@ -8,7 +8,7 @@ export async function GET() {
       orderBy: { nome: "asc" },
     });
     return NextResponse.json(operadores);
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: "Failed to fetch operators" }, { status: 500 });
   }
 }
@@ -20,7 +20,7 @@ export async function POST(request: Request) {
       data: body,
     });
     return NextResponse.json(operador, { status: 201 });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: "Failed to create operator" }, { status: 500 });
   }
 }

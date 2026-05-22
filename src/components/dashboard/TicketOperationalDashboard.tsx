@@ -78,12 +78,15 @@ function normalizeOptions(list: any[], toName: (x: any) => string) {
 export function TicketOperationalDashboard() {
   const [filtersDraft, setFiltersDraft] = useState<TicketDashboardFilters>(() => defaultFilters());
   const [filtersApplied, setFiltersApplied] = useState<TicketDashboardFilters>(() => defaultFilters());
-  const [autoRefresh, setAutoRefresh] = useState(true);
+  const [autoRefresh, setAutoRefresh] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<TicketOperationalDashboardResponse | null>(null);
   const lastUpdatedRef = useRef<string>("");
+  const dataRef = useRef<TicketOperationalDashboardResponse | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
+  const inFlightKeyRef = useRef<string | null>(null);
 
   const [options, setOptions] = useState<DashboardFilterOptions>({ clients: [], categories: [], agents: [] });
 
@@ -114,6 +117,8 @@ export function TicketOperationalDashboard() {
 
   const fetchDashboard = useCallback(
     async (isRefresh: boolean) => {
+      if (inFlightKeyRef.current === cacheKey) return;
+
       if (isRefresh) setRefreshing(true);
       if (!isRefresh) {
         const cached = (() => {
@@ -124,7 +129,7 @@ export function TicketOperationalDashboard() {
           }
         })();
 
-        if (cached && !data) {
+        if (cached && !dataRef.current) {
           const parsed = (() => {
             try {
               return JSON.parse(cached);
@@ -133,6 +138,7 @@ export function TicketOperationalDashboard() {
             }
           })();
           if (parsed) {
+            dataRef.current = parsed;
             setData(parsed);
             lastUpdatedRef.current = parsed?.data?.generatedAt || lastUpdatedRef.current;
           }
@@ -140,8 +146,13 @@ export function TicketOperationalDashboard() {
         setLoading(true);
       }
       setError(null);
+      abortRef.current?.abort();
+      const controller = new AbortController();
+      abortRef.current = controller;
+      inFlightKeyRef.current = cacheKey;
       try {
-        const res = await api.dashboard.ticketsOperational(filtersApplied);
+        const res = await api.dashboard.ticketsOperational(filtersApplied, { signal: controller.signal });
+        dataRef.current = res;
         setData(res);
         lastUpdatedRef.current = res.data.generatedAt;
         try {
@@ -150,13 +161,22 @@ export function TicketOperationalDashboard() {
           void 0;
         }
       } catch (e: any) {
-        setError(e?.message || "Falha ao carregar dashboard");
+        if (e?.name !== "AbortError") {
+          setError(e?.message || "Falha ao carregar dashboard");
+        }
       } finally {
-        setRefreshing(false);
-        setLoading(false);
+        const isCurrentRequest = abortRef.current === controller;
+        if (isCurrentRequest) {
+          abortRef.current = null;
+          if (inFlightKeyRef.current === cacheKey) {
+            inFlightKeyRef.current = null;
+          }
+          setRefreshing(false);
+          setLoading(false);
+        }
       }
     },
-    [filtersApplied, cacheKey, data]
+    [filtersApplied, cacheKey]
   );
 
   useEffect(() => {
@@ -168,10 +188,17 @@ export function TicketOperationalDashboard() {
   }, [fetchDashboard]);
 
   useEffect(() => {
+    return () => {
+      abortRef.current?.abort();
+    };
+  }, []);
+
+  useEffect(() => {
     if (!autoRefresh) return;
     const id = window.setInterval(() => {
+      if (document.visibilityState !== "visible") return;
       fetchDashboard(true);
-    }, 30_000);
+    }, 60_000);
     return () => window.clearInterval(id);
   }, [autoRefresh, fetchDashboard]);
 
@@ -241,7 +268,7 @@ export function TicketOperationalDashboard() {
 
         <HeaderActions>
           <Button type="button" variant={autoRefresh ? "primary" : "ghost"} onClick={() => setAutoRefresh((v) => !v)}>
-            {autoRefresh ? "Auto-refresh: 30s" : "Auto-refresh: off"}
+            {autoRefresh ? "Auto-refresh: 60s" : "Auto-refresh: off"}
           </Button>
           <Button type="button" variant="ghost" onClick={() => fetchDashboard(true)} disabled={refreshing}>
             Atualizar agora
