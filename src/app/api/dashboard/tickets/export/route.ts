@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import ExcelJS from "exceljs";
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import { getTicketsOperationalDashboard } from "@/server/services/tickets-operational-dashboard";
 import { Prisma } from "@/lib/prisma";
@@ -21,13 +20,6 @@ const QuerySchema = z.object({
 function fileName(format: string) {
   const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
   return `dashboard_tickets_${stamp}.${format}`;
-}
-
-async function workbookToBytes(workbook: ExcelJS.Workbook) {
-  const buffer = await workbook.xlsx.writeBuffer();
-  return buffer instanceof Buffer
-    ? new Uint8Array(buffer)
-    : new Uint8Array(buffer as ArrayBuffer);
 }
 
 function pdfSafe(text: string) {
@@ -78,6 +70,11 @@ async function buildPdf(dashboard: any) {
   return Buffer.from(await doc.save());
 }
 
+async function workbookToBytes(workbook: any) {
+  const buffer = await workbook.xlsx.writeBuffer();
+  return buffer instanceof Buffer ? new Uint8Array(buffer) : new Uint8Array(buffer as ArrayBuffer);
+}
+
 export async function GET(request: NextRequest) {
   const raw = Object.fromEntries(request.nextUrl.searchParams.entries());
   const parsed = QuerySchema.safeParse(raw);
@@ -98,6 +95,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (format === "xlsx") {
+      const ExcelJS = (await import("exceljs")).default;
       const rows = dashboard.data.tables.criticalTickets.map((t: any) => ({
         number: t.number,
         subject: t.subject,
@@ -130,7 +128,6 @@ export async function GET(request: NextRequest) {
         avgResolutionHours: dashboard.data.kpis.avgResolutionHours,
         firstContactResolutionRate: dashboard.data.kpis.firstContactResolutionRate
       });
-
       const critical = workbook.addWorksheet("Criticos");
       critical.columns = [
         { header: "number", key: "number" },
@@ -145,7 +142,6 @@ export async function GET(request: NextRequest) {
         { header: "updatedAt", key: "updatedAt" }
       ];
       critical.addRows(rows);
-
       const bytes = await workbookToBytes(workbook);
       return new NextResponse(bytes, {
         status: 200,

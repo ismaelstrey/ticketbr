@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireStaffSession } from "@/server/services/staff-context";
 import { ProjectExportSchema, ProjectListQuerySchema } from "../schemas";
-import ExcelJS from "exceljs";
 
 function toCsv(rows: Array<Record<string, any>>) {
   const headers = Array.from(
@@ -24,18 +23,16 @@ function toCsv(rows: Array<Record<string, any>>) {
   return lines.join("\n");
 }
 
-async function workbookToBytes(workbook: ExcelJS.Workbook) {
-  const buffer = await workbook.xlsx.writeBuffer();
-  return buffer instanceof Buffer
-    ? new Uint8Array(buffer)
-    : new Uint8Array(buffer as ArrayBuffer);
-}
-
 function baseWhereForSession(session: { userId: string; role: string }) {
   if (session.role === "ADMIN") return {};
   return {
     OR: [{ ownerUserId: session.userId }, { members: { some: { userId: session.userId } } }]
   };
+}
+
+async function workbookToBytes(workbook: any) {
+  const buffer = await workbook.xlsx.writeBuffer();
+  return buffer instanceof Buffer ? new Uint8Array(buffer) : new Uint8Array(buffer as ArrayBuffer);
 }
 
 export async function POST(request: NextRequest) {
@@ -106,6 +103,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    const ExcelJS = (await import("exceljs")).default;
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Projetos");
     worksheet.columns = [

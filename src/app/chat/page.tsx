@@ -9,7 +9,7 @@ import { Input, Select, Textarea } from "@/components/ui/Input";
 import { ThinScrollArea } from "@/components/ui/ThinScrollArea";
 import { useToast } from "@/context/ToastContext";
 import { useAuth } from "@/context/AuthContext";
-import { ArchivedChatConversation, ChatChannel, ChatContact, ChatMessage, ChatTicketLink } from "@/types/chat";
+import { ArchivedChatConversation, ChatChannel, ChatContact, ChatContactsResponse, ChatMessage, ChatTicketLink } from "@/types/chat";
 import { buildChatTimeline, mergeSeparators } from "@/lib/chatTimeline";
 import { getPersistedBoolean, setPersistedBoolean } from "@/lib/persistedBoolean";
 import { computeCurrentConversationCutoffMs, filterMessagesByCutoff } from "@/lib/chatHistoryVisibility";
@@ -574,6 +574,7 @@ export default function ChatPage() {
   const { showToast } = useToast();
   const { user } = useAuth();
   const [contacts, setContacts] = useState<ChatContact[]>([]);
+  const [whatsappEnabled, setWhatsappEnabled] = useState(false);
   const [tickets, setTickets] = useState<Array<{
     id: string;
     number: number;
@@ -790,21 +791,34 @@ export default function ChatPage() {
       : contact));
   }, [contactId]);
 
+  const resolveConversationIdForChannel = useCallback((contact: ChatContact, nextChannel: ChatChannel) => {
+    if (nextChannel === "portal") return `portal:${contact.id}`;
+    if (nextChannel === "whatsapp") return contact.conversationId || `whatsapp:${contact.id}`;
+    return contact.email || `email:${contact.id}`;
+  }, []);
+
   const loadBase = useCallback(async () => {
     const contactsRes = await fetch("/api/chat/contacts");
 
-    const contactsJson = await contactsRes.json();
+    const contactsJson = await contactsRes.json() as ChatContactsResponse & { error?: string };
 
     if (!contactsRes.ok) throw new Error(contactsJson?.error || "Erro ao carregar contatos");
 
     const nextContacts = Array.isArray(contactsJson.data) ? contactsJson.data : [];
+    const nextWhatsappEnabled = Boolean(contactsJson.meta?.whatsappEnabled);
+    setWhatsappEnabled(nextWhatsappEnabled);
     setContacts(nextContacts);
+    if (!nextWhatsappEnabled) {
+      setChannel((current) => current === "whatsapp" ? "portal" : current);
+    }
 
     if (!contactId && nextContacts.length) {
       setContactId(nextContacts[0].id);
-      setConversationId(channel === "portal" ? `portal:${nextContacts[0].id}` : nextContacts[0].conversationId || `${channel}:${nextContacts[0].id}`);
+      const nextChannel = !nextWhatsappEnabled && channel === "whatsapp" ? "portal" : channel;
+      setConversationId(resolveConversationIdForChannel(nextContacts[0], nextChannel));
     }
-  }, [channel, contactId]);
+    return nextWhatsappEnabled;
+  }, [channel, contactId, resolveConversationIdForChannel]);
 
 
   const loadTicketsForContact = useCallback(async (contact?: ChatContact) => {
@@ -1027,7 +1041,7 @@ export default function ChatPage() {
     setAgents(Array.isArray(json.data) ? json.data : []);
   }, []);
 
-  const loadInteractionPreferences = useCallback(async () => {
+  const loadInteractionPreferences = useCallback(async (capabilities?: { whatsappEnabled?: boolean }) => {
     const res = await fetch("/api/chat/preferences", { cache: "no-store" });
     const json = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(json?.error || "Erro ao carregar preferências do chat");
@@ -1035,18 +1049,24 @@ export default function ChatPage() {
     if (json?.data) {
       setEnableSound(Boolean(json.data.enableSound));
       setEnableAlert(Boolean(json.data.enableAlert));
-      setChannel(json.data.preferredChannel === "email" || json.data.preferredChannel === "portal" ? json.data.preferredChannel : "whatsapp");
+      const canUseWhatsApp = Boolean(capabilities?.whatsappEnabled ?? whatsappEnabled);
+      const preferred = json.data.preferredChannel === "email" || json.data.preferredChannel === "portal" || json.data.preferredChannel === "whatsapp"
+        ? json.data.preferredChannel as ChatChannel
+        : "portal";
+      setChannel(preferred === "whatsapp" && !canUseWhatsApp ? "portal" : preferred);
     }
 
     preferencesLoadedRef.current = true;
-  }, []);
+  }, [whatsappEnabled]);
 
   useEffect(() => {
-    Promise.all([
-      loadBase(),
-      loadInteractionPreferences(),
-      loadAgents()
-    ]).catch((error) => showToast(error.message, "error"));
+    (async () => {
+      const nextWhatsappEnabled = await loadBase();
+      await Promise.all([
+        loadInteractionPreferences({ whatsappEnabled: nextWhatsappEnabled }),
+        loadAgents()
+      ]);
+    })().catch((error) => showToast(error.message, "error"));
   }, [loadAgents, loadBase, loadInteractionPreferences, showToast]);
 
   useEffect(() => {
@@ -1124,9 +1144,15 @@ export default function ChatPage() {
     const stillVisible = filteredContacts.some((c) => c.id === contactId);
     if (!stillVisible) {
       setContactId(filteredContacts[0].id);
-      setConversationId(channel === "portal" ? `portal:${filteredContacts[0].id}` : filteredContacts[0].conversationId || `${channel}:${filteredContacts[0].id}`);
+      setConversationId(resolveConversationIdForChannel(filteredContacts[0], channel));
     }
-  }, [filteredContacts, contactId, channel]);
+  }, [filteredContacts, contactId, channel, resolveConversationIdForChannel]);
+
+  useEffect(() => {
+    if (!whatsappEnabled && channel === "whatsapp") {
+      setChannel("portal");
+    }
+  }, [channel, whatsappEnabled]);
 
   useEffect(() => {
     if (!preferencesLoadedRef.current) return;
@@ -1394,7 +1420,7 @@ export default function ChatPage() {
               <strong>Conversas</strong>
               <Select value={channel} onChange={(e) => setChannel(e.target.value as ChatChannel)}>
                 <option value="portal">Portal</option>
-                <option value="whatsapp">WhatsApp</option>
+                {whatsappEnabled ? <option value="whatsapp">WhatsApp</option> : null}
                 <option value="email">E-mail</option>
               </Select>
             </TopBar>
@@ -1419,7 +1445,7 @@ export default function ChatPage() {
                     $active={contact.id === contactId}
                     onClick={() => {
                       setContactId(contact.id);
-                      setConversationId(contact.conversationId || `whatsapp:${contact.id}`);
+                      setConversationId(resolveConversationIdForChannel(contact, channel));
                     }}
                     $open={Boolean(contact.hasOpenConversation)}
                   >

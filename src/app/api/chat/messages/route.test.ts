@@ -65,6 +65,27 @@ describe("POST /api/chat/messages", () => {
     expect(typeof body.error).toBe("string");
   });
 
+  it("retorna 400 quando nao existe integracao externa ativa", async () => {
+    resolveWhatsAppConfigMock.mockResolvedValueOnce({ whatsappProvider: "none" });
+    sendOutboundMessageMock.mockRejectedValueOnce(new Error("Nenhuma integracao externa configurada. Use o canal Portal para chat nativo."));
+    const { POST } = await import("./route");
+
+    const req = {
+      json: async () => ({
+        contactId: "c1",
+        channel: "whatsapp",
+        contactPhone: "5511999999999",
+        text: "oi"
+      })
+    } as any;
+
+    const res = await POST(req);
+    const body = await res.json();
+
+    expect(res.status).toBe(400);
+    expect(String(body.error)).toContain("Nenhuma integracao externa");
+  });
+
   it("retorna 201 quando envia via N8N com base configurada", async () => {
     resolveWhatsAppConfigMock.mockResolvedValueOnce({ n8nBaseUrl: "http://n8n", n8nWebhookUrl: "http://hook" });
     sendOutboundMessageMock.mockResolvedValueOnce({ waMessageId: "out_1" });

@@ -236,7 +236,8 @@ export async function POST(request: NextRequest) {
       waMessageId = outbound.waMessageId;
     } catch (error: any) {
       const message = String(error?.message || "");
-      const status =
+      const isBadRequest = message.includes("Nenhuma integracao externa");
+      const status = isBadRequest ||
         message.includes("não está configurado") ||
         message.includes("contactPhone é obrigatório") ||
         message.includes("Provider WhatsApp inválido")

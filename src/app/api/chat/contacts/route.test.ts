@@ -66,6 +66,35 @@ describe("GET /api/chat/contacts", () => {
     expect(fetchConversationsFromN8nMock).not.toHaveBeenCalled();
     expect(fetchConversationsFromEvolutionMock).not.toHaveBeenCalled();
   });
+
+  it("nao lista opcoes de WhatsApp quando nenhuma integracao esta ativa", async () => {
+    resolveWhatsAppConfigMock.mockResolvedValueOnce({ whatsappProvider: "none" });
+    findManyMock.mockResolvedValueOnce([
+      {
+        id: "f1",
+        nome: "Ana",
+        email: "ana@empresa.com",
+        telefone: "5511999997777",
+        remoteJid: "5511999997777@s.whatsapp.net",
+        whatsappId: null,
+        solicitante: { id: "s1", nome_fantasia: "Empresa A", razao_social: null }
+      }
+    ]);
+
+    const { GET } = await import("./route");
+    const res = await GET({} as any);
+    const body = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(body.meta).toEqual({ whatsappEnabled: false, whatsappProvider: null });
+    expect(body.data[0].hasWhatsApp).toBe(false);
+    expect(body.data[0].conversationId).toBeUndefined();
+    expect(body.data[0].tags).not.toContain("WhatsApp");
+    expect(fetchConversationsFromUazapiMock).not.toHaveBeenCalled();
+    expect(fetchConversationsFromN8nMock).not.toHaveBeenCalled();
+    expect(fetchConversationsFromEvolutionMock).not.toHaveBeenCalled();
+  });
+
   it("prioriza contatos com conversa em aberto no topo da lista", async () => {
     resolveWhatsAppConfigMock.mockResolvedValueOnce({ whatsappProvider: "uazapi" });
     uazapiIsConfiguredMock.mockReturnValueOnce(true);
