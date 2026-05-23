@@ -22,6 +22,13 @@ function fileName(format: string) {
   return `dashboard_tickets_${stamp}.${format}`;
 }
 
+async function workbookToBytes(workbook: ExcelJS.Workbook) {
+  const buffer = await workbook.xlsx.writeBuffer();
+  return buffer instanceof Buffer
+    ? new Uint8Array(buffer)
+    : new Uint8Array(buffer as ArrayBuffer);
+}
+
 function pdfSafe(text: string) {
   return String(text)
     .replaceAll("→", "->")

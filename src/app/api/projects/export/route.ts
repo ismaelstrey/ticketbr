@@ -23,6 +23,13 @@ function toCsv(rows: Array<Record<string, any>>) {
   return lines.join("\n");
 }
 
+async function workbookToBytes(workbook: ExcelJS.Workbook) {
+  const buffer = await workbook.xlsx.writeBuffer();
+  return buffer instanceof Buffer
+    ? new Uint8Array(buffer)
+    : new Uint8Array(buffer as ArrayBuffer);
+}
+
 function baseWhereForSession(session: { userId: string; role: string }) {
   if (session.role === "ADMIN") return {};
   return {
