@@ -623,17 +623,21 @@ export default function ChatPage() {
   const showArchivedTimerRef = useRef<number | null>(null);
 
   const selectedContact = useMemo(() => contacts.find((c) => c.id === contactId), [contacts, contactId]);
+  const selectedContactConversationId = selectedContact?.conversationId ? String(selectedContact.conversationId) : "";
+  const selectedContactPhone = selectedContact?.phone ?? "";
+  const selectedContactName = selectedContact?.name ?? "cliente";
+  const selectedContactId = selectedContact?.id ?? "";
 
   const resolveActiveWaChatId = useCallback(() => {
     if (channel === "portal") return contactId ? `portal:${contactId}` : null;
     if (channel !== "whatsapp") return null;
-    const fromContact = selectedContact?.conversationId ? String(selectedContact.conversationId) : "";
+    const fromContact = selectedContactConversationId;
     if (fromContact.includes("@")) return fromContact;
     if (String(contactId).includes("@")) return String(contactId);
-    const phoneDigits = String(selectedContact?.phone || "").replace(/\D/g, "");
+    const phoneDigits = String(selectedContactPhone).replace(/\D/g, "");
     if (phoneDigits) return `${phoneDigits}@s.whatsapp.net`;
     return null;
-  }, [channel, contactId, selectedContact]);
+  }, [channel, contactId, selectedContactConversationId, selectedContactPhone]);
   const activeArchivedConversation = useMemo(() => archivedConversations.find((item) => item.id === activeArchivedId), [archivedConversations, activeArchivedId]);
   const isAssignedToMe = Boolean(conversationAttendance?.assignedTo && user?.id && conversationAttendance.assignedTo === user.id);
   const isAssignedToOther = Boolean(conversationAttendance?.assignedTo && user?.id && conversationAttendance.assignedTo !== user.id);
@@ -857,9 +861,9 @@ export default function ChatPage() {
     if (!contactId) return;
     if (activeArchivedId) return;
     const reset = Boolean(options?.reset);
-    const fallbackPhone = selectedContact?.id.startsWith("wa:") ? selectedContact.id.replace("wa:", "") : "";
+    const fallbackPhone = selectedContactId.startsWith("wa:") ? selectedContactId.replace("wa:", "") : "";
     const waChatId = resolveActiveWaChatId();
-    const params = new URLSearchParams({ channel, contactPhone: selectedContact?.phone ?? fallbackPhone });
+    const params = new URLSearchParams({ channel, contactPhone: selectedContactPhone || fallbackPhone });
     if (waChatId) params.set("waChatId", waChatId);
     else params.set("contactId", contactId);
     params.set("limit", "50");
@@ -885,7 +889,7 @@ export default function ChatPage() {
       if (latest?.direction === "in") {
         if (enableSound) playNotificationTone();
         if (enableAlert && "Notification" in window && Notification.permission === "granted") {
-          new Notification(`Nova mensagem de ${selectedContact?.name ?? "cliente"}`, { body: latest.text ?? "Nova mensagem" });
+          new Notification(`Nova mensagem de ${selectedContactName}`, { body: latest.text ?? "Nova mensagem" });
         }
         showToast("Nova mensagem recebida", "success");
       }
@@ -909,7 +913,7 @@ export default function ChatPage() {
       if (!appended.length) return current;
       return [...current, ...appended];
     });
-  }, [activeArchivedId, channel, contactId, enableAlert, enableSound, resolveActiveWaChatId, selectedContact, showToast, sortChatMessages]);
+  }, [activeArchivedId, channel, contactId, enableAlert, enableSound, resolveActiveWaChatId, selectedContactId, selectedContactName, selectedContactPhone, showToast, sortChatMessages]);
 
   const loadOlderMessages = useCallback(async () => {
     if (!contactId) return;
@@ -925,9 +929,9 @@ export default function ChatPage() {
     const previousScrollTop = container?.scrollTop ?? 0;
 
     try {
-      const fallbackPhone = selectedContact?.id.startsWith("wa:") ? selectedContact.id.replace("wa:", "") : "";
+      const fallbackPhone = selectedContactId.startsWith("wa:") ? selectedContactId.replace("wa:", "") : "";
       const waChatId = resolveActiveWaChatId();
-      const params = new URLSearchParams({ channel, contactPhone: selectedContact?.phone ?? fallbackPhone });
+      const params = new URLSearchParams({ channel, contactPhone: selectedContactPhone || fallbackPhone });
       if (waChatId) params.set("waChatId", waChatId);
       else params.set("contactId", contactId);
       params.set("limit", "50");
@@ -966,7 +970,7 @@ export default function ChatPage() {
         skipAutoScrollRef.current = false;
       }, 0);
     }
-  }, [activeArchivedConversation, activeArchivedId, channel, contactId, loadingOlderMessages, messagesOlderCursor, resolveActiveWaChatId, selectedContact, showArchived, sortChatMessages]);
+  }, [activeArchivedConversation, activeArchivedId, channel, contactId, loadingOlderMessages, messagesOlderCursor, resolveActiveWaChatId, selectedContactId, selectedContactPhone, showArchived, sortChatMessages]);
 
   const onMessageListScroll = useCallback(() => {
     if (!contactId) return;
