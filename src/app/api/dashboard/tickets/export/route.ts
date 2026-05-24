@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import ExcelJS from "exceljs";
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import { getTicketsOperationalDashboard } from "@/server/services/tickets-operational-dashboard";
 import { Prisma } from "@/lib/prisma";
@@ -22,13 +21,6 @@ const QuerySchema = z.object({
 function fileName(format: string) {
   const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
   return `dashboard_tickets_${stamp}.${format}`;
-}
-
-async function workbookToBytes(workbook: ExcelJS.Workbook) {
-  const buffer = await workbook.xlsx.writeBuffer();
-  return buffer instanceof Buffer
-    ? new Uint8Array(buffer)
-    : new Uint8Array(buffer as ArrayBuffer);
 }
 
 function pdfSafe(text: string) {
@@ -111,18 +103,7 @@ export async function GET(request: NextRequest) {
         createdAt: t.createdAt,
         updatedAt: t.updatedAt
       }));
-      const workbook = new ExcelJS.Workbook();
-      const summary = workbook.addWorksheet("Resumo");
-      summary.columns = [
-        { header: "windowFrom", key: "windowFrom" },
-        { header: "windowTo", key: "windowTo" },
-        { header: "generatedAt", key: "generatedAt" },
-        { header: "openTotal", key: "openTotal" },
-        { header: "overdue", key: "overdue" },
-        { header: "avgResolutionHours", key: "avgResolutionHours" },
-        { header: "firstContactResolutionRate", key: "firstContactResolutionRate" }
-      ];
-      summary.addRow({
+      const summaryRows = [{
         windowFrom: dashboard.data.window.from,
         windowTo: dashboard.data.window.to,
         generatedAt: dashboard.data.generatedAt,
@@ -130,25 +111,13 @@ export async function GET(request: NextRequest) {
         overdue: dashboard.data.kpis.overdue,
         avgResolutionHours: dashboard.data.kpis.avgResolutionHours,
         firstContactResolutionRate: dashboard.data.kpis.firstContactResolutionRate
-      });
+      }];
 
-      const critical = workbook.addWorksheet("Criticos");
-      critical.columns = [
-        { header: "number", key: "number" },
-        { header: "subject", key: "subject" },
-        { header: "status", key: "status" },
-        { header: "priority", key: "priority" },
-        { header: "client", key: "client" },
-        { header: "assignee", key: "assignee" },
-        { header: "responseSlaAt", key: "responseSlaAt" },
-        { header: "solutionSlaAt", key: "solutionSlaAt" },
-        { header: "createdAt", key: "createdAt" },
-        { header: "updatedAt", key: "updatedAt" }
-      ];
-      critical.addRows(rows);
-
-      const bytes = await workbookToBytes(workbook);
-      return new NextResponse(bytes, {
+      const bytes = await createXlsxWorkbook([
+        { name: "Resumo", rows: summaryRows },
+        { name: "Criticos", rows }
+      ]);
+      return new NextResponse(Buffer.from(bytes), {
         status: 200,
         headers: {
           "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",

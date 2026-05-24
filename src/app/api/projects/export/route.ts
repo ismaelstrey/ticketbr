@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireStaffSession } from "@/server/services/staff-context";
 import { ProjectExportSchema, ProjectListQuerySchema } from "../schemas";
-import ExcelJS from "exceljs";
+import { createXlsxWorkbook } from "@/lib/xlsx";
 
 function toCsv(rows: Array<Record<string, any>>) {
   const headers = Array.from(
@@ -22,13 +22,6 @@ function toCsv(rows: Array<Record<string, any>>) {
     lines.push(headers.map((h) => escape(row[h])).join(","));
   }
   return lines.join("\n");
-}
-
-async function workbookToBytes(workbook: ExcelJS.Workbook) {
-  const buffer = await workbook.xlsx.writeBuffer();
-  return buffer instanceof Buffer
-    ? new Uint8Array(buffer)
-    : new Uint8Array(buffer as ArrayBuffer);
 }
 
 function baseWhereForSession(session: { userId: string; role: string }) {
@@ -106,24 +99,9 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet("Projetos");
-    worksheet.columns = [
-      { header: "id", key: "id" },
-      { header: "name", key: "name" },
-      { header: "status", key: "status" },
-      { header: "owner", key: "owner" },
-      { header: "ownerEmail", key: "ownerEmail" },
-      { header: "startDate", key: "startDate" },
-      { header: "endDate", key: "endDate" },
-      { header: "membersCount", key: "membersCount" },
-      { header: "createdAt", key: "createdAt" },
-      { header: "updatedAt", key: "updatedAt" }
-    ];
-    worksheet.addRows(rows);
-    const bytes = await workbookToBytes(workbook);
+    const bytes = await createXlsxWorkbook([{ name: "Projetos", rows }]);
 
-    return new NextResponse(bytes, {
+    return new NextResponse(Buffer.from(bytes), {
       status: 200,
       headers: {
         "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",

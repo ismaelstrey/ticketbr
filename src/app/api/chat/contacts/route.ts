@@ -135,9 +135,9 @@ export async function GET(request: NextRequest) {
         email: f.email ?? undefined,
         phone: f.telefone,
         tags,
-        hasWhatsApp: Boolean(f.remoteJid || f.whatsappId),
+        hasWhatsApp: whatsappEnabled && Boolean(f.remoteJid || f.whatsappId),
         hasPortal: true,
-        conversationId: f.remoteJid || (f.telefone ? `${onlyDigits(f.telefone)}@s.whatsapp.net` : undefined),
+        conversationId: whatsappEnabled ? f.remoteJid || (f.telefone ? `${onlyDigits(f.telefone)}@s.whatsapp.net` : undefined) : undefined,
         lastMessagePreview: undefined,
         lastMessageAt: undefined,
         hasOpenConversation: (whatsappEnabled && hasOpenConversation("whatsapp", [f.remoteJid, f.telefone, f.whatsappId]))
@@ -171,8 +171,6 @@ export async function GET(request: NextRequest) {
       }
       contact.hasOpenConversation = contact.hasOpenConversation || portalConversation.status === "open";
     }
-
-    const provider = resolveWhatsAppProvider(config, ["uazapi", "evolution", "n8n"]);
 
     const conversations = provider === "uazapi"
       ? await fetchConversationsFromUazapi(config).catch((error) => {

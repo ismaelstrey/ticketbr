@@ -9,7 +9,7 @@ import { Input, Select, Textarea } from "@/components/ui/Input";
 import { ThinScrollArea } from "@/components/ui/ThinScrollArea";
 import { useToast } from "@/context/ToastContext";
 import { useAuth } from "@/context/AuthContext";
-import { ArchivedChatConversation, ChatChannel, ChatContact, ChatMessage, ChatTicketLink } from "@/types/chat";
+import { ArchivedChatConversation, ChatChannel, ChatContact, ChatContactsResponse, ChatMessage, ChatTicketLink } from "@/types/chat";
 import { buildChatTimeline, mergeSeparators } from "@/lib/chatTimeline";
 import { getPersistedBoolean, setPersistedBoolean } from "@/lib/persistedBoolean";
 import { computeCurrentConversationCutoffMs, filterMessagesByCutoff } from "@/lib/chatHistoryVisibility";
@@ -791,6 +791,12 @@ export default function ChatPage() {
       : contact));
   }, [contactId]);
 
+  const resolveConversationIdForChannel = useCallback((contact: ChatContact, nextChannel: ChatChannel) => {
+    if (nextChannel === "portal") return `portal:${contact.id}`;
+    if (nextChannel === "whatsapp") return contact.conversationId || `whatsapp:${contact.id}`;
+    return contact.email || `email:${contact.id}`;
+  }, []);
+
   const loadBase = useCallback(async () => {
     const contactsRes = await fetch("/api/chat/contacts");
 
@@ -808,9 +814,9 @@ export default function ChatPage() {
 
     if (!contactId && nextContacts.length) {
       setContactId(nextContacts[0].id);
-      setConversationId(channel === "portal" ? `portal:${nextContacts[0].id}` : nextContacts[0].conversationId || `${channel}:${nextContacts[0].id}`);
+      setConversationId(resolveConversationIdForChannel(nextContacts[0], channel));
     }
-  }, [channel, contactId]);
+  }, [channel, contactId, resolveConversationIdForChannel]);
 
 
   const loadTicketsForContact = useCallback(async (contact?: ChatContact) => {
@@ -1400,7 +1406,7 @@ export default function ChatPage() {
               <strong>Conversas</strong>
               <Select value={channel} onChange={(e) => setChannel(e.target.value as ChatChannel)}>
                 <option value="portal">Portal</option>
-                <option value="whatsapp">WhatsApp</option>
+                {whatsappEnabled ? <option value="whatsapp">WhatsApp</option> : null}
                 <option value="email">E-mail</option>
               </Select>
             </TopBar>
