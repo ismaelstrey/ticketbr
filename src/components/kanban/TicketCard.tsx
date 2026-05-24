@@ -6,8 +6,7 @@ import { FiHash, FiUser, FiTool, FiClock } from "@/components/icons";
 import { Ticket } from "@/types/ticket";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
-import { getSlaColor } from "@/lib/sla";
-import { getPriorityChipLabel, getSlaChipLabel, getSlaToneFromProgress } from "@/lib/tickets/sla-chip";
+import { getSlaColor, getSlaLabel } from "@/lib/sla";
 
 const StyledCard = styled(Card)`
   cursor: grab;
@@ -100,7 +99,7 @@ export function TicketCard({
 }: TicketCardProps) {
   const isDraggingRef = useRef(false);
   const slaColor = getSlaColor(ticket.progressoSla);
-  const slaLabel = getSlaChipLabel(getSlaToneFromProgress(ticket.progressoSla));
+  const slaLabel = getSlaLabel(ticket.progressoSla);
 
   return (
     <StyledCard
@@ -135,7 +134,7 @@ export function TicketCard({
         <FiTool aria-hidden="true" /> {ticket.assunto}
       </InfoRow>
       <MetaRow>
-        <Badge priority={ticket.prioridade}>{getPriorityChipLabel(ticket.prioridade)}</Badge>
+        <Badge priority={ticket.prioridade}>{ticket.prioridade}</Badge>
         <span>
           <FiClock aria-hidden="true" /> {ticket.data}
         </span>

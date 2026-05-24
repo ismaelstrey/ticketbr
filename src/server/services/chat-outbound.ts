@@ -53,9 +53,13 @@ function resolveAttachmentPayload(attachment: ChatAttachment & { type?: string }
 }
 
 export async function sendOutboundMessage(input: SendOutboundMessageInput, config?: WhatsAppRuntimeConfig | null): Promise<SendOutboundMessageResult> {
+  if (config?.whatsappProvider === "none") {
+    throw new Error("Nenhuma integracao externa configurada. Use o canal Portal para chat nativo.");
+  }
+
   const availableProviders = getAvailableWhatsAppProviders(config);
   if (!availableProviders.n8n && !availableProviders.evolution && !availableProviders.uazapi) {
-    throw new Error("WhatsApp não está configurado");
+    throw new Error("Nenhuma integracao externa de WhatsApp configurada");
   }
 
   const provider = resolveWhatsAppProvider(config, ["n8n", "evolution", "uazapi"]);
