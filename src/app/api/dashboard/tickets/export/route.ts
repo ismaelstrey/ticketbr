@@ -103,21 +103,18 @@ export async function GET(request: NextRequest) {
         createdAt: t.createdAt,
         updatedAt: t.updatedAt
       }));
+      const summaryRows = [{
+        windowFrom: dashboard.data.window.from,
+        windowTo: dashboard.data.window.to,
+        generatedAt: dashboard.data.generatedAt,
+        openTotal: dashboard.data.kpis.openTotal,
+        overdue: dashboard.data.kpis.overdue,
+        avgResolutionHours: dashboard.data.kpis.avgResolutionHours,
+        firstContactResolutionRate: dashboard.data.kpis.firstContactResolutionRate
+      }];
+
       const bytes = await createXlsxWorkbook([
-        {
-          name: "Resumo",
-          rows: [
-            {
-              windowFrom: dashboard.data.window.from,
-              windowTo: dashboard.data.window.to,
-              generatedAt: dashboard.data.generatedAt,
-              openTotal: dashboard.data.kpis.openTotal,
-              overdue: dashboard.data.kpis.overdue,
-              avgResolutionHours: dashboard.data.kpis.avgResolutionHours,
-              firstContactResolutionRate: dashboard.data.kpis.firstContactResolutionRate
-            }
-          ]
-        },
+        { name: "Resumo", rows: summaryRows },
         { name: "Criticos", rows }
       ]);
       return new NextResponse(Buffer.from(bytes), {

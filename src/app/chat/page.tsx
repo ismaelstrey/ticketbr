@@ -814,10 +814,8 @@ export default function ChatPage() {
 
     if (!contactId && nextContacts.length) {
       setContactId(nextContacts[0].id);
-      const nextChannel = !nextWhatsappEnabled && channel === "whatsapp" ? "portal" : channel;
-      setConversationId(resolveConversationIdForChannel(nextContacts[0], nextChannel));
+      setConversationId(resolveConversationIdForChannel(nextContacts[0], channel));
     }
-    return nextWhatsappEnabled;
   }, [channel, contactId, resolveConversationIdForChannel]);
 
 
@@ -1041,7 +1039,7 @@ export default function ChatPage() {
     setAgents(Array.isArray(json.data) ? json.data : []);
   }, []);
 
-  const loadInteractionPreferences = useCallback(async (capabilities?: { whatsappEnabled?: boolean }) => {
+  const loadInteractionPreferences = useCallback(async () => {
     const res = await fetch("/api/chat/preferences", { cache: "no-store" });
     const json = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(json?.error || "Erro ao carregar preferências do chat");
@@ -1049,24 +1047,18 @@ export default function ChatPage() {
     if (json?.data) {
       setEnableSound(Boolean(json.data.enableSound));
       setEnableAlert(Boolean(json.data.enableAlert));
-      const canUseWhatsApp = Boolean(capabilities?.whatsappEnabled ?? whatsappEnabled);
-      const preferred = json.data.preferredChannel === "email" || json.data.preferredChannel === "portal" || json.data.preferredChannel === "whatsapp"
-        ? json.data.preferredChannel as ChatChannel
-        : "portal";
-      setChannel(preferred === "whatsapp" && !canUseWhatsApp ? "portal" : preferred);
+      setChannel(json.data.preferredChannel === "email" || json.data.preferredChannel === "portal" ? json.data.preferredChannel : "whatsapp");
     }
 
     preferencesLoadedRef.current = true;
-  }, [whatsappEnabled]);
+  }, []);
 
   useEffect(() => {
-    (async () => {
-      const nextWhatsappEnabled = await loadBase();
-      await Promise.all([
-        loadInteractionPreferences({ whatsappEnabled: nextWhatsappEnabled }),
-        loadAgents()
-      ]);
-    })().catch((error) => showToast(error.message, "error"));
+    Promise.all([
+      loadBase(),
+      loadInteractionPreferences(),
+      loadAgents()
+    ]).catch((error) => showToast(error.message, "error"));
   }, [loadAgents, loadBase, loadInteractionPreferences, showToast]);
 
   useEffect(() => {
@@ -1144,15 +1136,9 @@ export default function ChatPage() {
     const stillVisible = filteredContacts.some((c) => c.id === contactId);
     if (!stillVisible) {
       setContactId(filteredContacts[0].id);
-      setConversationId(resolveConversationIdForChannel(filteredContacts[0], channel));
+      setConversationId(channel === "portal" ? `portal:${filteredContacts[0].id}` : filteredContacts[0].conversationId || `${channel}:${filteredContacts[0].id}`);
     }
-  }, [filteredContacts, contactId, channel, resolveConversationIdForChannel]);
-
-  useEffect(() => {
-    if (!whatsappEnabled && channel === "whatsapp") {
-      setChannel("portal");
-    }
-  }, [channel, whatsappEnabled]);
+  }, [filteredContacts, contactId, channel]);
 
   useEffect(() => {
     if (!preferencesLoadedRef.current) return;

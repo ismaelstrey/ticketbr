@@ -137,9 +137,7 @@ export async function GET(request: NextRequest) {
         tags,
         hasWhatsApp: whatsappEnabled && Boolean(f.remoteJid || f.whatsappId),
         hasPortal: true,
-        conversationId: whatsappEnabled
-          ? f.remoteJid || (f.telefone ? `${onlyDigits(f.telefone)}@s.whatsapp.net` : undefined)
-          : undefined,
+        conversationId: whatsappEnabled ? f.remoteJid || (f.telefone ? `${onlyDigits(f.telefone)}@s.whatsapp.net` : undefined) : undefined,
         lastMessagePreview: undefined,
         lastMessageAt: undefined,
         hasOpenConversation: (whatsappEnabled && hasOpenConversation("whatsapp", [f.remoteJid, f.telefone, f.whatsappId]))
