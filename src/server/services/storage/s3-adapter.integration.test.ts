@@ -1,49 +1,134 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import path from "node:path";
-import os from "node:os";
-import fs from "node:fs";
 import crypto from "node:crypto";
-import S3rver from "s3rver";
-import { S3Client, CreateBucketCommand } from "@aws-sdk/client-s3";
+import http from "node:http";
 import { S3StorageAdapter } from "./s3-adapter";
 
-function tmpDir(prefix: string) {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), prefix));
-  return dir;
+async function readBody(request: http.IncomingMessage) {
+  const chunks: Buffer[] = [];
+  for await (const chunk of request) {
+    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+  }
+  return Buffer.concat(chunks);
 }
 
-describe("S3StorageAdapter (integration via s3rver)", () => {
-  let s3rver: any;
+function escapeXml(value: string) {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;");
+}
+
+async function startFakeS3(bucket: string) {
+  const objects = new Map<string, { body: Buffer; contentType?: string; lastModified: Date }>();
+
+  const server = http.createServer(async (request, response) => {
+    const url = new URL(request.url ?? "/", "http://127.0.0.1");
+    const [requestBucket, ...keyParts] = url.pathname.split("/").filter(Boolean);
+    const key = decodeURIComponent(keyParts.join("/"));
+
+    if (requestBucket !== bucket) {
+      response.statusCode = 404;
+      response.end();
+      return;
+    }
+
+    if (request.method === "HEAD" && !key) {
+      response.statusCode = 200;
+      response.end();
+      return;
+    }
+
+    if (request.method === "PUT" && key) {
+      objects.set(key, {
+        body: await readBody(request),
+        contentType: request.headers["content-type"],
+        lastModified: new Date()
+      });
+      response.statusCode = 200;
+      response.end();
+      return;
+    }
+
+    if (request.method === "GET" && url.searchParams.get("list-type") === "2") {
+      const prefix = url.searchParams.get("prefix") ?? "";
+      const maxKeys = Number(url.searchParams.get("max-keys") ?? 100);
+      const contents = Array.from(objects.entries())
+        .filter(([objectKey]) => objectKey.startsWith(prefix))
+        .slice(0, Number.isFinite(maxKeys) ? maxKeys : 100)
+        .map(([objectKey, item]) => `
+          <Contents>
+            <Key>${escapeXml(objectKey)}</Key>
+            <LastModified>${item.lastModified.toISOString()}</LastModified>
+            <ETag>"${crypto.createHash("md5").update(item.body).digest("hex")}"</ETag>
+            <Size>${item.body.length}</Size>
+          </Contents>`)
+        .join("");
+
+      response.statusCode = 200;
+      response.setHeader("Content-Type", "application/xml");
+      response.end(`<?xml version="1.0" encoding="UTF-8"?>
+        <ListBucketResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
+          <Name>${escapeXml(bucket)}</Name>
+          <Prefix>${escapeXml(prefix)}</Prefix>
+          <KeyCount>${objects.size}</KeyCount>
+          <MaxKeys>${maxKeys}</MaxKeys>
+          <IsTruncated>false</IsTruncated>
+          ${contents}
+        </ListBucketResult>`);
+      return;
+    }
+
+    if (request.method === "GET" && key) {
+      const item = objects.get(key);
+      if (!item) {
+        response.statusCode = 404;
+        response.end();
+        return;
+      }
+      if (item.contentType) response.setHeader("Content-Type", item.contentType);
+      response.statusCode = 200;
+      response.end(item.body);
+      return;
+    }
+
+    if (request.method === "DELETE" && key) {
+      objects.delete(key);
+      response.statusCode = 204;
+      response.end();
+      return;
+    }
+
+    response.statusCode = 501;
+    response.end();
+  });
+
+  await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+  const address = server.address();
+  if (!address || typeof address === "string") throw new Error("Fake S3 server did not start");
+
+  return {
+    endpoint: `http://127.0.0.1:${address.port}`,
+    close: () => new Promise<void>((resolve, reject) => server.close((error) => (error ? reject(error) : resolve())))
+  };
+}
+
+describe("S3StorageAdapter (integration via local S3 fake)", () => {
+  let fakeS3: Awaited<ReturnType<typeof startFakeS3>> | undefined;
   let endpoint: string;
   const bucket = "ticketbr-test";
   const region = "us-east-1";
-  const accessKeyId = "S3RVER";
-  const secretAccessKey = "S3RVER";
+  const accessKeyId = "test";
+  const secretAccessKey = "test";
 
   beforeAll(async () => {
-    const dir = tmpDir("ticketbr-s3-");
-    const port = 4569 + Math.floor(Math.random() * 1000);
-    s3rver = new S3rver({
-      address: "127.0.0.1",
-      port,
-      directory: dir,
-      silent: true
-    });
-    await s3rver.run();
-    endpoint = `http://127.0.0.1:${port}`;
-
-    const client = new S3Client({
-      region,
-      endpoint,
-      forcePathStyle: true,
-      credentials: { accessKeyId, secretAccessKey }
-    });
-    await client.send(new CreateBucketCommand({ Bucket: bucket }));
+    fakeS3 = await startFakeS3(bucket);
+    endpoint = fakeS3.endpoint;
   }, 20_000);
 
   afterAll(async () => {
-    if (s3rver) {
-      await s3rver.close();
+    if (fakeS3) {
+      await fakeS3.close();
     }
   });
 

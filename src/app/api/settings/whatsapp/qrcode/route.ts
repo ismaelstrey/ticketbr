@@ -25,6 +25,16 @@ export async function POST(request: NextRequest) {
   const provider = resolveWhatsAppProvider(config, ["uazapi", "evolution"]);
 
   try {
+    if (!provider) {
+      return withRateLimitHeaders(
+        NextResponse.json(
+          { error: "Nenhuma integracao WhatsApp configurada. O modo Nenhum usa somente o chat nativo web e nao gera QR Code." },
+          { status: 400 }
+        ),
+        guard.rate
+      );
+    }
+
     if (provider === "uazapi") {
       if (!assertProviderConfigured("uazapi", config)) {
         return withRateLimitHeaders(NextResponse.json({ error: "UAZAPI nao configurada no servidor/sessao." }, { status: 400 }), guard.rate);

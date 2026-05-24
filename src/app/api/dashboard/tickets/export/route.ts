@@ -4,6 +4,7 @@ import ExcelJS from "exceljs";
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import { getTicketsOperationalDashboard } from "@/server/services/tickets-operational-dashboard";
 import { Prisma } from "@/lib/prisma";
+import { createXlsxWorkbook } from "@/lib/xlsx";
 
 const QuerySchema = z.object({
   format: z.enum(["xlsx", "pdf", "json"]).default("xlsx"),

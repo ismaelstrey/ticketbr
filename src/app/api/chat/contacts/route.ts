@@ -60,6 +60,8 @@ function compareContactsByPriority(a: Pick<ChatContact, "hasOpenConversation" | 
 export async function GET(request: NextRequest) {
   try {
     const config = await resolveWhatsAppConfig(request);
+    const provider = resolveWhatsAppProvider(config, ["uazapi", "evolution", "n8n"]);
+    const whatsappEnabled = Boolean(provider);
 
     const funcionarios = await prisma.funcionario.findMany({
       where: {
@@ -121,7 +123,7 @@ export async function GET(request: NextRequest) {
 
     const baseContacts: ChatContact[] = funcionarios.map((f) => {
       const tags = inferTags(f.nome);
-      if (f.remoteJid || f.whatsappId) tags.push("WhatsApp");
+      if (whatsappEnabled && (f.remoteJid || f.whatsappId)) tags.push("WhatsApp");
       if (f.email) tags.push("Email");
       tags.push("Portal");
 
@@ -138,7 +140,7 @@ export async function GET(request: NextRequest) {
         conversationId: f.remoteJid || (f.telefone ? `${onlyDigits(f.telefone)}@s.whatsapp.net` : undefined),
         lastMessagePreview: undefined,
         lastMessageAt: undefined,
-        hasOpenConversation: hasOpenConversation("whatsapp", [f.remoteJid, f.telefone, f.whatsappId])
+        hasOpenConversation: (whatsappEnabled && hasOpenConversation("whatsapp", [f.remoteJid, f.telefone, f.whatsappId]))
           || hasOpenConversation("email", [f.email])
       };
     });
@@ -191,7 +193,7 @@ export async function GET(request: NextRequest) {
 
     if (conversations.length === 0) {
       baseContacts.sort(compareContactsByPriority);
-      return NextResponse.json({ data: baseContacts });
+      return NextResponse.json({ data: baseContacts, meta: { whatsappEnabled, whatsappProvider: provider } });
     }
 
     const byPhone = new Map(baseContacts.map((c) => [onlyDigits(c.phone), c]));
@@ -214,7 +216,7 @@ export async function GET(request: NextRequest) {
 
     baseContacts.sort(compareContactsByPriority);
 
-    return NextResponse.json({ data: baseContacts });
+    return NextResponse.json({ data: baseContacts, meta: { whatsappEnabled, whatsappProvider: provider } });
   } catch (error) {
     console.error("Error loading chat contacts", error);
     return NextResponse.json({ error: "Erro ao carregar contatos" }, { status: 500 });

@@ -68,10 +68,7 @@ describe("GET /api/chat/tickets", () => {
       number: 1,
       subject: "Teste",
       companyId: null,
-      companyName: "Tech Sol",
-      slaProgress: 0,
-      slaLabel: "SLA dentro do prazo",
-      priorityLabel: "Sem prioridade"
+      companyName: "Tech Sol"
     });
   });
 });

@@ -9,7 +9,7 @@ export const ThinScrollArea = styled.div<{ $maxHeight?: string }>`
   overflow-y: auto;
   overflow-x: hidden;
   scrollbar-width: thin;
-  scrollbar-color: ${({ theme }) => `${theme.tokens.color.border.default}`} transparent;
+  scrollbar-color: rgba(148, 163, 184, 0.25) transparent;
 
   &::-webkit-scrollbar {
     width: 4px;
@@ -21,12 +21,12 @@ export const ThinScrollArea = styled.div<{ $maxHeight?: string }>`
   }
 
   &::-webkit-scrollbar-thumb {
-    background: ${({ theme }) => theme.tokens.color.border.default};
+    background: rgba(148, 163, 184, 0.25);
     border-radius: 999px;
   }
 
   &:hover::-webkit-scrollbar-thumb {
-    background: ${({ theme }) => theme.tokens.color.border.strong};
+    background: rgba(148, 163, 184, 0.45);
   }
 `;
 

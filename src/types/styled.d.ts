@@ -4,69 +4,6 @@ import type { ThemeMode } from "@/context/ThemeModeContext";
 declare module 'styled-components' {
   export interface DefaultTheme {
     mode: ThemeMode;
-    tokens: {
-      color: {
-        bg: {
-          default: string;
-          subtle: string;
-          surface: string;
-          surfaceAlt: string;
-          surfaceElevated: string;
-          accent: string;
-          overlay: string;
-          sidebar: string;
-          column: string;
-          dragOver: string;
-        };
-        text: {
-          primary: string;
-          secondary: string;
-          muted: string;
-          light: string;
-          inverse: string;
-        };
-        border: {
-          default: string;
-          strong: string;
-        };
-        status: {
-          success: string;
-          warning: string;
-          info: string;
-          purple: string;
-          successSurface: string;
-          warningSurface: string;
-          infoSurface: string;
-          successBorder: string;
-          warningBorder: string;
-          infoBorder: string;
-          successText: string;
-          warningText: string;
-          infoText: string;
-        };
-        interactive: {
-          primary: string;
-          primaryHover: string;
-          focus: string;
-          ghostHover: string;
-          chatButtonText: string;
-          pillGradients: readonly [string, string, string, string];
-          chatButton: string;
-        };
-        sidebar: {
-          border: string;
-          muted: string;
-          icon: string;
-          activeText: string;
-          brandGradient: string;
-        };
-        column: {
-          background: string;
-          dragOver: string;
-          dragBorder: string;
-        };
-      };
-    };
     colors: {
       primary: string;
       primaryHover: string;
@@ -115,22 +52,16 @@ declare module 'styled-components' {
       card: string;
       hover: string;
     };
-    spacing: {
-      1: string;
-      2: string;
-      3: string;
-      4: string;
-      5: string;
-      6: string;
-      8: string;
-      10: string;
-      12: string;
+    borderRadius: {
+      small: string;
+      medium: string;
+      large: string;
+      pill: string;
     };
+    spacing: Record<1 | 2 | 3 | 4 | 5 | 6 | 8, string>;
     typography: {
       family: {
         body: string;
-        heading: string;
-        mono: string;
       };
       size: {
         xs: string;
@@ -141,7 +72,6 @@ declare module 'styled-components' {
         "2xl": string;
       };
       weight: {
-        regular: number;
         medium: number;
         semibold: number;
         bold: number;
@@ -155,16 +85,52 @@ declare module 'styled-components' {
       easing: string;
     };
     zIndex: {
-      overlay: number;
       sidebar: number;
-      floating: number;
+      overlay: number;
       toast: number;
     };
-    borderRadius: {
-      small: string;
-      medium: string;
-      large: string;
-      pill: string;
+    tokens: {
+      color: {
+        bg: {
+          default: string;
+          accent: string;
+          surface: string;
+          surfaceAlt: string;
+          surfaceElevated: string;
+          overlay: string;
+        };
+        text: {
+          primary: string;
+          secondary: string;
+          muted: string;
+          inverse: string;
+        };
+        border: {
+          default: string;
+          strong: string;
+        };
+        interactive: {
+          primary: string;
+          primaryHover: string;
+          focus: string;
+          ghostHover: string;
+          pillGradients: string[];
+        };
+        status: {
+          success: string;
+          successSurface: string;
+          successBorder: string;
+          successText: string;
+          warning: string;
+          warningSurface: string;
+          warningBorder: string;
+          warningText: string;
+          info: string;
+          infoSurface: string;
+          infoBorder: string;
+          infoText: string;
+        };
+      };
     };
   }
 }

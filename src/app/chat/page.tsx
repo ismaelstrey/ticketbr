@@ -574,6 +574,7 @@ export default function ChatPage() {
   const { showToast } = useToast();
   const { user } = useAuth();
   const [contacts, setContacts] = useState<ChatContact[]>([]);
+  const [whatsappEnabled, setWhatsappEnabled] = useState(false);
   const [tickets, setTickets] = useState<Array<{
     id: string;
     number: number;
@@ -793,12 +794,17 @@ export default function ChatPage() {
   const loadBase = useCallback(async () => {
     const contactsRes = await fetch("/api/chat/contacts");
 
-    const contactsJson = await contactsRes.json();
+    const contactsJson = await contactsRes.json() as ChatContactsResponse & { error?: string };
 
     if (!contactsRes.ok) throw new Error(contactsJson?.error || "Erro ao carregar contatos");
 
     const nextContacts = Array.isArray(contactsJson.data) ? contactsJson.data : [];
+    const nextWhatsappEnabled = Boolean(contactsJson.meta?.whatsappEnabled);
+    setWhatsappEnabled(nextWhatsappEnabled);
     setContacts(nextContacts);
+    if (!nextWhatsappEnabled) {
+      setChannel((current) => current === "whatsapp" ? "portal" : current);
+    }
 
     if (!contactId && nextContacts.length) {
       setContactId(nextContacts[0].id);
@@ -1419,7 +1425,7 @@ export default function ChatPage() {
                     $active={contact.id === contactId}
                     onClick={() => {
                       setContactId(contact.id);
-                      setConversationId(contact.conversationId || `whatsapp:${contact.id}`);
+                      setConversationId(resolveConversationIdForChannel(contact, channel));
                     }}
                     $open={Boolean(contact.hasOpenConversation)}
                   >

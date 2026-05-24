@@ -16,6 +16,14 @@ export interface ChatContact {
   hasOpenConversation?: boolean;
 }
 
+export interface ChatContactsResponse {
+  data: ChatContact[];
+  meta?: {
+    whatsappEnabled: boolean;
+    whatsappProvider: "n8n" | "evolution" | "uazapi" | null;
+  };
+}
+
 export interface ChatAttachment {
   name: string;
   mimeType: string;

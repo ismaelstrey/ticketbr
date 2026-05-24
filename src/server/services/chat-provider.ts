@@ -1,9 +1,9 @@
-import type { WhatsAppRuntimeConfig } from "@/server/services/whatsapp-settings";
+import type { ExternalWhatsAppProvider, WhatsAppRuntimeConfig } from "@/server/services/whatsapp-settings";
 import { isN8nConfigured } from "@/server/services/n8n-adapter";
 import { evolutionIsConfigured } from "@/server/services/evolution-service";
 import { uazapiIsConfigured } from "@/server/services/uazapi-service";
 
-export type WhatsAppProviderName = "n8n" | "evolution" | "uazapi";
+export type WhatsAppProviderName = ExternalWhatsAppProvider;
 
 export interface AvailableWhatsAppProviders {
   n8n: boolean;
@@ -23,8 +23,12 @@ export function resolveWhatsAppProvider(
   config?: WhatsAppRuntimeConfig | null,
   fallbackOrder: WhatsAppProviderName[] = ["n8n", "evolution", "uazapi"]
 ): WhatsAppProviderName | null {
+  if (config?.whatsappProvider === "none") {
+    return null;
+  }
+
   const available = getAvailableWhatsAppProviders(config);
-  const preferred = config?.whatsappProvider;
+  const preferred = config?.whatsappProvider as WhatsAppProviderName | undefined;
 
   if (preferred && available[preferred]) {
     return preferred;
@@ -36,7 +40,7 @@ export function resolveWhatsAppProvider(
     }
   }
 
-  return preferred ?? null;
+  return null;
 }
 
 export function assertProviderConfigured(provider: WhatsAppProviderName, config?: WhatsAppRuntimeConfig | null) {

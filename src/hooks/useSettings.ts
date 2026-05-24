@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 import { useToast } from "@/context/ToastContext";
 
 export interface IntegrationSettings {
-  whatsappProvider: "n8n" | "evolution" | "uazapi";
+  whatsappProvider: "none" | "n8n" | "evolution" | "uazapi";
   evolutionBaseUrl: string;
   evolutionApiKey: string;
   evolutionInstance: string;
@@ -67,7 +67,7 @@ export interface StorageSettings {
 }
 
 export const defaultSettings: IntegrationSettings = {
-  whatsappProvider: "n8n",
+  whatsappProvider: "none",
   evolutionBaseUrl: "",
   evolutionApiKey: "",
   evolutionInstance: "",
@@ -153,7 +153,7 @@ export function useSettings() {
       if (json?.data) {
         setSettings((curr) => ({
           ...curr,
-          whatsappProvider: (json.data.whatsappProvider === "evolution" || json.data.whatsappProvider === "uazapi" || json.data.whatsappProvider === "n8n")
+          whatsappProvider: (json.data.whatsappProvider === "none" || json.data.whatsappProvider === "evolution" || json.data.whatsappProvider === "uazapi" || json.data.whatsappProvider === "n8n")
             ? json.data.whatsappProvider
             : curr.whatsappProvider,
           evolutionBaseUrl: json.data.baseUrl ?? curr.evolutionBaseUrl,
@@ -424,6 +424,11 @@ export function useSettings() {
 
   const syncContacts = useCallback(async () => {
     try {
+      if (settings.whatsappProvider === "none") {
+        showToast("Sincronizacao de contatos exige uma integracao externa. O chat nativo web ja esta ativo.", "info");
+        return;
+      }
+
       setSyncingContacts(true);
       setContactsSyncResult(null);
       const uazapiToken = settings.uazapiToken.includes("•") ? undefined : settings.uazapiToken;
@@ -500,6 +505,11 @@ export function useSettings() {
 
   const loadQr = useCallback(async () => {
     try {
+      if (settings.whatsappProvider === "none") {
+        showToast("O modo Nenhum usa somente o chat nativo web e nao gera QR Code.", "info");
+        return;
+      }
+
       setLoadingQr(true);
       setTestingApi(true); // compatibilidade visual
       const uazapiToken = settings.uazapiToken.includes("•") ? undefined : settings.uazapiToken;

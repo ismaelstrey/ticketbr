@@ -14,35 +14,33 @@ import {
   FiSettings,
   FiChevronDown,
   FiChevronRight,
-  FiMenu,
   FiLogOut,
   FiEdit,
-  FiLayers,
-  FiX
+  FiLayers
 } from "@/components/icons";
 
 const EXPANDED_WIDTH = "288px";
 const COLLAPSED_WIDTH = "72px";
 
 const SidebarContainer = styled.aside<{ $isExpanded: boolean }>`
-  background: ${({ theme }) => theme.tokens.color.bg.sidebar};
-  border-right: 1px solid ${({ theme }) => theme.tokens.color.sidebar.border};
+  background: ${({ theme }) => theme.colors.sidebar.background};
+  border-right: 1px solid ${({ theme }) => theme.colors.sidebar.border};
   backdrop-filter: blur(18px);
-  box-shadow: ${({ theme }) => theme.shadows.card};
+  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.22);
   display: flex;
   flex-direction: column;
   height: 100vh;
   position: fixed;
   left: 0;
   top: 0;
-  z-index: ${({ theme }) => theme.zIndex.sidebar};
+  z-index: 100;
   width: ${({ $isExpanded }) => ($isExpanded ? EXPANDED_WIDTH : COLLAPSED_WIDTH)};
   transition: width 0.28s ease, box-shadow 0.28s ease;
   overflow-y: auto;
   overflow-x: hidden;
 
   &:hover {
-    box-shadow: ${({ theme }) => theme.shadows.hover};
+    box-shadow: 0 24px 50px rgba(15, 23, 42, 0.3);
   }
 
   &::-webkit-scrollbar {
@@ -50,17 +48,13 @@ const SidebarContainer = styled.aside<{ $isExpanded: boolean }>`
   }
 
   &::-webkit-scrollbar-thumb {
-    background-color: ${({ theme }) => theme.tokens.color.border.strong};
+    background-color: ${({ theme }) => theme.colors.borderStrong};
     border-radius: 999px;
   }
 
   @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
     width: ${({ $isExpanded }) => ($isExpanded ? EXPANDED_WIDTH : "0")};
     border-right-width: ${({ $isExpanded }) => ($isExpanded ? "1px" : "0")};
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    transition: none;
   }
 `;
 
@@ -73,55 +67,22 @@ const SidebarHeader = styled.div<{ $isExpanded: boolean }>`
   gap: 0.75rem;
 `;
 
-const HeaderIconButton = styled.button`
-  width: 2rem;
-  height: 2rem;
-  border: 1px solid ${({ theme }) => theme.tokens.color.border.default};
-  border-radius: ${({ theme }) => theme.borderRadius.small};
-  background: ${({ theme }) => theme.tokens.color.bg.surface};
-  color: ${({ theme }) => theme.tokens.color.text.secondary};
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-
-  &:hover {
-    color: ${({ theme }) => theme.tokens.color.text.primary};
-    background: ${({ theme }) => theme.tokens.color.interactive.ghostHover};
-  }
-
-  &:focus-visible {
-    outline: 2px solid ${({ theme }) => theme.tokens.color.interactive.primary};
-    outline-offset: 2px;
-  }
-`;
-
-const Brand = styled.button<{ $isExpanded: boolean }>`
+const Brand = styled.div<{ $isExpanded: boolean }>`
   display: flex;
   align-items: center;
   gap: 0.85rem;
   min-width: 0;
   opacity: ${({ $isExpanded }) => ($isExpanded ? 1 : 0.96)};
   cursor: pointer;
-  border: 0;
-  background: transparent;
-  padding: 0;
-  text-align: left;
-
-  &:focus-visible {
-    outline: 2px solid ${({ theme }) => theme.tokens.color.interactive.primary};
-    outline-offset: 2px;
-    border-radius: ${({ theme }) => theme.borderRadius.small};
-  }
 `;
 
 const BrandMark = styled.div`
   width: 44px;
   height: 44px;
   border-radius: 16px;
-  background: ${({ theme }) => theme.tokens.color.sidebar.brandGradient};
-  box-shadow: ${({ theme }) => theme.shadows.card};
-  color: ${({ theme }) => theme.tokens.color.text.inverse};
+  background: linear-gradient(135deg, #38bdf8 0%, #6366f1 55%, #8b5cf6 100%);
+  box-shadow: 0 14px 28px rgba(99, 102, 241, 0.32);
+  color: ${({ theme }) => theme.colors.text.primary};
   display: grid;
   place-items: center;
   font-size: 1.15rem;
@@ -136,14 +97,14 @@ const BrandText = styled.div<{ $isExpanded: boolean }>`
 `;
 
 const BrandTitle = styled.span`
-  color: ${({ theme }) => theme.tokens.color.text.primary};
+  color: ${({ theme }) => theme.colors.text.primary};
   font-size: 1rem;
   font-weight: 700;
   letter-spacing: 0.01em;
 `;
 
 const BrandSubtitle = styled.span`
-  color: ${({ theme }) => theme.tokens.color.sidebar.muted};
+  color: ${({ theme }) => theme.colors.sidebar.muted};
   font-size: 0.75rem;
   white-space: nowrap;
 `;
@@ -152,7 +113,7 @@ const SectionLabel = styled.span<{ $isExpanded: boolean }>`
   display: ${({ $isExpanded }) => ($isExpanded ? "block" : "none")};
   padding: 0 1.2rem;
   margin: 0.4rem 0 0.3rem;
-  color: ${({ theme }) => theme.tokens.color.text.muted};
+  color: ${({ theme }) => theme.colors.text.muted};
   font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.14em;
@@ -177,14 +138,13 @@ const MenuItem = styled.button<{ $isActive: boolean; $isExpanded: boolean }>`
   align-items: center;
   width: 100%;
   padding: 0.62rem 0.72rem;
-  background: ${({ $isActive, theme }) =>
-    $isActive ? theme.tokens.color.interactive.ghostHover : "transparent"};
+  background: ${({ $isActive }) => ($isActive ? "rgba(148, 163, 184, 0.12)" : "transparent")};
   border: 1px solid transparent;
   border-radius: 10px;
   cursor: pointer;
-  color: ${({ theme }) => theme.tokens.color.text.primary};
+  color: ${({ theme }) => theme.colors.text.primary};
   opacity: ${({ $isActive }) => ($isActive ? 1 : 0.72)};
-  transition: all ${({ theme }) => theme.motion.normal} ${({ theme }) => theme.motion.easing};
+  transition: all 0.22s ease;
   justify-content: ${({ $isExpanded }) => ($isExpanded ? "flex-start" : "center")};
   position: relative;
   overflow: hidden;
@@ -193,36 +153,19 @@ const MenuItem = styled.button<{ $isActive: boolean; $isExpanded: boolean }>`
     content: "";
     position: absolute;
     inset: 0;
-    background: linear-gradient(
-      135deg,
-      ${({ theme }) => `${theme.tokens.color.bg.surfaceElevated}44`},
-      transparent 58%
-    );
+    background: linear-gradient(135deg, rgba(255,255,255,0.08), transparent 58%);
     opacity: ${({ $isActive }) => ($isActive ? 1 : 0)};
     transition: opacity 0.22s ease;
   }
 
   &:hover {
-    background: ${({ theme }) => theme.tokens.color.interactive.ghostHover};
+    background: rgba(148, 163, 184, 0.1);
     opacity: 1;
     transform: translateX(1px);
   }
 
-  &:focus-visible {
-    outline: 2px solid ${({ theme }) => theme.tokens.color.interactive.primary};
-    outline-offset: 1px;
-  }
-
   &:hover::before {
     opacity: 1;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    transition: none;
-
-    &:hover {
-      transform: none;
-    }
   }
 `;
 
@@ -264,7 +207,7 @@ const ChevronIcon = styled.span<{ $isExpanded: boolean }>`
   display: ${({ $isExpanded }) => ($isExpanded ? "flex" : "none")};
   align-items: center;
   font-size: 1rem;
-  color: ${({ theme }) => theme.tokens.color.text.muted};
+  color: ${({ theme }) => theme.colors.text.muted};
   position: relative;
   z-index: 1;
 `;
@@ -276,36 +219,28 @@ const SubMenu = styled.div<{ $isOpen: boolean; $isExpanded: boolean }>`
   gap: 0.15rem;
 `;
 
-const SubMenuItem = styled.button<{ $isActive: boolean }>`
+const SubMenuItem = styled.a<{ $isActive: boolean }>`
   display: block;
-  width: 100%;
-  text-align: left;
   padding: 0.5rem 0.65rem;
-  color: ${({ theme }) => theme.tokens.color.text.primary};
+  color: ${({ theme }) => theme.colors.text.primary};
   opacity: ${({ $isActive }) => ($isActive ? 1 : 0.72)};
   font-size: 0.84rem;
+  text-decoration: none;
   border-radius: 10px;
-  background: ${({ $isActive, theme }) =>
-    $isActive ? theme.tokens.color.interactive.ghostHover : "transparent"};
+  background: ${({ $isActive }) => ($isActive ? "rgba(148, 163, 184, 0.1)" : "transparent")};
   border: 1px solid transparent;
-  cursor: pointer;
-  transition: all ${({ theme }) => theme.motion.normal} ${({ theme }) => theme.motion.easing};
+  transition: all 0.18s ease;
 
   &:hover {
     opacity: 1;
-    background: ${({ theme }) => theme.tokens.color.interactive.ghostHover};
-  }
-
-  &:focus-visible {
-    outline: 2px solid ${({ theme }) => theme.tokens.color.interactive.primary};
-    outline-offset: 2px;
+    background: rgba(148, 163, 184, 0.08);
   }
 `;
 
 const MobileOverlay = styled.div<{ $isVisible: boolean }>`
   position: fixed;
   inset: 0;
-  background: ${({ theme }) => theme.tokens.color.bg.overlay};
+  background: rgba(2, 6, 23, 0.55);
   backdrop-filter: blur(4px);
   z-index: 90;
   display: ${({ $isVisible }) => ($isVisible ? "block" : "none")};
@@ -363,7 +298,7 @@ const menuItems: MenuItemType[] = [
 ];
 
 const UserSection = styled.div<{ $isExpanded: boolean }>`
-  border-top: 1px solid ${({ theme }) => theme.tokens.color.border.default};
+  border-top: 1px solid ${({ theme }) => theme.colors.border};
   padding: ${({ $isExpanded }) => ($isExpanded ? "1rem 0.85rem 1.1rem" : "0.9rem 0.55rem 1.05rem")};
   margin-top: auto;
   display: flex;
@@ -377,6 +312,8 @@ const UserInfo = styled.div<{ $isExpanded: boolean }>`
   gap: 0.85rem;
   padding: 0.75rem;
   border-radius: 10px;
+  // background: rgba(15, 23, 42, 0.38);
+  // border: 1px solid ${({ theme }) => theme.colors.border};
   justify-content: ${({ $isExpanded }) => ($isExpanded ? "flex-start" : "center")};
 `;
 
@@ -384,15 +321,15 @@ const UserAvatar = styled.div`
   width: 24px;
   height: 24px;
   border-radius: 0;
-  background: ${({ theme }) => theme.tokens.color.sidebar.brandGradient};
+  background: linear-gradient(135deg, #38bdf8, #8b5cf6);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: ${({ theme }) => theme.tokens.color.text.inverse};
+  color: white;
   font-weight: 700;
   font-size: 0.95rem;
   flex-shrink: 0;
-  box-shadow: ${({ theme }) => theme.shadows.card};
+  box-shadow: 0 12px 24px rgba(56, 189, 248, 0.22);
 `;
 
 const UserDetails = styled.div<{ $isExpanded: boolean }>`
@@ -403,7 +340,7 @@ const UserDetails = styled.div<{ $isExpanded: boolean }>`
 `;
 
 const UserName = styled.span`
-  color: ${({ theme }) => theme.tokens.color.text.primary};
+  color: ${({ theme }) => theme.colors.text.primary};
   font-size: 0.92rem;
   font-weight: 600;
   white-space: nowrap;
@@ -412,7 +349,7 @@ const UserName = styled.span`
 `;
 
 const UserRole = styled.span`
-  color: ${({ theme }) => theme.tokens.color.text.muted};
+  color: ${({ theme }) => theme.colors.text.muted};
   font-size: 0.76rem;
   white-space: nowrap;
 `;
@@ -426,53 +363,21 @@ const LogoutButton = styled.button<{ $isExpanded: boolean }>`
   gap: 0.8rem;
   padding: 0.8rem 0.85rem;
   border-radius: 10px;
-  color: ${({ theme }) => theme.tokens.color.text.primary};
+  color: ${({ theme }) => theme.colors.text.primary};
   opacity: 0.72;
   width: 100%;
-  transition: all ${({ theme }) => theme.motion.normal} ${({ theme }) => theme.motion.easing};
+  transition: all 0.2s ease;
   justify-content: ${({ $isExpanded }) => ($isExpanded ? "flex-start" : "center")};
 
   &:hover {
-    background: ${({ theme }) => theme.tokens.color.interactive.ghostHover};
+    background: rgba(148, 163, 184, 0.1);
     opacity: 1;
-  }
-
-  &:focus-visible {
-    outline: 2px solid ${({ theme }) => theme.tokens.color.interactive.primary};
-    outline-offset: 2px;
   }
 
   span {
     display: ${({ $isExpanded }) => ($isExpanded ? "block" : "none")};
     font-size: 0.9rem;
     font-weight: 600;
-  }
-`;
-
-const MobileMenuButton = styled.button`
-  position: fixed;
-  top: ${({ theme }) => theme.spacing[3]};
-  left: ${({ theme }) => theme.spacing[3]};
-  z-index: calc(${({ theme }) => theme.zIndex.sidebar} + 1);
-  width: 2.5rem;
-  height: 2.5rem;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  border-radius: ${({ theme }) => theme.borderRadius.medium};
-  border: 1px solid ${({ theme }) => theme.tokens.color.border.default};
-  background: ${({ theme }) => theme.tokens.color.bg.surfaceElevated};
-  color: ${({ theme }) => theme.tokens.color.text.primary};
-  box-shadow: ${({ theme }) => theme.shadows.card};
-  cursor: pointer;
-
-  &:focus-visible {
-    outline: 2px solid ${({ theme }) => theme.tokens.color.interactive.primary};
-    outline-offset: 2px;
-  }
-
-  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
-    display: inline-flex;
   }
 `;
 
@@ -541,49 +446,25 @@ export function Sidebar() {
 
   return (
     <>
-      <MobileMenuButton
-        type="button"
-        onClick={() => setIsExpanded((value) => !value)}
-        aria-label={isExpanded ? "Fechar menu lateral" : "Abrir menu lateral"}
-        aria-expanded={isExpanded}
-        aria-controls="ticketbr-sidebar"
-      >
-        {isExpanded ? <FiX /> : <FiMenu />}
-      </MobileMenuButton>
       <MobileOverlay $isVisible={isExpanded} onClick={() => setIsExpanded(false)} />
       <SidebarSpacer $isExpanded={isExpanded} />
       <SidebarContainer
-        id="ticketbr-sidebar"
         $isExpanded={isExpanded}
         onMouseEnter={handleDesktopExpand}
         onMouseLeave={handleDesktopCollapse}
       >
         <SidebarHeader $isExpanded={isExpanded}>
-          <Brand
-            type="button"
-            $isExpanded={isExpanded}
-            onClick={() => router.push("/ticket/kanban")}
-            aria-label="Ir para Kanban"
-          >
+          <Brand $isExpanded={isExpanded} onClick={() => router.push("/ticket/kanban")}>
             <BrandMark>T</BrandMark>
             <BrandText $isExpanded={isExpanded}>
               <BrandTitle>TicketBR</BrandTitle>
               <BrandSubtitle>Atalhos inteligentes</BrandSubtitle>
             </BrandText>
-          </Brand>
-          {isExpanded ? (
-            <HeaderIconButton
-              type="button"
-              aria-label="Fechar menu lateral"
-              onClick={() => setIsExpanded(false)}
-            >
-              <FiX />
-            </HeaderIconButton>
-          ) : null}
+          </Brand>         
         </SidebarHeader>
 
         <SectionLabel $isExpanded={isExpanded}>Navegação</SectionLabel>
-        <MenuList aria-label="Menu principal">
+        <MenuList>
           {menuItems.map((item) => {
             const isActive =
               activePath === item.path ||
@@ -599,11 +480,6 @@ export function Sidebar() {
                   $isExpanded={isExpanded}
                   onClick={() => handleMenuClick(item)}
                   title={!isExpanded ? item.label : ""}
-                  aria-label={item.label}
-                  aria-expanded={hasSubItems ? isSubMenuOpen : undefined}
-                  aria-haspopup={hasSubItems ? "menu" : undefined}
-                  aria-controls={hasSubItems ? `submenu-${item.label}` : undefined}
-                  aria-current={!hasSubItems && isActive ? "page" : undefined}
                 >
                   <IconWrap>
                     <item.icon />
@@ -617,15 +493,14 @@ export function Sidebar() {
                 </MenuItem>
 
                 {hasSubItems && (
-                  <SubMenu id={`submenu-${item.label}`} $isOpen={isSubMenuOpen} $isExpanded={isExpanded}>
+                  <SubMenu $isOpen={isSubMenuOpen} $isExpanded={isExpanded}>
                     {item.subItems!.map((sub) => (
                       <SubMenuItem
                         key={sub.path}
+                        href={sub.path}
                         $isActive={activePath === sub.path || activePath.startsWith(`${sub.path}/`)}
-                        aria-current={
-                          activePath === sub.path || activePath.startsWith(`${sub.path}/`) ? "page" : undefined
-                        }
-                        onClick={() => {
+                        onClick={(e) => {
+                          e.preventDefault();
                           router.push(sub.path);
                           if (typeof window !== "undefined" && window.innerWidth <= 768) {
                             setIsExpanded(false);
@@ -661,4 +536,3 @@ export function Sidebar() {
     </>
   );
 }
-
