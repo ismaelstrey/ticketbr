@@ -16,7 +16,8 @@ import {
   FiChevronRight,
   FiLogOut,
   FiEdit,
-  FiLayers
+  FiLayers,
+  FiClock
 } from "@/components/icons";
 
 const EXPANDED_WIDTH = "288px";
@@ -293,6 +294,7 @@ const menuItems: MenuItemType[] = [
     ]
   },
   { label: "Design System", icon: FiLayers, path: "/design-system" },
+  { label: "Progresso", icon: FiClock, path: "/progresso" },
   { label: "Contatos WhatsApp", icon: FiUsers, path: "/whatsapp-contatos" },
   { label: "Configurações", icon: FiSettings, path: "/settings" }
 ];
