@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { guardStaff } from "@/server/services/staff-context";
 
 export async function GET() {
+  // Somente staff autenticado (ADMIN/AGENT) pode listar mesas de trabalho
+  const unauthorized = await guardStaff();
+  if (unauthorized) return unauthorized;
+
   try {
     const workbenches = await prisma.mesa_Trabalho.findMany({
       where: { status: true },

@@ -3,8 +3,13 @@ import { createTicket, listTickets } from "@/server/services/ticket-service";
 import { CreateTicketSchema } from "@/lib/validations/ticket";
 import { z } from "zod";
 import { getSession } from "@/lib/auth";
+import { guardStaff } from "@/server/services/staff-context";
 
 export async function GET(_request: NextRequest) {
+  // Somente staff autenticado (ADMIN/AGENT) pode listar tickets
+  const unauthorized = await guardStaff();
+  if (unauthorized) return unauthorized;
+
   const requestId = (globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`).toString();
   const startedAt = Date.now();
   try {
@@ -18,6 +23,10 @@ export async function GET(_request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  // Somente staff autenticado (ADMIN/AGENT) pode criar tickets
+  const unauthorized = await guardStaff();
+  if (unauthorized) return unauthorized;
+
   const requestId = (globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`).toString();
   const startedAt = Date.now();
   try {

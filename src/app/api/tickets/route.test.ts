@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const listTicketsMock = vi.fn();
 const createTicketMock = vi.fn();
 const getSessionMock = vi.fn();
+const guardStaffMock = vi.fn();
 
 vi.mock("@/server/services/ticket-service", () => ({
   listTickets: listTicketsMock,
@@ -13,12 +14,19 @@ vi.mock("@/lib/auth", () => ({
   getSession: getSessionMock,
 }));
 
+vi.mock("@/server/services/staff-context", () => ({
+  guardStaff: guardStaffMock,
+}));
+
 describe("/api/tickets", () => {
   beforeEach(() => {
     vi.resetModules();
     listTicketsMock.mockReset();
     createTicketMock.mockReset();
     getSessionMock.mockReset();
+    guardStaffMock.mockReset();
+    // Por padrão, sessão de staff válida (sem resposta de erro)
+    guardStaffMock.mockResolvedValue(null);
   });
 
   it("GET retorna tickets com requestId e header de correlacao", async () => {
@@ -32,6 +40,20 @@ describe("/api/tickets", () => {
     expect(res.headers.get("x-request-id")).toBeTruthy();
     expect(typeof body.requestId).toBe("string");
     expect(Array.isArray(body.data)).toBe(true);
+    expect(guardStaffMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("GET retorna 401 quando a sessao de staff e invalida", async () => {
+    // Guard retorna a resposta de falha de autenticação
+    guardStaffMock.mockResolvedValueOnce(
+      new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 })
+    );
+    const { GET } = await import("./route");
+
+    const res = await GET({} as any);
+
+    expect(res.status).toBe(401);
+    expect(listTicketsMock).not.toHaveBeenCalled();
   });
 
   it("POST retorna 400 para payload invalido com requestId padronizado", async () => {

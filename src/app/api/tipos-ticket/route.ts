@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { guardAdmin } from "@/server/services/staff-context";
 
 export async function GET() {
+  // Somente administradores podem listar tipos de ticket
+  const unauthorized = await guardAdmin();
+  if (unauthorized) return unauthorized;
+
   try {
     const tipos = await prisma.tipo_Ticket.findMany({
       where: { status: true },
@@ -14,6 +19,10 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  // Somente administradores podem criar tipos de ticket
+  const unauthorized = await guardAdmin();
+  if (unauthorized) return unauthorized;
+
   try {
     const body = await request.json();
     const tipo = await prisma.tipo_Ticket.create({

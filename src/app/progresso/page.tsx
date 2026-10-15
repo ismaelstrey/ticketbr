@@ -633,15 +633,15 @@ const modules: Module[] = [
   },
   {
     name: "Cadastros",
-    description: "Gestão de solicitantes, operadores e usuários.",
+    description: "Gestão de solicitantes, operadores e usuários com RBAC ADMIN/staff.",
     status: "done",
-    progress: 95,
+    progress: 100,
     icon: FiTool,
     features: [
       "Solicitantes (CRUD)",
       "Operadores (CRUD)",
       "Usuários (CRUD)",
-      "Validação CPF/CNPJ"
+      "Autorização por perfil (RBAC)"
     ]
   },
   {
@@ -676,9 +676,9 @@ const modules: Module[] = [
 const qualityMetrics: QualityMetric[] = [
   {
     label: "Testes Automatizados",
-    value: "79 arquivos",
+    value: "80 arquivos",
     status: "ok",
-    description: "195 testes passando, incluindo testes de contrato, unitários e integração."
+    description: "199 testes passando, incluindo testes de contrato, unitários, integração e autorização."
   },
   {
     label: "Lint (ESLint)",
@@ -709,12 +709,18 @@ const qualityMetrics: QualityMetric[] = [
     value: "0 vulnerabilidades",
     status: "ok",
     description: "Nenhuma vulnerabilidade conhecida nas dependências."
+  },
+  {
+    label: "Autorização (RBAC)",
+    value: "Rotas protegidas",
+    status: "ok",
+    description: "Rotas administrativas exigem perfil ADMIN; rotas de staff exigem sessão válida (401/403)."
   }
 ];
 
 // Stack tecnológica
 const techStack = [
-  { name: "Next.js", version: "16.2.6", abbr: "Nx" },
+  { name: "Next.js", version: "16.4.1", abbr: "Nx" },
   { name: "React", version: "19.2.4", abbr: "Re" },
   { name: "TypeScript", version: "5.9.3", abbr: "TS" },
   { name: "Prisma", version: "7.7.0", abbr: "Pr" },
@@ -733,16 +739,16 @@ const roadmap: RoadmapItem[] = [
   {
     phase: "Fase 1 — Estabilização",
     title: "Hardening de RBAC e autorização por rota",
-    description: "Implementar controle de acesso por perfil (ADMIN, AGENT, CUSTOMER) em todas as rotas sensíveis.",
+    description: "Controle de acesso por perfil (ADMIN, AGENT, CUSTOMER) aplicado nas rotas administrativas e de cadastro.",
     priority: "P0",
-    status: "in-progress"
+    status: "done"
   },
   {
     phase: "Fase 1 — Estabilização",
     title: "Health checks de dependências",
-    description: "Enriquecer /api/health com status de DB, latência, versão e uptime.",
+    description: "Endpoint /api/health com status do banco, latência, versão, uptime e variáveis de ambiente.",
     priority: "P0",
-    status: "pending"
+    status: "done"
   },
   {
     phase: "Fase 2 — Consolidação",
@@ -791,9 +797,9 @@ const roadmap: RoadmapItem[] = [
 // Dívida técnica identificada
 const techDebt: TechDebtItem[] = [
   {
-    title: "RBAC incompleto",
-    description: "Controle de autorização por perfil ainda está fraco em algumas rotas administrativas.",
-    impact: "high"
+    title: "RBAC em rotas de chat",
+    description: "Rotas administrativas e de cadastro já estão protegidas; revisar autorização fina das rotas de chat/integração.",
+    impact: "low"
   },
   {
     title: "Campos legados no Ticket",
@@ -807,12 +813,12 @@ const techDebt: TechDebtItem[] = [
   },
   {
     title: "Observabilidade",
-    description: "Health check existe mas sem checks de dependências; falta stack de logs/métricas.",
+    description: "Health check já cobre dependências; falta stack de logs estruturados/métricas.",
     impact: "medium"
   },
   {
     title: "Cobertura de testes",
-    description: "Há 79 arquivos de teste, mas sem métrica oficial de cobertura percentual.",
+    description: "Há 80 arquivos de teste, mas sem métrica oficial de cobertura percentual.",
     impact: "low"
   },
   {

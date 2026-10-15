@@ -27,6 +27,10 @@ vi.mock("@/lib/prisma", () => ({
   }
 }));
 
+vi.mock("@/server/services/staff-context", () => ({
+  guardStaff: vi.fn(async () => null)
+}));
+
 describe("/api/solicitantes/[id]/funcionarios/[funcionarioId]", () => {
   beforeEach(() => {
     vi.resetModules();

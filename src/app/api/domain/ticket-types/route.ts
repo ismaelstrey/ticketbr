@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { guardStaff } from "@/server/services/staff-context";
 
 export async function GET() {
+  // Somente staff autenticado (ADMIN/AGENT) pode listar tipos de ticket
+  const unauthorized = await guardStaff();
+  if (unauthorized) return unauthorized;
+
   try {
     const types = await prisma.tipo_Ticket.findMany({
       where: { status: true },

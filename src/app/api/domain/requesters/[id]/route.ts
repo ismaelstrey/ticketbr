@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { guardStaff } from "@/server/services/staff-context";
 
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  // Somente staff autenticado (ADMIN/AGENT) pode atualizar solicitantes
+  const unauthorized = await guardStaff();
+  if (unauthorized) return unauthorized;
+
   try {
     const body = await request.json();
     const { id } = await params;
@@ -17,6 +22,10 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 }
 
 export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  // Somente staff autenticado (ADMIN/AGENT) pode excluir solicitantes
+  const unauthorized = await guardStaff();
+  if (unauthorized) return unauthorized;
+
   try {
     const { id } = await params;
     // Soft delete
