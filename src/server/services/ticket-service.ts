@@ -10,14 +10,7 @@ import {
   UiStatus
 } from "@/server/ticket-mappers";
 import type { TicketPriority, TicketStatus } from "../../../prisma/generated/enums";
-
-
-
-const COMPANY_SLA_HOURS: Record<string, number> = {
-  "ACEM PRIME SERVIÇOS DE INTERNET LTDA": 6,
-  "NETMITT": 4,
-  "LP INTERNET": 8,
-};
+import { assertTransition, resolveSlaDeadline } from "./ticket-status-policy";
 
 const LEGACY_MISSING_COLUMNS = ["pauseSla", "pausedStartedAt", "pausedTotalSeconds"];
 
@@ -76,12 +69,13 @@ const ticketLegacySelect = {
   createdAt: true,
   updatedAt: true,
   events: true,
+  tipo_ticket: { select: { sla_horas: true } },
 } as const;
 
 async function findTicketsWithCompatibility() {
   try {
     return await prisma.ticket.findMany({
-      include: { events: true },
+      include: { events: true, tipo_ticket: { select: { sla_horas: true } } },
       orderBy: { createdAt: "desc" }
     });
   } catch (error) {
@@ -101,7 +95,7 @@ async function findTicketByIdWithCompatibility(id: string) {
   try {
     return await prisma.ticket.findUnique({
       where: { id },
-      include: { events: true }
+      include: { events: true, tipo_ticket: { select: { sla_horas: true } } }
     });
   } catch (error) {
     if (!isMissingPauseColumnsError(error)) {
@@ -116,14 +110,13 @@ async function findTicketByIdWithCompatibility(id: string) {
   }
 }
 
-function resolveSlaDeadline(ticket: any): Date | null {
-  if (ticket.solutionSlaAt) {
-    return ticket.solutionSlaAt;
-  }
-
-  const company = ticket.company ?? "";
-  const configuredHours = COMPANY_SLA_HOURS[company] ?? 8;
-  return new Date(ticket.createdAt.getTime() + configuredHours * 60 * 60 * 1000);
+function resolveSlaDeadlineForTicket(ticket: any): Date {
+  return resolveSlaDeadline({
+    createdAt: ticket.createdAt,
+    solutionSlaAt: ticket.solutionSlaAt,
+    tipoTicketSlaHours: ticket.tipo_ticket?.sla_horas ?? null,
+    company: ticket.company
+  });
 }
 
 function calculateElapsedWithOptionalPause(
@@ -182,7 +175,7 @@ function mapTicket(ticket: any) {
     }),
     progressoSla: calculateSlaProgress(
       ticket.createdAt,
-      resolveSlaDeadline(ticket),
+      resolveSlaDeadlineForTicket(ticket),
       ticket.pausedTotalSeconds ?? 0,
       ticket.pauseSla,
       ticket.pausedStartedAt,
@@ -375,6 +368,14 @@ export async function changeTicketStatus(id: string, status: UiStatus, author?: 
   }
 
   const nextStatus = toPrismaStatus(status) as TicketStatus;
+
+  // Transição idempotente: mesmo status não gera atualização nem evento
+  if (current.status === nextStatus) {
+    return getTicketById(id);
+  }
+
+  // Valida a transição pela máquina de estados antes de persistir
+  assertTransition(current.status as DbStatus, nextStatus);
 
   const now = new Date();
   const pausedStartedAt = (current as any).pausedStartedAt as Date | null | undefined;

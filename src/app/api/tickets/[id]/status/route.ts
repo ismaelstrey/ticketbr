@@ -2,11 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { changeTicketStatus } from "@/server/services/ticket-service";
 import { getSession } from "@/lib/auth";
 import { UiStatus } from "@/server/ticket-mappers";
+import { InvalidStatusTransitionError } from "@/server/services/ticket-status-policy";
+import { guardStaff } from "@/server/services/staff-context";
 import { Prisma } from "@/lib/prisma";
 
 const acceptedStatuses: UiStatus[] = ["todo", "doing", "paused", "done"];
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  // Somente staff autenticado (ADMIN/AGENT) pode alterar o status do ticket
+  const unauthorized = await guardStaff();
+  if (unauthorized) return unauthorized;
+
   const { id } = await params;
   const requestId = (globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`).toString();
   const startedAt = Date.now();
@@ -40,6 +46,12 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     console.info("[tickets/status] ok", { requestId, id, status, ms: Date.now() - startedAt });
     return NextResponse.json({ data: ticket, requestId }, { headers: { "x-request-id": requestId } });
   } catch (error) {
+    // Transição não permitida pela máquina de estados
+    if (error instanceof InvalidStatusTransitionError) {
+      console.info("[tickets/status] invalid_transition", { requestId, id, from: error.from, to: error.to, ms: Date.now() - startedAt });
+      return NextResponse.json({ error: error.message, requestId }, { status: 409, headers: { "x-request-id": requestId } });
+    }
+
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
       if (error.code === "P2021" || error.code === "P2022") {
         console.error("[tickets/status] prisma_schema_error", { requestId, id, code: error.code, ms: Date.now() - startedAt });

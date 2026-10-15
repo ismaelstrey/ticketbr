@@ -140,4 +140,71 @@ describe("ticket-service.changeTicketStatus (compat)", () => {
     expect(createEventMock).toHaveBeenCalledTimes(1);
     expect(result).toBeTruthy();
   });
+
+  it("rejeita transição inválida (DONE -> PAUSED) sem persistir", async () => {
+    const ticketRow = {
+      id: "t1",
+      number: 1,
+      company: "Acme",
+      requester: "Acme",
+      subject: "Teste",
+      description: null,
+      status: "DONE",
+      priority: "NONE",
+      operator: null,
+      contact: null,
+      ticketType: null,
+      category: null,
+      workbench: null,
+      responseSlaAt: null,
+      solutionSlaAt: null,
+      pausedReason: null,
+      createdAt: new Date("2026-03-22T00:00:00.000Z"),
+      updatedAt: new Date("2026-03-22T00:00:00.000Z"),
+      events: []
+    };
+
+    findUniqueTicketMock.mockResolvedValue(ticketRow);
+
+    const { changeTicketStatus } = await import("./ticket-service");
+
+    await expect(changeTicketStatus("t1", "paused" as any, "Admin", "Aguardando cliente")).rejects.toThrow(
+      "Transição de status inválida"
+    );
+    expect(updateTicketMock).not.toHaveBeenCalled();
+    expect(createEventMock).not.toHaveBeenCalled();
+  });
+
+  it("não gera evento quando o status informado é o mesmo (idempotente)", async () => {
+    const ticketRow = {
+      id: "t1",
+      number: 1,
+      company: "Acme",
+      requester: "Acme",
+      subject: "Teste",
+      description: null,
+      status: "DOING",
+      priority: "NONE",
+      operator: null,
+      contact: null,
+      ticketType: null,
+      category: null,
+      workbench: null,
+      responseSlaAt: null,
+      solutionSlaAt: null,
+      pausedReason: null,
+      createdAt: new Date("2026-03-22T00:00:00.000Z"),
+      updatedAt: new Date("2026-03-22T00:00:00.000Z"),
+      events: []
+    };
+
+    findUniqueTicketMock.mockResolvedValue(ticketRow);
+
+    const { changeTicketStatus } = await import("./ticket-service");
+    const result = await changeTicketStatus("t1", "doing" as any, "Admin");
+
+    expect(result).toBeTruthy();
+    expect(updateTicketMock).not.toHaveBeenCalled();
+    expect(createEventMock).not.toHaveBeenCalled();
+  });
 });
