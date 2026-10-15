@@ -6,7 +6,6 @@ import { motion } from "framer-motion";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
 import {
   FiCheckCircle,
   FiAlertCircle,
@@ -20,8 +19,7 @@ import {
   FiUsers,
   FiWifi,
   FiSettings,
-  FiHome,
-  FiChevronRight
+  FiHome
 } from "@/components/icons";
 
 // ============================================================
