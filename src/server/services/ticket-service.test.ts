@@ -1,6 +1,10 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 
 const findFirstSolicitanteMock = vi.fn();
+const findFirstTipoTicketMock = vi.fn();
+const findFirstCategoriaMock = vi.fn();
+const findFirstMesaMock = vi.fn();
+const findFirstOperadorMock = vi.fn();
 const createTicketMock = vi.fn();
 const findUniqueTicketMock = vi.fn();
 const updateTicketMock = vi.fn();
@@ -22,6 +26,18 @@ vi.mock("@/lib/prisma", () => ({
     solicitante: {
       findFirst: findFirstSolicitanteMock
     },
+    tipo_Ticket: {
+      findFirst: findFirstTipoTicketMock
+    },
+    categoria_Ticket: {
+      findFirst: findFirstCategoriaMock
+    },
+    mesa_Trabalho: {
+      findFirst: findFirstMesaMock
+    },
+    operador: {
+      findFirst: findFirstOperadorMock
+    },
     ticket: {
       create: createTicketMock,
       findUnique: findUniqueTicketMock,
@@ -37,6 +53,10 @@ describe("ticket-service.createTicket", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     findFirstSolicitanteMock.mockResolvedValue(null);
+    findFirstTipoTicketMock.mockResolvedValue(null);
+    findFirstCategoriaMock.mockResolvedValue(null);
+    findFirstMesaMock.mockResolvedValue(null);
+    findFirstOperadorMock.mockResolvedValue(null);
     createTicketMock.mockResolvedValue({
       id: "t1",
       number: 1,
@@ -89,6 +109,76 @@ describe("ticket-service.createTicket", () => {
     expect(findFirstSolicitanteMock).toHaveBeenCalledTimes(1);
     const data = (createTicketMock.mock.calls[0]?.[0] as any)?.data;
     expect(data.solicitante_id).toBe("s2");
+  });
+
+  it("persiste os relacionamentos resolvidos a partir dos nomes informados", async () => {
+    findFirstTipoTicketMock.mockResolvedValueOnce({ id: "tt1" });
+    findFirstCategoriaMock.mockResolvedValueOnce({ id: "cat1" });
+    findFirstMesaMock.mockResolvedValueOnce({ id: "mesa1" });
+    findFirstOperadorMock.mockResolvedValueOnce({ id: "op1" });
+
+    const { createTicket } = await import("./ticket-service");
+    await createTicket({
+      empresa: "Tech Sol",
+      solicitante: "Tech Sol",
+      assunto: "Assunto",
+      tipoTicket: "Rede",
+      categoria: "Cabeamento",
+      mesaTrabalho: "Mesa 1",
+      operador: "Joao"
+    } as any);
+
+    const data = (createTicketMock.mock.calls[0]?.[0] as any)?.data;
+    expect(data.tipo_ticket_id).toBe("tt1");
+    expect(data.categoria_id).toBe("cat1");
+    expect(data.mesa_trabalho_id).toBe("mesa1");
+    expect(data.operador_id).toBe("op1");
+  });
+});
+
+describe("ticket-service.getTicketById", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("prioriza os relacionamentos em relação aos campos legados", async () => {
+    findUniqueTicketMock.mockResolvedValueOnce({
+      id: "t1",
+      number: 1,
+      company: "Cliente Legado",
+      requester: "Cliente Legado",
+      subject: "Assunto",
+      description: null,
+      status: "TODO",
+      priority: "NONE",
+      operator: "Operador Legado",
+      contact: null,
+      ticketType: "Legado",
+      category: "Legado",
+      workbench: "Legado",
+      responseSlaAt: null,
+      solutionSlaAt: null,
+      pausedReason: null,
+      pauseSla: false,
+      createdAt: new Date("2026-03-22T00:00:00.000Z"),
+      updatedAt: new Date("2026-03-22T00:00:00.000Z"),
+      events: [],
+      solicitante: { id: "s1", nome_fantasia: "Cliente Novo", razao_social: null },
+      tipo_ticket: { id: "tt1", nome: "Rede", sla_horas: 4 },
+      categoria: { id: "c1", nome: "Cabeamento" },
+      mesa_trabalho_rel: { id: "m1", nome: "Mesa 1" },
+      operador_rel: { id: "o1", nome: "Joao" }
+    });
+
+    const { getTicketById } = await import("./ticket-service");
+    const ticket = await getTicketById("t1");
+
+    expect(ticket?.empresa).toBe("Cliente Novo");
+    expect(ticket?.solicitante).toBe("Cliente Novo");
+    expect(ticket?.tipoTicket).toBe("Rede");
+    expect(ticket?.categoria).toBe("Cabeamento");
+    expect(ticket?.mesaTrabalho).toBe("Mesa 1");
+    expect(ticket?.operador).toBe("Joao");
   });
 });
 
