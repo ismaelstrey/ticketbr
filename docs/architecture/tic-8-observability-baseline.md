@@ -51,6 +51,18 @@ Padrao inicial adotado:
   - `GET|POST /api/tasks`
 - Resultado: respostas desses endpoints agora incluem `requestId` no payload e `x-request-id` no header de forma consistente.
 
+### Metricas operacionais por rota
+
+- Novo servico `src/server/services/route-metrics-observability.ts`:
+  - `recordRouteMetric` persiste a metrica de cada requisicao no `AuditLog` (`entity="route_metric"`, action `obs.route.<success|failure>`) de forma best-effort (nunca lanca);
+  - `trackRouteResponse` registra a metrica e devolve a propria resposta, permitindo encadear no retorno dos handlers;
+  - `getOperationalRouteMetrics` agrega os eventos por rota/metodo em uma janela (padrao 24h), calculando volume, taxa de erro e latencia media/p95.
+- Novo endpoint autenticado `GET /api/observability/metrics` (query opcional `hours`) expoe as metricas agregadas.
+- Rollout do padrao (requestId + latencia + log estruturado + metrica) para:
+  - `GET|POST /api/customer/tickets`
+  - `GET /api/dashboard/tickets`
+  - `GET /api/chat/tickets`
+
 ## Evidencias obrigatorias
 
 - `npm run lint`

@@ -676,9 +676,9 @@ const modules: Module[] = [
 const qualityMetrics: QualityMetric[] = [
   {
     label: "Testes Automatizados",
-    value: "81 arquivos",
+    value: "83 arquivos",
     status: "ok",
-    description: "213 testes passando, incluindo testes de contrato, unitários, integração, autorização e regras de status/SLA."
+    description: "221 testes passando, incluindo testes de contrato, unitários, integração, autorização, regras de status/SLA e observabilidade."
   },
   {
     label: "Lint (ESLint)",
@@ -767,9 +767,9 @@ const roadmap: RoadmapItem[] = [
   {
     phase: "Fase 2 — Consolidação",
     title: "Observabilidade estruturada",
-    description: "Logs estruturados, métricas e tracing para diagnóstico operacional.",
+    description: "Concluído: requestId + latência + logs estruturados nas rotas de negócio, eventos críticos persistidos no AuditLog e endpoint /api/observability/metrics com latência p95, taxa de erro e volume por rota (janela configurável).",
     priority: "P1",
-    status: "pending"
+    status: "done"
   },
   {
     phase: "Fase 3 — Escala",
@@ -807,13 +807,8 @@ const techDebt: TechDebtItem[] = [
     impact: "medium"
   },
   {
-    title: "Observabilidade",
-    description: "Health check já cobre dependências; falta stack de logs estruturados/métricas.",
-    impact: "medium"
-  },
-  {
     title: "Cobertura de testes",
-    description: "Há 81 arquivos de teste, mas sem métrica oficial de cobertura percentual.",
+    description: "Há 83 arquivos de teste, mas sem métrica oficial de cobertura percentual.",
     impact: "low"
   },
   {

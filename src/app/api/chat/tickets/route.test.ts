@@ -14,6 +14,17 @@ vi.mock("@/lib/prisma", () => ({
   }
 }));
 
+// Evita persistência real de métricas de rota durante os testes
+vi.mock("@/server/services/route-metrics-observability", () => ({
+  recordRouteMetric: async () => {},
+  trackRouteResponse: async (
+    _route: string,
+    _method: string,
+    _context: unknown,
+    response: Response
+  ) => response
+}));
+
 describe("GET /api/chat/tickets", () => {
   beforeEach(() => {
     vi.clearAllMocks();

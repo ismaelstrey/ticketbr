@@ -1,11 +1,15 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { createRequestContext, jsonWithRequestId, logRouteEvent } from "@/lib/observability";
 import { getPortalStatusCopy, getPortalStatusKey } from "@/lib/tickets/portal-status-taxonomy";
 import { requireCustomerContext } from "@/server/services/customer-context";
 import { writeAuditLog } from "@/server/services/audit-log";
 import { notifyTicketCreated } from "@/server/services/customer-notifications";
 import { computeCustomerSla } from "@/lib/customerPortal";
+import { trackRouteResponse } from "@/server/services/route-metrics-observability";
+
+const ROUTE = "/api/customer/tickets";
 
 const CreateTicketSchema = z.object({
   subject: z.string().min(3),
@@ -15,8 +19,14 @@ const CreateTicketSchema = z.object({
 });
 
 export async function GET(request: NextRequest) {
+  const context = createRequestContext();
+  let actorUserId: string | null = null;
+  let solicitanteId: string | null = null;
+
   try {
     const ctx = await requireCustomerContext();
+    actorUserId = ctx.user.id;
+    solicitanteId = ctx.solicitante.id;
     const q = String(request.nextUrl.searchParams.get("q") || "").trim();
     const status = String(request.nextUrl.searchParams.get("status") || "").trim();
     const priority = String(request.nextUrl.searchParams.get("priority") || "").trim();
@@ -93,34 +103,61 @@ export async function GET(request: NextRequest) {
       }
     });
 
-    return NextResponse.json({
-      data: tickets.map((t) => ({
-        id: t.id,
-        number: t.number,
-        subject: t.subject,
-        description: t.description,
-        status: t.status,
-        portalStatusKey: getPortalStatusKey(t.status),
-        portalStatus: getPortalStatusCopy(t.status),
-        priority: t.priority,
-        sla: computeCustomerSla(t),
-        responseSlaAt: t.responseSlaAt,
-        solutionSlaAt: t.solutionSlaAt,
-        category: t.categoria ? { id: t.categoria.id, name: t.categoria.nome } : null,
-        createdAt: t.createdAt,
-        updatedAt: t.updatedAt
-      }))
+    logRouteEvent("[customer.tickets] list ok", "info", context, {
+      solicitanteId,
+      count: tickets.length
     });
+
+    return trackRouteResponse(
+      ROUTE,
+      "GET",
+      context,
+      jsonWithRequestId(
+        {
+          data: tickets.map((t) => ({
+            id: t.id,
+            number: t.number,
+            subject: t.subject,
+            description: t.description,
+            status: t.status,
+            portalStatusKey: getPortalStatusKey(t.status),
+            portalStatus: getPortalStatusCopy(t.status),
+            priority: t.priority,
+            sla: computeCustomerSla(t),
+            responseSlaAt: t.responseSlaAt,
+            solutionSlaAt: t.solutionSlaAt,
+            category: t.categoria ? { id: t.categoria.id, name: t.categoria.nome } : null,
+            createdAt: t.createdAt,
+            updatedAt: t.updatedAt
+          }))
+        },
+        context
+      ),
+      { actorUserId, solicitanteId }
+    );
   } catch (error: any) {
     const code = String(error?.message || "");
     const status = code === "FORBIDDEN" ? 403 : 401;
-    return NextResponse.json({ error: status === 403 ? "Forbidden" : "Unauthorized" }, { status });
+    logRouteEvent("[customer.tickets] list failed", "warn", context, { status });
+    return trackRouteResponse(
+      ROUTE,
+      "GET",
+      context,
+      jsonWithRequestId({ error: status === 403 ? "Forbidden" : "Unauthorized" }, context, { status }),
+      { actorUserId, solicitanteId }
+    );
   }
 }
 
 export async function POST(request: NextRequest) {
+  const context = createRequestContext();
+  let actorUserId: string | null = null;
+  let solicitanteId: string | null = null;
+
   try {
     const ctx = await requireCustomerContext();
+    actorUserId = ctx.user.id;
+    solicitanteId = ctx.solicitante.id;
     const body = await request.json().catch(() => ({}));
     const input = CreateTicketSchema.parse(body);
 
@@ -130,7 +167,14 @@ export async function POST(request: NextRequest) {
     });
 
     if (!categoria) {
-      return NextResponse.json({ error: "Categoria inválida" }, { status: 400 });
+      logRouteEvent("[customer.tickets] create invalid_category", "warn", context, { solicitanteId });
+      return trackRouteResponse(
+        ROUTE,
+        "POST",
+        context,
+        jsonWithRequestId({ error: "Categoria inválida" }, context, { status: 400 }),
+        { actorUserId, solicitanteId }
+      );
     }
 
     const ticket = await prisma.ticket.create({
@@ -175,13 +219,42 @@ export async function POST(request: NextRequest) {
       ticketId: ticket.id
     });
 
-    return NextResponse.json({ data: ticket }, { status: 201 });
+    logRouteEvent("[customer.tickets] create ok", "info", context, {
+      solicitanteId,
+      ticketId: ticket.id
+    });
+
+    return trackRouteResponse(
+      ROUTE,
+      "POST",
+      context,
+      jsonWithRequestId({ data: ticket }, context, { status: 201 }),
+      { actorUserId, solicitanteId, metadata: { ticketId: ticket.id } }
+    );
   } catch (error: any) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: "Payload inválido", details: error.flatten() }, { status: 400 });
+      logRouteEvent("[customer.tickets] create validation_error", "warn", context, { solicitanteId });
+      return trackRouteResponse(
+        ROUTE,
+        "POST",
+        context,
+        jsonWithRequestId({ error: "Payload inválido", details: error.flatten() }, context, { status: 400 }),
+        { actorUserId, solicitanteId }
+      );
     }
     const code = String(error?.message || "");
     const status = code === "FORBIDDEN" ? 403 : code === "UNAUTHORIZED" ? 401 : 500;
-    return NextResponse.json({ error: status === 500 ? "Erro interno" : status === 403 ? "Forbidden" : "Unauthorized" }, { status });
+    logRouteEvent("[customer.tickets] create failed", "error", context, { status });
+    return trackRouteResponse(
+      ROUTE,
+      "POST",
+      context,
+      jsonWithRequestId(
+        { error: status === 500 ? "Erro interno" : status === 403 ? "Forbidden" : "Unauthorized" },
+        context,
+        { status }
+      ),
+      { actorUserId, solicitanteId }
+    );
   }
 }

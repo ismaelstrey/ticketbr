@@ -4,6 +4,17 @@ vi.mock("@/server/services/tickets-operational-dashboard", () => ({
   getTicketsOperationalDashboard: vi.fn()
 }));
 
+// Evita persistência real de métricas de rota durante os testes
+vi.mock("@/server/services/route-metrics-observability", () => ({
+  recordRouteMetric: async () => {},
+  trackRouteResponse: async (
+    _route: string,
+    _method: string,
+    _context: unknown,
+    response: Response
+  ) => response
+}));
+
 describe("GET /api/dashboard/tickets", () => {
   beforeEach(() => {
     vi.clearAllMocks();
