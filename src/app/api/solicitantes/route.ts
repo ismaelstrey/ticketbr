@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { Prisma } from "@/lib/prisma";
 import { CreateSolicitanteSchema } from "@/lib/validations/solicitante";
+import { guardStaff } from "@/server/services/staff-context";
 
 const QuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
@@ -13,6 +14,10 @@ const QuerySchema = z.object({
 });
 
 export async function GET(request: NextRequest) {
+  // Somente staff autenticado (ADMIN/AGENT) pode listar solicitantes
+  const unauthorized = await guardStaff();
+  if (unauthorized) return unauthorized;
+
   try {
     const parsed = QuerySchema.safeParse(Object.fromEntries(request.nextUrl.searchParams.entries()));
     if (!parsed.success) {
@@ -50,6 +55,10 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  // Somente staff autenticado (ADMIN/AGENT) pode criar solicitantes
+  const unauthorized = await guardStaff();
+  if (unauthorized) return unauthorized;
+
   try {
     const body = await request.json();
     const result = CreateSolicitanteSchema.safeParse(body);

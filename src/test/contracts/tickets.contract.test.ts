@@ -14,6 +14,11 @@ vi.mock("@/lib/auth", () => ({
   getSession: getSessionMock,
 }));
 
+vi.mock("@/server/services/staff-context", () => ({
+  // Sessão de staff válida para os testes de contrato
+  guardStaff: vi.fn(async () => null),
+}));
+
 describe("API Contract - /api/tickets", () => {
   beforeEach(() => {
     vi.resetModules();

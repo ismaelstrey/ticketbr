@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { guardAdmin } from "@/server/services/staff-context";
 
 export async function GET() {
+  // Somente administradores podem listar mesas de trabalho
+  const unauthorized = await guardAdmin();
+  if (unauthorized) return unauthorized;
+
   try {
     const mesas = await prisma.mesa_Trabalho.findMany({
       where: { status: true },
@@ -15,6 +20,10 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  // Somente administradores podem criar mesas de trabalho
+  const unauthorized = await guardAdmin();
+  if (unauthorized) return unauthorized;
+
   try {
     const body = await request.json();
     const mesa = await prisma.mesa_Trabalho.create({

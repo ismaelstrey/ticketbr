@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
+import { guardStaff } from "@/server/services/staff-context";
 
 const CreateFuncionarioSchema = z.object({
   nome: z.string().min(2, "Nome é obrigatório"),
@@ -55,6 +56,10 @@ async function findWhatsAppContactByPhone(phone: string) {
 }
 
 export async function GET(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  // Somente staff autenticado (ADMIN/AGENT) pode listar funcionários
+  const unauthorized = await guardStaff();
+  if (unauthorized) return unauthorized;
+
   try {
     const { id } = await params;
     const canUseWhatsappRelation = await hasWhatsappContactColumn();
@@ -110,6 +115,10 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ id: st
 }
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  // Somente staff autenticado (ADMIN/AGENT) pode criar funcionários
+  const unauthorized = await guardStaff();
+  if (unauthorized) return unauthorized;
+
   try {
     const { id } = await params;
     const canUseWhatsappRelation = await hasWhatsappContactColumn();

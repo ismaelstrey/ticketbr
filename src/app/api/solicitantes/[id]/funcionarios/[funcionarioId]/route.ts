@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
+import { guardStaff } from "@/server/services/staff-context";
 
 const UpdateFuncionarioSchema = z.object({
   nome: z.string().min(2).optional(),
@@ -55,6 +56,10 @@ async function findWhatsAppContactByPhone(phone?: string) {
 }
 
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string; funcionarioId: string }> }) {
+  // Somente staff autenticado (ADMIN/AGENT) pode atualizar funcionários
+  const unauthorized = await guardStaff();
+  if (unauthorized) return unauthorized;
+
   try {
     const { id, funcionarioId } = await params;
     const body = await request.json();
