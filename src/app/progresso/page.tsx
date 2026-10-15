@@ -676,9 +676,9 @@ const modules: Module[] = [
 const qualityMetrics: QualityMetric[] = [
   {
     label: "Testes Automatizados",
-    value: "80 arquivos",
+    value: "81 arquivos",
     status: "ok",
-    description: "199 testes passando, incluindo testes de contrato, unitários, integração e autorização."
+    description: "211 testes passando, incluindo testes de contrato, unitários, integração, autorização e regras de status/SLA."
   },
   {
     label: "Lint (ESLint)",
@@ -760,9 +760,9 @@ const roadmap: RoadmapItem[] = [
   {
     phase: "Fase 2 — Consolidação",
     title: "Regras de transição de status e SLA",
-    description: "Formalizar regras de negócio para mudanças de status e cálculo de SLA em camada de serviço.",
+    description: "Máquina de estados de status (TODO/DOING/PAUSED/DONE) e política de SLA (tipo de ticket, contrato e padrão) centralizadas em camada de serviço, com testes.",
     priority: "P1",
-    status: "in-progress"
+    status: "done"
   },
   {
     phase: "Fase 2 — Consolidação",
@@ -818,7 +818,7 @@ const techDebt: TechDebtItem[] = [
   },
   {
     title: "Cobertura de testes",
-    description: "Há 80 arquivos de teste, mas sem métrica oficial de cobertura percentual.",
+    description: "Há 81 arquivos de teste, mas sem métrica oficial de cobertura percentual.",
     impact: "low"
   },
   {
