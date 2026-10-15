@@ -13,7 +13,6 @@ export async function GET(request: NextRequest) {
     const orConditions: any[] = [];
 
     if (companyName) {
-      orConditions.push({ company: { equals: companyName, mode: "insensitive" as const } });
       orConditions.push({ solicitante: { is: { nome_fantasia: { equals: companyName, mode: "insensitive" as const } } } });
       orConditions.push({ solicitante: { is: { razao_social: { equals: companyName, mode: "insensitive" as const } } } });
     }
@@ -30,10 +29,10 @@ export async function GET(request: NextRequest) {
       const razaoSocial = solicitante?.razao_social?.trim();
 
       if (nomeFantasia) {
-        orConditions.push({ company: { equals: nomeFantasia, mode: "insensitive" as const } });
+        orConditions.push({ solicitante: { is: { nome_fantasia: { equals: nomeFantasia, mode: "insensitive" as const } } } });
       }
       if (razaoSocial) {
-        orConditions.push({ company: { equals: razaoSocial, mode: "insensitive" as const } });
+        orConditions.push({ solicitante: { is: { razao_social: { equals: razaoSocial, mode: "insensitive" as const } } } });
       }
     }
 
@@ -47,7 +46,6 @@ export async function GET(request: NextRequest) {
         id: true,
         number: true,
         subject: true,
-        company: true,
         solicitante_id: true,
         solicitante: {
           select: {
@@ -65,7 +63,7 @@ export async function GET(request: NextRequest) {
         number: ticket.number,
         subject: ticket.subject,
         companyId: ticket.solicitante?.id ?? ticket.solicitante_id ?? null,
-        companyName: ticket.solicitante?.nome_fantasia || ticket.solicitante?.razao_social || ticket.company || null
+        companyName: ticket.solicitante?.nome_fantasia || ticket.solicitante?.razao_social || null
       }))
     });
   } catch (error) {

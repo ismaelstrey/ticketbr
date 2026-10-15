@@ -63,20 +63,16 @@ const ticketRelationsInclude = {
   ...ticketRelationSelect
 } as const;
 
-const ticketLegacySelect = {
+// Projeção usada apenas quando o banco ainda não possui as colunas de pausa de SLA.
+// Seleciona explicitamente os campos existentes (sem as colunas de pausa ausentes).
+const ticketCompatSelect = {
   id: true,
   number: true,
-  company: true,
-  requester: true,
   subject: true,
   description: true,
   status: true,
   priority: true,
-  operator: true,
   contact: true,
-  ticketType: true,
-  category: true,
-  workbench: true,
   responseSlaAt: true,
   solutionSlaAt: true,
   pausedReason: true,
@@ -99,7 +95,7 @@ async function findTicketsWithCompatibility() {
 
     console.warn("[Service] DB sem colunas de pausa de SLA. Usando fallback compatível para listagem.");
     return prisma.ticket.findMany({
-      select: ticketLegacySelect,
+      select: ticketCompatSelect,
       orderBy: { createdAt: "desc" }
     });
   }
@@ -119,17 +115,19 @@ async function findTicketByIdWithCompatibility(id: string) {
     console.warn(`[Service] DB sem colunas de pausa de SLA. Usando fallback compatível para ticket ${id}.`);
     return prisma.ticket.findUnique({
       where: { id },
-      select: ticketLegacySelect
+      select: ticketCompatSelect
     });
   }
 }
 
 function resolveSlaDeadlineForTicket(ticket: any): Date {
+  // A empresa/solicitante agora vem da relação, não mais do campo legado
+  const nomeSolicitante = ticket.solicitante?.nome_fantasia || ticket.solicitante?.razao_social || null;
   return resolveSlaDeadline({
     createdAt: ticket.createdAt,
     solutionSlaAt: ticket.solutionSlaAt,
     tipoTicketSlaHours: ticket.tipo_ticket?.sla_horas ?? null,
-    company: ticket.company
+    company: nomeSolicitante
   });
 }
 
@@ -174,14 +172,14 @@ function calculateSlaProgress(
 }
 
 function mapTicket(ticket: any) {
-  // Nome do cliente resolvido pela relação (fallback para o campo legado)
+  // Nome do cliente resolvido pela relação (fonte de verdade)
   const nomeSolicitante = ticket.solicitante?.nome_fantasia || ticket.solicitante?.razao_social || null;
 
   return {
     id: ticket.id,
     number: ticket.number,
-    empresa: nomeSolicitante ?? ticket.company,
-    solicitante: nomeSolicitante ?? ticket.requester,
+    empresa: nomeSolicitante,
+    solicitante: nomeSolicitante,
     assunto: ticket.subject,
     descricao: ticket.description,
     prioridade: fromPrismaPriority(ticket.priority as any),
@@ -199,11 +197,11 @@ function mapTicket(ticket: any) {
       ticket.status
     ),
     progressoTarefa: 0, // Campo não existe no banco, retornando 0 por padrão
-    operador: ticket.operador_rel?.nome ?? ticket.operator,
+    operador: ticket.operador_rel?.nome ?? null,
     contato: ticket.contact,
-    tipoTicket: ticket.tipo_ticket?.nome ?? ticket.ticketType,
-    categoria: ticket.categoria?.nome ?? ticket.category,
-    mesaTrabalho: ticket.mesa_trabalho_rel?.nome ?? ticket.workbench,
+    tipoTicket: ticket.tipo_ticket?.nome ?? null,
+    categoria: ticket.categoria?.nome ?? null,
+    mesaTrabalho: ticket.mesa_trabalho_rel?.nome ?? null,
     dataCriacao: ticket.createdAt,
     dataAtualizacao: ticket.updatedAt,
     slaResposta: ticket.responseSlaAt,
@@ -368,13 +366,6 @@ export async function createTicket(input: CreateTicketInput) {
       ...(categoriaId ? { categoria_id: categoriaId } : {}),
       ...(mesaTrabalhoId ? { mesa_trabalho_id: mesaTrabalhoId } : {}),
       ...(operadorId ? { operador_id: operadorId } : {}),
-      // Campos legados mantidos em sincronia temporariamente (dual-write) até a remoção das colunas
-      company: input.empresa,
-      requester: input.solicitante,
-      operator: input.operador,
-      ticketType: input.tipoTicket,
-      category: input.categoria,
-      workbench: input.mesaTrabalho,
       events: {
         create: {
           type: "CREATED",
@@ -398,15 +389,9 @@ export async function updateTicket(id: string, input: UpdateTicketInput) {
   }
 
   const data: Record<string, unknown> = {
-    company: input.empresa,
-    requester: input.solicitante,
     subject: input.assunto,
     description: input.descricao,
-    operator: input.operador,
-    contact: input.contato,
-    ticketType: input.tipoTicket,
-    category: input.categoria,
-    workbench: input.mesaTrabalho
+    contact: input.contato
   };
 
   // Remove undefined keys

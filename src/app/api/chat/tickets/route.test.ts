@@ -43,9 +43,8 @@ describe("GET /api/chat/tickets", () => {
         id: "t1",
         number: 1,
         subject: "Teste",
-        company: "Tech Sol",
-        solicitante_id: null,
-        solicitante: null
+        solicitante_id: "s1",
+        solicitante: { id: "s1", nome_fantasia: "Tech Sol", razao_social: "Tech Sol LTDA" }
       }
     ]);
 
@@ -60,14 +59,14 @@ describe("GET /api/chat/tickets", () => {
     expect(findManyTicketsMock).toHaveBeenCalledTimes(1);
     const where = (findManyTicketsMock.mock.calls[0]?.[0] as any)?.where;
     expect(where?.OR?.some((c: any) => c?.solicitante_id === "s1")).toBe(true);
-    expect(where?.OR?.some((c: any) => c?.company?.equals === "Tech Sol")).toBe(true);
-    expect(where?.OR?.some((c: any) => c?.company?.equals === "Tech Sol LTDA")).toBe(true);
+    expect(where?.OR?.some((c: any) => c?.solicitante?.is?.nome_fantasia?.equals === "Tech Sol")).toBe(true);
+    expect(where?.OR?.some((c: any) => c?.solicitante?.is?.razao_social?.equals === "Tech Sol LTDA")).toBe(true);
 
     expect(body.data[0]).toEqual({
       id: "t1",
       number: 1,
       subject: "Teste",
-      companyId: null,
+      companyId: "s1",
       companyName: "Tech Sol"
     });
   });

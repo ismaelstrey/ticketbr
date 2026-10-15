@@ -99,14 +99,15 @@ export function TicketOperationalDashboard() {
 
   const loadOptions = useCallback(async () => {
     try {
-      const [users, solicitantesRes, categorias] = await Promise.all([
-        api.users.list().catch(() => []),
+      const [operadores, solicitantesRes, categorias] = await Promise.all([
+        fetch("/api/operadores").then((r) => r.json()).catch(() => []),
         fetch("/api/solicitantes?page=1&pageSize=100&sortBy=nome_fantasia&sortDir=asc").then((r) => r.json()).catch(() => ({ data: [] })),
         fetch("/api/categorias-ticket").then((r) => r.json()).catch(() => [])
       ]);
 
       setOptions({
-        agents: normalizeOptions(users, (u) => String(u.name || u.email || u.id)),
+        // Os agentes do dashboard são operadores (relação operador_id do ticket)
+        agents: normalizeOptions(operadores, (o) => String(o.nome || o.email || o.id)),
         clients: normalizeOptions(solicitantesRes?.data || [], (s) => String(s.nome_fantasia || s.razao_social || s.id)),
         categories: normalizeOptions(categorias, (c) => String(c.nome || c.id))
       });
