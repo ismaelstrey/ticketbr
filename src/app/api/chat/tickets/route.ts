@@ -1,13 +1,25 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { createRequestContext, jsonWithRequestId, logRouteEvent } from "@/lib/observability";
+import { trackRouteResponse } from "@/server/services/route-metrics-observability";
+
+const ROUTE = "/api/chat/tickets";
 
 export async function GET(request: NextRequest) {
+  const context = createRequestContext();
+
   try {
     const companyId = request.nextUrl.searchParams.get("companyId")?.trim();
     const companyName = request.nextUrl.searchParams.get("companyName")?.trim();
 
     if (!companyId && !companyName) {
-      return NextResponse.json({ data: [] });
+      logRouteEvent("[chat.tickets] skipped", "info", context, { reason: "no_filters" });
+      return trackRouteResponse(
+        ROUTE,
+        "GET",
+        context,
+        jsonWithRequestId({ data: [] }, context)
+      );
     }
 
     const orConditions: any[] = [];
@@ -57,17 +69,34 @@ export async function GET(request: NextRequest) {
       }
     });
 
-    return NextResponse.json({
-      data: tickets.map((ticket) => ({
-        id: ticket.id,
-        number: ticket.number,
-        subject: ticket.subject,
-        companyId: ticket.solicitante?.id ?? ticket.solicitante_id ?? null,
-        companyName: ticket.solicitante?.nome_fantasia || ticket.solicitante?.razao_social || null
-      }))
-    });
+    logRouteEvent("[chat.tickets] ok", "info", context, { count: tickets.length });
+    return trackRouteResponse(
+      ROUTE,
+      "GET",
+      context,
+      jsonWithRequestId(
+        {
+          data: tickets.map((ticket) => ({
+            id: ticket.id,
+            number: ticket.number,
+            subject: ticket.subject,
+            companyId: ticket.solicitante?.id ?? ticket.solicitante_id ?? null,
+            companyName: ticket.solicitante?.nome_fantasia || ticket.solicitante?.razao_social || null
+          }))
+        },
+        context
+      )
+    );
   } catch (error) {
     console.error("Error loading chat tickets", error);
-    return NextResponse.json({ error: "Erro ao carregar tickets" }, { status: 500 });
+    logRouteEvent("[chat.tickets] failed", "error", context, {
+      error: error instanceof Error ? error.message : "unknown"
+    });
+    return trackRouteResponse(
+      ROUTE,
+      "GET",
+      context,
+      jsonWithRequestId({ error: "Erro ao carregar tickets" }, context, { status: 500 })
+    );
   }
 }
