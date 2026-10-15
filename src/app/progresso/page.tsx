@@ -753,9 +753,9 @@ const roadmap: RoadmapItem[] = [
   {
     phase: "Fase 2 — Consolidação",
     title: "Remover campos legados do Ticket",
-    description: "Migrar para os relacionamentos novos e remover campos string legados gradualmente.",
+    description: "Etapa 1 concluída: backfill dos relacionamentos (tipo, categoria, mesa, operador), leitura usando as relações como fonte de verdade e escrita resolvendo os IDs. Falta remover o dual-write e dropar as colunas.",
     priority: "P1",
-    status: "pending"
+    status: "in-progress"
   },
   {
     phase: "Fase 2 — Consolidação",
@@ -803,8 +803,8 @@ const techDebt: TechDebtItem[] = [
   },
   {
     title: "Campos legados no Ticket",
-    description: "Coexistem campos string legados e relacionamentos novos, indicando migração parcial.",
-    impact: "high"
+    description: "Relacionamentos já são a fonte de verdade na leitura e o backfill foi aplicado; resta remover o dual-write e dropar as colunas string.",
+    impact: "medium"
   },
   {
     title: "Rate-limit e bloqueio de login",

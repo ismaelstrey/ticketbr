@@ -24,8 +24,12 @@ export const CreateTicketSchema = z.object({
   operador: z.string().optional(),
   contato: z.string().optional(),
   tipoTicket: z.string().optional(),
+  tipoTicketId: z.string().min(1).optional(),
   categoria: z.string().optional(),
+  categoriaId: z.string().min(1).optional(),
   mesaTrabalho: z.string().optional(),
+  mesaTrabalhoId: z.string().min(1).optional(),
+  operadorId: z.string().min(1).optional(),
 });
 
 export const UpdateTicketSchema = CreateTicketSchema.partial().extend({

@@ -49,6 +49,20 @@ function isMissingPauseColumnsError(error: unknown): boolean {
   ) || (message.includes("does not exist") && hasLegacyColumnName);
 }
 
+// Relacionamentos carregados para que a leitura use as relações como fonte de verdade
+const ticketRelationSelect = {
+  tipo_ticket: { select: { id: true, nome: true, sla_horas: true } },
+  categoria: { select: { id: true, nome: true } },
+  mesa_trabalho_rel: { select: { id: true, nome: true } },
+  operador_rel: { select: { id: true, nome: true } },
+  solicitante: { select: { id: true, nome_fantasia: true, razao_social: true } }
+} as const;
+
+const ticketRelationsInclude = {
+  events: true,
+  ...ticketRelationSelect
+} as const;
+
 const ticketLegacySelect = {
   id: true,
   number: true,
@@ -69,13 +83,13 @@ const ticketLegacySelect = {
   createdAt: true,
   updatedAt: true,
   events: true,
-  tipo_ticket: { select: { sla_horas: true } },
+  ...ticketRelationSelect
 } as const;
 
 async function findTicketsWithCompatibility() {
   try {
     return await prisma.ticket.findMany({
-      include: { events: true, tipo_ticket: { select: { sla_horas: true } } },
+      include: ticketRelationsInclude,
       orderBy: { createdAt: "desc" }
     });
   } catch (error) {
@@ -95,7 +109,7 @@ async function findTicketByIdWithCompatibility(id: string) {
   try {
     return await prisma.ticket.findUnique({
       where: { id },
-      include: { events: true, tipo_ticket: { select: { sla_horas: true } } }
+      include: ticketRelationsInclude
     });
   } catch (error) {
     if (!isMissingPauseColumnsError(error)) {
@@ -160,11 +174,14 @@ function calculateSlaProgress(
 }
 
 function mapTicket(ticket: any) {
+  // Nome do cliente resolvido pela relação (fallback para o campo legado)
+  const nomeSolicitante = ticket.solicitante?.nome_fantasia || ticket.solicitante?.razao_social || null;
+
   return {
     id: ticket.id,
     number: ticket.number,
-    empresa: ticket.company,
-    solicitante: ticket.requester,
+    empresa: nomeSolicitante ?? ticket.company,
+    solicitante: nomeSolicitante ?? ticket.requester,
     assunto: ticket.subject,
     descricao: ticket.description,
     prioridade: fromPrismaPriority(ticket.priority as any),
@@ -182,11 +199,11 @@ function mapTicket(ticket: any) {
       ticket.status
     ),
     progressoTarefa: 0, // Campo não existe no banco, retornando 0 por padrão
-    operador: ticket.operator,
+    operador: ticket.operador_rel?.nome ?? ticket.operator,
     contato: ticket.contact,
-    tipoTicket: ticket.ticketType,
-    categoria: ticket.category,
-    mesaTrabalho: ticket.workbench,
+    tipoTicket: ticket.tipo_ticket?.nome ?? ticket.ticketType,
+    categoria: ticket.categoria?.nome ?? ticket.category,
+    mesaTrabalho: ticket.mesa_trabalho_rel?.nome ?? ticket.workbench,
     dataCriacao: ticket.createdAt,
     dataAtualizacao: ticket.updatedAt,
     slaResposta: ticket.responseSlaAt,
@@ -259,23 +276,102 @@ async function resolveSolicitanteId(input: CreateTicketInput | UpdateTicketInput
   return solicitante?.id ?? null;
 }
 
+/** Resolve o ID do tipo de ticket a partir do ID informado ou do nome (case-insensitive). */
+async function resolveTipoTicketId(input: CreateTicketInput | UpdateTicketInput): Promise<string | null> {
+  if (input.tipoTicketId?.trim()) return input.tipoTicketId.trim();
+
+  const nome = String(input.tipoTicket ?? "").trim();
+  if (!nome) return null;
+
+  const tipo = await prisma.tipo_Ticket.findFirst({
+    where: { nome: { equals: nome, mode: "insensitive" } },
+    select: { id: true }
+  });
+  return tipo?.id ?? null;
+}
+
+/** Resolve o ID da categoria, priorizando a categoria vinculada ao tipo de ticket. */
+async function resolveCategoriaId(
+  input: CreateTicketInput | UpdateTicketInput,
+  tipoTicketId: string | null
+): Promise<string | null> {
+  if (input.categoriaId?.trim()) return input.categoriaId.trim();
+
+  const nome = String(input.categoria ?? "").trim();
+  if (!nome) return null;
+
+  const categoria = await prisma.categoria_Ticket.findFirst({
+    where: {
+      nome: { equals: nome, mode: "insensitive" },
+      ...(tipoTicketId ? { tipo_ticket_id: tipoTicketId } : {})
+    },
+    select: { id: true }
+  });
+  if (categoria) return categoria.id;
+
+  // Fallback: procura a categoria apenas pelo nome
+  const fallback = await prisma.categoria_Ticket.findFirst({
+    where: { nome: { equals: nome, mode: "insensitive" } },
+    select: { id: true }
+  });
+  return fallback?.id ?? null;
+}
+
+/** Resolve o ID da mesa de trabalho a partir do ID informado ou do nome. */
+async function resolveMesaTrabalhoId(input: CreateTicketInput | UpdateTicketInput): Promise<string | null> {
+  if (input.mesaTrabalhoId?.trim()) return input.mesaTrabalhoId.trim();
+
+  const nome = String(input.mesaTrabalho ?? "").trim();
+  if (!nome) return null;
+
+  const mesa = await prisma.mesa_Trabalho.findFirst({
+    where: { nome: { equals: nome, mode: "insensitive" } },
+    select: { id: true }
+  });
+  return mesa?.id ?? null;
+}
+
+/** Resolve o ID do operador a partir do ID informado ou do nome. */
+async function resolveOperadorId(input: CreateTicketInput | UpdateTicketInput): Promise<string | null> {
+  if (input.operadorId?.trim()) return input.operadorId.trim();
+
+  const nome = String(input.operador ?? "").trim();
+  if (!nome) return null;
+
+  const operador = await prisma.operador.findFirst({
+    where: { nome: { equals: nome, mode: "insensitive" } },
+    select: { id: true }
+  });
+  return operador?.id ?? null;
+}
+
 export async function createTicket(input: CreateTicketInput) {
   // Safe cast to Prisma enum strings
   const status = (input.status ? toPrismaStatus(input.status as UiStatus) : "TODO") as TicketStatus;
   const priority = (input.prioridade ? toPrismaPriority(input.prioridade as UiPriority) : undefined) as TicketPriority | undefined;
   const solicitanteId = await resolveSolicitanteId(input);
+  // Resolve os relacionamentos (fonte de verdade) a partir dos IDs ou nomes informados
+  const tipoTicketId = await resolveTipoTicketId(input);
+  const categoriaId = await resolveCategoriaId(input, tipoTicketId);
+  const mesaTrabalhoId = await resolveMesaTrabalhoId(input);
+  const operadorId = await resolveOperadorId(input);
 
   const ticket = await prisma.ticket.create({
     data: {
-      company: input.empresa,
-      requester: input.solicitante,
       subject: input.assunto,
       description: input.descricao,
-      ...(solicitanteId ? { solicitante_id: solicitanteId } : {}),
       status,
       priority,
-      operator: input.operador,
       contact: input.contato,
+      ...(solicitanteId ? { solicitante_id: solicitanteId } : {}),
+      ...(tipoTicketId ? { tipo_ticket_id: tipoTicketId } : {}),
+      ...(categoriaId ? { categoria_id: categoriaId } : {}),
+      ...(mesaTrabalhoId ? { mesa_trabalho_id: mesaTrabalhoId } : {}),
+      ...(operadorId ? { operador_id: operadorId } : {}),
+      // Campos legados mantidos em sincronia temporariamente (dual-write) até a remoção das colunas
+      company: input.empresa,
+      requester: input.solicitante,
+      operator: input.operador,
       ticketType: input.tipoTicket,
       category: input.categoria,
       workbench: input.mesaTrabalho,
@@ -289,7 +385,7 @@ export async function createTicket(input: CreateTicketInput) {
         }
       }
     },
-    include: { events: true }
+    include: ticketRelationsInclude
   });
 
   return mapTicket(ticket);
@@ -335,6 +431,24 @@ export async function updateTicket(id: string, input: UpdateTicketInput) {
   const solicitanteId = await resolveSolicitanteId(input);
   if (solicitanteId) {
     data.solicitante_id = solicitanteId;
+  }
+
+  // Resolve e sincroniza os relacionamentos (fonte de verdade) com base nos IDs/nomes
+  const tipoTicketId = (await resolveTipoTicketId(input)) ?? current.tipo_ticket_id ?? null;
+  if (tipoTicketId) {
+    data.tipo_ticket_id = tipoTicketId;
+  }
+  const categoriaId = await resolveCategoriaId(input, tipoTicketId);
+  if (categoriaId) {
+    data.categoria_id = categoriaId;
+  }
+  const mesaTrabalhoId = await resolveMesaTrabalhoId(input);
+  if (mesaTrabalhoId) {
+    data.mesa_trabalho_id = mesaTrabalhoId;
+  }
+  const operadorId = await resolveOperadorId(input);
+  if (operadorId) {
+    data.operador_id = operadorId;
   }
 
   await prisma.ticket.update({ where: { id }, data });
