@@ -678,7 +678,7 @@ const qualityMetrics: QualityMetric[] = [
     label: "Testes Automatizados",
     value: "81 arquivos",
     status: "ok",
-    description: "211 testes passando, incluindo testes de contrato, unitários, integração, autorização e regras de status/SLA."
+    description: "213 testes passando, incluindo testes de contrato, unitários, integração, autorização e regras de status/SLA."
   },
   {
     label: "Lint (ESLint)",
@@ -753,9 +753,9 @@ const roadmap: RoadmapItem[] = [
   {
     phase: "Fase 2 — Consolidação",
     title: "Remover campos legados do Ticket",
-    description: "Etapa 1 concluída: backfill dos relacionamentos (tipo, categoria, mesa, operador), leitura usando as relações como fonte de verdade e escrita resolvendo os IDs. Falta remover o dual-write e dropar as colunas.",
+    description: "Concluído: backfill dos relacionamentos (tipo, categoria, mesa, operador), leitura/escrita usando as relações como fonte de verdade, dual-write removido e colunas legadas (company, requester, operator, operatorId, ticketType, category, workbench) dropadas via migration.",
     priority: "P1",
-    status: "in-progress"
+    status: "done"
   },
   {
     phase: "Fase 2 — Consolidação",
@@ -800,11 +800,6 @@ const techDebt: TechDebtItem[] = [
     title: "RBAC em rotas de chat",
     description: "Rotas administrativas e de cadastro já estão protegidas; revisar autorização fina das rotas de chat/integração.",
     impact: "low"
-  },
-  {
-    title: "Campos legados no Ticket",
-    description: "Relacionamentos já são a fonte de verdade na leitura e o backfill foi aplicado; resta remover o dual-write e dropar as colunas string.",
-    impact: "medium"
   },
   {
     title: "Rate-limit e bloqueio de login",

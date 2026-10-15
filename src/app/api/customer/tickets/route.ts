@@ -136,12 +136,9 @@ export async function POST(request: NextRequest) {
     const ticket = await prisma.ticket.create({
       data: {
         solicitante_id: ctx.solicitante.id,
-        company: ctx.solicitante.nome_fantasia || ctx.solicitante.razao_social,
-        requester: ctx.user.name,
         subject: input.subject,
         description: input.description,
         categoria_id: categoria.id,
-        category: categoria.nome,
         tipo_ticket_id: categoria.tipo_ticket_id,
         status: "TODO",
         priority: input.priority,

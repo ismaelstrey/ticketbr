@@ -44,19 +44,12 @@ export type TicketMinAggregateOutputType = {
   categoria_id: string | null
   mesa_trabalho_id: string | null
   operador_id: string | null
-  company: string | null
-  requester: string | null
   subject: string | null
   description: string | null
   status: $Enums.TicketStatus | null
   priority: $Enums.TicketPriority | null
-  operator: string | null
-  operatorId: string | null
   createdByUserId: string | null
   contact: string | null
-  ticketType: string | null
-  category: string | null
-  workbench: string | null
   responseSlaAt: Date | null
   solutionSlaAt: Date | null
   pausedReason: string | null
@@ -78,19 +71,12 @@ export type TicketMaxAggregateOutputType = {
   categoria_id: string | null
   mesa_trabalho_id: string | null
   operador_id: string | null
-  company: string | null
-  requester: string | null
   subject: string | null
   description: string | null
   status: $Enums.TicketStatus | null
   priority: $Enums.TicketPriority | null
-  operator: string | null
-  operatorId: string | null
   createdByUserId: string | null
   contact: string | null
-  ticketType: string | null
-  category: string | null
-  workbench: string | null
   responseSlaAt: Date | null
   solutionSlaAt: Date | null
   pausedReason: string | null
@@ -112,19 +98,12 @@ export type TicketCountAggregateOutputType = {
   categoria_id: number
   mesa_trabalho_id: number
   operador_id: number
-  company: number
-  requester: number
   subject: number
   description: number
   status: number
   priority: number
-  operator: number
-  operatorId: number
   createdByUserId: number
   contact: number
-  ticketType: number
-  category: number
-  workbench: number
   responseSlaAt: number
   solutionSlaAt: number
   pausedReason: number
@@ -158,19 +137,12 @@ export type TicketMinAggregateInputType = {
   categoria_id?: true
   mesa_trabalho_id?: true
   operador_id?: true
-  company?: true
-  requester?: true
   subject?: true
   description?: true
   status?: true
   priority?: true
-  operator?: true
-  operatorId?: true
   createdByUserId?: true
   contact?: true
-  ticketType?: true
-  category?: true
-  workbench?: true
   responseSlaAt?: true
   solutionSlaAt?: true
   pausedReason?: true
@@ -192,19 +164,12 @@ export type TicketMaxAggregateInputType = {
   categoria_id?: true
   mesa_trabalho_id?: true
   operador_id?: true
-  company?: true
-  requester?: true
   subject?: true
   description?: true
   status?: true
   priority?: true
-  operator?: true
-  operatorId?: true
   createdByUserId?: true
   contact?: true
-  ticketType?: true
-  category?: true
-  workbench?: true
   responseSlaAt?: true
   solutionSlaAt?: true
   pausedReason?: true
@@ -226,19 +191,12 @@ export type TicketCountAggregateInputType = {
   categoria_id?: true
   mesa_trabalho_id?: true
   operador_id?: true
-  company?: true
-  requester?: true
   subject?: true
   description?: true
   status?: true
   priority?: true
-  operator?: true
-  operatorId?: true
   createdByUserId?: true
   contact?: true
-  ticketType?: true
-  category?: true
-  workbench?: true
   responseSlaAt?: true
   solutionSlaAt?: true
   pausedReason?: true
@@ -347,19 +305,12 @@ export type TicketGroupByOutputType = {
   categoria_id: string | null
   mesa_trabalho_id: string | null
   operador_id: string | null
-  company: string | null
-  requester: string | null
   subject: string
   description: string | null
   status: $Enums.TicketStatus
   priority: $Enums.TicketPriority
-  operator: string | null
-  operatorId: string | null
   createdByUserId: string | null
   contact: string | null
-  ticketType: string | null
-  category: string | null
-  workbench: string | null
   responseSlaAt: Date | null
   solutionSlaAt: Date | null
   pausedReason: string | null
@@ -404,19 +355,12 @@ export type TicketWhereInput = {
   categoria_id?: Prisma.StringNullableFilter<"Ticket"> | string | null
   mesa_trabalho_id?: Prisma.StringNullableFilter<"Ticket"> | string | null
   operador_id?: Prisma.StringNullableFilter<"Ticket"> | string | null
-  company?: Prisma.StringNullableFilter<"Ticket"> | string | null
-  requester?: Prisma.StringNullableFilter<"Ticket"> | string | null
   subject?: Prisma.StringFilter<"Ticket"> | string
   description?: Prisma.StringNullableFilter<"Ticket"> | string | null
   status?: Prisma.EnumTicketStatusFilter<"Ticket"> | $Enums.TicketStatus
   priority?: Prisma.EnumTicketPriorityFilter<"Ticket"> | $Enums.TicketPriority
-  operator?: Prisma.StringNullableFilter<"Ticket"> | string | null
-  operatorId?: Prisma.StringNullableFilter<"Ticket"> | string | null
   createdByUserId?: Prisma.StringNullableFilter<"Ticket"> | string | null
   contact?: Prisma.StringNullableFilter<"Ticket"> | string | null
-  ticketType?: Prisma.StringNullableFilter<"Ticket"> | string | null
-  category?: Prisma.StringNullableFilter<"Ticket"> | string | null
-  workbench?: Prisma.StringNullableFilter<"Ticket"> | string | null
   responseSlaAt?: Prisma.DateTimeNullableFilter<"Ticket"> | Date | string | null
   solutionSlaAt?: Prisma.DateTimeNullableFilter<"Ticket"> | Date | string | null
   pausedReason?: Prisma.StringNullableFilter<"Ticket"> | string | null
@@ -433,7 +377,6 @@ export type TicketWhereInput = {
   categoria?: Prisma.XOR<Prisma.Categoria_TicketNullableScalarRelationFilter, Prisma.Categoria_TicketWhereInput> | null
   mesa_trabalho_rel?: Prisma.XOR<Prisma.Mesa_TrabalhoNullableScalarRelationFilter, Prisma.Mesa_TrabalhoWhereInput> | null
   operador_rel?: Prisma.XOR<Prisma.OperadorNullableScalarRelationFilter, Prisma.OperadorWhereInput> | null
-  operatorUser?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   createdByUser?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   events?: Prisma.TicketEventListRelationFilter
   chatConversations?: Prisma.ChatConversationListRelationFilter
@@ -447,19 +390,12 @@ export type TicketOrderByWithRelationInput = {
   categoria_id?: Prisma.SortOrderInput | Prisma.SortOrder
   mesa_trabalho_id?: Prisma.SortOrderInput | Prisma.SortOrder
   operador_id?: Prisma.SortOrderInput | Prisma.SortOrder
-  company?: Prisma.SortOrderInput | Prisma.SortOrder
-  requester?: Prisma.SortOrderInput | Prisma.SortOrder
   subject?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   priority?: Prisma.SortOrder
-  operator?: Prisma.SortOrderInput | Prisma.SortOrder
-  operatorId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdByUserId?: Prisma.SortOrderInput | Prisma.SortOrder
   contact?: Prisma.SortOrderInput | Prisma.SortOrder
-  ticketType?: Prisma.SortOrderInput | Prisma.SortOrder
-  category?: Prisma.SortOrderInput | Prisma.SortOrder
-  workbench?: Prisma.SortOrderInput | Prisma.SortOrder
   responseSlaAt?: Prisma.SortOrderInput | Prisma.SortOrder
   solutionSlaAt?: Prisma.SortOrderInput | Prisma.SortOrder
   pausedReason?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -476,7 +412,6 @@ export type TicketOrderByWithRelationInput = {
   categoria?: Prisma.Categoria_TicketOrderByWithRelationInput
   mesa_trabalho_rel?: Prisma.Mesa_TrabalhoOrderByWithRelationInput
   operador_rel?: Prisma.OperadorOrderByWithRelationInput
-  operatorUser?: Prisma.UserOrderByWithRelationInput
   createdByUser?: Prisma.UserOrderByWithRelationInput
   events?: Prisma.TicketEventOrderByRelationAggregateInput
   chatConversations?: Prisma.ChatConversationOrderByRelationAggregateInput
@@ -493,19 +428,12 @@ export type TicketWhereUniqueInput = Prisma.AtLeast<{
   categoria_id?: Prisma.StringNullableFilter<"Ticket"> | string | null
   mesa_trabalho_id?: Prisma.StringNullableFilter<"Ticket"> | string | null
   operador_id?: Prisma.StringNullableFilter<"Ticket"> | string | null
-  company?: Prisma.StringNullableFilter<"Ticket"> | string | null
-  requester?: Prisma.StringNullableFilter<"Ticket"> | string | null
   subject?: Prisma.StringFilter<"Ticket"> | string
   description?: Prisma.StringNullableFilter<"Ticket"> | string | null
   status?: Prisma.EnumTicketStatusFilter<"Ticket"> | $Enums.TicketStatus
   priority?: Prisma.EnumTicketPriorityFilter<"Ticket"> | $Enums.TicketPriority
-  operator?: Prisma.StringNullableFilter<"Ticket"> | string | null
-  operatorId?: Prisma.StringNullableFilter<"Ticket"> | string | null
   createdByUserId?: Prisma.StringNullableFilter<"Ticket"> | string | null
   contact?: Prisma.StringNullableFilter<"Ticket"> | string | null
-  ticketType?: Prisma.StringNullableFilter<"Ticket"> | string | null
-  category?: Prisma.StringNullableFilter<"Ticket"> | string | null
-  workbench?: Prisma.StringNullableFilter<"Ticket"> | string | null
   responseSlaAt?: Prisma.DateTimeNullableFilter<"Ticket"> | Date | string | null
   solutionSlaAt?: Prisma.DateTimeNullableFilter<"Ticket"> | Date | string | null
   pausedReason?: Prisma.StringNullableFilter<"Ticket"> | string | null
@@ -522,7 +450,6 @@ export type TicketWhereUniqueInput = Prisma.AtLeast<{
   categoria?: Prisma.XOR<Prisma.Categoria_TicketNullableScalarRelationFilter, Prisma.Categoria_TicketWhereInput> | null
   mesa_trabalho_rel?: Prisma.XOR<Prisma.Mesa_TrabalhoNullableScalarRelationFilter, Prisma.Mesa_TrabalhoWhereInput> | null
   operador_rel?: Prisma.XOR<Prisma.OperadorNullableScalarRelationFilter, Prisma.OperadorWhereInput> | null
-  operatorUser?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   createdByUser?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   events?: Prisma.TicketEventListRelationFilter
   chatConversations?: Prisma.ChatConversationListRelationFilter
@@ -536,19 +463,12 @@ export type TicketOrderByWithAggregationInput = {
   categoria_id?: Prisma.SortOrderInput | Prisma.SortOrder
   mesa_trabalho_id?: Prisma.SortOrderInput | Prisma.SortOrder
   operador_id?: Prisma.SortOrderInput | Prisma.SortOrder
-  company?: Prisma.SortOrderInput | Prisma.SortOrder
-  requester?: Prisma.SortOrderInput | Prisma.SortOrder
   subject?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   priority?: Prisma.SortOrder
-  operator?: Prisma.SortOrderInput | Prisma.SortOrder
-  operatorId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdByUserId?: Prisma.SortOrderInput | Prisma.SortOrder
   contact?: Prisma.SortOrderInput | Prisma.SortOrder
-  ticketType?: Prisma.SortOrderInput | Prisma.SortOrder
-  category?: Prisma.SortOrderInput | Prisma.SortOrder
-  workbench?: Prisma.SortOrderInput | Prisma.SortOrder
   responseSlaAt?: Prisma.SortOrderInput | Prisma.SortOrder
   solutionSlaAt?: Prisma.SortOrderInput | Prisma.SortOrder
   pausedReason?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -578,19 +498,12 @@ export type TicketScalarWhereWithAggregatesInput = {
   categoria_id?: Prisma.StringNullableWithAggregatesFilter<"Ticket"> | string | null
   mesa_trabalho_id?: Prisma.StringNullableWithAggregatesFilter<"Ticket"> | string | null
   operador_id?: Prisma.StringNullableWithAggregatesFilter<"Ticket"> | string | null
-  company?: Prisma.StringNullableWithAggregatesFilter<"Ticket"> | string | null
-  requester?: Prisma.StringNullableWithAggregatesFilter<"Ticket"> | string | null
   subject?: Prisma.StringWithAggregatesFilter<"Ticket"> | string
   description?: Prisma.StringNullableWithAggregatesFilter<"Ticket"> | string | null
   status?: Prisma.EnumTicketStatusWithAggregatesFilter<"Ticket"> | $Enums.TicketStatus
   priority?: Prisma.EnumTicketPriorityWithAggregatesFilter<"Ticket"> | $Enums.TicketPriority
-  operator?: Prisma.StringNullableWithAggregatesFilter<"Ticket"> | string | null
-  operatorId?: Prisma.StringNullableWithAggregatesFilter<"Ticket"> | string | null
   createdByUserId?: Prisma.StringNullableWithAggregatesFilter<"Ticket"> | string | null
   contact?: Prisma.StringNullableWithAggregatesFilter<"Ticket"> | string | null
-  ticketType?: Prisma.StringNullableWithAggregatesFilter<"Ticket"> | string | null
-  category?: Prisma.StringNullableWithAggregatesFilter<"Ticket"> | string | null
-  workbench?: Prisma.StringNullableWithAggregatesFilter<"Ticket"> | string | null
   responseSlaAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Ticket"> | Date | string | null
   solutionSlaAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Ticket"> | Date | string | null
   pausedReason?: Prisma.StringNullableWithAggregatesFilter<"Ticket"> | string | null
@@ -607,17 +520,11 @@ export type TicketScalarWhereWithAggregatesInput = {
 export type TicketCreateInput = {
   id?: string
   number?: number
-  company?: string | null
-  requester?: string | null
   subject: string
   description?: string | null
   status?: $Enums.TicketStatus
   priority?: $Enums.TicketPriority
-  operator?: string | null
   contact?: string | null
-  ticketType?: string | null
-  category?: string | null
-  workbench?: string | null
   responseSlaAt?: Date | string | null
   solutionSlaAt?: Date | string | null
   pausedReason?: string | null
@@ -634,7 +541,6 @@ export type TicketCreateInput = {
   categoria?: Prisma.Categoria_TicketCreateNestedOneWithoutTicketsInput
   mesa_trabalho_rel?: Prisma.Mesa_TrabalhoCreateNestedOneWithoutTicketsInput
   operador_rel?: Prisma.OperadorCreateNestedOneWithoutTicketsInput
-  operatorUser?: Prisma.UserCreateNestedOneWithoutTicketsInput
   createdByUser?: Prisma.UserCreateNestedOneWithoutCreatedTicketsInput
   events?: Prisma.TicketEventCreateNestedManyWithoutTicketInput
   chatConversations?: Prisma.ChatConversationCreateNestedManyWithoutTicketInput
@@ -648,19 +554,12 @@ export type TicketUncheckedCreateInput = {
   categoria_id?: string | null
   mesa_trabalho_id?: string | null
   operador_id?: string | null
-  company?: string | null
-  requester?: string | null
   subject: string
   description?: string | null
   status?: $Enums.TicketStatus
   priority?: $Enums.TicketPriority
-  operator?: string | null
-  operatorId?: string | null
   createdByUserId?: string | null
   contact?: string | null
-  ticketType?: string | null
-  category?: string | null
-  workbench?: string | null
   responseSlaAt?: Date | string | null
   solutionSlaAt?: Date | string | null
   pausedReason?: string | null
@@ -678,17 +577,11 @@ export type TicketUncheckedCreateInput = {
 
 export type TicketUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  company?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  requester?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subject?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
   priority?: Prisma.EnumTicketPriorityFieldUpdateOperationsInput | $Enums.TicketPriority
-  operator?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contact?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  ticketType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  category?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  workbench?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responseSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   solutionSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pausedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -705,7 +598,6 @@ export type TicketUpdateInput = {
   categoria?: Prisma.Categoria_TicketUpdateOneWithoutTicketsNestedInput
   mesa_trabalho_rel?: Prisma.Mesa_TrabalhoUpdateOneWithoutTicketsNestedInput
   operador_rel?: Prisma.OperadorUpdateOneWithoutTicketsNestedInput
-  operatorUser?: Prisma.UserUpdateOneWithoutTicketsNestedInput
   createdByUser?: Prisma.UserUpdateOneWithoutCreatedTicketsNestedInput
   events?: Prisma.TicketEventUpdateManyWithoutTicketNestedInput
   chatConversations?: Prisma.ChatConversationUpdateManyWithoutTicketNestedInput
@@ -719,19 +611,12 @@ export type TicketUncheckedUpdateInput = {
   categoria_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mesa_trabalho_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   operador_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  company?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  requester?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subject?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
   priority?: Prisma.EnumTicketPriorityFieldUpdateOperationsInput | $Enums.TicketPriority
-  operator?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  operatorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contact?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  ticketType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  category?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  workbench?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responseSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   solutionSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pausedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -755,19 +640,12 @@ export type TicketCreateManyInput = {
   categoria_id?: string | null
   mesa_trabalho_id?: string | null
   operador_id?: string | null
-  company?: string | null
-  requester?: string | null
   subject: string
   description?: string | null
   status?: $Enums.TicketStatus
   priority?: $Enums.TicketPriority
-  operator?: string | null
-  operatorId?: string | null
   createdByUserId?: string | null
   contact?: string | null
-  ticketType?: string | null
-  category?: string | null
-  workbench?: string | null
   responseSlaAt?: Date | string | null
   solutionSlaAt?: Date | string | null
   pausedReason?: string | null
@@ -783,17 +661,11 @@ export type TicketCreateManyInput = {
 
 export type TicketUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  company?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  requester?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subject?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
   priority?: Prisma.EnumTicketPriorityFieldUpdateOperationsInput | $Enums.TicketPriority
-  operator?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contact?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  ticketType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  category?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  workbench?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responseSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   solutionSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pausedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -815,19 +687,12 @@ export type TicketUncheckedUpdateManyInput = {
   categoria_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mesa_trabalho_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   operador_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  company?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  requester?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subject?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
   priority?: Prisma.EnumTicketPriorityFieldUpdateOperationsInput | $Enums.TicketPriority
-  operator?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  operatorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contact?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  ticketType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  category?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  workbench?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responseSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   solutionSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pausedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -859,19 +724,12 @@ export type TicketCountOrderByAggregateInput = {
   categoria_id?: Prisma.SortOrder
   mesa_trabalho_id?: Prisma.SortOrder
   operador_id?: Prisma.SortOrder
-  company?: Prisma.SortOrder
-  requester?: Prisma.SortOrder
   subject?: Prisma.SortOrder
   description?: Prisma.SortOrder
   status?: Prisma.SortOrder
   priority?: Prisma.SortOrder
-  operator?: Prisma.SortOrder
-  operatorId?: Prisma.SortOrder
   createdByUserId?: Prisma.SortOrder
   contact?: Prisma.SortOrder
-  ticketType?: Prisma.SortOrder
-  category?: Prisma.SortOrder
-  workbench?: Prisma.SortOrder
   responseSlaAt?: Prisma.SortOrder
   solutionSlaAt?: Prisma.SortOrder
   pausedReason?: Prisma.SortOrder
@@ -898,19 +756,12 @@ export type TicketMaxOrderByAggregateInput = {
   categoria_id?: Prisma.SortOrder
   mesa_trabalho_id?: Prisma.SortOrder
   operador_id?: Prisma.SortOrder
-  company?: Prisma.SortOrder
-  requester?: Prisma.SortOrder
   subject?: Prisma.SortOrder
   description?: Prisma.SortOrder
   status?: Prisma.SortOrder
   priority?: Prisma.SortOrder
-  operator?: Prisma.SortOrder
-  operatorId?: Prisma.SortOrder
   createdByUserId?: Prisma.SortOrder
   contact?: Prisma.SortOrder
-  ticketType?: Prisma.SortOrder
-  category?: Prisma.SortOrder
-  workbench?: Prisma.SortOrder
   responseSlaAt?: Prisma.SortOrder
   solutionSlaAt?: Prisma.SortOrder
   pausedReason?: Prisma.SortOrder
@@ -932,19 +783,12 @@ export type TicketMinOrderByAggregateInput = {
   categoria_id?: Prisma.SortOrder
   mesa_trabalho_id?: Prisma.SortOrder
   operador_id?: Prisma.SortOrder
-  company?: Prisma.SortOrder
-  requester?: Prisma.SortOrder
   subject?: Prisma.SortOrder
   description?: Prisma.SortOrder
   status?: Prisma.SortOrder
   priority?: Prisma.SortOrder
-  operator?: Prisma.SortOrder
-  operatorId?: Prisma.SortOrder
   createdByUserId?: Prisma.SortOrder
   contact?: Prisma.SortOrder
-  ticketType?: Prisma.SortOrder
-  category?: Prisma.SortOrder
-  workbench?: Prisma.SortOrder
   responseSlaAt?: Prisma.SortOrder
   solutionSlaAt?: Prisma.SortOrder
   pausedReason?: Prisma.SortOrder
@@ -973,24 +817,10 @@ export type TicketNullableScalarRelationFilter = {
   isNot?: Prisma.TicketWhereInput | null
 }
 
-export type TicketCreateNestedManyWithoutOperatorUserInput = {
-  create?: Prisma.XOR<Prisma.TicketCreateWithoutOperatorUserInput, Prisma.TicketUncheckedCreateWithoutOperatorUserInput> | Prisma.TicketCreateWithoutOperatorUserInput[] | Prisma.TicketUncheckedCreateWithoutOperatorUserInput[]
-  connectOrCreate?: Prisma.TicketCreateOrConnectWithoutOperatorUserInput | Prisma.TicketCreateOrConnectWithoutOperatorUserInput[]
-  createMany?: Prisma.TicketCreateManyOperatorUserInputEnvelope
-  connect?: Prisma.TicketWhereUniqueInput | Prisma.TicketWhereUniqueInput[]
-}
-
 export type TicketCreateNestedManyWithoutCreatedByUserInput = {
   create?: Prisma.XOR<Prisma.TicketCreateWithoutCreatedByUserInput, Prisma.TicketUncheckedCreateWithoutCreatedByUserInput> | Prisma.TicketCreateWithoutCreatedByUserInput[] | Prisma.TicketUncheckedCreateWithoutCreatedByUserInput[]
   connectOrCreate?: Prisma.TicketCreateOrConnectWithoutCreatedByUserInput | Prisma.TicketCreateOrConnectWithoutCreatedByUserInput[]
   createMany?: Prisma.TicketCreateManyCreatedByUserInputEnvelope
-  connect?: Prisma.TicketWhereUniqueInput | Prisma.TicketWhereUniqueInput[]
-}
-
-export type TicketUncheckedCreateNestedManyWithoutOperatorUserInput = {
-  create?: Prisma.XOR<Prisma.TicketCreateWithoutOperatorUserInput, Prisma.TicketUncheckedCreateWithoutOperatorUserInput> | Prisma.TicketCreateWithoutOperatorUserInput[] | Prisma.TicketUncheckedCreateWithoutOperatorUserInput[]
-  connectOrCreate?: Prisma.TicketCreateOrConnectWithoutOperatorUserInput | Prisma.TicketCreateOrConnectWithoutOperatorUserInput[]
-  createMany?: Prisma.TicketCreateManyOperatorUserInputEnvelope
   connect?: Prisma.TicketWhereUniqueInput | Prisma.TicketWhereUniqueInput[]
 }
 
@@ -999,20 +829,6 @@ export type TicketUncheckedCreateNestedManyWithoutCreatedByUserInput = {
   connectOrCreate?: Prisma.TicketCreateOrConnectWithoutCreatedByUserInput | Prisma.TicketCreateOrConnectWithoutCreatedByUserInput[]
   createMany?: Prisma.TicketCreateManyCreatedByUserInputEnvelope
   connect?: Prisma.TicketWhereUniqueInput | Prisma.TicketWhereUniqueInput[]
-}
-
-export type TicketUpdateManyWithoutOperatorUserNestedInput = {
-  create?: Prisma.XOR<Prisma.TicketCreateWithoutOperatorUserInput, Prisma.TicketUncheckedCreateWithoutOperatorUserInput> | Prisma.TicketCreateWithoutOperatorUserInput[] | Prisma.TicketUncheckedCreateWithoutOperatorUserInput[]
-  connectOrCreate?: Prisma.TicketCreateOrConnectWithoutOperatorUserInput | Prisma.TicketCreateOrConnectWithoutOperatorUserInput[]
-  upsert?: Prisma.TicketUpsertWithWhereUniqueWithoutOperatorUserInput | Prisma.TicketUpsertWithWhereUniqueWithoutOperatorUserInput[]
-  createMany?: Prisma.TicketCreateManyOperatorUserInputEnvelope
-  set?: Prisma.TicketWhereUniqueInput | Prisma.TicketWhereUniqueInput[]
-  disconnect?: Prisma.TicketWhereUniqueInput | Prisma.TicketWhereUniqueInput[]
-  delete?: Prisma.TicketWhereUniqueInput | Prisma.TicketWhereUniqueInput[]
-  connect?: Prisma.TicketWhereUniqueInput | Prisma.TicketWhereUniqueInput[]
-  update?: Prisma.TicketUpdateWithWhereUniqueWithoutOperatorUserInput | Prisma.TicketUpdateWithWhereUniqueWithoutOperatorUserInput[]
-  updateMany?: Prisma.TicketUpdateManyWithWhereWithoutOperatorUserInput | Prisma.TicketUpdateManyWithWhereWithoutOperatorUserInput[]
-  deleteMany?: Prisma.TicketScalarWhereInput | Prisma.TicketScalarWhereInput[]
 }
 
 export type TicketUpdateManyWithoutCreatedByUserNestedInput = {
@@ -1026,20 +842,6 @@ export type TicketUpdateManyWithoutCreatedByUserNestedInput = {
   connect?: Prisma.TicketWhereUniqueInput | Prisma.TicketWhereUniqueInput[]
   update?: Prisma.TicketUpdateWithWhereUniqueWithoutCreatedByUserInput | Prisma.TicketUpdateWithWhereUniqueWithoutCreatedByUserInput[]
   updateMany?: Prisma.TicketUpdateManyWithWhereWithoutCreatedByUserInput | Prisma.TicketUpdateManyWithWhereWithoutCreatedByUserInput[]
-  deleteMany?: Prisma.TicketScalarWhereInput | Prisma.TicketScalarWhereInput[]
-}
-
-export type TicketUncheckedUpdateManyWithoutOperatorUserNestedInput = {
-  create?: Prisma.XOR<Prisma.TicketCreateWithoutOperatorUserInput, Prisma.TicketUncheckedCreateWithoutOperatorUserInput> | Prisma.TicketCreateWithoutOperatorUserInput[] | Prisma.TicketUncheckedCreateWithoutOperatorUserInput[]
-  connectOrCreate?: Prisma.TicketCreateOrConnectWithoutOperatorUserInput | Prisma.TicketCreateOrConnectWithoutOperatorUserInput[]
-  upsert?: Prisma.TicketUpsertWithWhereUniqueWithoutOperatorUserInput | Prisma.TicketUpsertWithWhereUniqueWithoutOperatorUserInput[]
-  createMany?: Prisma.TicketCreateManyOperatorUserInputEnvelope
-  set?: Prisma.TicketWhereUniqueInput | Prisma.TicketWhereUniqueInput[]
-  disconnect?: Prisma.TicketWhereUniqueInput | Prisma.TicketWhereUniqueInput[]
-  delete?: Prisma.TicketWhereUniqueInput | Prisma.TicketWhereUniqueInput[]
-  connect?: Prisma.TicketWhereUniqueInput | Prisma.TicketWhereUniqueInput[]
-  update?: Prisma.TicketUpdateWithWhereUniqueWithoutOperatorUserInput | Prisma.TicketUpdateWithWhereUniqueWithoutOperatorUserInput[]
-  updateMany?: Prisma.TicketUpdateManyWithWhereWithoutOperatorUserInput | Prisma.TicketUpdateManyWithWhereWithoutOperatorUserInput[]
   deleteMany?: Prisma.TicketScalarWhereInput | Prisma.TicketScalarWhereInput[]
 }
 
@@ -1305,100 +1107,14 @@ export type TicketUpdateOneWithoutChatConversationsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.TicketUpdateToOneWithWhereWithoutChatConversationsInput, Prisma.TicketUpdateWithoutChatConversationsInput>, Prisma.TicketUncheckedUpdateWithoutChatConversationsInput>
 }
 
-export type TicketCreateWithoutOperatorUserInput = {
-  id?: string
-  number?: number
-  company?: string | null
-  requester?: string | null
-  subject: string
-  description?: string | null
-  status?: $Enums.TicketStatus
-  priority?: $Enums.TicketPriority
-  operator?: string | null
-  contact?: string | null
-  ticketType?: string | null
-  category?: string | null
-  workbench?: string | null
-  responseSlaAt?: Date | string | null
-  solutionSlaAt?: Date | string | null
-  pausedReason?: string | null
-  pauseSla?: boolean
-  pausedStartedAt?: Date | string | null
-  pausedTotalSeconds?: number
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  created_by?: string | null
-  updated_by?: string | null
-  deleted_at?: Date | string | null
-  solicitante?: Prisma.SolicitanteCreateNestedOneWithoutTicketsInput
-  tipo_ticket?: Prisma.Tipo_TicketCreateNestedOneWithoutTicketsInput
-  categoria?: Prisma.Categoria_TicketCreateNestedOneWithoutTicketsInput
-  mesa_trabalho_rel?: Prisma.Mesa_TrabalhoCreateNestedOneWithoutTicketsInput
-  operador_rel?: Prisma.OperadorCreateNestedOneWithoutTicketsInput
-  createdByUser?: Prisma.UserCreateNestedOneWithoutCreatedTicketsInput
-  events?: Prisma.TicketEventCreateNestedManyWithoutTicketInput
-  chatConversations?: Prisma.ChatConversationCreateNestedManyWithoutTicketInput
-}
-
-export type TicketUncheckedCreateWithoutOperatorUserInput = {
-  id?: string
-  number?: number
-  solicitante_id?: string | null
-  tipo_ticket_id?: string | null
-  categoria_id?: string | null
-  mesa_trabalho_id?: string | null
-  operador_id?: string | null
-  company?: string | null
-  requester?: string | null
-  subject: string
-  description?: string | null
-  status?: $Enums.TicketStatus
-  priority?: $Enums.TicketPriority
-  operator?: string | null
-  createdByUserId?: string | null
-  contact?: string | null
-  ticketType?: string | null
-  category?: string | null
-  workbench?: string | null
-  responseSlaAt?: Date | string | null
-  solutionSlaAt?: Date | string | null
-  pausedReason?: string | null
-  pauseSla?: boolean
-  pausedStartedAt?: Date | string | null
-  pausedTotalSeconds?: number
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  created_by?: string | null
-  updated_by?: string | null
-  deleted_at?: Date | string | null
-  events?: Prisma.TicketEventUncheckedCreateNestedManyWithoutTicketInput
-  chatConversations?: Prisma.ChatConversationUncheckedCreateNestedManyWithoutTicketInput
-}
-
-export type TicketCreateOrConnectWithoutOperatorUserInput = {
-  where: Prisma.TicketWhereUniqueInput
-  create: Prisma.XOR<Prisma.TicketCreateWithoutOperatorUserInput, Prisma.TicketUncheckedCreateWithoutOperatorUserInput>
-}
-
-export type TicketCreateManyOperatorUserInputEnvelope = {
-  data: Prisma.TicketCreateManyOperatorUserInput | Prisma.TicketCreateManyOperatorUserInput[]
-  skipDuplicates?: boolean
-}
-
 export type TicketCreateWithoutCreatedByUserInput = {
   id?: string
   number?: number
-  company?: string | null
-  requester?: string | null
   subject: string
   description?: string | null
   status?: $Enums.TicketStatus
   priority?: $Enums.TicketPriority
-  operator?: string | null
   contact?: string | null
-  ticketType?: string | null
-  category?: string | null
-  workbench?: string | null
   responseSlaAt?: Date | string | null
   solutionSlaAt?: Date | string | null
   pausedReason?: string | null
@@ -1415,7 +1131,6 @@ export type TicketCreateWithoutCreatedByUserInput = {
   categoria?: Prisma.Categoria_TicketCreateNestedOneWithoutTicketsInput
   mesa_trabalho_rel?: Prisma.Mesa_TrabalhoCreateNestedOneWithoutTicketsInput
   operador_rel?: Prisma.OperadorCreateNestedOneWithoutTicketsInput
-  operatorUser?: Prisma.UserCreateNestedOneWithoutTicketsInput
   events?: Prisma.TicketEventCreateNestedManyWithoutTicketInput
   chatConversations?: Prisma.ChatConversationCreateNestedManyWithoutTicketInput
 }
@@ -1428,18 +1143,11 @@ export type TicketUncheckedCreateWithoutCreatedByUserInput = {
   categoria_id?: string | null
   mesa_trabalho_id?: string | null
   operador_id?: string | null
-  company?: string | null
-  requester?: string | null
   subject: string
   description?: string | null
   status?: $Enums.TicketStatus
   priority?: $Enums.TicketPriority
-  operator?: string | null
-  operatorId?: string | null
   contact?: string | null
-  ticketType?: string | null
-  category?: string | null
-  workbench?: string | null
   responseSlaAt?: Date | string | null
   solutionSlaAt?: Date | string | null
   pausedReason?: string | null
@@ -1465,59 +1173,6 @@ export type TicketCreateManyCreatedByUserInputEnvelope = {
   skipDuplicates?: boolean
 }
 
-export type TicketUpsertWithWhereUniqueWithoutOperatorUserInput = {
-  where: Prisma.TicketWhereUniqueInput
-  update: Prisma.XOR<Prisma.TicketUpdateWithoutOperatorUserInput, Prisma.TicketUncheckedUpdateWithoutOperatorUserInput>
-  create: Prisma.XOR<Prisma.TicketCreateWithoutOperatorUserInput, Prisma.TicketUncheckedCreateWithoutOperatorUserInput>
-}
-
-export type TicketUpdateWithWhereUniqueWithoutOperatorUserInput = {
-  where: Prisma.TicketWhereUniqueInput
-  data: Prisma.XOR<Prisma.TicketUpdateWithoutOperatorUserInput, Prisma.TicketUncheckedUpdateWithoutOperatorUserInput>
-}
-
-export type TicketUpdateManyWithWhereWithoutOperatorUserInput = {
-  where: Prisma.TicketScalarWhereInput
-  data: Prisma.XOR<Prisma.TicketUpdateManyMutationInput, Prisma.TicketUncheckedUpdateManyWithoutOperatorUserInput>
-}
-
-export type TicketScalarWhereInput = {
-  AND?: Prisma.TicketScalarWhereInput | Prisma.TicketScalarWhereInput[]
-  OR?: Prisma.TicketScalarWhereInput[]
-  NOT?: Prisma.TicketScalarWhereInput | Prisma.TicketScalarWhereInput[]
-  id?: Prisma.StringFilter<"Ticket"> | string
-  number?: Prisma.IntFilter<"Ticket"> | number
-  solicitante_id?: Prisma.StringNullableFilter<"Ticket"> | string | null
-  tipo_ticket_id?: Prisma.StringNullableFilter<"Ticket"> | string | null
-  categoria_id?: Prisma.StringNullableFilter<"Ticket"> | string | null
-  mesa_trabalho_id?: Prisma.StringNullableFilter<"Ticket"> | string | null
-  operador_id?: Prisma.StringNullableFilter<"Ticket"> | string | null
-  company?: Prisma.StringNullableFilter<"Ticket"> | string | null
-  requester?: Prisma.StringNullableFilter<"Ticket"> | string | null
-  subject?: Prisma.StringFilter<"Ticket"> | string
-  description?: Prisma.StringNullableFilter<"Ticket"> | string | null
-  status?: Prisma.EnumTicketStatusFilter<"Ticket"> | $Enums.TicketStatus
-  priority?: Prisma.EnumTicketPriorityFilter<"Ticket"> | $Enums.TicketPriority
-  operator?: Prisma.StringNullableFilter<"Ticket"> | string | null
-  operatorId?: Prisma.StringNullableFilter<"Ticket"> | string | null
-  createdByUserId?: Prisma.StringNullableFilter<"Ticket"> | string | null
-  contact?: Prisma.StringNullableFilter<"Ticket"> | string | null
-  ticketType?: Prisma.StringNullableFilter<"Ticket"> | string | null
-  category?: Prisma.StringNullableFilter<"Ticket"> | string | null
-  workbench?: Prisma.StringNullableFilter<"Ticket"> | string | null
-  responseSlaAt?: Prisma.DateTimeNullableFilter<"Ticket"> | Date | string | null
-  solutionSlaAt?: Prisma.DateTimeNullableFilter<"Ticket"> | Date | string | null
-  pausedReason?: Prisma.StringNullableFilter<"Ticket"> | string | null
-  pauseSla?: Prisma.BoolFilter<"Ticket"> | boolean
-  pausedStartedAt?: Prisma.DateTimeNullableFilter<"Ticket"> | Date | string | null
-  pausedTotalSeconds?: Prisma.IntFilter<"Ticket"> | number
-  createdAt?: Prisma.DateTimeFilter<"Ticket"> | Date | string
-  updatedAt?: Prisma.DateTimeFilter<"Ticket"> | Date | string
-  created_by?: Prisma.StringNullableFilter<"Ticket"> | string | null
-  updated_by?: Prisma.StringNullableFilter<"Ticket"> | string | null
-  deleted_at?: Prisma.DateTimeNullableFilter<"Ticket"> | Date | string | null
-}
-
 export type TicketUpsertWithWhereUniqueWithoutCreatedByUserInput = {
   where: Prisma.TicketWhereUniqueInput
   update: Prisma.XOR<Prisma.TicketUpdateWithoutCreatedByUserInput, Prisma.TicketUncheckedUpdateWithoutCreatedByUserInput>
@@ -1534,20 +1189,44 @@ export type TicketUpdateManyWithWhereWithoutCreatedByUserInput = {
   data: Prisma.XOR<Prisma.TicketUpdateManyMutationInput, Prisma.TicketUncheckedUpdateManyWithoutCreatedByUserInput>
 }
 
+export type TicketScalarWhereInput = {
+  AND?: Prisma.TicketScalarWhereInput | Prisma.TicketScalarWhereInput[]
+  OR?: Prisma.TicketScalarWhereInput[]
+  NOT?: Prisma.TicketScalarWhereInput | Prisma.TicketScalarWhereInput[]
+  id?: Prisma.StringFilter<"Ticket"> | string
+  number?: Prisma.IntFilter<"Ticket"> | number
+  solicitante_id?: Prisma.StringNullableFilter<"Ticket"> | string | null
+  tipo_ticket_id?: Prisma.StringNullableFilter<"Ticket"> | string | null
+  categoria_id?: Prisma.StringNullableFilter<"Ticket"> | string | null
+  mesa_trabalho_id?: Prisma.StringNullableFilter<"Ticket"> | string | null
+  operador_id?: Prisma.StringNullableFilter<"Ticket"> | string | null
+  subject?: Prisma.StringFilter<"Ticket"> | string
+  description?: Prisma.StringNullableFilter<"Ticket"> | string | null
+  status?: Prisma.EnumTicketStatusFilter<"Ticket"> | $Enums.TicketStatus
+  priority?: Prisma.EnumTicketPriorityFilter<"Ticket"> | $Enums.TicketPriority
+  createdByUserId?: Prisma.StringNullableFilter<"Ticket"> | string | null
+  contact?: Prisma.StringNullableFilter<"Ticket"> | string | null
+  responseSlaAt?: Prisma.DateTimeNullableFilter<"Ticket"> | Date | string | null
+  solutionSlaAt?: Prisma.DateTimeNullableFilter<"Ticket"> | Date | string | null
+  pausedReason?: Prisma.StringNullableFilter<"Ticket"> | string | null
+  pauseSla?: Prisma.BoolFilter<"Ticket"> | boolean
+  pausedStartedAt?: Prisma.DateTimeNullableFilter<"Ticket"> | Date | string | null
+  pausedTotalSeconds?: Prisma.IntFilter<"Ticket"> | number
+  createdAt?: Prisma.DateTimeFilter<"Ticket"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"Ticket"> | Date | string
+  created_by?: Prisma.StringNullableFilter<"Ticket"> | string | null
+  updated_by?: Prisma.StringNullableFilter<"Ticket"> | string | null
+  deleted_at?: Prisma.DateTimeNullableFilter<"Ticket"> | Date | string | null
+}
+
 export type TicketCreateWithoutSolicitanteInput = {
   id?: string
   number?: number
-  company?: string | null
-  requester?: string | null
   subject: string
   description?: string | null
   status?: $Enums.TicketStatus
   priority?: $Enums.TicketPriority
-  operator?: string | null
   contact?: string | null
-  ticketType?: string | null
-  category?: string | null
-  workbench?: string | null
   responseSlaAt?: Date | string | null
   solutionSlaAt?: Date | string | null
   pausedReason?: string | null
@@ -1563,7 +1242,6 @@ export type TicketCreateWithoutSolicitanteInput = {
   categoria?: Prisma.Categoria_TicketCreateNestedOneWithoutTicketsInput
   mesa_trabalho_rel?: Prisma.Mesa_TrabalhoCreateNestedOneWithoutTicketsInput
   operador_rel?: Prisma.OperadorCreateNestedOneWithoutTicketsInput
-  operatorUser?: Prisma.UserCreateNestedOneWithoutTicketsInput
   createdByUser?: Prisma.UserCreateNestedOneWithoutCreatedTicketsInput
   events?: Prisma.TicketEventCreateNestedManyWithoutTicketInput
   chatConversations?: Prisma.ChatConversationCreateNestedManyWithoutTicketInput
@@ -1576,19 +1254,12 @@ export type TicketUncheckedCreateWithoutSolicitanteInput = {
   categoria_id?: string | null
   mesa_trabalho_id?: string | null
   operador_id?: string | null
-  company?: string | null
-  requester?: string | null
   subject: string
   description?: string | null
   status?: $Enums.TicketStatus
   priority?: $Enums.TicketPriority
-  operator?: string | null
-  operatorId?: string | null
   createdByUserId?: string | null
   contact?: string | null
-  ticketType?: string | null
-  category?: string | null
-  workbench?: string | null
   responseSlaAt?: Date | string | null
   solutionSlaAt?: Date | string | null
   pausedReason?: string | null
@@ -1633,17 +1304,11 @@ export type TicketUpdateManyWithWhereWithoutSolicitanteInput = {
 export type TicketCreateWithoutTipo_ticketInput = {
   id?: string
   number?: number
-  company?: string | null
-  requester?: string | null
   subject: string
   description?: string | null
   status?: $Enums.TicketStatus
   priority?: $Enums.TicketPriority
-  operator?: string | null
   contact?: string | null
-  ticketType?: string | null
-  category?: string | null
-  workbench?: string | null
   responseSlaAt?: Date | string | null
   solutionSlaAt?: Date | string | null
   pausedReason?: string | null
@@ -1659,7 +1324,6 @@ export type TicketCreateWithoutTipo_ticketInput = {
   categoria?: Prisma.Categoria_TicketCreateNestedOneWithoutTicketsInput
   mesa_trabalho_rel?: Prisma.Mesa_TrabalhoCreateNestedOneWithoutTicketsInput
   operador_rel?: Prisma.OperadorCreateNestedOneWithoutTicketsInput
-  operatorUser?: Prisma.UserCreateNestedOneWithoutTicketsInput
   createdByUser?: Prisma.UserCreateNestedOneWithoutCreatedTicketsInput
   events?: Prisma.TicketEventCreateNestedManyWithoutTicketInput
   chatConversations?: Prisma.ChatConversationCreateNestedManyWithoutTicketInput
@@ -1672,19 +1336,12 @@ export type TicketUncheckedCreateWithoutTipo_ticketInput = {
   categoria_id?: string | null
   mesa_trabalho_id?: string | null
   operador_id?: string | null
-  company?: string | null
-  requester?: string | null
   subject: string
   description?: string | null
   status?: $Enums.TicketStatus
   priority?: $Enums.TicketPriority
-  operator?: string | null
-  operatorId?: string | null
   createdByUserId?: string | null
   contact?: string | null
-  ticketType?: string | null
-  category?: string | null
-  workbench?: string | null
   responseSlaAt?: Date | string | null
   solutionSlaAt?: Date | string | null
   pausedReason?: string | null
@@ -1729,17 +1386,11 @@ export type TicketUpdateManyWithWhereWithoutTipo_ticketInput = {
 export type TicketCreateWithoutCategoriaInput = {
   id?: string
   number?: number
-  company?: string | null
-  requester?: string | null
   subject: string
   description?: string | null
   status?: $Enums.TicketStatus
   priority?: $Enums.TicketPriority
-  operator?: string | null
   contact?: string | null
-  ticketType?: string | null
-  category?: string | null
-  workbench?: string | null
   responseSlaAt?: Date | string | null
   solutionSlaAt?: Date | string | null
   pausedReason?: string | null
@@ -1755,7 +1406,6 @@ export type TicketCreateWithoutCategoriaInput = {
   tipo_ticket?: Prisma.Tipo_TicketCreateNestedOneWithoutTicketsInput
   mesa_trabalho_rel?: Prisma.Mesa_TrabalhoCreateNestedOneWithoutTicketsInput
   operador_rel?: Prisma.OperadorCreateNestedOneWithoutTicketsInput
-  operatorUser?: Prisma.UserCreateNestedOneWithoutTicketsInput
   createdByUser?: Prisma.UserCreateNestedOneWithoutCreatedTicketsInput
   events?: Prisma.TicketEventCreateNestedManyWithoutTicketInput
   chatConversations?: Prisma.ChatConversationCreateNestedManyWithoutTicketInput
@@ -1768,19 +1418,12 @@ export type TicketUncheckedCreateWithoutCategoriaInput = {
   tipo_ticket_id?: string | null
   mesa_trabalho_id?: string | null
   operador_id?: string | null
-  company?: string | null
-  requester?: string | null
   subject: string
   description?: string | null
   status?: $Enums.TicketStatus
   priority?: $Enums.TicketPriority
-  operator?: string | null
-  operatorId?: string | null
   createdByUserId?: string | null
   contact?: string | null
-  ticketType?: string | null
-  category?: string | null
-  workbench?: string | null
   responseSlaAt?: Date | string | null
   solutionSlaAt?: Date | string | null
   pausedReason?: string | null
@@ -1825,17 +1468,11 @@ export type TicketUpdateManyWithWhereWithoutCategoriaInput = {
 export type TicketCreateWithoutMesa_trabalho_relInput = {
   id?: string
   number?: number
-  company?: string | null
-  requester?: string | null
   subject: string
   description?: string | null
   status?: $Enums.TicketStatus
   priority?: $Enums.TicketPriority
-  operator?: string | null
   contact?: string | null
-  ticketType?: string | null
-  category?: string | null
-  workbench?: string | null
   responseSlaAt?: Date | string | null
   solutionSlaAt?: Date | string | null
   pausedReason?: string | null
@@ -1851,7 +1488,6 @@ export type TicketCreateWithoutMesa_trabalho_relInput = {
   tipo_ticket?: Prisma.Tipo_TicketCreateNestedOneWithoutTicketsInput
   categoria?: Prisma.Categoria_TicketCreateNestedOneWithoutTicketsInput
   operador_rel?: Prisma.OperadorCreateNestedOneWithoutTicketsInput
-  operatorUser?: Prisma.UserCreateNestedOneWithoutTicketsInput
   createdByUser?: Prisma.UserCreateNestedOneWithoutCreatedTicketsInput
   events?: Prisma.TicketEventCreateNestedManyWithoutTicketInput
   chatConversations?: Prisma.ChatConversationCreateNestedManyWithoutTicketInput
@@ -1864,19 +1500,12 @@ export type TicketUncheckedCreateWithoutMesa_trabalho_relInput = {
   tipo_ticket_id?: string | null
   categoria_id?: string | null
   operador_id?: string | null
-  company?: string | null
-  requester?: string | null
   subject: string
   description?: string | null
   status?: $Enums.TicketStatus
   priority?: $Enums.TicketPriority
-  operator?: string | null
-  operatorId?: string | null
   createdByUserId?: string | null
   contact?: string | null
-  ticketType?: string | null
-  category?: string | null
-  workbench?: string | null
   responseSlaAt?: Date | string | null
   solutionSlaAt?: Date | string | null
   pausedReason?: string | null
@@ -1921,17 +1550,11 @@ export type TicketUpdateManyWithWhereWithoutMesa_trabalho_relInput = {
 export type TicketCreateWithoutOperador_relInput = {
   id?: string
   number?: number
-  company?: string | null
-  requester?: string | null
   subject: string
   description?: string | null
   status?: $Enums.TicketStatus
   priority?: $Enums.TicketPriority
-  operator?: string | null
   contact?: string | null
-  ticketType?: string | null
-  category?: string | null
-  workbench?: string | null
   responseSlaAt?: Date | string | null
   solutionSlaAt?: Date | string | null
   pausedReason?: string | null
@@ -1947,7 +1570,6 @@ export type TicketCreateWithoutOperador_relInput = {
   tipo_ticket?: Prisma.Tipo_TicketCreateNestedOneWithoutTicketsInput
   categoria?: Prisma.Categoria_TicketCreateNestedOneWithoutTicketsInput
   mesa_trabalho_rel?: Prisma.Mesa_TrabalhoCreateNestedOneWithoutTicketsInput
-  operatorUser?: Prisma.UserCreateNestedOneWithoutTicketsInput
   createdByUser?: Prisma.UserCreateNestedOneWithoutCreatedTicketsInput
   events?: Prisma.TicketEventCreateNestedManyWithoutTicketInput
   chatConversations?: Prisma.ChatConversationCreateNestedManyWithoutTicketInput
@@ -1960,19 +1582,12 @@ export type TicketUncheckedCreateWithoutOperador_relInput = {
   tipo_ticket_id?: string | null
   categoria_id?: string | null
   mesa_trabalho_id?: string | null
-  company?: string | null
-  requester?: string | null
   subject: string
   description?: string | null
   status?: $Enums.TicketStatus
   priority?: $Enums.TicketPriority
-  operator?: string | null
-  operatorId?: string | null
   createdByUserId?: string | null
   contact?: string | null
-  ticketType?: string | null
-  category?: string | null
-  workbench?: string | null
   responseSlaAt?: Date | string | null
   solutionSlaAt?: Date | string | null
   pausedReason?: string | null
@@ -2017,17 +1632,11 @@ export type TicketUpdateManyWithWhereWithoutOperador_relInput = {
 export type TicketCreateWithoutEventsInput = {
   id?: string
   number?: number
-  company?: string | null
-  requester?: string | null
   subject: string
   description?: string | null
   status?: $Enums.TicketStatus
   priority?: $Enums.TicketPriority
-  operator?: string | null
   contact?: string | null
-  ticketType?: string | null
-  category?: string | null
-  workbench?: string | null
   responseSlaAt?: Date | string | null
   solutionSlaAt?: Date | string | null
   pausedReason?: string | null
@@ -2044,7 +1653,6 @@ export type TicketCreateWithoutEventsInput = {
   categoria?: Prisma.Categoria_TicketCreateNestedOneWithoutTicketsInput
   mesa_trabalho_rel?: Prisma.Mesa_TrabalhoCreateNestedOneWithoutTicketsInput
   operador_rel?: Prisma.OperadorCreateNestedOneWithoutTicketsInput
-  operatorUser?: Prisma.UserCreateNestedOneWithoutTicketsInput
   createdByUser?: Prisma.UserCreateNestedOneWithoutCreatedTicketsInput
   chatConversations?: Prisma.ChatConversationCreateNestedManyWithoutTicketInput
 }
@@ -2057,19 +1665,12 @@ export type TicketUncheckedCreateWithoutEventsInput = {
   categoria_id?: string | null
   mesa_trabalho_id?: string | null
   operador_id?: string | null
-  company?: string | null
-  requester?: string | null
   subject: string
   description?: string | null
   status?: $Enums.TicketStatus
   priority?: $Enums.TicketPriority
-  operator?: string | null
-  operatorId?: string | null
   createdByUserId?: string | null
   contact?: string | null
-  ticketType?: string | null
-  category?: string | null
-  workbench?: string | null
   responseSlaAt?: Date | string | null
   solutionSlaAt?: Date | string | null
   pausedReason?: string | null
@@ -2102,17 +1703,11 @@ export type TicketUpdateToOneWithWhereWithoutEventsInput = {
 
 export type TicketUpdateWithoutEventsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  company?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  requester?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subject?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
   priority?: Prisma.EnumTicketPriorityFieldUpdateOperationsInput | $Enums.TicketPriority
-  operator?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contact?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  ticketType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  category?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  workbench?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responseSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   solutionSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pausedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2129,7 +1724,6 @@ export type TicketUpdateWithoutEventsInput = {
   categoria?: Prisma.Categoria_TicketUpdateOneWithoutTicketsNestedInput
   mesa_trabalho_rel?: Prisma.Mesa_TrabalhoUpdateOneWithoutTicketsNestedInput
   operador_rel?: Prisma.OperadorUpdateOneWithoutTicketsNestedInput
-  operatorUser?: Prisma.UserUpdateOneWithoutTicketsNestedInput
   createdByUser?: Prisma.UserUpdateOneWithoutCreatedTicketsNestedInput
   chatConversations?: Prisma.ChatConversationUpdateManyWithoutTicketNestedInput
 }
@@ -2142,19 +1736,12 @@ export type TicketUncheckedUpdateWithoutEventsInput = {
   categoria_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mesa_trabalho_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   operador_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  company?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  requester?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subject?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
   priority?: Prisma.EnumTicketPriorityFieldUpdateOperationsInput | $Enums.TicketPriority
-  operator?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  operatorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contact?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  ticketType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  category?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  workbench?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responseSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   solutionSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pausedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2172,17 +1759,11 @@ export type TicketUncheckedUpdateWithoutEventsInput = {
 export type TicketCreateWithoutChatConversationsInput = {
   id?: string
   number?: number
-  company?: string | null
-  requester?: string | null
   subject: string
   description?: string | null
   status?: $Enums.TicketStatus
   priority?: $Enums.TicketPriority
-  operator?: string | null
   contact?: string | null
-  ticketType?: string | null
-  category?: string | null
-  workbench?: string | null
   responseSlaAt?: Date | string | null
   solutionSlaAt?: Date | string | null
   pausedReason?: string | null
@@ -2199,7 +1780,6 @@ export type TicketCreateWithoutChatConversationsInput = {
   categoria?: Prisma.Categoria_TicketCreateNestedOneWithoutTicketsInput
   mesa_trabalho_rel?: Prisma.Mesa_TrabalhoCreateNestedOneWithoutTicketsInput
   operador_rel?: Prisma.OperadorCreateNestedOneWithoutTicketsInput
-  operatorUser?: Prisma.UserCreateNestedOneWithoutTicketsInput
   createdByUser?: Prisma.UserCreateNestedOneWithoutCreatedTicketsInput
   events?: Prisma.TicketEventCreateNestedManyWithoutTicketInput
 }
@@ -2212,19 +1792,12 @@ export type TicketUncheckedCreateWithoutChatConversationsInput = {
   categoria_id?: string | null
   mesa_trabalho_id?: string | null
   operador_id?: string | null
-  company?: string | null
-  requester?: string | null
   subject: string
   description?: string | null
   status?: $Enums.TicketStatus
   priority?: $Enums.TicketPriority
-  operator?: string | null
-  operatorId?: string | null
   createdByUserId?: string | null
   contact?: string | null
-  ticketType?: string | null
-  category?: string | null
-  workbench?: string | null
   responseSlaAt?: Date | string | null
   solutionSlaAt?: Date | string | null
   pausedReason?: string | null
@@ -2257,17 +1830,11 @@ export type TicketUpdateToOneWithWhereWithoutChatConversationsInput = {
 
 export type TicketUpdateWithoutChatConversationsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  company?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  requester?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subject?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
   priority?: Prisma.EnumTicketPriorityFieldUpdateOperationsInput | $Enums.TicketPriority
-  operator?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contact?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  ticketType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  category?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  workbench?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responseSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   solutionSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pausedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2284,7 +1851,6 @@ export type TicketUpdateWithoutChatConversationsInput = {
   categoria?: Prisma.Categoria_TicketUpdateOneWithoutTicketsNestedInput
   mesa_trabalho_rel?: Prisma.Mesa_TrabalhoUpdateOneWithoutTicketsNestedInput
   operador_rel?: Prisma.OperadorUpdateOneWithoutTicketsNestedInput
-  operatorUser?: Prisma.UserUpdateOneWithoutTicketsNestedInput
   createdByUser?: Prisma.UserUpdateOneWithoutCreatedTicketsNestedInput
   events?: Prisma.TicketEventUpdateManyWithoutTicketNestedInput
 }
@@ -2297,19 +1863,12 @@ export type TicketUncheckedUpdateWithoutChatConversationsInput = {
   categoria_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mesa_trabalho_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   operador_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  company?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  requester?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subject?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
   priority?: Prisma.EnumTicketPriorityFieldUpdateOperationsInput | $Enums.TicketPriority
-  operator?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  operatorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contact?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  ticketType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  category?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  workbench?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responseSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   solutionSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pausedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2322,39 +1881,6 @@ export type TicketUncheckedUpdateWithoutChatConversationsInput = {
   updated_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   events?: Prisma.TicketEventUncheckedUpdateManyWithoutTicketNestedInput
-}
-
-export type TicketCreateManyOperatorUserInput = {
-  id?: string
-  number?: number
-  solicitante_id?: string | null
-  tipo_ticket_id?: string | null
-  categoria_id?: string | null
-  mesa_trabalho_id?: string | null
-  operador_id?: string | null
-  company?: string | null
-  requester?: string | null
-  subject: string
-  description?: string | null
-  status?: $Enums.TicketStatus
-  priority?: $Enums.TicketPriority
-  operator?: string | null
-  createdByUserId?: string | null
-  contact?: string | null
-  ticketType?: string | null
-  category?: string | null
-  workbench?: string | null
-  responseSlaAt?: Date | string | null
-  solutionSlaAt?: Date | string | null
-  pausedReason?: string | null
-  pauseSla?: boolean
-  pausedStartedAt?: Date | string | null
-  pausedTotalSeconds?: number
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  created_by?: string | null
-  updated_by?: string | null
-  deleted_at?: Date | string | null
 }
 
 export type TicketCreateManyCreatedByUserInput = {
@@ -2365,18 +1891,11 @@ export type TicketCreateManyCreatedByUserInput = {
   categoria_id?: string | null
   mesa_trabalho_id?: string | null
   operador_id?: string | null
-  company?: string | null
-  requester?: string | null
   subject: string
   description?: string | null
   status?: $Enums.TicketStatus
   priority?: $Enums.TicketPriority
-  operator?: string | null
-  operatorId?: string | null
   contact?: string | null
-  ticketType?: string | null
-  category?: string | null
-  workbench?: string | null
   responseSlaAt?: Date | string | null
   solutionSlaAt?: Date | string | null
   pausedReason?: string | null
@@ -2390,121 +1909,13 @@ export type TicketCreateManyCreatedByUserInput = {
   deleted_at?: Date | string | null
 }
 
-export type TicketUpdateWithoutOperatorUserInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  company?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  requester?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  subject?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  status?: Prisma.EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
-  priority?: Prisma.EnumTicketPriorityFieldUpdateOperationsInput | $Enums.TicketPriority
-  operator?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  contact?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  ticketType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  category?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  workbench?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  responseSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  solutionSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  pausedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  pauseSla?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  pausedStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  pausedTotalSeconds?: Prisma.IntFieldUpdateOperationsInput | number
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  updated_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  solicitante?: Prisma.SolicitanteUpdateOneWithoutTicketsNestedInput
-  tipo_ticket?: Prisma.Tipo_TicketUpdateOneWithoutTicketsNestedInput
-  categoria?: Prisma.Categoria_TicketUpdateOneWithoutTicketsNestedInput
-  mesa_trabalho_rel?: Prisma.Mesa_TrabalhoUpdateOneWithoutTicketsNestedInput
-  operador_rel?: Prisma.OperadorUpdateOneWithoutTicketsNestedInput
-  createdByUser?: Prisma.UserUpdateOneWithoutCreatedTicketsNestedInput
-  events?: Prisma.TicketEventUpdateManyWithoutTicketNestedInput
-  chatConversations?: Prisma.ChatConversationUpdateManyWithoutTicketNestedInput
-}
-
-export type TicketUncheckedUpdateWithoutOperatorUserInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  number?: Prisma.IntFieldUpdateOperationsInput | number
-  solicitante_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  tipo_ticket_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  categoria_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  mesa_trabalho_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  operador_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  company?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  requester?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  subject?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  status?: Prisma.EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
-  priority?: Prisma.EnumTicketPriorityFieldUpdateOperationsInput | $Enums.TicketPriority
-  operator?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  contact?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  ticketType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  category?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  workbench?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  responseSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  solutionSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  pausedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  pauseSla?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  pausedStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  pausedTotalSeconds?: Prisma.IntFieldUpdateOperationsInput | number
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  updated_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  events?: Prisma.TicketEventUncheckedUpdateManyWithoutTicketNestedInput
-  chatConversations?: Prisma.ChatConversationUncheckedUpdateManyWithoutTicketNestedInput
-}
-
-export type TicketUncheckedUpdateManyWithoutOperatorUserInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  number?: Prisma.IntFieldUpdateOperationsInput | number
-  solicitante_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  tipo_ticket_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  categoria_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  mesa_trabalho_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  operador_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  company?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  requester?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  subject?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  status?: Prisma.EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
-  priority?: Prisma.EnumTicketPriorityFieldUpdateOperationsInput | $Enums.TicketPriority
-  operator?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  contact?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  ticketType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  category?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  workbench?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  responseSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  solutionSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  pausedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  pauseSla?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  pausedStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  pausedTotalSeconds?: Prisma.IntFieldUpdateOperationsInput | number
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  updated_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-}
-
 export type TicketUpdateWithoutCreatedByUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  company?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  requester?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subject?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
   priority?: Prisma.EnumTicketPriorityFieldUpdateOperationsInput | $Enums.TicketPriority
-  operator?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contact?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  ticketType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  category?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  workbench?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responseSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   solutionSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pausedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2521,7 +1932,6 @@ export type TicketUpdateWithoutCreatedByUserInput = {
   categoria?: Prisma.Categoria_TicketUpdateOneWithoutTicketsNestedInput
   mesa_trabalho_rel?: Prisma.Mesa_TrabalhoUpdateOneWithoutTicketsNestedInput
   operador_rel?: Prisma.OperadorUpdateOneWithoutTicketsNestedInput
-  operatorUser?: Prisma.UserUpdateOneWithoutTicketsNestedInput
   events?: Prisma.TicketEventUpdateManyWithoutTicketNestedInput
   chatConversations?: Prisma.ChatConversationUpdateManyWithoutTicketNestedInput
 }
@@ -2534,18 +1944,11 @@ export type TicketUncheckedUpdateWithoutCreatedByUserInput = {
   categoria_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mesa_trabalho_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   operador_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  company?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  requester?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subject?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
   priority?: Prisma.EnumTicketPriorityFieldUpdateOperationsInput | $Enums.TicketPriority
-  operator?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  operatorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contact?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  ticketType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  category?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  workbench?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responseSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   solutionSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pausedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2569,18 +1972,11 @@ export type TicketUncheckedUpdateManyWithoutCreatedByUserInput = {
   categoria_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mesa_trabalho_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   operador_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  company?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  requester?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subject?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
   priority?: Prisma.EnumTicketPriorityFieldUpdateOperationsInput | $Enums.TicketPriority
-  operator?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  operatorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contact?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  ticketType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  category?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  workbench?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responseSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   solutionSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pausedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2601,19 +1997,12 @@ export type TicketCreateManySolicitanteInput = {
   categoria_id?: string | null
   mesa_trabalho_id?: string | null
   operador_id?: string | null
-  company?: string | null
-  requester?: string | null
   subject: string
   description?: string | null
   status?: $Enums.TicketStatus
   priority?: $Enums.TicketPriority
-  operator?: string | null
-  operatorId?: string | null
   createdByUserId?: string | null
   contact?: string | null
-  ticketType?: string | null
-  category?: string | null
-  workbench?: string | null
   responseSlaAt?: Date | string | null
   solutionSlaAt?: Date | string | null
   pausedReason?: string | null
@@ -2629,17 +2018,11 @@ export type TicketCreateManySolicitanteInput = {
 
 export type TicketUpdateWithoutSolicitanteInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  company?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  requester?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subject?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
   priority?: Prisma.EnumTicketPriorityFieldUpdateOperationsInput | $Enums.TicketPriority
-  operator?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contact?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  ticketType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  category?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  workbench?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responseSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   solutionSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pausedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2655,7 +2038,6 @@ export type TicketUpdateWithoutSolicitanteInput = {
   categoria?: Prisma.Categoria_TicketUpdateOneWithoutTicketsNestedInput
   mesa_trabalho_rel?: Prisma.Mesa_TrabalhoUpdateOneWithoutTicketsNestedInput
   operador_rel?: Prisma.OperadorUpdateOneWithoutTicketsNestedInput
-  operatorUser?: Prisma.UserUpdateOneWithoutTicketsNestedInput
   createdByUser?: Prisma.UserUpdateOneWithoutCreatedTicketsNestedInput
   events?: Prisma.TicketEventUpdateManyWithoutTicketNestedInput
   chatConversations?: Prisma.ChatConversationUpdateManyWithoutTicketNestedInput
@@ -2668,19 +2050,12 @@ export type TicketUncheckedUpdateWithoutSolicitanteInput = {
   categoria_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mesa_trabalho_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   operador_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  company?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  requester?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subject?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
   priority?: Prisma.EnumTicketPriorityFieldUpdateOperationsInput | $Enums.TicketPriority
-  operator?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  operatorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contact?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  ticketType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  category?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  workbench?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responseSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   solutionSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pausedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2703,19 +2078,12 @@ export type TicketUncheckedUpdateManyWithoutSolicitanteInput = {
   categoria_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mesa_trabalho_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   operador_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  company?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  requester?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subject?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
   priority?: Prisma.EnumTicketPriorityFieldUpdateOperationsInput | $Enums.TicketPriority
-  operator?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  operatorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contact?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  ticketType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  category?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  workbench?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responseSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   solutionSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pausedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2736,19 +2104,12 @@ export type TicketCreateManyTipo_ticketInput = {
   categoria_id?: string | null
   mesa_trabalho_id?: string | null
   operador_id?: string | null
-  company?: string | null
-  requester?: string | null
   subject: string
   description?: string | null
   status?: $Enums.TicketStatus
   priority?: $Enums.TicketPriority
-  operator?: string | null
-  operatorId?: string | null
   createdByUserId?: string | null
   contact?: string | null
-  ticketType?: string | null
-  category?: string | null
-  workbench?: string | null
   responseSlaAt?: Date | string | null
   solutionSlaAt?: Date | string | null
   pausedReason?: string | null
@@ -2764,17 +2125,11 @@ export type TicketCreateManyTipo_ticketInput = {
 
 export type TicketUpdateWithoutTipo_ticketInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  company?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  requester?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subject?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
   priority?: Prisma.EnumTicketPriorityFieldUpdateOperationsInput | $Enums.TicketPriority
-  operator?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contact?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  ticketType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  category?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  workbench?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responseSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   solutionSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pausedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2790,7 +2145,6 @@ export type TicketUpdateWithoutTipo_ticketInput = {
   categoria?: Prisma.Categoria_TicketUpdateOneWithoutTicketsNestedInput
   mesa_trabalho_rel?: Prisma.Mesa_TrabalhoUpdateOneWithoutTicketsNestedInput
   operador_rel?: Prisma.OperadorUpdateOneWithoutTicketsNestedInput
-  operatorUser?: Prisma.UserUpdateOneWithoutTicketsNestedInput
   createdByUser?: Prisma.UserUpdateOneWithoutCreatedTicketsNestedInput
   events?: Prisma.TicketEventUpdateManyWithoutTicketNestedInput
   chatConversations?: Prisma.ChatConversationUpdateManyWithoutTicketNestedInput
@@ -2803,19 +2157,12 @@ export type TicketUncheckedUpdateWithoutTipo_ticketInput = {
   categoria_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mesa_trabalho_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   operador_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  company?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  requester?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subject?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
   priority?: Prisma.EnumTicketPriorityFieldUpdateOperationsInput | $Enums.TicketPriority
-  operator?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  operatorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contact?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  ticketType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  category?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  workbench?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responseSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   solutionSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pausedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2838,19 +2185,12 @@ export type TicketUncheckedUpdateManyWithoutTipo_ticketInput = {
   categoria_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mesa_trabalho_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   operador_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  company?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  requester?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subject?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
   priority?: Prisma.EnumTicketPriorityFieldUpdateOperationsInput | $Enums.TicketPriority
-  operator?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  operatorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contact?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  ticketType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  category?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  workbench?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responseSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   solutionSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pausedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2871,19 +2211,12 @@ export type TicketCreateManyCategoriaInput = {
   tipo_ticket_id?: string | null
   mesa_trabalho_id?: string | null
   operador_id?: string | null
-  company?: string | null
-  requester?: string | null
   subject: string
   description?: string | null
   status?: $Enums.TicketStatus
   priority?: $Enums.TicketPriority
-  operator?: string | null
-  operatorId?: string | null
   createdByUserId?: string | null
   contact?: string | null
-  ticketType?: string | null
-  category?: string | null
-  workbench?: string | null
   responseSlaAt?: Date | string | null
   solutionSlaAt?: Date | string | null
   pausedReason?: string | null
@@ -2899,17 +2232,11 @@ export type TicketCreateManyCategoriaInput = {
 
 export type TicketUpdateWithoutCategoriaInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  company?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  requester?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subject?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
   priority?: Prisma.EnumTicketPriorityFieldUpdateOperationsInput | $Enums.TicketPriority
-  operator?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contact?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  ticketType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  category?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  workbench?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responseSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   solutionSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pausedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2925,7 +2252,6 @@ export type TicketUpdateWithoutCategoriaInput = {
   tipo_ticket?: Prisma.Tipo_TicketUpdateOneWithoutTicketsNestedInput
   mesa_trabalho_rel?: Prisma.Mesa_TrabalhoUpdateOneWithoutTicketsNestedInput
   operador_rel?: Prisma.OperadorUpdateOneWithoutTicketsNestedInput
-  operatorUser?: Prisma.UserUpdateOneWithoutTicketsNestedInput
   createdByUser?: Prisma.UserUpdateOneWithoutCreatedTicketsNestedInput
   events?: Prisma.TicketEventUpdateManyWithoutTicketNestedInput
   chatConversations?: Prisma.ChatConversationUpdateManyWithoutTicketNestedInput
@@ -2938,19 +2264,12 @@ export type TicketUncheckedUpdateWithoutCategoriaInput = {
   tipo_ticket_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mesa_trabalho_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   operador_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  company?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  requester?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subject?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
   priority?: Prisma.EnumTicketPriorityFieldUpdateOperationsInput | $Enums.TicketPriority
-  operator?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  operatorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contact?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  ticketType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  category?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  workbench?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responseSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   solutionSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pausedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2973,19 +2292,12 @@ export type TicketUncheckedUpdateManyWithoutCategoriaInput = {
   tipo_ticket_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mesa_trabalho_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   operador_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  company?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  requester?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subject?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
   priority?: Prisma.EnumTicketPriorityFieldUpdateOperationsInput | $Enums.TicketPriority
-  operator?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  operatorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contact?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  ticketType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  category?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  workbench?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responseSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   solutionSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pausedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3006,19 +2318,12 @@ export type TicketCreateManyMesa_trabalho_relInput = {
   tipo_ticket_id?: string | null
   categoria_id?: string | null
   operador_id?: string | null
-  company?: string | null
-  requester?: string | null
   subject: string
   description?: string | null
   status?: $Enums.TicketStatus
   priority?: $Enums.TicketPriority
-  operator?: string | null
-  operatorId?: string | null
   createdByUserId?: string | null
   contact?: string | null
-  ticketType?: string | null
-  category?: string | null
-  workbench?: string | null
   responseSlaAt?: Date | string | null
   solutionSlaAt?: Date | string | null
   pausedReason?: string | null
@@ -3034,17 +2339,11 @@ export type TicketCreateManyMesa_trabalho_relInput = {
 
 export type TicketUpdateWithoutMesa_trabalho_relInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  company?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  requester?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subject?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
   priority?: Prisma.EnumTicketPriorityFieldUpdateOperationsInput | $Enums.TicketPriority
-  operator?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contact?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  ticketType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  category?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  workbench?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responseSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   solutionSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pausedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3060,7 +2359,6 @@ export type TicketUpdateWithoutMesa_trabalho_relInput = {
   tipo_ticket?: Prisma.Tipo_TicketUpdateOneWithoutTicketsNestedInput
   categoria?: Prisma.Categoria_TicketUpdateOneWithoutTicketsNestedInput
   operador_rel?: Prisma.OperadorUpdateOneWithoutTicketsNestedInput
-  operatorUser?: Prisma.UserUpdateOneWithoutTicketsNestedInput
   createdByUser?: Prisma.UserUpdateOneWithoutCreatedTicketsNestedInput
   events?: Prisma.TicketEventUpdateManyWithoutTicketNestedInput
   chatConversations?: Prisma.ChatConversationUpdateManyWithoutTicketNestedInput
@@ -3073,19 +2371,12 @@ export type TicketUncheckedUpdateWithoutMesa_trabalho_relInput = {
   tipo_ticket_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categoria_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   operador_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  company?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  requester?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subject?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
   priority?: Prisma.EnumTicketPriorityFieldUpdateOperationsInput | $Enums.TicketPriority
-  operator?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  operatorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contact?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  ticketType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  category?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  workbench?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responseSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   solutionSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pausedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3108,19 +2399,12 @@ export type TicketUncheckedUpdateManyWithoutMesa_trabalho_relInput = {
   tipo_ticket_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categoria_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   operador_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  company?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  requester?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subject?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
   priority?: Prisma.EnumTicketPriorityFieldUpdateOperationsInput | $Enums.TicketPriority
-  operator?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  operatorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contact?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  ticketType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  category?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  workbench?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responseSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   solutionSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pausedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3141,19 +2425,12 @@ export type TicketCreateManyOperador_relInput = {
   tipo_ticket_id?: string | null
   categoria_id?: string | null
   mesa_trabalho_id?: string | null
-  company?: string | null
-  requester?: string | null
   subject: string
   description?: string | null
   status?: $Enums.TicketStatus
   priority?: $Enums.TicketPriority
-  operator?: string | null
-  operatorId?: string | null
   createdByUserId?: string | null
   contact?: string | null
-  ticketType?: string | null
-  category?: string | null
-  workbench?: string | null
   responseSlaAt?: Date | string | null
   solutionSlaAt?: Date | string | null
   pausedReason?: string | null
@@ -3169,17 +2446,11 @@ export type TicketCreateManyOperador_relInput = {
 
 export type TicketUpdateWithoutOperador_relInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  company?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  requester?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subject?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
   priority?: Prisma.EnumTicketPriorityFieldUpdateOperationsInput | $Enums.TicketPriority
-  operator?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contact?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  ticketType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  category?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  workbench?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responseSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   solutionSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pausedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3195,7 +2466,6 @@ export type TicketUpdateWithoutOperador_relInput = {
   tipo_ticket?: Prisma.Tipo_TicketUpdateOneWithoutTicketsNestedInput
   categoria?: Prisma.Categoria_TicketUpdateOneWithoutTicketsNestedInput
   mesa_trabalho_rel?: Prisma.Mesa_TrabalhoUpdateOneWithoutTicketsNestedInput
-  operatorUser?: Prisma.UserUpdateOneWithoutTicketsNestedInput
   createdByUser?: Prisma.UserUpdateOneWithoutCreatedTicketsNestedInput
   events?: Prisma.TicketEventUpdateManyWithoutTicketNestedInput
   chatConversations?: Prisma.ChatConversationUpdateManyWithoutTicketNestedInput
@@ -3208,19 +2478,12 @@ export type TicketUncheckedUpdateWithoutOperador_relInput = {
   tipo_ticket_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categoria_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mesa_trabalho_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  company?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  requester?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subject?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
   priority?: Prisma.EnumTicketPriorityFieldUpdateOperationsInput | $Enums.TicketPriority
-  operator?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  operatorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contact?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  ticketType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  category?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  workbench?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responseSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   solutionSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pausedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3243,19 +2506,12 @@ export type TicketUncheckedUpdateManyWithoutOperador_relInput = {
   tipo_ticket_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categoria_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mesa_trabalho_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  company?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  requester?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subject?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
   priority?: Prisma.EnumTicketPriorityFieldUpdateOperationsInput | $Enums.TicketPriority
-  operator?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  operatorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contact?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  ticketType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  category?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  workbench?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responseSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   solutionSlaAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pausedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3317,19 +2573,12 @@ export type TicketSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   categoria_id?: boolean
   mesa_trabalho_id?: boolean
   operador_id?: boolean
-  company?: boolean
-  requester?: boolean
   subject?: boolean
   description?: boolean
   status?: boolean
   priority?: boolean
-  operator?: boolean
-  operatorId?: boolean
   createdByUserId?: boolean
   contact?: boolean
-  ticketType?: boolean
-  category?: boolean
-  workbench?: boolean
   responseSlaAt?: boolean
   solutionSlaAt?: boolean
   pausedReason?: boolean
@@ -3346,7 +2595,6 @@ export type TicketSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   categoria?: boolean | Prisma.Ticket$categoriaArgs<ExtArgs>
   mesa_trabalho_rel?: boolean | Prisma.Ticket$mesa_trabalho_relArgs<ExtArgs>
   operador_rel?: boolean | Prisma.Ticket$operador_relArgs<ExtArgs>
-  operatorUser?: boolean | Prisma.Ticket$operatorUserArgs<ExtArgs>
   createdByUser?: boolean | Prisma.Ticket$createdByUserArgs<ExtArgs>
   events?: boolean | Prisma.Ticket$eventsArgs<ExtArgs>
   chatConversations?: boolean | Prisma.Ticket$chatConversationsArgs<ExtArgs>
@@ -3361,19 +2609,12 @@ export type TicketSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   categoria_id?: boolean
   mesa_trabalho_id?: boolean
   operador_id?: boolean
-  company?: boolean
-  requester?: boolean
   subject?: boolean
   description?: boolean
   status?: boolean
   priority?: boolean
-  operator?: boolean
-  operatorId?: boolean
   createdByUserId?: boolean
   contact?: boolean
-  ticketType?: boolean
-  category?: boolean
-  workbench?: boolean
   responseSlaAt?: boolean
   solutionSlaAt?: boolean
   pausedReason?: boolean
@@ -3390,7 +2631,6 @@ export type TicketSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   categoria?: boolean | Prisma.Ticket$categoriaArgs<ExtArgs>
   mesa_trabalho_rel?: boolean | Prisma.Ticket$mesa_trabalho_relArgs<ExtArgs>
   operador_rel?: boolean | Prisma.Ticket$operador_relArgs<ExtArgs>
-  operatorUser?: boolean | Prisma.Ticket$operatorUserArgs<ExtArgs>
   createdByUser?: boolean | Prisma.Ticket$createdByUserArgs<ExtArgs>
 }, ExtArgs["result"]["ticket"]>
 
@@ -3402,19 +2642,12 @@ export type TicketSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   categoria_id?: boolean
   mesa_trabalho_id?: boolean
   operador_id?: boolean
-  company?: boolean
-  requester?: boolean
   subject?: boolean
   description?: boolean
   status?: boolean
   priority?: boolean
-  operator?: boolean
-  operatorId?: boolean
   createdByUserId?: boolean
   contact?: boolean
-  ticketType?: boolean
-  category?: boolean
-  workbench?: boolean
   responseSlaAt?: boolean
   solutionSlaAt?: boolean
   pausedReason?: boolean
@@ -3431,7 +2664,6 @@ export type TicketSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   categoria?: boolean | Prisma.Ticket$categoriaArgs<ExtArgs>
   mesa_trabalho_rel?: boolean | Prisma.Ticket$mesa_trabalho_relArgs<ExtArgs>
   operador_rel?: boolean | Prisma.Ticket$operador_relArgs<ExtArgs>
-  operatorUser?: boolean | Prisma.Ticket$operatorUserArgs<ExtArgs>
   createdByUser?: boolean | Prisma.Ticket$createdByUserArgs<ExtArgs>
 }, ExtArgs["result"]["ticket"]>
 
@@ -3443,19 +2675,12 @@ export type TicketSelectScalar = {
   categoria_id?: boolean
   mesa_trabalho_id?: boolean
   operador_id?: boolean
-  company?: boolean
-  requester?: boolean
   subject?: boolean
   description?: boolean
   status?: boolean
   priority?: boolean
-  operator?: boolean
-  operatorId?: boolean
   createdByUserId?: boolean
   contact?: boolean
-  ticketType?: boolean
-  category?: boolean
-  workbench?: boolean
   responseSlaAt?: boolean
   solutionSlaAt?: boolean
   pausedReason?: boolean
@@ -3469,14 +2694,13 @@ export type TicketSelectScalar = {
   deleted_at?: boolean
 }
 
-export type TicketOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "number" | "solicitante_id" | "tipo_ticket_id" | "categoria_id" | "mesa_trabalho_id" | "operador_id" | "company" | "requester" | "subject" | "description" | "status" | "priority" | "operator" | "operatorId" | "createdByUserId" | "contact" | "ticketType" | "category" | "workbench" | "responseSlaAt" | "solutionSlaAt" | "pausedReason" | "pauseSla" | "pausedStartedAt" | "pausedTotalSeconds" | "createdAt" | "updatedAt" | "created_by" | "updated_by" | "deleted_at", ExtArgs["result"]["ticket"]>
+export type TicketOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "number" | "solicitante_id" | "tipo_ticket_id" | "categoria_id" | "mesa_trabalho_id" | "operador_id" | "subject" | "description" | "status" | "priority" | "createdByUserId" | "contact" | "responseSlaAt" | "solutionSlaAt" | "pausedReason" | "pauseSla" | "pausedStartedAt" | "pausedTotalSeconds" | "createdAt" | "updatedAt" | "created_by" | "updated_by" | "deleted_at", ExtArgs["result"]["ticket"]>
 export type TicketInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   solicitante?: boolean | Prisma.Ticket$solicitanteArgs<ExtArgs>
   tipo_ticket?: boolean | Prisma.Ticket$tipo_ticketArgs<ExtArgs>
   categoria?: boolean | Prisma.Ticket$categoriaArgs<ExtArgs>
   mesa_trabalho_rel?: boolean | Prisma.Ticket$mesa_trabalho_relArgs<ExtArgs>
   operador_rel?: boolean | Prisma.Ticket$operador_relArgs<ExtArgs>
-  operatorUser?: boolean | Prisma.Ticket$operatorUserArgs<ExtArgs>
   createdByUser?: boolean | Prisma.Ticket$createdByUserArgs<ExtArgs>
   events?: boolean | Prisma.Ticket$eventsArgs<ExtArgs>
   chatConversations?: boolean | Prisma.Ticket$chatConversationsArgs<ExtArgs>
@@ -3488,7 +2712,6 @@ export type TicketIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   categoria?: boolean | Prisma.Ticket$categoriaArgs<ExtArgs>
   mesa_trabalho_rel?: boolean | Prisma.Ticket$mesa_trabalho_relArgs<ExtArgs>
   operador_rel?: boolean | Prisma.Ticket$operador_relArgs<ExtArgs>
-  operatorUser?: boolean | Prisma.Ticket$operatorUserArgs<ExtArgs>
   createdByUser?: boolean | Prisma.Ticket$createdByUserArgs<ExtArgs>
 }
 export type TicketIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -3497,7 +2720,6 @@ export type TicketIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   categoria?: boolean | Prisma.Ticket$categoriaArgs<ExtArgs>
   mesa_trabalho_rel?: boolean | Prisma.Ticket$mesa_trabalho_relArgs<ExtArgs>
   operador_rel?: boolean | Prisma.Ticket$operador_relArgs<ExtArgs>
-  operatorUser?: boolean | Prisma.Ticket$operatorUserArgs<ExtArgs>
   createdByUser?: boolean | Prisma.Ticket$createdByUserArgs<ExtArgs>
 }
 
@@ -3509,7 +2731,6 @@ export type $TicketPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     categoria: Prisma.$Categoria_TicketPayload<ExtArgs> | null
     mesa_trabalho_rel: Prisma.$Mesa_TrabalhoPayload<ExtArgs> | null
     operador_rel: Prisma.$OperadorPayload<ExtArgs> | null
-    operatorUser: Prisma.$UserPayload<ExtArgs> | null
     createdByUser: Prisma.$UserPayload<ExtArgs> | null
     events: Prisma.$TicketEventPayload<ExtArgs>[]
     chatConversations: Prisma.$ChatConversationPayload<ExtArgs>[]
@@ -3522,19 +2743,12 @@ export type $TicketPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     categoria_id: string | null
     mesa_trabalho_id: string | null
     operador_id: string | null
-    company: string | null
-    requester: string | null
     subject: string
     description: string | null
     status: $Enums.TicketStatus
     priority: $Enums.TicketPriority
-    operator: string | null
-    operatorId: string | null
     createdByUserId: string | null
     contact: string | null
-    ticketType: string | null
-    category: string | null
-    workbench: string | null
     responseSlaAt: Date | null
     solutionSlaAt: Date | null
     pausedReason: string | null
@@ -3945,7 +3159,6 @@ export interface Prisma__TicketClient<T, Null = never, ExtArgs extends runtime.T
   categoria<T extends Prisma.Ticket$categoriaArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Ticket$categoriaArgs<ExtArgs>>): Prisma.Prisma__Categoria_TicketClient<runtime.Types.Result.GetResult<Prisma.$Categoria_TicketPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   mesa_trabalho_rel<T extends Prisma.Ticket$mesa_trabalho_relArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Ticket$mesa_trabalho_relArgs<ExtArgs>>): Prisma.Prisma__Mesa_TrabalhoClient<runtime.Types.Result.GetResult<Prisma.$Mesa_TrabalhoPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   operador_rel<T extends Prisma.Ticket$operador_relArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Ticket$operador_relArgs<ExtArgs>>): Prisma.Prisma__OperadorClient<runtime.Types.Result.GetResult<Prisma.$OperadorPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-  operatorUser<T extends Prisma.Ticket$operatorUserArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Ticket$operatorUserArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   createdByUser<T extends Prisma.Ticket$createdByUserArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Ticket$createdByUserArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   events<T extends Prisma.Ticket$eventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Ticket$eventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TicketEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   chatConversations<T extends Prisma.Ticket$chatConversationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Ticket$chatConversationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ChatConversationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -3985,19 +3198,12 @@ export interface TicketFieldRefs {
   readonly categoria_id: Prisma.FieldRef<"Ticket", 'String'>
   readonly mesa_trabalho_id: Prisma.FieldRef<"Ticket", 'String'>
   readonly operador_id: Prisma.FieldRef<"Ticket", 'String'>
-  readonly company: Prisma.FieldRef<"Ticket", 'String'>
-  readonly requester: Prisma.FieldRef<"Ticket", 'String'>
   readonly subject: Prisma.FieldRef<"Ticket", 'String'>
   readonly description: Prisma.FieldRef<"Ticket", 'String'>
   readonly status: Prisma.FieldRef<"Ticket", 'TicketStatus'>
   readonly priority: Prisma.FieldRef<"Ticket", 'TicketPriority'>
-  readonly operator: Prisma.FieldRef<"Ticket", 'String'>
-  readonly operatorId: Prisma.FieldRef<"Ticket", 'String'>
   readonly createdByUserId: Prisma.FieldRef<"Ticket", 'String'>
   readonly contact: Prisma.FieldRef<"Ticket", 'String'>
-  readonly ticketType: Prisma.FieldRef<"Ticket", 'String'>
-  readonly category: Prisma.FieldRef<"Ticket", 'String'>
-  readonly workbench: Prisma.FieldRef<"Ticket", 'String'>
   readonly responseSlaAt: Prisma.FieldRef<"Ticket", 'DateTime'>
   readonly solutionSlaAt: Prisma.FieldRef<"Ticket", 'DateTime'>
   readonly pausedReason: Prisma.FieldRef<"Ticket", 'String'>
@@ -4502,25 +3708,6 @@ export type Ticket$operador_relArgs<ExtArgs extends runtime.Types.Extensions.Int
    */
   include?: Prisma.OperadorInclude<ExtArgs> | null
   where?: Prisma.OperadorWhereInput
-}
-
-/**
- * Ticket.operatorUser
- */
-export type Ticket$operatorUserArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the User
-   */
-  select?: Prisma.UserSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the User
-   */
-  omit?: Prisma.UserOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.UserInclude<ExtArgs> | null
-  where?: Prisma.UserWhereInput
 }
 
 /**

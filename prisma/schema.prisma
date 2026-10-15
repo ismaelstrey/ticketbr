@@ -68,7 +68,6 @@ model User {
   profilePicUrl  String?  @db.Text
   instanceId     String?
   funcionario    Funcionario?
-  tickets   Ticket[] @relation("OperatorTickets")
   events    TicketEvent[]
   createdTickets Ticket[] @relation("TicketCreatedBy")
 
@@ -277,27 +276,15 @@ model Ticket {
   operador_id    String?
   operador_rel   Operador? @relation(fields: [operador_id], references: [id], onDelete: Restrict)
 
-  // Legacy fields (keeping for compatibility/migration or plain text storage if relation not available)
-  company       String?
-  requester     String?
   subject       String
   description   String?
   status        TicketStatus   @default(TODO)
   priority      TicketPriority @default(NONE)
-  
-  operator      String?
-  
-  // Relation to User model (Legacy)
-  operatorId    String?
-  operatorUser  User?          @relation("OperatorTickets", fields: [operatorId], references: [id])
 
   createdByUserId String?
   createdByUser   User?        @relation("TicketCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
   
   contact       String?
-  ticketType    String? // Legacy string field
-  category      String? // Legacy string field
-  workbench     String? // Legacy string field
   responseSlaAt DateTime?
   solutionSlaAt DateTime?
   pausedReason  String?

@@ -239,7 +239,6 @@ export type UserWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   funcionario?: Prisma.XOR<Prisma.FuncionarioNullableScalarRelationFilter, Prisma.FuncionarioWhereInput> | null
-  tickets?: Prisma.TicketListRelationFilter
   events?: Prisma.TicketEventListRelationFilter
   createdTickets?: Prisma.TicketListRelationFilter
   createdTasks?: Prisma.TaskListRelationFilter
@@ -264,7 +263,6 @@ export type UserOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   funcionario?: Prisma.FuncionarioOrderByWithRelationInput
-  tickets?: Prisma.TicketOrderByRelationAggregateInput
   events?: Prisma.TicketEventOrderByRelationAggregateInput
   createdTickets?: Prisma.TicketOrderByRelationAggregateInput
   createdTasks?: Prisma.TaskOrderByRelationAggregateInput
@@ -292,7 +290,6 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   funcionario?: Prisma.XOR<Prisma.FuncionarioNullableScalarRelationFilter, Prisma.FuncionarioWhereInput> | null
-  tickets?: Prisma.TicketListRelationFilter
   events?: Prisma.TicketEventListRelationFilter
   createdTickets?: Prisma.TicketListRelationFilter
   createdTasks?: Prisma.TaskListRelationFilter
@@ -353,7 +350,6 @@ export type UserCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   funcionario?: Prisma.FuncionarioCreateNestedOneWithoutUserInput
-  tickets?: Prisma.TicketCreateNestedManyWithoutOperatorUserInput
   events?: Prisma.TicketEventCreateNestedManyWithoutAuthorUserInput
   createdTickets?: Prisma.TicketCreateNestedManyWithoutCreatedByUserInput
   createdTasks?: Prisma.TaskCreateNestedManyWithoutCreatedByInput
@@ -378,7 +374,6 @@ export type UserUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   funcionario?: Prisma.FuncionarioUncheckedCreateNestedOneWithoutUserInput
-  tickets?: Prisma.TicketUncheckedCreateNestedManyWithoutOperatorUserInput
   events?: Prisma.TicketEventUncheckedCreateNestedManyWithoutAuthorUserInput
   createdTickets?: Prisma.TicketUncheckedCreateNestedManyWithoutCreatedByUserInput
   createdTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutCreatedByInput
@@ -403,7 +398,6 @@ export type UserUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   funcionario?: Prisma.FuncionarioUpdateOneWithoutUserNestedInput
-  tickets?: Prisma.TicketUpdateManyWithoutOperatorUserNestedInput
   events?: Prisma.TicketEventUpdateManyWithoutAuthorUserNestedInput
   createdTickets?: Prisma.TicketUpdateManyWithoutCreatedByUserNestedInput
   createdTasks?: Prisma.TaskUpdateManyWithoutCreatedByNestedInput
@@ -428,7 +422,6 @@ export type UserUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   funcionario?: Prisma.FuncionarioUncheckedUpdateOneWithoutUserNestedInput
-  tickets?: Prisma.TicketUncheckedUpdateManyWithoutOperatorUserNestedInput
   events?: Prisma.TicketEventUncheckedUpdateManyWithoutAuthorUserNestedInput
   createdTickets?: Prisma.TicketUncheckedUpdateManyWithoutCreatedByUserNestedInput
   createdTasks?: Prisma.TaskUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -569,26 +562,10 @@ export type UserUpdateOneRequiredWithoutFuncionarioNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutFuncionarioInput, Prisma.UserUpdateWithoutFuncionarioInput>, Prisma.UserUncheckedUpdateWithoutFuncionarioInput>
 }
 
-export type UserCreateNestedOneWithoutTicketsInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutTicketsInput, Prisma.UserUncheckedCreateWithoutTicketsInput>
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutTicketsInput
-  connect?: Prisma.UserWhereUniqueInput
-}
-
 export type UserCreateNestedOneWithoutCreatedTicketsInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutCreatedTicketsInput, Prisma.UserUncheckedCreateWithoutCreatedTicketsInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutCreatedTicketsInput
   connect?: Prisma.UserWhereUniqueInput
-}
-
-export type UserUpdateOneWithoutTicketsNestedInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutTicketsInput, Prisma.UserUncheckedCreateWithoutTicketsInput>
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutTicketsInput
-  upsert?: Prisma.UserUpsertWithoutTicketsInput
-  disconnect?: Prisma.UserWhereInput | boolean
-  delete?: Prisma.UserWhereInput | boolean
-  connect?: Prisma.UserWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutTicketsInput, Prisma.UserUpdateWithoutTicketsInput>, Prisma.UserUncheckedUpdateWithoutTicketsInput>
 }
 
 export type UserUpdateOneWithoutCreatedTicketsNestedInput = {
@@ -716,7 +693,6 @@ export type UserCreateWithoutFuncionarioInput = {
   instanceId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  tickets?: Prisma.TicketCreateNestedManyWithoutOperatorUserInput
   events?: Prisma.TicketEventCreateNestedManyWithoutAuthorUserInput
   createdTickets?: Prisma.TicketCreateNestedManyWithoutCreatedByUserInput
   createdTasks?: Prisma.TaskCreateNestedManyWithoutCreatedByInput
@@ -740,7 +716,6 @@ export type UserUncheckedCreateWithoutFuncionarioInput = {
   instanceId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  tickets?: Prisma.TicketUncheckedCreateNestedManyWithoutOperatorUserInput
   events?: Prisma.TicketEventUncheckedCreateNestedManyWithoutAuthorUserInput
   createdTickets?: Prisma.TicketUncheckedCreateNestedManyWithoutCreatedByUserInput
   createdTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutCreatedByInput
@@ -780,7 +755,6 @@ export type UserUpdateWithoutFuncionarioInput = {
   instanceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  tickets?: Prisma.TicketUpdateManyWithoutOperatorUserNestedInput
   events?: Prisma.TicketEventUpdateManyWithoutAuthorUserNestedInput
   createdTickets?: Prisma.TicketUpdateManyWithoutCreatedByUserNestedInput
   createdTasks?: Prisma.TaskUpdateManyWithoutCreatedByNestedInput
@@ -804,7 +778,6 @@ export type UserUncheckedUpdateWithoutFuncionarioInput = {
   instanceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  tickets?: Prisma.TicketUncheckedUpdateManyWithoutOperatorUserNestedInput
   events?: Prisma.TicketEventUncheckedUpdateManyWithoutAuthorUserNestedInput
   createdTickets?: Prisma.TicketUncheckedUpdateManyWithoutCreatedByUserNestedInput
   createdTasks?: Prisma.TaskUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -813,59 +786,6 @@ export type UserUncheckedUpdateWithoutFuncionarioInput = {
   ownedProjects?: Prisma.ProjectUncheckedUpdateManyWithoutOwnerUserNestedInput
   projectMemberships?: Prisma.ProjectMemberUncheckedUpdateManyWithoutUserNestedInput
   projectExports?: Prisma.ProjectExportAuditUncheckedUpdateManyWithoutUserNestedInput
-}
-
-export type UserCreateWithoutTicketsInput = {
-  id?: string
-  email: string
-  name: string
-  password?: string
-  role?: $Enums.Role
-  whatsappId?: string | null
-  remoteJid?: string | null
-  pushName?: string | null
-  profilePicUrl?: string | null
-  instanceId?: string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  funcionario?: Prisma.FuncionarioCreateNestedOneWithoutUserInput
-  events?: Prisma.TicketEventCreateNestedManyWithoutAuthorUserInput
-  createdTickets?: Prisma.TicketCreateNestedManyWithoutCreatedByUserInput
-  createdTasks?: Prisma.TaskCreateNestedManyWithoutCreatedByInput
-  assignedTasks?: Prisma.TaskCreateNestedManyWithoutAssigneeInput
-  createdTaskAttachments?: Prisma.TaskAttachmentCreateNestedManyWithoutCreatedByInput
-  ownedProjects?: Prisma.ProjectCreateNestedManyWithoutOwnerUserInput
-  projectMemberships?: Prisma.ProjectMemberCreateNestedManyWithoutUserInput
-  projectExports?: Prisma.ProjectExportAuditCreateNestedManyWithoutUserInput
-}
-
-export type UserUncheckedCreateWithoutTicketsInput = {
-  id?: string
-  email: string
-  name: string
-  password?: string
-  role?: $Enums.Role
-  whatsappId?: string | null
-  remoteJid?: string | null
-  pushName?: string | null
-  profilePicUrl?: string | null
-  instanceId?: string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  funcionario?: Prisma.FuncionarioUncheckedCreateNestedOneWithoutUserInput
-  events?: Prisma.TicketEventUncheckedCreateNestedManyWithoutAuthorUserInput
-  createdTickets?: Prisma.TicketUncheckedCreateNestedManyWithoutCreatedByUserInput
-  createdTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutCreatedByInput
-  assignedTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutAssigneeInput
-  createdTaskAttachments?: Prisma.TaskAttachmentUncheckedCreateNestedManyWithoutCreatedByInput
-  ownedProjects?: Prisma.ProjectUncheckedCreateNestedManyWithoutOwnerUserInput
-  projectMemberships?: Prisma.ProjectMemberUncheckedCreateNestedManyWithoutUserInput
-  projectExports?: Prisma.ProjectExportAuditUncheckedCreateNestedManyWithoutUserInput
-}
-
-export type UserCreateOrConnectWithoutTicketsInput = {
-  where: Prisma.UserWhereUniqueInput
-  create: Prisma.XOR<Prisma.UserCreateWithoutTicketsInput, Prisma.UserUncheckedCreateWithoutTicketsInput>
 }
 
 export type UserCreateWithoutCreatedTicketsInput = {
@@ -882,7 +802,6 @@ export type UserCreateWithoutCreatedTicketsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   funcionario?: Prisma.FuncionarioCreateNestedOneWithoutUserInput
-  tickets?: Prisma.TicketCreateNestedManyWithoutOperatorUserInput
   events?: Prisma.TicketEventCreateNestedManyWithoutAuthorUserInput
   createdTasks?: Prisma.TaskCreateNestedManyWithoutCreatedByInput
   assignedTasks?: Prisma.TaskCreateNestedManyWithoutAssigneeInput
@@ -906,7 +825,6 @@ export type UserUncheckedCreateWithoutCreatedTicketsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   funcionario?: Prisma.FuncionarioUncheckedCreateNestedOneWithoutUserInput
-  tickets?: Prisma.TicketUncheckedCreateNestedManyWithoutOperatorUserInput
   events?: Prisma.TicketEventUncheckedCreateNestedManyWithoutAuthorUserInput
   createdTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutCreatedByInput
   assignedTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutAssigneeInput
@@ -919,65 +837,6 @@ export type UserUncheckedCreateWithoutCreatedTicketsInput = {
 export type UserCreateOrConnectWithoutCreatedTicketsInput = {
   where: Prisma.UserWhereUniqueInput
   create: Prisma.XOR<Prisma.UserCreateWithoutCreatedTicketsInput, Prisma.UserUncheckedCreateWithoutCreatedTicketsInput>
-}
-
-export type UserUpsertWithoutTicketsInput = {
-  update: Prisma.XOR<Prisma.UserUpdateWithoutTicketsInput, Prisma.UserUncheckedUpdateWithoutTicketsInput>
-  create: Prisma.XOR<Prisma.UserCreateWithoutTicketsInput, Prisma.UserUncheckedCreateWithoutTicketsInput>
-  where?: Prisma.UserWhereInput
-}
-
-export type UserUpdateToOneWithWhereWithoutTicketsInput = {
-  where?: Prisma.UserWhereInput
-  data: Prisma.XOR<Prisma.UserUpdateWithoutTicketsInput, Prisma.UserUncheckedUpdateWithoutTicketsInput>
-}
-
-export type UserUpdateWithoutTicketsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  password?: Prisma.StringFieldUpdateOperationsInput | string
-  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
-  whatsappId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  remoteJid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  pushName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  profilePicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  instanceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  funcionario?: Prisma.FuncionarioUpdateOneWithoutUserNestedInput
-  events?: Prisma.TicketEventUpdateManyWithoutAuthorUserNestedInput
-  createdTickets?: Prisma.TicketUpdateManyWithoutCreatedByUserNestedInput
-  createdTasks?: Prisma.TaskUpdateManyWithoutCreatedByNestedInput
-  assignedTasks?: Prisma.TaskUpdateManyWithoutAssigneeNestedInput
-  createdTaskAttachments?: Prisma.TaskAttachmentUpdateManyWithoutCreatedByNestedInput
-  ownedProjects?: Prisma.ProjectUpdateManyWithoutOwnerUserNestedInput
-  projectMemberships?: Prisma.ProjectMemberUpdateManyWithoutUserNestedInput
-  projectExports?: Prisma.ProjectExportAuditUpdateManyWithoutUserNestedInput
-}
-
-export type UserUncheckedUpdateWithoutTicketsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  password?: Prisma.StringFieldUpdateOperationsInput | string
-  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
-  whatsappId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  remoteJid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  pushName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  profilePicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  instanceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  funcionario?: Prisma.FuncionarioUncheckedUpdateOneWithoutUserNestedInput
-  events?: Prisma.TicketEventUncheckedUpdateManyWithoutAuthorUserNestedInput
-  createdTickets?: Prisma.TicketUncheckedUpdateManyWithoutCreatedByUserNestedInput
-  createdTasks?: Prisma.TaskUncheckedUpdateManyWithoutCreatedByNestedInput
-  assignedTasks?: Prisma.TaskUncheckedUpdateManyWithoutAssigneeNestedInput
-  createdTaskAttachments?: Prisma.TaskAttachmentUncheckedUpdateManyWithoutCreatedByNestedInput
-  ownedProjects?: Prisma.ProjectUncheckedUpdateManyWithoutOwnerUserNestedInput
-  projectMemberships?: Prisma.ProjectMemberUncheckedUpdateManyWithoutUserNestedInput
-  projectExports?: Prisma.ProjectExportAuditUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUpsertWithoutCreatedTicketsInput = {
@@ -1005,7 +864,6 @@ export type UserUpdateWithoutCreatedTicketsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   funcionario?: Prisma.FuncionarioUpdateOneWithoutUserNestedInput
-  tickets?: Prisma.TicketUpdateManyWithoutOperatorUserNestedInput
   events?: Prisma.TicketEventUpdateManyWithoutAuthorUserNestedInput
   createdTasks?: Prisma.TaskUpdateManyWithoutCreatedByNestedInput
   assignedTasks?: Prisma.TaskUpdateManyWithoutAssigneeNestedInput
@@ -1029,7 +887,6 @@ export type UserUncheckedUpdateWithoutCreatedTicketsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   funcionario?: Prisma.FuncionarioUncheckedUpdateOneWithoutUserNestedInput
-  tickets?: Prisma.TicketUncheckedUpdateManyWithoutOperatorUserNestedInput
   events?: Prisma.TicketEventUncheckedUpdateManyWithoutAuthorUserNestedInput
   createdTasks?: Prisma.TaskUncheckedUpdateManyWithoutCreatedByNestedInput
   assignedTasks?: Prisma.TaskUncheckedUpdateManyWithoutAssigneeNestedInput
@@ -1053,7 +910,6 @@ export type UserCreateWithoutEventsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   funcionario?: Prisma.FuncionarioCreateNestedOneWithoutUserInput
-  tickets?: Prisma.TicketCreateNestedManyWithoutOperatorUserInput
   createdTickets?: Prisma.TicketCreateNestedManyWithoutCreatedByUserInput
   createdTasks?: Prisma.TaskCreateNestedManyWithoutCreatedByInput
   assignedTasks?: Prisma.TaskCreateNestedManyWithoutAssigneeInput
@@ -1077,7 +933,6 @@ export type UserUncheckedCreateWithoutEventsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   funcionario?: Prisma.FuncionarioUncheckedCreateNestedOneWithoutUserInput
-  tickets?: Prisma.TicketUncheckedCreateNestedManyWithoutOperatorUserInput
   createdTickets?: Prisma.TicketUncheckedCreateNestedManyWithoutCreatedByUserInput
   createdTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutCreatedByInput
   assignedTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutAssigneeInput
@@ -1117,7 +972,6 @@ export type UserUpdateWithoutEventsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   funcionario?: Prisma.FuncionarioUpdateOneWithoutUserNestedInput
-  tickets?: Prisma.TicketUpdateManyWithoutOperatorUserNestedInput
   createdTickets?: Prisma.TicketUpdateManyWithoutCreatedByUserNestedInput
   createdTasks?: Prisma.TaskUpdateManyWithoutCreatedByNestedInput
   assignedTasks?: Prisma.TaskUpdateManyWithoutAssigneeNestedInput
@@ -1141,7 +995,6 @@ export type UserUncheckedUpdateWithoutEventsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   funcionario?: Prisma.FuncionarioUncheckedUpdateOneWithoutUserNestedInput
-  tickets?: Prisma.TicketUncheckedUpdateManyWithoutOperatorUserNestedInput
   createdTickets?: Prisma.TicketUncheckedUpdateManyWithoutCreatedByUserNestedInput
   createdTasks?: Prisma.TaskUncheckedUpdateManyWithoutCreatedByNestedInput
   assignedTasks?: Prisma.TaskUncheckedUpdateManyWithoutAssigneeNestedInput
@@ -1165,7 +1018,6 @@ export type UserCreateWithoutAssignedTasksInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   funcionario?: Prisma.FuncionarioCreateNestedOneWithoutUserInput
-  tickets?: Prisma.TicketCreateNestedManyWithoutOperatorUserInput
   events?: Prisma.TicketEventCreateNestedManyWithoutAuthorUserInput
   createdTickets?: Prisma.TicketCreateNestedManyWithoutCreatedByUserInput
   createdTasks?: Prisma.TaskCreateNestedManyWithoutCreatedByInput
@@ -1189,7 +1041,6 @@ export type UserUncheckedCreateWithoutAssignedTasksInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   funcionario?: Prisma.FuncionarioUncheckedCreateNestedOneWithoutUserInput
-  tickets?: Prisma.TicketUncheckedCreateNestedManyWithoutOperatorUserInput
   events?: Prisma.TicketEventUncheckedCreateNestedManyWithoutAuthorUserInput
   createdTickets?: Prisma.TicketUncheckedCreateNestedManyWithoutCreatedByUserInput
   createdTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutCreatedByInput
@@ -1218,7 +1069,6 @@ export type UserCreateWithoutCreatedTasksInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   funcionario?: Prisma.FuncionarioCreateNestedOneWithoutUserInput
-  tickets?: Prisma.TicketCreateNestedManyWithoutOperatorUserInput
   events?: Prisma.TicketEventCreateNestedManyWithoutAuthorUserInput
   createdTickets?: Prisma.TicketCreateNestedManyWithoutCreatedByUserInput
   assignedTasks?: Prisma.TaskCreateNestedManyWithoutAssigneeInput
@@ -1242,7 +1092,6 @@ export type UserUncheckedCreateWithoutCreatedTasksInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   funcionario?: Prisma.FuncionarioUncheckedCreateNestedOneWithoutUserInput
-  tickets?: Prisma.TicketUncheckedCreateNestedManyWithoutOperatorUserInput
   events?: Prisma.TicketEventUncheckedCreateNestedManyWithoutAuthorUserInput
   createdTickets?: Prisma.TicketUncheckedCreateNestedManyWithoutCreatedByUserInput
   assignedTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutAssigneeInput
@@ -1282,7 +1131,6 @@ export type UserUpdateWithoutAssignedTasksInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   funcionario?: Prisma.FuncionarioUpdateOneWithoutUserNestedInput
-  tickets?: Prisma.TicketUpdateManyWithoutOperatorUserNestedInput
   events?: Prisma.TicketEventUpdateManyWithoutAuthorUserNestedInput
   createdTickets?: Prisma.TicketUpdateManyWithoutCreatedByUserNestedInput
   createdTasks?: Prisma.TaskUpdateManyWithoutCreatedByNestedInput
@@ -1306,7 +1154,6 @@ export type UserUncheckedUpdateWithoutAssignedTasksInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   funcionario?: Prisma.FuncionarioUncheckedUpdateOneWithoutUserNestedInput
-  tickets?: Prisma.TicketUncheckedUpdateManyWithoutOperatorUserNestedInput
   events?: Prisma.TicketEventUncheckedUpdateManyWithoutAuthorUserNestedInput
   createdTickets?: Prisma.TicketUncheckedUpdateManyWithoutCreatedByUserNestedInput
   createdTasks?: Prisma.TaskUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -1341,7 +1188,6 @@ export type UserUpdateWithoutCreatedTasksInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   funcionario?: Prisma.FuncionarioUpdateOneWithoutUserNestedInput
-  tickets?: Prisma.TicketUpdateManyWithoutOperatorUserNestedInput
   events?: Prisma.TicketEventUpdateManyWithoutAuthorUserNestedInput
   createdTickets?: Prisma.TicketUpdateManyWithoutCreatedByUserNestedInput
   assignedTasks?: Prisma.TaskUpdateManyWithoutAssigneeNestedInput
@@ -1365,7 +1211,6 @@ export type UserUncheckedUpdateWithoutCreatedTasksInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   funcionario?: Prisma.FuncionarioUncheckedUpdateOneWithoutUserNestedInput
-  tickets?: Prisma.TicketUncheckedUpdateManyWithoutOperatorUserNestedInput
   events?: Prisma.TicketEventUncheckedUpdateManyWithoutAuthorUserNestedInput
   createdTickets?: Prisma.TicketUncheckedUpdateManyWithoutCreatedByUserNestedInput
   assignedTasks?: Prisma.TaskUncheckedUpdateManyWithoutAssigneeNestedInput
@@ -1389,7 +1234,6 @@ export type UserCreateWithoutCreatedTaskAttachmentsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   funcionario?: Prisma.FuncionarioCreateNestedOneWithoutUserInput
-  tickets?: Prisma.TicketCreateNestedManyWithoutOperatorUserInput
   events?: Prisma.TicketEventCreateNestedManyWithoutAuthorUserInput
   createdTickets?: Prisma.TicketCreateNestedManyWithoutCreatedByUserInput
   createdTasks?: Prisma.TaskCreateNestedManyWithoutCreatedByInput
@@ -1413,7 +1257,6 @@ export type UserUncheckedCreateWithoutCreatedTaskAttachmentsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   funcionario?: Prisma.FuncionarioUncheckedCreateNestedOneWithoutUserInput
-  tickets?: Prisma.TicketUncheckedCreateNestedManyWithoutOperatorUserInput
   events?: Prisma.TicketEventUncheckedCreateNestedManyWithoutAuthorUserInput
   createdTickets?: Prisma.TicketUncheckedCreateNestedManyWithoutCreatedByUserInput
   createdTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutCreatedByInput
@@ -1453,7 +1296,6 @@ export type UserUpdateWithoutCreatedTaskAttachmentsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   funcionario?: Prisma.FuncionarioUpdateOneWithoutUserNestedInput
-  tickets?: Prisma.TicketUpdateManyWithoutOperatorUserNestedInput
   events?: Prisma.TicketEventUpdateManyWithoutAuthorUserNestedInput
   createdTickets?: Prisma.TicketUpdateManyWithoutCreatedByUserNestedInput
   createdTasks?: Prisma.TaskUpdateManyWithoutCreatedByNestedInput
@@ -1477,7 +1319,6 @@ export type UserUncheckedUpdateWithoutCreatedTaskAttachmentsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   funcionario?: Prisma.FuncionarioUncheckedUpdateOneWithoutUserNestedInput
-  tickets?: Prisma.TicketUncheckedUpdateManyWithoutOperatorUserNestedInput
   events?: Prisma.TicketEventUncheckedUpdateManyWithoutAuthorUserNestedInput
   createdTickets?: Prisma.TicketUncheckedUpdateManyWithoutCreatedByUserNestedInput
   createdTasks?: Prisma.TaskUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -1501,7 +1342,6 @@ export type UserCreateWithoutOwnedProjectsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   funcionario?: Prisma.FuncionarioCreateNestedOneWithoutUserInput
-  tickets?: Prisma.TicketCreateNestedManyWithoutOperatorUserInput
   events?: Prisma.TicketEventCreateNestedManyWithoutAuthorUserInput
   createdTickets?: Prisma.TicketCreateNestedManyWithoutCreatedByUserInput
   createdTasks?: Prisma.TaskCreateNestedManyWithoutCreatedByInput
@@ -1525,7 +1365,6 @@ export type UserUncheckedCreateWithoutOwnedProjectsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   funcionario?: Prisma.FuncionarioUncheckedCreateNestedOneWithoutUserInput
-  tickets?: Prisma.TicketUncheckedCreateNestedManyWithoutOperatorUserInput
   events?: Prisma.TicketEventUncheckedCreateNestedManyWithoutAuthorUserInput
   createdTickets?: Prisma.TicketUncheckedCreateNestedManyWithoutCreatedByUserInput
   createdTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutCreatedByInput
@@ -1565,7 +1404,6 @@ export type UserUpdateWithoutOwnedProjectsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   funcionario?: Prisma.FuncionarioUpdateOneWithoutUserNestedInput
-  tickets?: Prisma.TicketUpdateManyWithoutOperatorUserNestedInput
   events?: Prisma.TicketEventUpdateManyWithoutAuthorUserNestedInput
   createdTickets?: Prisma.TicketUpdateManyWithoutCreatedByUserNestedInput
   createdTasks?: Prisma.TaskUpdateManyWithoutCreatedByNestedInput
@@ -1589,7 +1427,6 @@ export type UserUncheckedUpdateWithoutOwnedProjectsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   funcionario?: Prisma.FuncionarioUncheckedUpdateOneWithoutUserNestedInput
-  tickets?: Prisma.TicketUncheckedUpdateManyWithoutOperatorUserNestedInput
   events?: Prisma.TicketEventUncheckedUpdateManyWithoutAuthorUserNestedInput
   createdTickets?: Prisma.TicketUncheckedUpdateManyWithoutCreatedByUserNestedInput
   createdTasks?: Prisma.TaskUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -1613,7 +1450,6 @@ export type UserCreateWithoutProjectMembershipsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   funcionario?: Prisma.FuncionarioCreateNestedOneWithoutUserInput
-  tickets?: Prisma.TicketCreateNestedManyWithoutOperatorUserInput
   events?: Prisma.TicketEventCreateNestedManyWithoutAuthorUserInput
   createdTickets?: Prisma.TicketCreateNestedManyWithoutCreatedByUserInput
   createdTasks?: Prisma.TaskCreateNestedManyWithoutCreatedByInput
@@ -1637,7 +1473,6 @@ export type UserUncheckedCreateWithoutProjectMembershipsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   funcionario?: Prisma.FuncionarioUncheckedCreateNestedOneWithoutUserInput
-  tickets?: Prisma.TicketUncheckedCreateNestedManyWithoutOperatorUserInput
   events?: Prisma.TicketEventUncheckedCreateNestedManyWithoutAuthorUserInput
   createdTickets?: Prisma.TicketUncheckedCreateNestedManyWithoutCreatedByUserInput
   createdTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutCreatedByInput
@@ -1677,7 +1512,6 @@ export type UserUpdateWithoutProjectMembershipsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   funcionario?: Prisma.FuncionarioUpdateOneWithoutUserNestedInput
-  tickets?: Prisma.TicketUpdateManyWithoutOperatorUserNestedInput
   events?: Prisma.TicketEventUpdateManyWithoutAuthorUserNestedInput
   createdTickets?: Prisma.TicketUpdateManyWithoutCreatedByUserNestedInput
   createdTasks?: Prisma.TaskUpdateManyWithoutCreatedByNestedInput
@@ -1701,7 +1535,6 @@ export type UserUncheckedUpdateWithoutProjectMembershipsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   funcionario?: Prisma.FuncionarioUncheckedUpdateOneWithoutUserNestedInput
-  tickets?: Prisma.TicketUncheckedUpdateManyWithoutOperatorUserNestedInput
   events?: Prisma.TicketEventUncheckedUpdateManyWithoutAuthorUserNestedInput
   createdTickets?: Prisma.TicketUncheckedUpdateManyWithoutCreatedByUserNestedInput
   createdTasks?: Prisma.TaskUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -1725,7 +1558,6 @@ export type UserCreateWithoutProjectExportsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   funcionario?: Prisma.FuncionarioCreateNestedOneWithoutUserInput
-  tickets?: Prisma.TicketCreateNestedManyWithoutOperatorUserInput
   events?: Prisma.TicketEventCreateNestedManyWithoutAuthorUserInput
   createdTickets?: Prisma.TicketCreateNestedManyWithoutCreatedByUserInput
   createdTasks?: Prisma.TaskCreateNestedManyWithoutCreatedByInput
@@ -1749,7 +1581,6 @@ export type UserUncheckedCreateWithoutProjectExportsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   funcionario?: Prisma.FuncionarioUncheckedCreateNestedOneWithoutUserInput
-  tickets?: Prisma.TicketUncheckedCreateNestedManyWithoutOperatorUserInput
   events?: Prisma.TicketEventUncheckedCreateNestedManyWithoutAuthorUserInput
   createdTickets?: Prisma.TicketUncheckedCreateNestedManyWithoutCreatedByUserInput
   createdTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutCreatedByInput
@@ -1789,7 +1620,6 @@ export type UserUpdateWithoutProjectExportsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   funcionario?: Prisma.FuncionarioUpdateOneWithoutUserNestedInput
-  tickets?: Prisma.TicketUpdateManyWithoutOperatorUserNestedInput
   events?: Prisma.TicketEventUpdateManyWithoutAuthorUserNestedInput
   createdTickets?: Prisma.TicketUpdateManyWithoutCreatedByUserNestedInput
   createdTasks?: Prisma.TaskUpdateManyWithoutCreatedByNestedInput
@@ -1813,7 +1643,6 @@ export type UserUncheckedUpdateWithoutProjectExportsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   funcionario?: Prisma.FuncionarioUncheckedUpdateOneWithoutUserNestedInput
-  tickets?: Prisma.TicketUncheckedUpdateManyWithoutOperatorUserNestedInput
   events?: Prisma.TicketEventUncheckedUpdateManyWithoutAuthorUserNestedInput
   createdTickets?: Prisma.TicketUncheckedUpdateManyWithoutCreatedByUserNestedInput
   createdTasks?: Prisma.TaskUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -1829,7 +1658,6 @@ export type UserUncheckedUpdateWithoutProjectExportsInput = {
  */
 
 export type UserCountOutputType = {
-  tickets: number
   events: number
   createdTickets: number
   createdTasks: number
@@ -1841,7 +1669,6 @@ export type UserCountOutputType = {
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  tickets?: boolean | UserCountOutputTypeCountTicketsArgs
   events?: boolean | UserCountOutputTypeCountEventsArgs
   createdTickets?: boolean | UserCountOutputTypeCountCreatedTicketsArgs
   createdTasks?: boolean | UserCountOutputTypeCountCreatedTasksArgs
@@ -1860,13 +1687,6 @@ export type UserCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensi
    * Select specific fields to fetch from the UserCountOutputType
    */
   select?: Prisma.UserCountOutputTypeSelect<ExtArgs> | null
-}
-
-/**
- * UserCountOutputType without action
- */
-export type UserCountOutputTypeCountTicketsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.TicketWhereInput
 }
 
 /**
@@ -1940,7 +1760,6 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   createdAt?: boolean
   updatedAt?: boolean
   funcionario?: boolean | Prisma.User$funcionarioArgs<ExtArgs>
-  tickets?: boolean | Prisma.User$ticketsArgs<ExtArgs>
   events?: boolean | Prisma.User$eventsArgs<ExtArgs>
   createdTickets?: boolean | Prisma.User$createdTicketsArgs<ExtArgs>
   createdTasks?: boolean | Prisma.User$createdTasksArgs<ExtArgs>
@@ -2000,7 +1819,6 @@ export type UserSelectScalar = {
 export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "name" | "password" | "role" | "whatsappId" | "remoteJid" | "pushName" | "profilePicUrl" | "instanceId" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   funcionario?: boolean | Prisma.User$funcionarioArgs<ExtArgs>
-  tickets?: boolean | Prisma.User$ticketsArgs<ExtArgs>
   events?: boolean | Prisma.User$eventsArgs<ExtArgs>
   createdTickets?: boolean | Prisma.User$createdTicketsArgs<ExtArgs>
   createdTasks?: boolean | Prisma.User$createdTasksArgs<ExtArgs>
@@ -2018,7 +1836,6 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   name: "User"
   objects: {
     funcionario: Prisma.$FuncionarioPayload<ExtArgs> | null
-    tickets: Prisma.$TicketPayload<ExtArgs>[]
     events: Prisma.$TicketEventPayload<ExtArgs>[]
     createdTickets: Prisma.$TicketPayload<ExtArgs>[]
     createdTasks: Prisma.$TaskPayload<ExtArgs>[]
@@ -2436,7 +2253,6 @@ readonly fields: UserFieldRefs;
 export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   funcionario<T extends Prisma.User$funcionarioArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$funcionarioArgs<ExtArgs>>): Prisma.Prisma__FuncionarioClient<runtime.Types.Result.GetResult<Prisma.$FuncionarioPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-  tickets<T extends Prisma.User$ticketsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$ticketsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TicketPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   events<T extends Prisma.User$eventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$eventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TicketEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   createdTickets<T extends Prisma.User$createdTicketsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$createdTicketsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TicketPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   createdTasks<T extends Prisma.User$createdTasksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$createdTasksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TaskPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -2895,30 +2711,6 @@ export type User$funcionarioArgs<ExtArgs extends runtime.Types.Extensions.Intern
    */
   include?: Prisma.FuncionarioInclude<ExtArgs> | null
   where?: Prisma.FuncionarioWhereInput
-}
-
-/**
- * User.tickets
- */
-export type User$ticketsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the Ticket
-   */
-  select?: Prisma.TicketSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the Ticket
-   */
-  omit?: Prisma.TicketOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.TicketInclude<ExtArgs> | null
-  where?: Prisma.TicketWhereInput
-  orderBy?: Prisma.TicketOrderByWithRelationInput | Prisma.TicketOrderByWithRelationInput[]
-  cursor?: Prisma.TicketWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.TicketScalarFieldEnum | Prisma.TicketScalarFieldEnum[]
 }
 
 /**

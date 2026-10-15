@@ -110,7 +110,7 @@ export async function getCustomerTicketsDashboard(
   inRange.forEach((ticket) => {
     increment(volume, dayKey(ticket.createdAt));
     increment(statusCounts, String(ticket.status));
-    increment(categoryCounts, ticket.categoria?.nome || ticket.category || "Sem categoria");
+    increment(categoryCounts, ticket.categoria?.nome || "Sem categoria");
   });
 
   tickets.forEach((ticket) => {
@@ -194,7 +194,7 @@ export async function getCustomerTicketsDashboard(
           subject: ticket.subject,
           status: String(ticket.status),
           priority: String(ticket.priority),
-          category: ticket.categoria?.nome || ticket.category || "Sem categoria",
+          category: ticket.categoria?.nome || "Sem categoria",
           sla,
           updatedAt: ticket.updatedAt.toISOString()
         }))

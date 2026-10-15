@@ -67,7 +67,7 @@ function baseTicketWhere(filters: TicketDashboardFilters) {
     deleted_at: null,
     ...(filters.status ? { status: filters.status as any } : {}),
     ...(filters.priority ? { priority: filters.priority as any } : {}),
-    ...(filters.agentId ? { operatorId: String(filters.agentId) } : {}),
+    ...(filters.agentId ? { operador_id: String(filters.agentId) } : {}),
     ...(filters.clientId ? { solicitante_id: String(filters.clientId) } : {}),
     ...(filters.categoryId ? { categoria_id: String(filters.categoryId) } : {}),
     ...(q
@@ -95,7 +95,7 @@ function buildSqlFilter(filters: TicketDashboardFilters) {
 
   if (filters.status) push('t."status" = $', String(filters.status));
   if (filters.priority) push('t."priority" = $', String(filters.priority));
-  if (filters.agentId) push('t."operatorId" = $', String(filters.agentId));
+  if (filters.agentId) push('t."operador_id" = $', String(filters.agentId));
   if (filters.clientId) push('t."solicitante_id" = $', String(filters.clientId));
   if (filters.categoryId) push('t."categoria_id" = $', String(filters.categoryId));
   const q = String(filters.q ?? "").trim();
@@ -162,7 +162,7 @@ export async function getTicketsOperationalDashboard(filters: TicketDashboardFil
 
   const topClientsSql = `
     SELECT COALESCE(t."solicitante_id", NULL) AS "clientId",
-           COALESCE(s.nome_fantasia, s.razao_social, t.company, 'Sem cliente') AS "clientName",
+           COALESCE(s.nome_fantasia, s.razao_social, 'Sem cliente') AS "clientName",
            COUNT(*)::int AS count
     FROM "Ticket" t
     LEFT JOIN "Solicitante" s ON s.id = t."solicitante_id"
@@ -175,7 +175,7 @@ export async function getTicketsOperationalDashboard(filters: TicketDashboardFil
 
   const categoryTrendSql = `
     SELECT date_trunc('${volumeGranularity}', t."createdAt") AS bucket,
-           COALESCE(c.nome, t.category, 'Sem categoria') AS category,
+           COALESCE(c.nome, 'Sem categoria') AS category,
            COUNT(*)::int AS count
     FROM "Ticket" t
     LEFT JOIN "Categoria_Ticket" c ON c.id = t."categoria_id"
@@ -201,11 +201,11 @@ export async function getTicketsOperationalDashboard(filters: TicketDashboardFil
       SELECT t.id AS ticket_id,
              t."createdAt" AS created_at,
              MIN(e."createdAt") AS done_at,
-             t."operatorId" AS operator_id
+             t."operador_id" AS operator_id
       FROM "Ticket" t
       JOIN "TicketEvent" e ON e."ticketId" = t.id
       WHERE ${sqlBase.sql} AND e."toStatus" = 'DONE'
-      GROUP BY t.id, t."createdAt", t."operatorId"
+      GROUP BY t.id, t."createdAt", t."operador_id"
     ), comment_counts AS (
       SELECT e."ticketId" AS ticket_id,
              COUNT(*)::int AS comments
@@ -249,27 +249,27 @@ export async function getTicketsOperationalDashboard(filters: TicketDashboardFil
       SELECT t.id AS ticket_id,
              t."createdAt" AS created_at,
              MIN(e."createdAt") AS done_at,
-             t."operatorId" AS operator_id
+             t."operador_id" AS operator_id
       FROM "Ticket" t
       JOIN "TicketEvent" e ON e."ticketId" = t.id
-      WHERE ${sqlBase.sql} AND e."toStatus" = 'DONE' AND t."operatorId" IS NOT NULL
-      GROUP BY t.id, t."createdAt", t."operatorId"
+      WHERE ${sqlBase.sql} AND e."toStatus" = 'DONE' AND t."operador_id" IS NOT NULL
+      GROUP BY t.id, t."createdAt", t."operador_id"
     )
-    SELECT u.id AS "agentId",
-           u.name AS "agentName",
+    SELECT o.id AS "agentId",
+           o.nome AS "agentName",
            COUNT(*)::int AS resolved,
            AVG(EXTRACT(EPOCH FROM (d.done_at - d.created_at))) AS avg_seconds
     FROM done_events d
-    JOIN "User" u ON u.id = d.operator_id
+    JOIN "Operador" o ON o.id = d.operator_id
     WHERE d.done_at >= $${sqlBase.params.length + 1} AND d.done_at <= $${sqlBase.params.length + 2}
-    GROUP BY u.id, u.name
+    GROUP BY o.id, o.nome
     ORDER BY resolved DESC, avg_seconds ASC
     LIMIT 10
   `;
   const topAgentsRows = await prisma.$queryRawUnsafe<any[]>(topAgentsSql, ...sqlBase.params, window.from, window.to);
 
   const topCategoriesSql = `
-    SELECT COALESCE(c.nome, t.category, 'Sem categoria') AS category,
+    SELECT COALESCE(c.nome, 'Sem categoria') AS category,
            COUNT(*)::int AS count
     FROM "Ticket" t
     LEFT JOIN "Categoria_Ticket" c ON c.id = t."categoria_id"
@@ -294,7 +294,7 @@ export async function getTicketsOperationalDashboard(filters: TicketDashboardFil
     take: 20,
     include: {
       solicitante: { select: { nome_fantasia: true, razao_social: true } },
-      operatorUser: { select: { name: true } }
+      operador_rel: { select: { nome: true } }
     }
   });
 
@@ -324,8 +324,8 @@ export async function getTicketsOperationalDashboard(filters: TicketDashboardFil
           subject: t.subject,
           status: String(t.status),
           priority: String(t.priority),
-          clientName: t.solicitante?.nome_fantasia || t.solicitante?.razao_social || t.company || "Sem cliente",
-          assigneeName: t.operatorUser?.name || t.operator || "",
+          clientName: t.solicitante?.nome_fantasia || t.solicitante?.razao_social || "Sem cliente",
+          assigneeName: t.operador_rel?.nome || "",
           responseSlaAt: t.responseSlaAt ? t.responseSlaAt.toISOString() : null,
           solutionSlaAt: t.solutionSlaAt ? t.solutionSlaAt.toISOString() : null,
           createdAt: t.createdAt.toISOString(),

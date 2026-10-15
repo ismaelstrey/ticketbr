@@ -543,7 +543,6 @@ export async function seedDatabase(prisma: PrismaClient, options?: SeedOptions):
         }
 
         const createdBy = faker.helpers.arrayElement(staffUsers);
-        const operator = faker.helpers.arrayElement(staffUsers);
 
         const ticket = await tx.ticket.create({
           data: {
@@ -556,13 +555,7 @@ export async function seedDatabase(prisma: PrismaClient, options?: SeedOptions):
             categoria_id: category?.id ?? undefined,
             mesa_trabalho_id: mesa.id,
             operador_id: admin.id,
-            requester: requester.nome_fantasia,
-            company: requester.nome_fantasia,
-            operator: operator.name,
             createdByUserId: createdBy.id,
-            ticketType: type.nome,
-            category: category?.nome,
-            workbench: mesa.nome,
             created_by: "seed",
             updated_by: "seed"
           }
