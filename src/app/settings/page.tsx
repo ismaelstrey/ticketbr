@@ -654,8 +654,8 @@ export default function SettingsPage() {
             <div>
               <h3>Monitor de Webhooks e Requisições Externas</h3>
               <Info>
-                Esta aba mostra em tempo real as chamadas externas recebidas pelos endpoints públicos de webhook da aplicação.
-                A lista é atualizada automaticamente a cada 2,5 segundos.
+                Esta aba mostra as chamadas externas recebidas pelos endpoints públicos de webhook da aplicação.
+                Os registros ficam persistidos no banco e a lista é atualizada automaticamente a cada 2,5 segundos.
               </Info>
 
               <Footer>

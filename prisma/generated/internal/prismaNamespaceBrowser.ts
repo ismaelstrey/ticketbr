@@ -73,7 +73,8 @@ export const ModelName = {
   ProjectMember: 'ProjectMember',
   ProjectExportAudit: 'ProjectExportAudit',
   Notification: 'Notification',
-  KpiSnapshot: 'KpiSnapshot'
+  KpiSnapshot: 'KpiSnapshot',
+  WebhookRequestLog: 'WebhookRequestLog'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -477,6 +478,24 @@ export const KpiSnapshotScalarFieldEnum = {
 } as const
 
 export type KpiSnapshotScalarFieldEnum = (typeof KpiSnapshotScalarFieldEnum)[keyof typeof KpiSnapshotScalarFieldEnum]
+
+
+export const WebhookRequestLogScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  method: 'method',
+  path: 'path',
+  route: 'route',
+  source: 'source',
+  status: 'status',
+  ok: 'ok',
+  ip: 'ip',
+  userAgent: 'userAgent',
+  payload: 'payload',
+  headers: 'headers'
+} as const
+
+export type WebhookRequestLogScalarFieldEnum = (typeof WebhookRequestLogScalarFieldEnum)[keyof typeof WebhookRequestLogScalarFieldEnum]
 
 
 export const SortOrder = {

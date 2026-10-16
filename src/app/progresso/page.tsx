@@ -676,9 +676,9 @@ const modules: Module[] = [
 const qualityMetrics: QualityMetric[] = [
   {
     label: "Testes Automatizados",
-    value: "91 arquivos",
+    value: "93 arquivos",
     status: "ok",
-    description: "262 testes passando, incluindo testes de contrato, unitários, integração, autorização, regras de status/SLA, observabilidade, notificações, relatórios gerenciais e bloqueio progressivo de login."
+    description: "271 testes passando, incluindo testes de contrato, unitários, integração, autorização, regras de status/SLA, observabilidade, notificações, relatórios gerenciais, bloqueio progressivo de login e logs de webhook."
   },
   {
     label: "Lint (ESLint)",
@@ -802,9 +802,9 @@ const roadmap: RoadmapItem[] = [
   {
     phase: "Fase 4 — Maturidade",
     title: "Persistir logs de webhook no banco",
-    description: "Migrar os logs de webhook hoje em memória (perdidos a cada deploy) para persistência no banco, com listagem, filtros e limpeza.",
+    description: "Concluído: logs de webhook passaram de memória (perdidos a cada deploy) para o modelo Prisma WebhookRequestLog, com listagem paginada, filtros (rota, fonte, status, período), limpeza e retenção configurável (WEBHOOK_LOG_MAX_ENTRIES).",
     priority: "P2",
-    status: "pending"
+    status: "done"
   },
   {
     phase: "Fase 4 — Maturidade",

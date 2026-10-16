@@ -132,3 +132,8 @@ export type Notification = Prisma.NotificationModel
  * 
  */
 export type KpiSnapshot = Prisma.KpiSnapshotModel
+/**
+ * Model WebhookRequestLog
+ * 
+ */
+export type WebhookRequestLog = Prisma.WebhookRequestLogModel

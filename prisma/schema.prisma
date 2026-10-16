@@ -563,3 +563,25 @@ model KpiSnapshot {
 
   @@map("kpi_snapshots")
 }
+
+// Registro persistido das chamadas externas recebidas nos endpoints públicos de webhook
+model WebhookRequestLog {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  method    String   @db.VarChar(10)
+  path      String   @db.VarChar(255)
+  route     String   @db.VarChar(80)
+  source    String   @db.VarChar(40)
+  status    Int
+  ok        Boolean
+  ip        String?  @db.VarChar(64)
+  userAgent String?  @db.VarChar(255) @map("user_agent")
+  payload   Json?
+  headers   Json     @default("{}")
+
+  @@index([createdAt])
+  @@index([route, createdAt])
+  @@index([source, createdAt])
+  @@index([status, createdAt])
+  @@map("webhook_request_logs")
+}
