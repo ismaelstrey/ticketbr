@@ -788,9 +788,9 @@ const roadmap: RoadmapItem[] = [
   {
     phase: "Fase 3 — Escala",
     title: "Documentação operacional completa",
-    description: "Arquitetura, runbook de incidentes, política de backup/restore e guia de deploy.",
+    description: "Concluído: guia de deploy, política de backup/restore e runbook de incidentes em docs/operacional/, indexados no README.",
     priority: "P2",
-    status: "pending"
+    status: "done"
   }
 ];
 
@@ -809,11 +809,6 @@ const techDebt: TechDebtItem[] = [
   {
     title: "Cobertura de testes",
     description: "Há 90 arquivos de teste, mas sem métrica oficial de cobertura percentual.",
-    impact: "low"
-  },
-  {
-    title: "Documentação operacional",
-    description: "Falta runbook de incidentes, política de backup/restore e guia de ambiente.",
     impact: "low"
   }
 ];
