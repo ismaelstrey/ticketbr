@@ -4,6 +4,7 @@ import { chatService } from "@/server/services/chat-service";
 import { resolveWhatsAppConfig } from "@/server/services/whatsapp-settings";
 import { sendOutboundMessage } from "@/server/services/chat-outbound";
 import { getSession } from "@/lib/auth";
+import { guardStaff } from "@/server/services/staff-context";
 
 function parsePositiveInt(value: string | null, fallback: number) {
   const parsed = Number(value);
@@ -42,6 +43,10 @@ async function findConversationByIdentifiers(input: {
 }
 
 export async function GET(request: NextRequest) {
+  // Garante que apenas staff (ADMIN/AGENT) leia o histórico de mensagens do chat
+  const unauthorized = await guardStaff();
+  if (unauthorized) return unauthorized;
+
   try {
     const contactId = request.nextUrl.searchParams.get("contactId");
     const conversationId = request.nextUrl.searchParams.get("conversationId");
@@ -150,6 +155,10 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  // Garante que apenas staff (ADMIN/AGENT) envie mensagens pelo chat
+  const unauthorized = await guardStaff();
+  if (unauthorized) return unauthorized;
+
   try {
     const session = await getSession();
     if (!session?.id) {

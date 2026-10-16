@@ -2,8 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { ensureChatConversationFinalizedColumn } from "@/server/services/chat-conversation-schema";
+import { guardStaff } from "@/server/services/staff-context";
 
 export async function GET(request: NextRequest) {
+  // Garante que apenas staff (ADMIN/AGENT) acesse o histórico de conversas do chat
+  const unauthorized = await guardStaff();
+  if (unauthorized) return unauthorized;
+
   try {
     await ensureChatConversationFinalizedColumn();
     const contactId = request.nextUrl.searchParams.get("contactId") ?? undefined;
@@ -36,6 +41,10 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  // Garante que apenas staff (ADMIN/AGENT) finalize conversas do chat
+  const unauthorized = await guardStaff();
+  if (unauthorized) return unauthorized;
+
   try {
     await ensureChatConversationFinalizedColumn();
     const body = await request.json();

@@ -12,6 +12,11 @@ vi.mock("@/lib/auth", () => ({
   getSession: getSessionMock
 }));
 
+vi.mock("@/server/services/staff-context", () => ({
+  // Libera o acesso simulando uma sessão de staff válida
+  guardStaff: vi.fn(async () => null)
+}));
+
 vi.mock("@/server/services/chat-service", () => ({
   chatService: {
     findOrCreateConversation: findOrCreateConversationMock,

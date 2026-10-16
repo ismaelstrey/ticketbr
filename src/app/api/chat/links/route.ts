@@ -4,8 +4,13 @@ import { getSession } from "@/lib/auth";
 import { createChatTicketLinkedEvent } from "@/server/contracts/ticket-chat-events";
 import { emitChatEventToN8n } from "@/server/services/n8n-adapter";
 import { resolveWhatsAppConfig } from "@/server/services/whatsapp-settings";
+import { guardStaff } from "@/server/services/staff-context";
 
 export async function GET(request: NextRequest) {
+  // Garante que apenas staff (ADMIN/AGENT) consulte os vínculos de chat
+  const unauthorized = await guardStaff();
+  if (unauthorized) return unauthorized;
+
   const contactId = request.nextUrl.searchParams.get("contactId");
 
   try {
@@ -48,6 +53,10 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  // Garante que apenas staff (ADMIN/AGENT) vincule conversas a tickets
+  const unauthorized = await guardStaff();
+  if (unauthorized) return unauthorized;
+
   try {
     const body = await request.json();
 
