@@ -546,3 +546,20 @@ model Notification {
   @@index([ticketId])
   @@map("notifications")
 }
+
+// Snapshot diário de KPIs gerenciais (pré-agregação para relatórios e tendências)
+model KpiSnapshot {
+  id                         String   @id @default(cuid())
+  snapshotDate               DateTime @unique @map("snapshot_date") @db.Date
+  openTotal                  Int      @default(0) @map("open_total")
+  doneTotal                  Int      @default(0) @map("done_total")
+  overdueTotal               Int      @default(0) @map("overdue_total")
+  slaWarningTotal            Int      @default(0) @map("sla_warning_total")
+  avgResolutionHours         Float?   @map("avg_resolution_hours")
+  firstContactResolutionRate Float?   @map("first_contact_resolution_rate")
+  details                    Json?
+  createdAt                  DateTime @default(now()) @map("created_at")
+  updatedAt                  DateTime @updatedAt @map("updated_at")
+
+  @@map("kpi_snapshots")
+}

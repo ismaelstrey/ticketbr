@@ -72,7 +72,8 @@ export const ModelName = {
   Project: 'Project',
   ProjectMember: 'ProjectMember',
   ProjectExportAudit: 'ProjectExportAudit',
-  Notification: 'Notification'
+  Notification: 'Notification',
+  KpiSnapshot: 'KpiSnapshot'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -459,6 +460,23 @@ export const NotificationScalarFieldEnum = {
 } as const
 
 export type NotificationScalarFieldEnum = (typeof NotificationScalarFieldEnum)[keyof typeof NotificationScalarFieldEnum]
+
+
+export const KpiSnapshotScalarFieldEnum = {
+  id: 'id',
+  snapshotDate: 'snapshotDate',
+  openTotal: 'openTotal',
+  doneTotal: 'doneTotal',
+  overdueTotal: 'overdueTotal',
+  slaWarningTotal: 'slaWarningTotal',
+  avgResolutionHours: 'avgResolutionHours',
+  firstContactResolutionRate: 'firstContactResolutionRate',
+  details: 'details',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type KpiSnapshotScalarFieldEnum = (typeof KpiSnapshotScalarFieldEnum)[keyof typeof KpiSnapshotScalarFieldEnum]
 
 
 export const SortOrder = {

@@ -1,7 +1,9 @@
 import { prisma } from "@/lib/prisma";
 import { TicketOperationalDashboardResponse, TicketDashboardFilters } from "@/types/ticketsDashboard";
 
-type WindowRange = { from: Date; to: Date; prevFrom: Date; prevTo: Date };
+export type DashboardWindowRange = { from: Date; to: Date; prevFrom: Date; prevTo: Date };
+
+type WindowRange = DashboardWindowRange;
 
 function startOfDay(d: Date) {
   const x = new Date(d);
@@ -22,7 +24,7 @@ function clampDateRange(from: Date, to: Date) {
   return { from: f, to: t };
 }
 
-function computeWindow(filters: TicketDashboardFilters): WindowRange {
+export function computeWindow(filters: TicketDashboardFilters): WindowRange {
   const now = new Date();
   const preset = filters.preset ?? "7d";
   if (preset === "today") {

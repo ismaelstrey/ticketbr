@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/sla-scan",
       "schedule": "0 12 * * *"
+    },
+    {
+      "path": "/api/cron/kpi-snapshot",
+      "schedule": "30 12 * * *"
     }
   ]
 }
