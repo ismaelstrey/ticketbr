@@ -646,15 +646,16 @@ const modules: Module[] = [
   },
   {
     name: "Configurações",
-    description: "Integrações, armazenamento, WhatsApp e webhooks.",
+    description: "Integrações, armazenamento, WhatsApp, webhooks e notificações.",
     status: "in-progress",
-    progress: 70,
+    progress: 85,
     icon: FiSettings,
     features: [
       "Integração Evolution/N8N",
       "Storage S3",
       "Configuração WhatsApp",
-      "Logs de webhook"
+      "Logs de webhook",
+      "Preferências de notificação"
     ]
   },
   {
@@ -676,9 +677,9 @@ const modules: Module[] = [
 const qualityMetrics: QualityMetric[] = [
   {
     label: "Testes Automatizados",
-    value: "93 arquivos",
+    value: "95 arquivos",
     status: "ok",
-    description: "271 testes passando, incluindo testes de contrato, unitários, integração, autorização, regras de status/SLA, observabilidade, notificações, relatórios gerenciais, bloqueio progressivo de login e logs de webhook."
+    description: "285 testes passando, incluindo testes de contrato, unitários, integração, autorização, regras de status/SLA, observabilidade, notificações, preferências de notificação, relatórios gerenciais, bloqueio progressivo de login e logs de webhook."
   },
   {
     label: "Lint (ESLint)",
@@ -809,9 +810,9 @@ const roadmap: RoadmapItem[] = [
   {
     phase: "Fase 4 — Maturidade",
     title: "Preferências de notificação",
-    description: "Implementar a aba de Notificações em Configurações (hoje placeholder), com preferências por evento e canal.",
+    description: "Concluído: aba de Notificações em Configurações com chave geral por canal (in-app e e-mail) e por evento (status, comentário, atribuição, SLA próximo e estourado), persistidas em app_runtime_settings e respeitadas pelo dispatchNotification.",
     priority: "P2",
-    status: "pending"
+    status: "done"
   }
 ];
 
@@ -824,7 +825,7 @@ const techDebt: TechDebtItem[] = [
   },
   {
     title: "Cobertura de testes",
-    description: "Há 91 arquivos de teste, mas sem métrica oficial de cobertura percentual.",
+    description: "Há 95 arquivos de teste, mas sem métrica oficial de cobertura percentual.",
     impact: "low"
   }
 ];

@@ -32,6 +32,13 @@ Observações:
 - Unit tests: `npm test`
 - Watch: `npm run test:watch`
 
+## Notificações
+
+- Os disparos passam pelo serviço `src/server/services/notifications.ts` (in-app + e-mail), com `dedupeKey` para varreduras idempotentes.
+- As preferências ficam em **Configurações → Notificações** (`/settings`), persistidas na tabela `app_runtime_settings` (chave `notification_preferences`) via `/api/settings/notification-preferences`.
+- É possível ligar/desligar os canais **in-app** e **e-mail** e cada evento (mudança de status, comentário, atribuição, SLA próximo e SLA estourado).
+- Eventos desativados não geram registro in-app nem envio de e-mail.
+
 ## Desenvolvimento
 
 - Subir app: `npm run dev`
