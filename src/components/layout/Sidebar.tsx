@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import { NotificationBell } from "@/components/layout/NotificationBell";
 import {
   FiHome,
   FiGrid,
@@ -462,7 +463,8 @@ export function Sidebar() {
               <BrandTitle>TicketBR</BrandTitle>
               <BrandSubtitle>Atalhos inteligentes</BrandSubtitle>
             </BrandText>
-          </Brand>         
+          </Brand>
+          {isExpanded && <NotificationBell />}
         </SidebarHeader>
 
         <SectionLabel $isExpanded={isExpanded}>Navegação</SectionLabel>

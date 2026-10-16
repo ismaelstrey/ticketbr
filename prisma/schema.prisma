@@ -55,6 +55,14 @@ enum Role {
   CUSTOMER
 }
 
+enum NotificationType {
+  TICKET_STATUS_CHANGED
+  TICKET_COMMENT
+  TICKET_ASSIGNED
+  SLA_WARNING
+  SLA_BREACHED
+}
+
 // Existing User model - keeping for backward compatibility or future migration
 model User {
   id        String   @id @default(cuid())
@@ -70,6 +78,7 @@ model User {
   funcionario    Funcionario?
   events    TicketEvent[]
   createdTickets Ticket[] @relation("TicketCreatedBy")
+  notifications Notification[]
 
   createdTasks Task[] @relation("TaskCreatedBy")
   assignedTasks Task[] @relation("TaskAssignee")
@@ -301,6 +310,7 @@ model Ticket {
 
   events        TicketEvent[]
   chatConversations ChatConversation[]
+  notifications Notification[]
 
   @@index([status])
   @@index([priority])
@@ -512,4 +522,27 @@ model ProjectExportAudit {
   @@index([userId, createdAt])
   @@index([projectId, createdAt])
   @@map("project_export_audit")
+}
+
+model Notification {
+  id             String           @id @default(cuid())
+  userId         String           @map("user_id")
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ticketId       String?          @map("ticket_id")
+  ticket         Ticket?          @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  solicitante_id String?          @map("solicitante_id")
+  tipo           NotificationType
+  title          String
+  body           String?          @db.Text
+  link           String?
+  metadata       Json?
+  // Evita notificações duplicadas em varreduras periódicas (ex.: SLA)
+  dedupeKey      String?          @unique @map("dedupe_key")
+  readAt         DateTime?        @map("read_at")
+  createdAt      DateTime         @default(now()) @map("created_at")
+
+  @@index([userId, readAt])
+  @@index([userId, createdAt])
+  @@index([ticketId])
+  @@map("notifications")
 }

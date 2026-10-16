@@ -11,8 +11,24 @@ import {
 } from "@/server/ticket-mappers";
 import type { TicketPriority, TicketStatus } from "../../../prisma/generated/enums";
 import { assertTransition, resolveSlaDeadline } from "./ticket-status-policy";
+import { notifyTicketAssigned, notifyTicketComment, notifyTicketStatusChanged } from "./notifications";
 
 const LEGACY_MISSING_COLUMNS = ["pauseSla", "pausedStartedAt", "pausedTotalSeconds"];
+
+/**
+ * Executa um disparo de notificação em modo best-effort: eventuais falhas são
+ * registradas no log e nunca interrompem o fluxo principal do ticket.
+ */
+async function notifyBestEffort(label: string, task: () => Promise<unknown>): Promise<void> {
+  try {
+    await task();
+  } catch (error) {
+    console.warn("[Service] falha ao disparar notificação", {
+      label,
+      error: error instanceof Error ? error.message : "unknown"
+    });
+  }
+}
 
 function isMissingPauseColumnsError(error: unknown): boolean {
   const plainError = (error && typeof error === "object" ? error : {}) as Record<string, unknown>;
@@ -432,6 +448,8 @@ export async function updateTicket(id: string, input: UpdateTicketInput) {
     data.mesa_trabalho_id = mesaTrabalhoId;
   }
   const operadorId = await resolveOperadorId(input);
+  // Detecta troca de responsável para disparar a notificação de atribuição
+  const operadorChanged = Boolean(operadorId) && operadorId !== current.operador_id;
   if (operadorId) {
     data.operador_id = operadorId;
   }
@@ -447,6 +465,10 @@ export async function updateTicket(id: string, input: UpdateTicketInput) {
       author: input.operador ?? "Sistema"
     }
   });
+
+  if (operadorChanged) {
+    await notifyBestEffort("atribuição de operador", () => notifyTicketAssigned({ ticketId: id }));
+  }
 
   return getTicketById(id);
 }
@@ -540,6 +562,11 @@ export async function changeTicketStatus(id: string, status: UiStatus, author?: 
     });
   }
 
+  // Cliente é avisado (in-app + email) sobre a mudança de status
+  await notifyBestEffort("mudança de status", () =>
+    notifyTicketStatusChanged({ ticketId: id, fromStatus: current.status, toStatus: nextStatus })
+  );
+
   return getTicketById(id);
 }
 
@@ -552,15 +579,29 @@ export async function addTicketInteraction(
     return null;
   }
 
+  const eventType = payload.type === "NOTE" ? "NOTE" : "COMMENT";
+
   await prisma.ticketEvent.create({
     data: {
       ticketId: id,
-      type: payload.type === "NOTE" ? "NOTE" : "COMMENT",
+      type: eventType,
       title: payload.title,
       description: payload.description,
       author: payload.author ?? "Sistema"
     }
   });
+
+  // Interações do tipo COMMENT (staff) avisam o cliente; notas internas não notificam
+  if (eventType === "COMMENT") {
+    await notifyBestEffort("novo comentário", () =>
+      notifyTicketComment({
+        ticketId: id,
+        fromCustomer: false,
+        author: payload.author ?? "Sistema",
+        message: payload.description ?? payload.title
+      })
+    );
+  }
 
   return getTicketById(id);
 }

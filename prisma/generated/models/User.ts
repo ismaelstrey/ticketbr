@@ -241,6 +241,7 @@ export type UserWhereInput = {
   funcionario?: Prisma.XOR<Prisma.FuncionarioNullableScalarRelationFilter, Prisma.FuncionarioWhereInput> | null
   events?: Prisma.TicketEventListRelationFilter
   createdTickets?: Prisma.TicketListRelationFilter
+  notifications?: Prisma.NotificationListRelationFilter
   createdTasks?: Prisma.TaskListRelationFilter
   assignedTasks?: Prisma.TaskListRelationFilter
   createdTaskAttachments?: Prisma.TaskAttachmentListRelationFilter
@@ -265,6 +266,7 @@ export type UserOrderByWithRelationInput = {
   funcionario?: Prisma.FuncionarioOrderByWithRelationInput
   events?: Prisma.TicketEventOrderByRelationAggregateInput
   createdTickets?: Prisma.TicketOrderByRelationAggregateInput
+  notifications?: Prisma.NotificationOrderByRelationAggregateInput
   createdTasks?: Prisma.TaskOrderByRelationAggregateInput
   assignedTasks?: Prisma.TaskOrderByRelationAggregateInput
   createdTaskAttachments?: Prisma.TaskAttachmentOrderByRelationAggregateInput
@@ -292,6 +294,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   funcionario?: Prisma.XOR<Prisma.FuncionarioNullableScalarRelationFilter, Prisma.FuncionarioWhereInput> | null
   events?: Prisma.TicketEventListRelationFilter
   createdTickets?: Prisma.TicketListRelationFilter
+  notifications?: Prisma.NotificationListRelationFilter
   createdTasks?: Prisma.TaskListRelationFilter
   assignedTasks?: Prisma.TaskListRelationFilter
   createdTaskAttachments?: Prisma.TaskAttachmentListRelationFilter
@@ -352,6 +355,7 @@ export type UserCreateInput = {
   funcionario?: Prisma.FuncionarioCreateNestedOneWithoutUserInput
   events?: Prisma.TicketEventCreateNestedManyWithoutAuthorUserInput
   createdTickets?: Prisma.TicketCreateNestedManyWithoutCreatedByUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   createdTasks?: Prisma.TaskCreateNestedManyWithoutCreatedByInput
   assignedTasks?: Prisma.TaskCreateNestedManyWithoutAssigneeInput
   createdTaskAttachments?: Prisma.TaskAttachmentCreateNestedManyWithoutCreatedByInput
@@ -376,6 +380,7 @@ export type UserUncheckedCreateInput = {
   funcionario?: Prisma.FuncionarioUncheckedCreateNestedOneWithoutUserInput
   events?: Prisma.TicketEventUncheckedCreateNestedManyWithoutAuthorUserInput
   createdTickets?: Prisma.TicketUncheckedCreateNestedManyWithoutCreatedByUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   createdTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutCreatedByInput
   assignedTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutAssigneeInput
   createdTaskAttachments?: Prisma.TaskAttachmentUncheckedCreateNestedManyWithoutCreatedByInput
@@ -400,6 +405,7 @@ export type UserUpdateInput = {
   funcionario?: Prisma.FuncionarioUpdateOneWithoutUserNestedInput
   events?: Prisma.TicketEventUpdateManyWithoutAuthorUserNestedInput
   createdTickets?: Prisma.TicketUpdateManyWithoutCreatedByUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   createdTasks?: Prisma.TaskUpdateManyWithoutCreatedByNestedInput
   assignedTasks?: Prisma.TaskUpdateManyWithoutAssigneeNestedInput
   createdTaskAttachments?: Prisma.TaskAttachmentUpdateManyWithoutCreatedByNestedInput
@@ -424,6 +430,7 @@ export type UserUncheckedUpdateInput = {
   funcionario?: Prisma.FuncionarioUncheckedUpdateOneWithoutUserNestedInput
   events?: Prisma.TicketEventUncheckedUpdateManyWithoutAuthorUserNestedInput
   createdTickets?: Prisma.TicketUncheckedUpdateManyWithoutCreatedByUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   createdTasks?: Prisma.TaskUncheckedUpdateManyWithoutCreatedByNestedInput
   assignedTasks?: Prisma.TaskUncheckedUpdateManyWithoutAssigneeNestedInput
   createdTaskAttachments?: Prisma.TaskAttachmentUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -680,6 +687,20 @@ export type UserUpdateOneRequiredWithoutProjectExportsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutProjectExportsInput, Prisma.UserUpdateWithoutProjectExportsInput>, Prisma.UserUncheckedUpdateWithoutProjectExportsInput>
 }
 
+export type UserCreateNestedOneWithoutNotificationsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutNotificationsInput, Prisma.UserUncheckedCreateWithoutNotificationsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutNotificationsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutNotificationsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutNotificationsInput, Prisma.UserUncheckedCreateWithoutNotificationsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutNotificationsInput
+  upsert?: Prisma.UserUpsertWithoutNotificationsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutNotificationsInput, Prisma.UserUpdateWithoutNotificationsInput>, Prisma.UserUncheckedUpdateWithoutNotificationsInput>
+}
+
 export type UserCreateWithoutFuncionarioInput = {
   id?: string
   email: string
@@ -695,6 +716,7 @@ export type UserCreateWithoutFuncionarioInput = {
   updatedAt?: Date | string
   events?: Prisma.TicketEventCreateNestedManyWithoutAuthorUserInput
   createdTickets?: Prisma.TicketCreateNestedManyWithoutCreatedByUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   createdTasks?: Prisma.TaskCreateNestedManyWithoutCreatedByInput
   assignedTasks?: Prisma.TaskCreateNestedManyWithoutAssigneeInput
   createdTaskAttachments?: Prisma.TaskAttachmentCreateNestedManyWithoutCreatedByInput
@@ -718,6 +740,7 @@ export type UserUncheckedCreateWithoutFuncionarioInput = {
   updatedAt?: Date | string
   events?: Prisma.TicketEventUncheckedCreateNestedManyWithoutAuthorUserInput
   createdTickets?: Prisma.TicketUncheckedCreateNestedManyWithoutCreatedByUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   createdTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutCreatedByInput
   assignedTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutAssigneeInput
   createdTaskAttachments?: Prisma.TaskAttachmentUncheckedCreateNestedManyWithoutCreatedByInput
@@ -757,6 +780,7 @@ export type UserUpdateWithoutFuncionarioInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   events?: Prisma.TicketEventUpdateManyWithoutAuthorUserNestedInput
   createdTickets?: Prisma.TicketUpdateManyWithoutCreatedByUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   createdTasks?: Prisma.TaskUpdateManyWithoutCreatedByNestedInput
   assignedTasks?: Prisma.TaskUpdateManyWithoutAssigneeNestedInput
   createdTaskAttachments?: Prisma.TaskAttachmentUpdateManyWithoutCreatedByNestedInput
@@ -780,6 +804,7 @@ export type UserUncheckedUpdateWithoutFuncionarioInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   events?: Prisma.TicketEventUncheckedUpdateManyWithoutAuthorUserNestedInput
   createdTickets?: Prisma.TicketUncheckedUpdateManyWithoutCreatedByUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   createdTasks?: Prisma.TaskUncheckedUpdateManyWithoutCreatedByNestedInput
   assignedTasks?: Prisma.TaskUncheckedUpdateManyWithoutAssigneeNestedInput
   createdTaskAttachments?: Prisma.TaskAttachmentUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -803,6 +828,7 @@ export type UserCreateWithoutCreatedTicketsInput = {
   updatedAt?: Date | string
   funcionario?: Prisma.FuncionarioCreateNestedOneWithoutUserInput
   events?: Prisma.TicketEventCreateNestedManyWithoutAuthorUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   createdTasks?: Prisma.TaskCreateNestedManyWithoutCreatedByInput
   assignedTasks?: Prisma.TaskCreateNestedManyWithoutAssigneeInput
   createdTaskAttachments?: Prisma.TaskAttachmentCreateNestedManyWithoutCreatedByInput
@@ -826,6 +852,7 @@ export type UserUncheckedCreateWithoutCreatedTicketsInput = {
   updatedAt?: Date | string
   funcionario?: Prisma.FuncionarioUncheckedCreateNestedOneWithoutUserInput
   events?: Prisma.TicketEventUncheckedCreateNestedManyWithoutAuthorUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   createdTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutCreatedByInput
   assignedTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutAssigneeInput
   createdTaskAttachments?: Prisma.TaskAttachmentUncheckedCreateNestedManyWithoutCreatedByInput
@@ -865,6 +892,7 @@ export type UserUpdateWithoutCreatedTicketsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   funcionario?: Prisma.FuncionarioUpdateOneWithoutUserNestedInput
   events?: Prisma.TicketEventUpdateManyWithoutAuthorUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   createdTasks?: Prisma.TaskUpdateManyWithoutCreatedByNestedInput
   assignedTasks?: Prisma.TaskUpdateManyWithoutAssigneeNestedInput
   createdTaskAttachments?: Prisma.TaskAttachmentUpdateManyWithoutCreatedByNestedInput
@@ -888,6 +916,7 @@ export type UserUncheckedUpdateWithoutCreatedTicketsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   funcionario?: Prisma.FuncionarioUncheckedUpdateOneWithoutUserNestedInput
   events?: Prisma.TicketEventUncheckedUpdateManyWithoutAuthorUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   createdTasks?: Prisma.TaskUncheckedUpdateManyWithoutCreatedByNestedInput
   assignedTasks?: Prisma.TaskUncheckedUpdateManyWithoutAssigneeNestedInput
   createdTaskAttachments?: Prisma.TaskAttachmentUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -911,6 +940,7 @@ export type UserCreateWithoutEventsInput = {
   updatedAt?: Date | string
   funcionario?: Prisma.FuncionarioCreateNestedOneWithoutUserInput
   createdTickets?: Prisma.TicketCreateNestedManyWithoutCreatedByUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   createdTasks?: Prisma.TaskCreateNestedManyWithoutCreatedByInput
   assignedTasks?: Prisma.TaskCreateNestedManyWithoutAssigneeInput
   createdTaskAttachments?: Prisma.TaskAttachmentCreateNestedManyWithoutCreatedByInput
@@ -934,6 +964,7 @@ export type UserUncheckedCreateWithoutEventsInput = {
   updatedAt?: Date | string
   funcionario?: Prisma.FuncionarioUncheckedCreateNestedOneWithoutUserInput
   createdTickets?: Prisma.TicketUncheckedCreateNestedManyWithoutCreatedByUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   createdTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutCreatedByInput
   assignedTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutAssigneeInput
   createdTaskAttachments?: Prisma.TaskAttachmentUncheckedCreateNestedManyWithoutCreatedByInput
@@ -973,6 +1004,7 @@ export type UserUpdateWithoutEventsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   funcionario?: Prisma.FuncionarioUpdateOneWithoutUserNestedInput
   createdTickets?: Prisma.TicketUpdateManyWithoutCreatedByUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   createdTasks?: Prisma.TaskUpdateManyWithoutCreatedByNestedInput
   assignedTasks?: Prisma.TaskUpdateManyWithoutAssigneeNestedInput
   createdTaskAttachments?: Prisma.TaskAttachmentUpdateManyWithoutCreatedByNestedInput
@@ -996,6 +1028,7 @@ export type UserUncheckedUpdateWithoutEventsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   funcionario?: Prisma.FuncionarioUncheckedUpdateOneWithoutUserNestedInput
   createdTickets?: Prisma.TicketUncheckedUpdateManyWithoutCreatedByUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   createdTasks?: Prisma.TaskUncheckedUpdateManyWithoutCreatedByNestedInput
   assignedTasks?: Prisma.TaskUncheckedUpdateManyWithoutAssigneeNestedInput
   createdTaskAttachments?: Prisma.TaskAttachmentUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -1020,6 +1053,7 @@ export type UserCreateWithoutAssignedTasksInput = {
   funcionario?: Prisma.FuncionarioCreateNestedOneWithoutUserInput
   events?: Prisma.TicketEventCreateNestedManyWithoutAuthorUserInput
   createdTickets?: Prisma.TicketCreateNestedManyWithoutCreatedByUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   createdTasks?: Prisma.TaskCreateNestedManyWithoutCreatedByInput
   createdTaskAttachments?: Prisma.TaskAttachmentCreateNestedManyWithoutCreatedByInput
   ownedProjects?: Prisma.ProjectCreateNestedManyWithoutOwnerUserInput
@@ -1043,6 +1077,7 @@ export type UserUncheckedCreateWithoutAssignedTasksInput = {
   funcionario?: Prisma.FuncionarioUncheckedCreateNestedOneWithoutUserInput
   events?: Prisma.TicketEventUncheckedCreateNestedManyWithoutAuthorUserInput
   createdTickets?: Prisma.TicketUncheckedCreateNestedManyWithoutCreatedByUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   createdTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutCreatedByInput
   createdTaskAttachments?: Prisma.TaskAttachmentUncheckedCreateNestedManyWithoutCreatedByInput
   ownedProjects?: Prisma.ProjectUncheckedCreateNestedManyWithoutOwnerUserInput
@@ -1071,6 +1106,7 @@ export type UserCreateWithoutCreatedTasksInput = {
   funcionario?: Prisma.FuncionarioCreateNestedOneWithoutUserInput
   events?: Prisma.TicketEventCreateNestedManyWithoutAuthorUserInput
   createdTickets?: Prisma.TicketCreateNestedManyWithoutCreatedByUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   assignedTasks?: Prisma.TaskCreateNestedManyWithoutAssigneeInput
   createdTaskAttachments?: Prisma.TaskAttachmentCreateNestedManyWithoutCreatedByInput
   ownedProjects?: Prisma.ProjectCreateNestedManyWithoutOwnerUserInput
@@ -1094,6 +1130,7 @@ export type UserUncheckedCreateWithoutCreatedTasksInput = {
   funcionario?: Prisma.FuncionarioUncheckedCreateNestedOneWithoutUserInput
   events?: Prisma.TicketEventUncheckedCreateNestedManyWithoutAuthorUserInput
   createdTickets?: Prisma.TicketUncheckedCreateNestedManyWithoutCreatedByUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   assignedTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutAssigneeInput
   createdTaskAttachments?: Prisma.TaskAttachmentUncheckedCreateNestedManyWithoutCreatedByInput
   ownedProjects?: Prisma.ProjectUncheckedCreateNestedManyWithoutOwnerUserInput
@@ -1133,6 +1170,7 @@ export type UserUpdateWithoutAssignedTasksInput = {
   funcionario?: Prisma.FuncionarioUpdateOneWithoutUserNestedInput
   events?: Prisma.TicketEventUpdateManyWithoutAuthorUserNestedInput
   createdTickets?: Prisma.TicketUpdateManyWithoutCreatedByUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   createdTasks?: Prisma.TaskUpdateManyWithoutCreatedByNestedInput
   createdTaskAttachments?: Prisma.TaskAttachmentUpdateManyWithoutCreatedByNestedInput
   ownedProjects?: Prisma.ProjectUpdateManyWithoutOwnerUserNestedInput
@@ -1156,6 +1194,7 @@ export type UserUncheckedUpdateWithoutAssignedTasksInput = {
   funcionario?: Prisma.FuncionarioUncheckedUpdateOneWithoutUserNestedInput
   events?: Prisma.TicketEventUncheckedUpdateManyWithoutAuthorUserNestedInput
   createdTickets?: Prisma.TicketUncheckedUpdateManyWithoutCreatedByUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   createdTasks?: Prisma.TaskUncheckedUpdateManyWithoutCreatedByNestedInput
   createdTaskAttachments?: Prisma.TaskAttachmentUncheckedUpdateManyWithoutCreatedByNestedInput
   ownedProjects?: Prisma.ProjectUncheckedUpdateManyWithoutOwnerUserNestedInput
@@ -1190,6 +1229,7 @@ export type UserUpdateWithoutCreatedTasksInput = {
   funcionario?: Prisma.FuncionarioUpdateOneWithoutUserNestedInput
   events?: Prisma.TicketEventUpdateManyWithoutAuthorUserNestedInput
   createdTickets?: Prisma.TicketUpdateManyWithoutCreatedByUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   assignedTasks?: Prisma.TaskUpdateManyWithoutAssigneeNestedInput
   createdTaskAttachments?: Prisma.TaskAttachmentUpdateManyWithoutCreatedByNestedInput
   ownedProjects?: Prisma.ProjectUpdateManyWithoutOwnerUserNestedInput
@@ -1213,6 +1253,7 @@ export type UserUncheckedUpdateWithoutCreatedTasksInput = {
   funcionario?: Prisma.FuncionarioUncheckedUpdateOneWithoutUserNestedInput
   events?: Prisma.TicketEventUncheckedUpdateManyWithoutAuthorUserNestedInput
   createdTickets?: Prisma.TicketUncheckedUpdateManyWithoutCreatedByUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   assignedTasks?: Prisma.TaskUncheckedUpdateManyWithoutAssigneeNestedInput
   createdTaskAttachments?: Prisma.TaskAttachmentUncheckedUpdateManyWithoutCreatedByNestedInput
   ownedProjects?: Prisma.ProjectUncheckedUpdateManyWithoutOwnerUserNestedInput
@@ -1236,6 +1277,7 @@ export type UserCreateWithoutCreatedTaskAttachmentsInput = {
   funcionario?: Prisma.FuncionarioCreateNestedOneWithoutUserInput
   events?: Prisma.TicketEventCreateNestedManyWithoutAuthorUserInput
   createdTickets?: Prisma.TicketCreateNestedManyWithoutCreatedByUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   createdTasks?: Prisma.TaskCreateNestedManyWithoutCreatedByInput
   assignedTasks?: Prisma.TaskCreateNestedManyWithoutAssigneeInput
   ownedProjects?: Prisma.ProjectCreateNestedManyWithoutOwnerUserInput
@@ -1259,6 +1301,7 @@ export type UserUncheckedCreateWithoutCreatedTaskAttachmentsInput = {
   funcionario?: Prisma.FuncionarioUncheckedCreateNestedOneWithoutUserInput
   events?: Prisma.TicketEventUncheckedCreateNestedManyWithoutAuthorUserInput
   createdTickets?: Prisma.TicketUncheckedCreateNestedManyWithoutCreatedByUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   createdTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutCreatedByInput
   assignedTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutAssigneeInput
   ownedProjects?: Prisma.ProjectUncheckedCreateNestedManyWithoutOwnerUserInput
@@ -1298,6 +1341,7 @@ export type UserUpdateWithoutCreatedTaskAttachmentsInput = {
   funcionario?: Prisma.FuncionarioUpdateOneWithoutUserNestedInput
   events?: Prisma.TicketEventUpdateManyWithoutAuthorUserNestedInput
   createdTickets?: Prisma.TicketUpdateManyWithoutCreatedByUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   createdTasks?: Prisma.TaskUpdateManyWithoutCreatedByNestedInput
   assignedTasks?: Prisma.TaskUpdateManyWithoutAssigneeNestedInput
   ownedProjects?: Prisma.ProjectUpdateManyWithoutOwnerUserNestedInput
@@ -1321,6 +1365,7 @@ export type UserUncheckedUpdateWithoutCreatedTaskAttachmentsInput = {
   funcionario?: Prisma.FuncionarioUncheckedUpdateOneWithoutUserNestedInput
   events?: Prisma.TicketEventUncheckedUpdateManyWithoutAuthorUserNestedInput
   createdTickets?: Prisma.TicketUncheckedUpdateManyWithoutCreatedByUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   createdTasks?: Prisma.TaskUncheckedUpdateManyWithoutCreatedByNestedInput
   assignedTasks?: Prisma.TaskUncheckedUpdateManyWithoutAssigneeNestedInput
   ownedProjects?: Prisma.ProjectUncheckedUpdateManyWithoutOwnerUserNestedInput
@@ -1344,6 +1389,7 @@ export type UserCreateWithoutOwnedProjectsInput = {
   funcionario?: Prisma.FuncionarioCreateNestedOneWithoutUserInput
   events?: Prisma.TicketEventCreateNestedManyWithoutAuthorUserInput
   createdTickets?: Prisma.TicketCreateNestedManyWithoutCreatedByUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   createdTasks?: Prisma.TaskCreateNestedManyWithoutCreatedByInput
   assignedTasks?: Prisma.TaskCreateNestedManyWithoutAssigneeInput
   createdTaskAttachments?: Prisma.TaskAttachmentCreateNestedManyWithoutCreatedByInput
@@ -1367,6 +1413,7 @@ export type UserUncheckedCreateWithoutOwnedProjectsInput = {
   funcionario?: Prisma.FuncionarioUncheckedCreateNestedOneWithoutUserInput
   events?: Prisma.TicketEventUncheckedCreateNestedManyWithoutAuthorUserInput
   createdTickets?: Prisma.TicketUncheckedCreateNestedManyWithoutCreatedByUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   createdTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutCreatedByInput
   assignedTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutAssigneeInput
   createdTaskAttachments?: Prisma.TaskAttachmentUncheckedCreateNestedManyWithoutCreatedByInput
@@ -1406,6 +1453,7 @@ export type UserUpdateWithoutOwnedProjectsInput = {
   funcionario?: Prisma.FuncionarioUpdateOneWithoutUserNestedInput
   events?: Prisma.TicketEventUpdateManyWithoutAuthorUserNestedInput
   createdTickets?: Prisma.TicketUpdateManyWithoutCreatedByUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   createdTasks?: Prisma.TaskUpdateManyWithoutCreatedByNestedInput
   assignedTasks?: Prisma.TaskUpdateManyWithoutAssigneeNestedInput
   createdTaskAttachments?: Prisma.TaskAttachmentUpdateManyWithoutCreatedByNestedInput
@@ -1429,6 +1477,7 @@ export type UserUncheckedUpdateWithoutOwnedProjectsInput = {
   funcionario?: Prisma.FuncionarioUncheckedUpdateOneWithoutUserNestedInput
   events?: Prisma.TicketEventUncheckedUpdateManyWithoutAuthorUserNestedInput
   createdTickets?: Prisma.TicketUncheckedUpdateManyWithoutCreatedByUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   createdTasks?: Prisma.TaskUncheckedUpdateManyWithoutCreatedByNestedInput
   assignedTasks?: Prisma.TaskUncheckedUpdateManyWithoutAssigneeNestedInput
   createdTaskAttachments?: Prisma.TaskAttachmentUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -1452,6 +1501,7 @@ export type UserCreateWithoutProjectMembershipsInput = {
   funcionario?: Prisma.FuncionarioCreateNestedOneWithoutUserInput
   events?: Prisma.TicketEventCreateNestedManyWithoutAuthorUserInput
   createdTickets?: Prisma.TicketCreateNestedManyWithoutCreatedByUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   createdTasks?: Prisma.TaskCreateNestedManyWithoutCreatedByInput
   assignedTasks?: Prisma.TaskCreateNestedManyWithoutAssigneeInput
   createdTaskAttachments?: Prisma.TaskAttachmentCreateNestedManyWithoutCreatedByInput
@@ -1475,6 +1525,7 @@ export type UserUncheckedCreateWithoutProjectMembershipsInput = {
   funcionario?: Prisma.FuncionarioUncheckedCreateNestedOneWithoutUserInput
   events?: Prisma.TicketEventUncheckedCreateNestedManyWithoutAuthorUserInput
   createdTickets?: Prisma.TicketUncheckedCreateNestedManyWithoutCreatedByUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   createdTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutCreatedByInput
   assignedTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutAssigneeInput
   createdTaskAttachments?: Prisma.TaskAttachmentUncheckedCreateNestedManyWithoutCreatedByInput
@@ -1514,6 +1565,7 @@ export type UserUpdateWithoutProjectMembershipsInput = {
   funcionario?: Prisma.FuncionarioUpdateOneWithoutUserNestedInput
   events?: Prisma.TicketEventUpdateManyWithoutAuthorUserNestedInput
   createdTickets?: Prisma.TicketUpdateManyWithoutCreatedByUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   createdTasks?: Prisma.TaskUpdateManyWithoutCreatedByNestedInput
   assignedTasks?: Prisma.TaskUpdateManyWithoutAssigneeNestedInput
   createdTaskAttachments?: Prisma.TaskAttachmentUpdateManyWithoutCreatedByNestedInput
@@ -1537,6 +1589,7 @@ export type UserUncheckedUpdateWithoutProjectMembershipsInput = {
   funcionario?: Prisma.FuncionarioUncheckedUpdateOneWithoutUserNestedInput
   events?: Prisma.TicketEventUncheckedUpdateManyWithoutAuthorUserNestedInput
   createdTickets?: Prisma.TicketUncheckedUpdateManyWithoutCreatedByUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   createdTasks?: Prisma.TaskUncheckedUpdateManyWithoutCreatedByNestedInput
   assignedTasks?: Prisma.TaskUncheckedUpdateManyWithoutAssigneeNestedInput
   createdTaskAttachments?: Prisma.TaskAttachmentUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -1560,6 +1613,7 @@ export type UserCreateWithoutProjectExportsInput = {
   funcionario?: Prisma.FuncionarioCreateNestedOneWithoutUserInput
   events?: Prisma.TicketEventCreateNestedManyWithoutAuthorUserInput
   createdTickets?: Prisma.TicketCreateNestedManyWithoutCreatedByUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   createdTasks?: Prisma.TaskCreateNestedManyWithoutCreatedByInput
   assignedTasks?: Prisma.TaskCreateNestedManyWithoutAssigneeInput
   createdTaskAttachments?: Prisma.TaskAttachmentCreateNestedManyWithoutCreatedByInput
@@ -1583,6 +1637,7 @@ export type UserUncheckedCreateWithoutProjectExportsInput = {
   funcionario?: Prisma.FuncionarioUncheckedCreateNestedOneWithoutUserInput
   events?: Prisma.TicketEventUncheckedCreateNestedManyWithoutAuthorUserInput
   createdTickets?: Prisma.TicketUncheckedCreateNestedManyWithoutCreatedByUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   createdTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutCreatedByInput
   assignedTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutAssigneeInput
   createdTaskAttachments?: Prisma.TaskAttachmentUncheckedCreateNestedManyWithoutCreatedByInput
@@ -1622,6 +1677,7 @@ export type UserUpdateWithoutProjectExportsInput = {
   funcionario?: Prisma.FuncionarioUpdateOneWithoutUserNestedInput
   events?: Prisma.TicketEventUpdateManyWithoutAuthorUserNestedInput
   createdTickets?: Prisma.TicketUpdateManyWithoutCreatedByUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   createdTasks?: Prisma.TaskUpdateManyWithoutCreatedByNestedInput
   assignedTasks?: Prisma.TaskUpdateManyWithoutAssigneeNestedInput
   createdTaskAttachments?: Prisma.TaskAttachmentUpdateManyWithoutCreatedByNestedInput
@@ -1645,11 +1701,124 @@ export type UserUncheckedUpdateWithoutProjectExportsInput = {
   funcionario?: Prisma.FuncionarioUncheckedUpdateOneWithoutUserNestedInput
   events?: Prisma.TicketEventUncheckedUpdateManyWithoutAuthorUserNestedInput
   createdTickets?: Prisma.TicketUncheckedUpdateManyWithoutCreatedByUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   createdTasks?: Prisma.TaskUncheckedUpdateManyWithoutCreatedByNestedInput
   assignedTasks?: Prisma.TaskUncheckedUpdateManyWithoutAssigneeNestedInput
   createdTaskAttachments?: Prisma.TaskAttachmentUncheckedUpdateManyWithoutCreatedByNestedInput
   ownedProjects?: Prisma.ProjectUncheckedUpdateManyWithoutOwnerUserNestedInput
   projectMemberships?: Prisma.ProjectMemberUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutNotificationsInput = {
+  id?: string
+  email: string
+  name: string
+  password?: string
+  role?: $Enums.Role
+  whatsappId?: string | null
+  remoteJid?: string | null
+  pushName?: string | null
+  profilePicUrl?: string | null
+  instanceId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  funcionario?: Prisma.FuncionarioCreateNestedOneWithoutUserInput
+  events?: Prisma.TicketEventCreateNestedManyWithoutAuthorUserInput
+  createdTickets?: Prisma.TicketCreateNestedManyWithoutCreatedByUserInput
+  createdTasks?: Prisma.TaskCreateNestedManyWithoutCreatedByInput
+  assignedTasks?: Prisma.TaskCreateNestedManyWithoutAssigneeInput
+  createdTaskAttachments?: Prisma.TaskAttachmentCreateNestedManyWithoutCreatedByInput
+  ownedProjects?: Prisma.ProjectCreateNestedManyWithoutOwnerUserInput
+  projectMemberships?: Prisma.ProjectMemberCreateNestedManyWithoutUserInput
+  projectExports?: Prisma.ProjectExportAuditCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutNotificationsInput = {
+  id?: string
+  email: string
+  name: string
+  password?: string
+  role?: $Enums.Role
+  whatsappId?: string | null
+  remoteJid?: string | null
+  pushName?: string | null
+  profilePicUrl?: string | null
+  instanceId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  funcionario?: Prisma.FuncionarioUncheckedCreateNestedOneWithoutUserInput
+  events?: Prisma.TicketEventUncheckedCreateNestedManyWithoutAuthorUserInput
+  createdTickets?: Prisma.TicketUncheckedCreateNestedManyWithoutCreatedByUserInput
+  createdTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutCreatedByInput
+  assignedTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutAssigneeInput
+  createdTaskAttachments?: Prisma.TaskAttachmentUncheckedCreateNestedManyWithoutCreatedByInput
+  ownedProjects?: Prisma.ProjectUncheckedCreateNestedManyWithoutOwnerUserInput
+  projectMemberships?: Prisma.ProjectMemberUncheckedCreateNestedManyWithoutUserInput
+  projectExports?: Prisma.ProjectExportAuditUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutNotificationsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutNotificationsInput, Prisma.UserUncheckedCreateWithoutNotificationsInput>
+}
+
+export type UserUpsertWithoutNotificationsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutNotificationsInput, Prisma.UserUncheckedUpdateWithoutNotificationsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutNotificationsInput, Prisma.UserUncheckedCreateWithoutNotificationsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutNotificationsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutNotificationsInput, Prisma.UserUncheckedUpdateWithoutNotificationsInput>
+}
+
+export type UserUpdateWithoutNotificationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  whatsappId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  remoteJid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pushName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profilePicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  instanceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  funcionario?: Prisma.FuncionarioUpdateOneWithoutUserNestedInput
+  events?: Prisma.TicketEventUpdateManyWithoutAuthorUserNestedInput
+  createdTickets?: Prisma.TicketUpdateManyWithoutCreatedByUserNestedInput
+  createdTasks?: Prisma.TaskUpdateManyWithoutCreatedByNestedInput
+  assignedTasks?: Prisma.TaskUpdateManyWithoutAssigneeNestedInput
+  createdTaskAttachments?: Prisma.TaskAttachmentUpdateManyWithoutCreatedByNestedInput
+  ownedProjects?: Prisma.ProjectUpdateManyWithoutOwnerUserNestedInput
+  projectMemberships?: Prisma.ProjectMemberUpdateManyWithoutUserNestedInput
+  projectExports?: Prisma.ProjectExportAuditUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutNotificationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  whatsappId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  remoteJid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pushName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profilePicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  instanceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  funcionario?: Prisma.FuncionarioUncheckedUpdateOneWithoutUserNestedInput
+  events?: Prisma.TicketEventUncheckedUpdateManyWithoutAuthorUserNestedInput
+  createdTickets?: Prisma.TicketUncheckedUpdateManyWithoutCreatedByUserNestedInput
+  createdTasks?: Prisma.TaskUncheckedUpdateManyWithoutCreatedByNestedInput
+  assignedTasks?: Prisma.TaskUncheckedUpdateManyWithoutAssigneeNestedInput
+  createdTaskAttachments?: Prisma.TaskAttachmentUncheckedUpdateManyWithoutCreatedByNestedInput
+  ownedProjects?: Prisma.ProjectUncheckedUpdateManyWithoutOwnerUserNestedInput
+  projectMemberships?: Prisma.ProjectMemberUncheckedUpdateManyWithoutUserNestedInput
+  projectExports?: Prisma.ProjectExportAuditUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -1660,6 +1829,7 @@ export type UserUncheckedUpdateWithoutProjectExportsInput = {
 export type UserCountOutputType = {
   events: number
   createdTickets: number
+  notifications: number
   createdTasks: number
   assignedTasks: number
   createdTaskAttachments: number
@@ -1671,6 +1841,7 @@ export type UserCountOutputType = {
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   events?: boolean | UserCountOutputTypeCountEventsArgs
   createdTickets?: boolean | UserCountOutputTypeCountCreatedTicketsArgs
+  notifications?: boolean | UserCountOutputTypeCountNotificationsArgs
   createdTasks?: boolean | UserCountOutputTypeCountCreatedTasksArgs
   assignedTasks?: boolean | UserCountOutputTypeCountAssignedTasksArgs
   createdTaskAttachments?: boolean | UserCountOutputTypeCountCreatedTaskAttachmentsArgs
@@ -1701,6 +1872,13 @@ export type UserCountOutputTypeCountEventsArgs<ExtArgs extends runtime.Types.Ext
  */
 export type UserCountOutputTypeCountCreatedTicketsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.TicketWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountNotificationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.NotificationWhereInput
 }
 
 /**
@@ -1762,6 +1940,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   funcionario?: boolean | Prisma.User$funcionarioArgs<ExtArgs>
   events?: boolean | Prisma.User$eventsArgs<ExtArgs>
   createdTickets?: boolean | Prisma.User$createdTicketsArgs<ExtArgs>
+  notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
   createdTasks?: boolean | Prisma.User$createdTasksArgs<ExtArgs>
   assignedTasks?: boolean | Prisma.User$assignedTasksArgs<ExtArgs>
   createdTaskAttachments?: boolean | Prisma.User$createdTaskAttachmentsArgs<ExtArgs>
@@ -1821,6 +2000,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   funcionario?: boolean | Prisma.User$funcionarioArgs<ExtArgs>
   events?: boolean | Prisma.User$eventsArgs<ExtArgs>
   createdTickets?: boolean | Prisma.User$createdTicketsArgs<ExtArgs>
+  notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
   createdTasks?: boolean | Prisma.User$createdTasksArgs<ExtArgs>
   assignedTasks?: boolean | Prisma.User$assignedTasksArgs<ExtArgs>
   createdTaskAttachments?: boolean | Prisma.User$createdTaskAttachmentsArgs<ExtArgs>
@@ -1838,6 +2018,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     funcionario: Prisma.$FuncionarioPayload<ExtArgs> | null
     events: Prisma.$TicketEventPayload<ExtArgs>[]
     createdTickets: Prisma.$TicketPayload<ExtArgs>[]
+    notifications: Prisma.$NotificationPayload<ExtArgs>[]
     createdTasks: Prisma.$TaskPayload<ExtArgs>[]
     assignedTasks: Prisma.$TaskPayload<ExtArgs>[]
     createdTaskAttachments: Prisma.$TaskAttachmentPayload<ExtArgs>[]
@@ -2255,6 +2436,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   funcionario<T extends Prisma.User$funcionarioArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$funcionarioArgs<ExtArgs>>): Prisma.Prisma__FuncionarioClient<runtime.Types.Result.GetResult<Prisma.$FuncionarioPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   events<T extends Prisma.User$eventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$eventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TicketEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   createdTickets<T extends Prisma.User$createdTicketsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$createdTicketsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TicketPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  notifications<T extends Prisma.User$notificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   createdTasks<T extends Prisma.User$createdTasksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$createdTasksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TaskPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   assignedTasks<T extends Prisma.User$assignedTasksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$assignedTasksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TaskPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   createdTaskAttachments<T extends Prisma.User$createdTaskAttachmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$createdTaskAttachmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TaskAttachmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -2759,6 +2941,30 @@ export type User$createdTicketsArgs<ExtArgs extends runtime.Types.Extensions.Int
   take?: number
   skip?: number
   distinct?: Prisma.TicketScalarFieldEnum | Prisma.TicketScalarFieldEnum[]
+}
+
+/**
+ * User.notifications
+ */
+export type User$notificationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Notification
+   */
+  select?: Prisma.NotificationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Notification
+   */
+  omit?: Prisma.NotificationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.NotificationInclude<ExtArgs> | null
+  where?: Prisma.NotificationWhereInput
+  orderBy?: Prisma.NotificationOrderByWithRelationInput | Prisma.NotificationOrderByWithRelationInput[]
+  cursor?: Prisma.NotificationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.NotificationScalarFieldEnum | Prisma.NotificationScalarFieldEnum[]
 }
 
 /**

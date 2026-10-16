@@ -676,9 +676,9 @@ const modules: Module[] = [
 const qualityMetrics: QualityMetric[] = [
   {
     label: "Testes Automatizados",
-    value: "83 arquivos",
+    value: "86 arquivos",
     status: "ok",
-    description: "221 testes passando, incluindo testes de contrato, unitários, integração, autorização, regras de status/SLA e observabilidade."
+    description: "235 testes passando, incluindo testes de contrato, unitários, integração, autorização, regras de status/SLA, observabilidade e notificações."
   },
   {
     label: "Lint (ESLint)",
@@ -774,9 +774,9 @@ const roadmap: RoadmapItem[] = [
   {
     phase: "Fase 3 — Escala",
     title: "Notificações (email/in-app)",
-    description: "Sistema de notificações para eventos de ticket, SLA e atribuições.",
+    description: "Concluído: modelo Notification + API /api/notifications e sino in-app no layout, com disparos em mudança de status, novo comentário, atribuição de operador e varredura de SLA (próximo/estourado) via /api/cron/sla-scan, além do envio de email.",
     priority: "P2",
-    status: "pending"
+    status: "done"
   },
   {
     phase: "Fase 3 — Escala",
@@ -808,7 +808,7 @@ const techDebt: TechDebtItem[] = [
   },
   {
     title: "Cobertura de testes",
-    description: "Há 83 arquivos de teste, mas sem métrica oficial de cobertura percentual.",
+    description: "Há 86 arquivos de teste, mas sem métrica oficial de cobertura percentual.",
     impact: "low"
   },
   {
