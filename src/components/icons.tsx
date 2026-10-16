@@ -5,6 +5,8 @@ export {
   FiCheck,
   FiCheckCircle,
   FiClock,
+  FiDownload,
+  FiTrendingUp,
   FiFilter,
   FiGrid,
   FiHash,

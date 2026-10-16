@@ -151,3 +151,8 @@ export type ProjectExportAudit = Prisma.ProjectExportAuditModel
  * 
  */
 export type Notification = Prisma.NotificationModel
+/**
+ * Model KpiSnapshot
+ * 
+ */
+export type KpiSnapshot = Prisma.KpiSnapshotModel

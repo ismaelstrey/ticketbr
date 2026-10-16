@@ -676,9 +676,9 @@ const modules: Module[] = [
 const qualityMetrics: QualityMetric[] = [
   {
     label: "Testes Automatizados",
-    value: "86 arquivos",
+    value: "90 arquivos",
     status: "ok",
-    description: "235 testes passando, incluindo testes de contrato, unitários, integração, autorização, regras de status/SLA, observabilidade e notificações."
+    description: "248 testes passando, incluindo testes de contrato, unitários, integração, autorização, regras de status/SLA, observabilidade, notificações e relatórios gerenciais."
   },
   {
     label: "Lint (ESLint)",
@@ -781,9 +781,9 @@ const roadmap: RoadmapItem[] = [
   {
     phase: "Fase 3 — Escala",
     title: "Relatórios e dashboards gerenciais",
-    description: "KPIs persistidos, relatórios exportáveis e painéis de gestão.",
+    description: "Concluído: snapshots diários de KPIs (modelo KpiSnapshot + cron /api/cron/kpi-snapshot), painel gerencial em /reports com KPIs do período e comparação com o período anterior, série de tendência e exportação em XLSX/PDF/JSON via /api/reports/management/export.",
     priority: "P2",
-    status: "in-progress"
+    status: "done"
   },
   {
     phase: "Fase 3 — Escala",
@@ -808,7 +808,7 @@ const techDebt: TechDebtItem[] = [
   },
   {
     title: "Cobertura de testes",
-    description: "Há 86 arquivos de teste, mas sem métrica oficial de cobertura percentual.",
+    description: "Há 90 arquivos de teste, mas sem métrica oficial de cobertura percentual.",
     impact: "low"
   },
   {

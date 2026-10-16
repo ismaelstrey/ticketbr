@@ -405,7 +405,8 @@ export const ModelName = {
   Project: 'Project',
   ProjectMember: 'ProjectMember',
   ProjectExportAudit: 'ProjectExportAudit',
-  Notification: 'Notification'
+  Notification: 'Notification',
+  KpiSnapshot: 'KpiSnapshot'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -421,7 +422,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "whatsAppContact" | "solicitante" | "funcionario" | "auditLog" | "tipo_Ticket" | "categoria_Ticket" | "mesa_Trabalho" | "operador" | "ticket" | "ticketEvent" | "chatConversation" | "conversation" | "message" | "task" | "taskSubtask" | "taskAttachment" | "taskTicketLink" | "project" | "projectMember" | "projectExportAudit" | "notification"
+    modelProps: "user" | "whatsAppContact" | "solicitante" | "funcionario" | "auditLog" | "tipo_Ticket" | "categoria_Ticket" | "mesa_Trabalho" | "operador" | "ticket" | "ticketEvent" | "chatConversation" | "conversation" | "message" | "task" | "taskSubtask" | "taskAttachment" | "taskTicketLink" | "project" | "projectMember" | "projectExportAudit" | "notification" | "kpiSnapshot"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2053,6 +2054,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    KpiSnapshot: {
+      payload: Prisma.$KpiSnapshotPayload<ExtArgs>
+      fields: Prisma.KpiSnapshotFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.KpiSnapshotFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KpiSnapshotPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.KpiSnapshotFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KpiSnapshotPayload>
+        }
+        findFirst: {
+          args: Prisma.KpiSnapshotFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KpiSnapshotPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.KpiSnapshotFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KpiSnapshotPayload>
+        }
+        findMany: {
+          args: Prisma.KpiSnapshotFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KpiSnapshotPayload>[]
+        }
+        create: {
+          args: Prisma.KpiSnapshotCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KpiSnapshotPayload>
+        }
+        createMany: {
+          args: Prisma.KpiSnapshotCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.KpiSnapshotCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KpiSnapshotPayload>[]
+        }
+        delete: {
+          args: Prisma.KpiSnapshotDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KpiSnapshotPayload>
+        }
+        update: {
+          args: Prisma.KpiSnapshotUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KpiSnapshotPayload>
+        }
+        deleteMany: {
+          args: Prisma.KpiSnapshotDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.KpiSnapshotUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.KpiSnapshotUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KpiSnapshotPayload>[]
+        }
+        upsert: {
+          args: Prisma.KpiSnapshotUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KpiSnapshotPayload>
+        }
+        aggregate: {
+          args: Prisma.KpiSnapshotAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateKpiSnapshot>
+        }
+        groupBy: {
+          args: Prisma.KpiSnapshotGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.KpiSnapshotGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.KpiSnapshotCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.KpiSnapshotCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -2462,6 +2537,23 @@ export const NotificationScalarFieldEnum = {
 export type NotificationScalarFieldEnum = (typeof NotificationScalarFieldEnum)[keyof typeof NotificationScalarFieldEnum]
 
 
+export const KpiSnapshotScalarFieldEnum = {
+  id: 'id',
+  snapshotDate: 'snapshotDate',
+  openTotal: 'openTotal',
+  doneTotal: 'doneTotal',
+  overdueTotal: 'overdueTotal',
+  slaWarningTotal: 'slaWarningTotal',
+  avgResolutionHours: 'avgResolutionHours',
+  firstContactResolutionRate: 'firstContactResolutionRate',
+  details: 'details',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type KpiSnapshotScalarFieldEnum = (typeof KpiSnapshotScalarFieldEnum)[keyof typeof KpiSnapshotScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -2850,6 +2942,7 @@ export type GlobalOmitConfig = {
   projectMember?: Prisma.ProjectMemberOmit
   projectExportAudit?: Prisma.ProjectExportAuditOmit
   notification?: Prisma.NotificationOmit
+  kpiSnapshot?: Prisma.KpiSnapshotOmit
 }
 
 /* Types for Logging */
