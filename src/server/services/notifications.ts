@@ -1,5 +1,6 @@
 import { Prisma, prisma } from "@/lib/prisma";
 import { sendEmail } from "@/server/services/emailer";
+import { getNotificationPreferences } from "@/server/services/notification-preferences";
 import type { NotificationType } from "../../../prisma/generated/enums";
 
 // Destinatário de uma notificação: pode ter usuário (in-app) e/ou email (canal externo)
@@ -43,9 +44,17 @@ function normalizeEmails(list: Array<string | null | undefined>): string[] {
 
 /**
  * Cria notificações in-app e dispara email (best-effort).
+ * Respeita as preferências de notificação (canal e tipo) configuradas em /settings.
  * Nunca lança: falhas de persistência/envio são registradas e ignoradas.
  */
 export async function dispatchNotification(input: DispatchNotificationInput) {
+  const preferences = await getNotificationPreferences();
+
+  // Tipo desabilitado nas preferências: nada é criado nem enviado
+  if (preferences.types[input.tipo] === false) {
+    return { created: 0, emailed: 0, skipped: true };
+  }
+
   const inAppRecipients = new Map<string, NotificationRecipient>();
   for (const recipient of input.recipients ?? []) {
     const userId = recipient?.userId ? String(recipient.userId) : "";
@@ -54,37 +63,39 @@ export async function dispatchNotification(input: DispatchNotificationInput) {
 
   let created = 0;
 
-  for (const recipient of inAppRecipients.values()) {
-    const userId = String(recipient.userId);
-    try {
-      await prisma.notification.create({
-        data: {
-          userId,
-          ticketId: input.ticketId ?? null,
-          solicitante_id: input.solicitanteId ?? null,
-          tipo: input.tipo,
-          title: input.title,
-          body: input.body ?? null,
-          link: input.link ?? null,
-          metadata: (input.metadata ?? undefined) as Prisma.InputJsonValue | undefined,
-          dedupeKey: input.dedupeKey ? `${input.dedupeKey}:${userId}` : null
-        }
-      });
-      created += 1;
-    } catch (error) {
-      // Duplicata de varredura (dedupe) é esperada; demais erros são apenas logados
-      if (!isUniqueConstraintError(error)) {
-        console.warn("[notifications] falha ao criar notificação in-app", {
-          userId,
-          tipo: input.tipo,
-          error: error instanceof Error ? error.message : "unknown"
+  if (preferences.inAppEnabled) {
+    for (const recipient of inAppRecipients.values()) {
+      const userId = String(recipient.userId);
+      try {
+        await prisma.notification.create({
+          data: {
+            userId,
+            ticketId: input.ticketId ?? null,
+            solicitante_id: input.solicitanteId ?? null,
+            tipo: input.tipo,
+            title: input.title,
+            body: input.body ?? null,
+            link: input.link ?? null,
+            metadata: (input.metadata ?? undefined) as Prisma.InputJsonValue | undefined,
+            dedupeKey: input.dedupeKey ? `${input.dedupeKey}:${userId}` : null
+          }
         });
+        created += 1;
+      } catch (error) {
+        // Duplicata de varredura (dedupe) é esperada; demais erros são apenas logados
+        if (!isUniqueConstraintError(error)) {
+          console.warn("[notifications] falha ao criar notificação in-app", {
+            userId,
+            tipo: input.tipo,
+            error: error instanceof Error ? error.message : "unknown"
+          });
+        }
       }
     }
   }
 
   let emailed = 0;
-  if (input.email) {
+  if (input.email && preferences.emailEnabled) {
     const to = normalizeEmails((input.recipients ?? []).map((recipient) => recipient?.email));
     if (to.length) {
       try {
@@ -99,7 +110,7 @@ export async function dispatchNotification(input: DispatchNotificationInput) {
     }
   }
 
-  return { created, emailed };
+  return { created, emailed, skipped: false };
 }
 
 /** Resolve a audiência do lado do cliente (membros do solicitante). */

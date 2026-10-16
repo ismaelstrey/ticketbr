@@ -11,6 +11,7 @@ const funcionarioFindManyMock = vi.fn();
 const ticketFindUniqueMock = vi.fn();
 const ticketFindManyMock = vi.fn();
 const sendEmailMock = vi.fn();
+const getNotificationPreferencesMock = vi.fn();
 
 vi.mock("@/lib/prisma", () => ({
   Prisma: {
@@ -50,6 +51,26 @@ vi.mock("@/server/services/emailer", () => ({
   sendEmail: sendEmailMock
 }));
 
+vi.mock("@/server/services/notification-preferences", () => ({
+  getNotificationPreferences: getNotificationPreferencesMock
+}));
+
+// Preferências padrão (tudo habilitado), sobrescritas por teste quando necessário
+function preferencesFixture(overrides: Record<string, unknown> = {}) {
+  return {
+    inAppEnabled: true,
+    emailEnabled: true,
+    types: {
+      TICKET_STATUS_CHANGED: true,
+      TICKET_COMMENT: true,
+      TICKET_ASSIGNED: true,
+      SLA_WARNING: true,
+      SLA_BREACHED: true
+    },
+    ...overrides
+  };
+}
+
 describe("notifications service", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -64,6 +85,7 @@ describe("notifications service", () => {
     ticketFindUniqueMock.mockResolvedValue(null);
     ticketFindManyMock.mockResolvedValue([]);
     sendEmailMock.mockResolvedValue(undefined);
+    getNotificationPreferencesMock.mockResolvedValue(preferencesFixture());
   });
 
   it("cria notificação in-app por destinatário e envia email", async () => {
@@ -98,6 +120,58 @@ describe("notifications service", () => {
 
     expect(result.created).toBe(0);
     expect(result.emailed).toBe(0);
+  });
+
+  it("não cria nem envia quando o tipo está desabilitado nas preferências", async () => {
+    getNotificationPreferencesMock.mockResolvedValueOnce(
+      preferencesFixture({ types: { TICKET_COMMENT: false } })
+    );
+
+    const { dispatchNotification } = await import("./notifications");
+    const result = await dispatchNotification({
+      tipo: "TICKET_COMMENT",
+      title: "Novo comentário",
+      recipients: [{ userId: "u1", email: "u1@a.com" }],
+      email: { subject: "Assunto", text: "Texto" }
+    });
+
+    expect(result).toEqual({ created: 0, emailed: 0, skipped: true });
+    expect(notificationCreateMock).not.toHaveBeenCalled();
+    expect(sendEmailMock).not.toHaveBeenCalled();
+  });
+
+  it("cria apenas in-app quando o canal de email está desabilitado", async () => {
+    getNotificationPreferencesMock.mockResolvedValueOnce(preferencesFixture({ emailEnabled: false }));
+
+    const { dispatchNotification } = await import("./notifications");
+    const result = await dispatchNotification({
+      tipo: "TICKET_COMMENT",
+      title: "Novo comentário",
+      recipients: [{ userId: "u1", email: "u1@a.com" }],
+      email: { subject: "Assunto", text: "Texto" }
+    });
+
+    expect(result.created).toBe(1);
+    expect(result.emailed).toBe(0);
+    expect(notificationCreateMock).toHaveBeenCalledTimes(1);
+    expect(sendEmailMock).not.toHaveBeenCalled();
+  });
+
+  it("não cria in-app quando o canal in-app está desabilitado", async () => {
+    getNotificationPreferencesMock.mockResolvedValueOnce(preferencesFixture({ inAppEnabled: false }));
+
+    const { dispatchNotification } = await import("./notifications");
+    const result = await dispatchNotification({
+      tipo: "TICKET_COMMENT",
+      title: "Novo comentário",
+      recipients: [{ userId: "u1", email: "u1@a.com" }],
+      email: { subject: "Assunto", text: "Texto" }
+    });
+
+    expect(result.created).toBe(0);
+    expect(result.emailed).toBe(1);
+    expect(notificationCreateMock).not.toHaveBeenCalled();
+    expect(sendEmailMock).toHaveBeenCalledTimes(1);
   });
 
   it("lista notificações com contagem de não lidas respeitando o limite", async () => {

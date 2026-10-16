@@ -9,9 +9,38 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { Button } from "@/components/ui/Button";
 import { Input, Select } from "@/components/ui/Input";
 import { useThemeMode } from "@/context/ThemeModeContext";
-import { useSettings } from "@/hooks/useSettings";
+import { useSettings, type NotificationPreferenceType } from "@/hooks/useSettings";
 
 type TabKey = "general" | "evolution" | "n8n" | "uazapi" | "contactsSync" | "webhookLogs" | "notifications" | "storage";
+
+// Eventos configuráveis na aba de notificações, com o rótulo exibido ao usuário
+const notificationEvents: Array<{ key: NotificationPreferenceType; title: string; description: string }> = [
+  {
+    key: "TICKET_STATUS_CHANGED",
+    title: "Mudança de status do ticket",
+    description: "Avisa o cliente quando o status do ticket dele é alterado."
+  },
+  {
+    key: "TICKET_COMMENT",
+    title: "Novo comentário",
+    description: "Notifica a outra ponta quando um comentário é adicionado ao ticket."
+  },
+  {
+    key: "TICKET_ASSIGNED",
+    title: "Ticket atribuído ao operador",
+    description: "Avisa o operador responsável quando um ticket é atribuído a ele."
+  },
+  {
+    key: "SLA_WARNING",
+    title: "SLA próximo do vencimento",
+    description: "Alerta o staff quando o prazo de resposta/solução está perto de estourar."
+  },
+  {
+    key: "SLA_BREACHED",
+    title: "SLA estourado",
+    description: "Alerta o staff quando o prazo de resposta/solução já foi ultrapassado."
+  }
+];
 
 const Card = styled.section`
   background: ${({ theme }) => theme.colors.surfaceElevated};
@@ -185,6 +214,32 @@ const ThemeSwitch = styled.button<{ $active: boolean }>`
   }
 `;
 
+// Botão de alternância usado nas preferências de notificação (on/off textual)
+const PreferenceToggle = styled.button<{ $active: boolean }>`
+  min-width: 96px;
+  height: 34px;
+  padding: 0 0.85rem;
+  border-radius: 999px;
+  border: 1px solid ${({ theme, $active }) => ($active ? theme.colors.primary : theme.colors.borderStrong)};
+  background: ${({ theme, $active }) => ($active ? `${theme.colors.primary}22` : theme.colors.surface)};
+  color: ${({ theme, $active }) => ($active ? theme.colors.primary : theme.colors.text.secondary)};
+  font-weight: 700;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: ${({ theme }) => theme.colors.primary};
+  }
+`;
+
+const ToggleStack = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-top: 0.75rem;
+`;
+
 const StatusPanel = styled.div`
   margin-top: 16px;
   border: 1px solid ${({ theme }) => theme.colors.border};
@@ -255,8 +310,10 @@ export default function SettingsPage() {
   const {
     settings,
     storageSettings,
+    notificationPreferences,
     updateSettings: update,
     updateStorageSettings: updateStorage,
+    updateNotificationPreferences,
     fetchSettings,
     saveSettings,
     testSystemApi,
@@ -265,6 +322,8 @@ export default function SettingsPage() {
     loadSyncedContacts,
     loadWebhookLogs,
     clearWebhookLogs,
+    loadNotificationPreferences,
+    saveNotificationPreferences,
     loadQr,
     testStorage,
     saveStorage,
@@ -278,6 +337,8 @@ export default function SettingsPage() {
     testingStorage,
     savingStorage,
     storageListLoading,
+    loadingNotificationPreferences,
+    savingNotificationPreferences,
     n8nTestResult,
     contactsSyncResult,
     contacts,
@@ -304,6 +365,11 @@ export default function SettingsPage() {
     }, 2500);
     return () => window.clearInterval(timer);
   }, [activeTab, loadWebhookLogs]);
+
+  useEffect(() => {
+    if (activeTab !== "notifications") return;
+    loadNotificationPreferences();
+  }, [activeTab, loadNotificationPreferences]);
 
   const tabs = useMemo(
     () => [
@@ -711,8 +777,82 @@ export default function SettingsPage() {
 
           {activeTab === "notifications" && (
             <div>
-              <h3>Notificações</h3>
-              <Info>Espaço reservado para alertas.</Info>
+              <h3>Preferências de notificação</h3>
+              <Info>
+                Escolha por onde deseja ser avisado e quais eventos devem gerar notificação.
+                As preferências são globais e valem para o sistema inteiro, incluindo a varredura de SLA.
+              </Info>
+
+              <ToggleStack>
+                <ToggleCard>
+                  <ToggleContent>
+                    <ToggleTitle>Notificações no sistema (in-app)</ToggleTitle>
+                    <ToggleDescription>Registra os avisos no sino e na lista de notificações do usuário.</ToggleDescription>
+                  </ToggleContent>
+                  <PreferenceToggle
+                    type="button"
+                    $active={notificationPreferences.inAppEnabled}
+                    aria-pressed={notificationPreferences.inAppEnabled}
+                    onClick={() => updateNotificationPreferences({ inAppEnabled: !notificationPreferences.inAppEnabled })}
+                  >
+                    {notificationPreferences.inAppEnabled ? "Ativado" : "Desativado"}
+                  </PreferenceToggle>
+                </ToggleCard>
+
+                <ToggleCard>
+                  <ToggleContent>
+                    <ToggleTitle>Notificações por e-mail</ToggleTitle>
+                    <ToggleDescription>Envia os mesmos avisos para os e-mails da audiência (requer SMTP configurado).</ToggleDescription>
+                  </ToggleContent>
+                  <PreferenceToggle
+                    type="button"
+                    $active={notificationPreferences.emailEnabled}
+                    aria-pressed={notificationPreferences.emailEnabled}
+                    onClick={() => updateNotificationPreferences({ emailEnabled: !notificationPreferences.emailEnabled })}
+                  >
+                    {notificationPreferences.emailEnabled ? "Ativado" : "Desativado"}
+                  </PreferenceToggle>
+                </ToggleCard>
+              </ToggleStack>
+
+              <h3 style={{ marginTop: 24 }}>Eventos</h3>
+              <Info>Eventos desativados não geram notificação in-app nem e-mail.</Info>
+
+              <ToggleStack>
+                {notificationEvents.map((event) => {
+                  const enabled = notificationPreferences.types[event.key] !== false;
+                  return (
+                    <ToggleCard key={event.key}>
+                      <ToggleContent>
+                        <ToggleTitle>{event.title}</ToggleTitle>
+                        <ToggleDescription>{event.description}</ToggleDescription>
+                      </ToggleContent>
+                      <PreferenceToggle
+                        type="button"
+                        $active={enabled}
+                        aria-pressed={enabled}
+                        aria-label={`${enabled ? "Desativar" : "Ativar"} notificação: ${event.title}`}
+                        onClick={() =>
+                          updateNotificationPreferences({
+                            types: { ...notificationPreferences.types, [event.key]: !enabled }
+                          })
+                        }
+                      >
+                        {enabled ? "Ativado" : "Desativado"}
+                      </PreferenceToggle>
+                    </ToggleCard>
+                  );
+                })}
+              </ToggleStack>
+
+              <Footer>
+                <Button variant="save" onClick={() => saveNotificationPreferences()} disabled={savingNotificationPreferences}>
+                  {savingNotificationPreferences ? "Salvando..." : "Salvar preferências"}
+                </Button>
+                <Button variant="ghost" onClick={loadNotificationPreferences} disabled={loadingNotificationPreferences}>
+                  {loadingNotificationPreferences ? "Carregando..." : "Recarregar"}
+                </Button>
+              </Footer>
             </div>
           )}
         </Card>

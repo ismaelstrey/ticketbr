@@ -66,6 +66,32 @@ export interface StorageSettings {
   retentionDays: string;
 }
 
+// Tipos de evento que podem ser ligados/desligados individualmente
+export type NotificationPreferenceType =
+  | "TICKET_STATUS_CHANGED"
+  | "TICKET_COMMENT"
+  | "TICKET_ASSIGNED"
+  | "SLA_WARNING"
+  | "SLA_BREACHED";
+
+export interface NotificationPreferences {
+  inAppEnabled: boolean;
+  emailEnabled: boolean;
+  types: Record<NotificationPreferenceType, boolean>;
+}
+
+export const defaultNotificationPreferences: NotificationPreferences = {
+  inAppEnabled: true,
+  emailEnabled: true,
+  types: {
+    TICKET_STATUS_CHANGED: true,
+    TICKET_COMMENT: true,
+    TICKET_ASSIGNED: true,
+    SLA_WARNING: true,
+    SLA_BREACHED: true
+  }
+};
+
 export const defaultSettings: IntegrationSettings = {
   whatsappProvider: "none",
   evolutionBaseUrl: "",
@@ -110,6 +136,7 @@ export function useSettings() {
   const { showToast } = useToast();
   const [settings, setSettings] = useState<IntegrationSettings>(defaultSettings);
   const [storageSettings, setStorageSettings] = useState<StorageSettings>(defaultStorageSettings);
+  const [notificationPreferences, setNotificationPreferences] = useState<NotificationPreferences>(defaultNotificationPreferences);
   const [loading, setLoading] = useState(false);
   
   // Estados de carregamento específicos
@@ -122,6 +149,8 @@ export function useSettings() {
   const [testingStorage, setTestingStorage] = useState(false);
   const [savingStorage, setSavingStorage] = useState(false);
   const [storageListLoading, setStorageListLoading] = useState(false);
+  const [loadingNotificationPreferences, setLoadingNotificationPreferences] = useState(false);
+  const [savingNotificationPreferences, setSavingNotificationPreferences] = useState(false);
 
   // Resultados
   const [n8nTestResult, setN8nTestResult] = useState<unknown>(null);
@@ -503,6 +532,44 @@ export function useSettings() {
     }
   }, [showToast]);
 
+  const updateNotificationPreferences = useCallback((patch: Partial<NotificationPreferences>) => {
+    setNotificationPreferences((curr) => ({ ...curr, ...patch }));
+  }, []);
+
+  const loadNotificationPreferences = useCallback(async () => {
+    try {
+      setLoadingNotificationPreferences(true);
+      const res = await fetch("/api/settings/notification-preferences", { cache: "no-store" });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json?.error || "Erro ao carregar preferências de notificação");
+      if (json?.data) setNotificationPreferences(json.data as NotificationPreferences);
+    } catch (error: any) {
+      showToast(error?.message ?? "Falha ao carregar preferências de notificação", "error");
+    } finally {
+      setLoadingNotificationPreferences(false);
+    }
+  }, [showToast]);
+
+  const saveNotificationPreferences = useCallback(async () => {
+    try {
+      setSavingNotificationPreferences(true);
+      const res = await fetch("/api/settings/notification-preferences", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(notificationPreferences)
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json?.error || "Erro ao salvar preferências de notificação");
+      if (json?.data) setNotificationPreferences(json.data as NotificationPreferences);
+      showToast("Preferências de notificação salvas.", "success");
+    } catch (error: any) {
+      showToast(error?.message ?? "Erro ao salvar preferências de notificação", "error");
+      throw error;
+    } finally {
+      setSavingNotificationPreferences(false);
+    }
+  }, [notificationPreferences, showToast]);
+
   const loadQr = useCallback(async () => {
     try {
       if (settings.whatsappProvider === "none") {
@@ -551,9 +618,11 @@ export function useSettings() {
   return {
     settings,
     storageSettings,
+    notificationPreferences,
     loading,
     updateSettings,
     updateStorageSettings,
+    updateNotificationPreferences,
     fetchSettings,
     saveSettings,
     
@@ -564,6 +633,8 @@ export function useSettings() {
     loadSyncedContacts,
     loadWebhookLogs,
     clearWebhookLogs,
+    loadNotificationPreferences,
+    saveNotificationPreferences,
     loadQr,
     testStorage,
     saveStorage,
@@ -579,6 +650,8 @@ export function useSettings() {
     testingStorage,
     savingStorage,
     storageListLoading,
+    loadingNotificationPreferences,
+    savingNotificationPreferences,
 
     // Data states
     n8nTestResult,
