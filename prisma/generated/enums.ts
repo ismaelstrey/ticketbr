@@ -76,3 +76,14 @@ export const Role = {
 } as const
 
 export type Role = (typeof Role)[keyof typeof Role]
+
+
+export const NotificationType = {
+  TICKET_STATUS_CHANGED: 'TICKET_STATUS_CHANGED',
+  TICKET_COMMENT: 'TICKET_COMMENT',
+  TICKET_ASSIGNED: 'TICKET_ASSIGNED',
+  SLA_WARNING: 'SLA_WARNING',
+  SLA_BREACHED: 'SLA_BREACHED'
+} as const
+
+export type NotificationType = (typeof NotificationType)[keyof typeof NotificationType]

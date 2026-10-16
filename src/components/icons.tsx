@@ -1,6 +1,8 @@
 export {
   FiAlertCircle,
+  FiBell,
   FiBookOpen,
+  FiCheck,
   FiCheckCircle,
   FiClock,
   FiFilter,

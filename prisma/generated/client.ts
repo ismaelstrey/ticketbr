@@ -146,3 +146,8 @@ export type ProjectMember = Prisma.ProjectMemberModel
  * 
  */
 export type ProjectExportAudit = Prisma.ProjectExportAuditModel
+/**
+ * Model Notification
+ * 
+ */
+export type Notification = Prisma.NotificationModel

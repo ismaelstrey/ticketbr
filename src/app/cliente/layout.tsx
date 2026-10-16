@@ -5,6 +5,7 @@ import Link from "next/link";
 import styled from "styled-components";
 import { CustomerAuthProvider, useCustomerAuth } from "@/context/CustomerAuthContext";
 import { Button } from "@/components/ui/Button";
+import { NotificationBell } from "@/components/layout/NotificationBell";
 
 const Shell = styled.div`
   min-height: 100vh;
@@ -75,15 +76,25 @@ const Content = styled.main`
   }
 `;
 
+const BrandRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+`;
+
 function SidebarInner() {
   const { company, member, logout, loading } = useCustomerAuth();
 
   return (
     <Sidebar>
-      <div>
-        <Brand>TicketBR Cliente</Brand>
-        <CompanyName>{loading ? "" : (company?.name || "")}</CompanyName>
-      </div>
+      <BrandRow>
+        <div>
+          <Brand>TicketBR Cliente</Brand>
+          <CompanyName>{loading ? "" : (company?.name || "")}</CompanyName>
+        </div>
+        <NotificationBell />
+      </BrandRow>
 
       <Nav>
         <NavLink href="/cliente">Solicitacoes</NavLink>

@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const requireCustomerContextMock = vi.fn();
 const writeAuditLogMock = vi.fn();
-const notifyTicketCommentedMock = vi.fn();
+const notifyTicketCommentMock = vi.fn();
 const ticketFindFirstMock = vi.fn();
 const ticketEventCreateMock = vi.fn();
 
@@ -14,8 +14,8 @@ vi.mock("@/server/services/audit-log", () => ({
   writeAuditLog: writeAuditLogMock
 }));
 
-vi.mock("@/server/services/customer-notifications", () => ({
-  notifyTicketCommented: notifyTicketCommentedMock
+vi.mock("@/server/services/notifications", () => ({
+  notifyTicketComment: notifyTicketCommentMock
 }));
 
 vi.mock("@/lib/prisma", () => ({
@@ -35,7 +35,7 @@ describe("/api/customer/tickets/[id]/comments", () => {
     vi.resetModules();
     requireCustomerContextMock.mockReset();
     writeAuditLogMock.mockReset();
-    notifyTicketCommentedMock.mockReset();
+    notifyTicketCommentMock.mockReset();
     ticketFindFirstMock.mockReset();
     ticketEventCreateMock.mockReset();
 
@@ -44,6 +44,9 @@ describe("/api/customer/tickets/[id]/comments", () => {
       solicitante: { id: "s1", nome_fantasia: "ACME", razao_social: "ACME", email: "acme@a.com" },
       member: { id: "m1", solicitante_id: "s1", isAdmin: false }
     });
+    writeAuditLogMock.mockResolvedValue(undefined);
+    notifyTicketCommentMock.mockResolvedValue({ created: 1, emailed: 0 });
+    ticketEventCreateMock.mockResolvedValue({ id: "e1", createdAt: new Date("2026-05-01T10:00:00.000Z") });
   });
 
   it("POST retorna 404 quando o ticket nao pertence ao cliente", async () => {
@@ -55,5 +58,23 @@ describe("/api/customer/tickets/[id]/comments", () => {
 
     expect(res.status).toBe(404);
     expect(ticketEventCreateMock).not.toHaveBeenCalled();
+    expect(notifyTicketCommentMock).not.toHaveBeenCalled();
+  });
+
+  it("POST notifica o staff quando o cliente comenta", async () => {
+    ticketFindFirstMock.mockResolvedValueOnce({ id: "t1", number: 10, subject: "Teste" });
+
+    const { POST } = await import("./route");
+    const req = { json: async () => ({ message: "Alguma novidade?" }) } as any;
+    const res = await POST(req, { params: Promise.resolve({ id: "t1" }) });
+
+    expect(res.status).toBe(201);
+    expect(notifyTicketCommentMock).toHaveBeenCalledTimes(1);
+    expect(notifyTicketCommentMock.mock.calls[0][0]).toMatchObject({
+      ticketId: "t1",
+      fromCustomer: true,
+      author: "Cliente",
+      message: "Alguma novidade?"
+    });
   });
 });

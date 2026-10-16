@@ -3,7 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireCustomerContext } from "@/server/services/customer-context";
 import { writeAuditLog } from "@/server/services/audit-log";
-import { notifyTicketCommented } from "@/server/services/customer-notifications";
+import { notifyTicketComment } from "@/server/services/notifications";
 
 const CreateCommentSchema = z.object({
   message: z.string().min(1).max(8000)
@@ -81,14 +81,17 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       metadata: { ticketNumber: ticket.number }
     });
 
-    const recipients = [ctx.solicitante.email].filter(Boolean);
-    await notifyTicketCommented({
-      to: recipients,
-      ticketNumber: ticket.number,
-      subject: ticket.subject,
+    // Avisa o staff responsável (in-app + email) sobre o novo comentário do cliente
+    await notifyTicketComment({
+      ticketId: ticket.id,
+      fromCustomer: true,
       author: ctx.user.name,
-      message: input.message,
-      ticketId: ticket.id
+      message: input.message
+    }).catch((error) => {
+      console.warn("[customer/comments] falha ao notificar comentário", {
+        ticketId: ticket.id,
+        error: error instanceof Error ? error.message : "unknown"
+      });
     });
 
     return NextResponse.json({ data: { id: created.id, createdAt: created.createdAt } }, { status: 201 });

@@ -71,7 +71,8 @@ export const ModelName = {
   TaskTicketLink: 'TaskTicketLink',
   Project: 'Project',
   ProjectMember: 'ProjectMember',
-  ProjectExportAudit: 'ProjectExportAudit'
+  ProjectExportAudit: 'ProjectExportAudit',
+  Notification: 'Notification'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -440,6 +441,24 @@ export const ProjectExportAuditScalarFieldEnum = {
 } as const
 
 export type ProjectExportAuditScalarFieldEnum = (typeof ProjectExportAuditScalarFieldEnum)[keyof typeof ProjectExportAuditScalarFieldEnum]
+
+
+export const NotificationScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  ticketId: 'ticketId',
+  solicitante_id: 'solicitante_id',
+  tipo: 'tipo',
+  title: 'title',
+  body: 'body',
+  link: 'link',
+  metadata: 'metadata',
+  dedupeKey: 'dedupeKey',
+  readAt: 'readAt',
+  createdAt: 'createdAt'
+} as const
+
+export type NotificationScalarFieldEnum = (typeof NotificationScalarFieldEnum)[keyof typeof NotificationScalarFieldEnum]
 
 
 export const SortOrder = {
