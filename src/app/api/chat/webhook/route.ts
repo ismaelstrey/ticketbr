@@ -19,11 +19,11 @@ export async function POST(request: NextRequest) {
   try {
     payload = await request.json();
     const response = await processInboundWebhook(payload);
-    logWebhookRequest({ request, payload, route: "chat.webhook", source: "uazapi", status: 200 });
+    await logWebhookRequest({ request, payload, route: "chat.webhook", source: "uazapi", status: 200 });
     return NextResponse.json(response);
   } catch (error) {
     console.error("Error on chat webhook", error);
-    logWebhookRequest({ request, payload, route: "chat.webhook", source: "uazapi", status: 400 });
+    await logWebhookRequest({ request, payload, route: "chat.webhook", source: "uazapi", status: 400 });
     return NextResponse.json({ error: "Webhook inválido" }, { status: 400 });
   }
 }

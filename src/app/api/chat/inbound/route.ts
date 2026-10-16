@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
     const latencyMs = Date.now() - context.startedAt;
 
     if (normalized.kind === "ignored") {
-      logWebhookRequest({ request: req, payload: body, route: "chat.inbound", source: normalized.source, status: 400 });
+      await logWebhookRequest({ request: req, payload: body, route: "chat.inbound", source: normalized.source, status: 400 });
       await recordCriticalFlowEvent({
         stage: "chat_inbound",
         outcome: "failure",
@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
     }
 
     const response = await processNormalizedInboundEvent(normalized);
-    logWebhookRequest({ request: req, payload: body, route: "chat.inbound", source: normalized.source, status: 200 });
+    await logWebhookRequest({ request: req, payload: body, route: "chat.inbound", source: normalized.source, status: 200 });
     await recordCriticalFlowEvent({
       stage: "chat_inbound",
       outcome: "success",
@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
   } catch (error: any) {
     const latencyMs = Date.now() - context.startedAt;
     console.error("Error processing inbound message:", error);
-    logWebhookRequest({ request: req, payload: body, route: "chat.inbound", source: "webhook", status: 500 });
+    await logWebhookRequest({ request: req, payload: body, route: "chat.inbound", source: "webhook", status: 500 });
     await recordCriticalFlowEvent({
       stage: "chat_inbound",
       outcome: "failure",

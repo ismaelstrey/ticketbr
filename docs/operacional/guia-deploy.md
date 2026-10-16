@@ -35,6 +35,7 @@ Definidas no Vercel (Production/Preview) e localmente em `.env`. Referência: [`
 | `LOGIN_MAX_FAILURES` | Opcional | Falhas de credencial antes do bloqueio progressivo da conta (padrão 5). |
 | `LOGIN_FAILURE_WINDOW_MINUTES` | Opcional | Janela (minutos) de contagem das falhas de login (padrão 15). |
 | `LOGIN_LOCK_STEPS_MINUTES` | Opcional | Duração crescente do bloqueio de login, em minutos (padrão `1,5,15,60`). |
+| `WEBHOOK_LOG_MAX_ENTRIES` | Opcional | Número máximo de logs de webhook mantidos no banco (padrão 500; os mais antigos são removidos). |
 | `CORS_ALLOW_ORIGIN` | Opcional | Origem permitida no header `Access-Control-Allow-Origin`. |
 
 Flags de build (opcionais, lidas no `postbuild`):

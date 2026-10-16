@@ -406,7 +406,8 @@ export const ModelName = {
   ProjectMember: 'ProjectMember',
   ProjectExportAudit: 'ProjectExportAudit',
   Notification: 'Notification',
-  KpiSnapshot: 'KpiSnapshot'
+  KpiSnapshot: 'KpiSnapshot',
+  WebhookRequestLog: 'WebhookRequestLog'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -422,7 +423,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "whatsAppContact" | "solicitante" | "funcionario" | "auditLog" | "tipo_Ticket" | "categoria_Ticket" | "mesa_Trabalho" | "operador" | "ticket" | "ticketEvent" | "chatConversation" | "conversation" | "message" | "task" | "taskSubtask" | "taskAttachment" | "taskTicketLink" | "project" | "projectMember" | "projectExportAudit" | "notification" | "kpiSnapshot"
+    modelProps: "user" | "whatsAppContact" | "solicitante" | "funcionario" | "auditLog" | "tipo_Ticket" | "categoria_Ticket" | "mesa_Trabalho" | "operador" | "ticket" | "ticketEvent" | "chatConversation" | "conversation" | "message" | "task" | "taskSubtask" | "taskAttachment" | "taskTicketLink" | "project" | "projectMember" | "projectExportAudit" | "notification" | "kpiSnapshot" | "webhookRequestLog"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2128,6 +2129,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    WebhookRequestLog: {
+      payload: Prisma.$WebhookRequestLogPayload<ExtArgs>
+      fields: Prisma.WebhookRequestLogFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.WebhookRequestLogFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WebhookRequestLogPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.WebhookRequestLogFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WebhookRequestLogPayload>
+        }
+        findFirst: {
+          args: Prisma.WebhookRequestLogFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WebhookRequestLogPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.WebhookRequestLogFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WebhookRequestLogPayload>
+        }
+        findMany: {
+          args: Prisma.WebhookRequestLogFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WebhookRequestLogPayload>[]
+        }
+        create: {
+          args: Prisma.WebhookRequestLogCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WebhookRequestLogPayload>
+        }
+        createMany: {
+          args: Prisma.WebhookRequestLogCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.WebhookRequestLogCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WebhookRequestLogPayload>[]
+        }
+        delete: {
+          args: Prisma.WebhookRequestLogDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WebhookRequestLogPayload>
+        }
+        update: {
+          args: Prisma.WebhookRequestLogUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WebhookRequestLogPayload>
+        }
+        deleteMany: {
+          args: Prisma.WebhookRequestLogDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.WebhookRequestLogUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.WebhookRequestLogUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WebhookRequestLogPayload>[]
+        }
+        upsert: {
+          args: Prisma.WebhookRequestLogUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WebhookRequestLogPayload>
+        }
+        aggregate: {
+          args: Prisma.WebhookRequestLogAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateWebhookRequestLog>
+        }
+        groupBy: {
+          args: Prisma.WebhookRequestLogGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.WebhookRequestLogGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.WebhookRequestLogCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.WebhookRequestLogCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -2554,6 +2629,24 @@ export const KpiSnapshotScalarFieldEnum = {
 export type KpiSnapshotScalarFieldEnum = (typeof KpiSnapshotScalarFieldEnum)[keyof typeof KpiSnapshotScalarFieldEnum]
 
 
+export const WebhookRequestLogScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  method: 'method',
+  path: 'path',
+  route: 'route',
+  source: 'source',
+  status: 'status',
+  ok: 'ok',
+  ip: 'ip',
+  userAgent: 'userAgent',
+  payload: 'payload',
+  headers: 'headers'
+} as const
+
+export type WebhookRequestLogScalarFieldEnum = (typeof WebhookRequestLogScalarFieldEnum)[keyof typeof WebhookRequestLogScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -2943,6 +3036,7 @@ export type GlobalOmitConfig = {
   projectExportAudit?: Prisma.ProjectExportAuditOmit
   notification?: Prisma.NotificationOmit
   kpiSnapshot?: Prisma.KpiSnapshotOmit
+  webhookRequestLog?: Prisma.WebhookRequestLogOmit
 }
 
 /* Types for Logging */
