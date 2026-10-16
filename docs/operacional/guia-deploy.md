@@ -32,6 +32,9 @@ Definidas no Vercel (Production/Preview) e localmente em `.env`. Referência: [`
 | `CRON_SECRET` | Sim (se usar cron) | Segredo enviado pelo scheduler nos endpoints `/api/cron/*`. |
 | `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` | Recomendadas | Habilita rate-limit distribuído em produção. |
 | `RATE_LIMIT_KEY_PREFIX` | Opcional | Prefixo das chaves de rate-limit. |
+| `LOGIN_MAX_FAILURES` | Opcional | Falhas de credencial antes do bloqueio progressivo da conta (padrão 5). |
+| `LOGIN_FAILURE_WINDOW_MINUTES` | Opcional | Janela (minutos) de contagem das falhas de login (padrão 15). |
+| `LOGIN_LOCK_STEPS_MINUTES` | Opcional | Duração crescente do bloqueio de login, em minutos (padrão `1,5,15,60`). |
 | `CORS_ALLOW_ORIGIN` | Opcional | Origem permitida no header `Access-Control-Allow-Origin`. |
 
 Flags de build (opcionais, lidas no `postbuild`):

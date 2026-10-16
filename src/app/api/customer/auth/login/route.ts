@@ -2,10 +2,10 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { compare } from "bcryptjs";
 import { login } from "@/lib/auth";
-import { loginRateLimiter, RateLimitResult } from "@/lib/rateLimit";
+import { loginRateLimiter, loginLockGuard, RateLimitResult } from "@/lib/rateLimit";
 import { writeAuditLog } from "@/server/services/audit-log";
 
-function buildRateLimitHeaders(rate: RateLimitResult, includeRetryAfter = false) {
+function buildRateLimitHeaders(rate: RateLimitResult, includeRetryAfter = false, retryAfterSeconds?: number) {
   const headers: Record<string, string> = {
     "X-RateLimit-Limit": String(rate.limit),
     "X-RateLimit-Remaining": String(rate.remaining),
@@ -13,10 +13,27 @@ function buildRateLimitHeaders(rate: RateLimitResult, includeRetryAfter = false)
   };
 
   if (includeRetryAfter) {
-    headers["Retry-After"] = String(rate.retryAfterSeconds);
+    headers["Retry-After"] = String(retryAfterSeconds ?? rate.retryAfterSeconds);
   }
 
   return headers;
+}
+
+// Registra a falha de credencial e responde 429 (bloqueio progressivo) ou 401
+async function respondInvalidCredentials(rate: RateLimitResult, lockKey: string) {
+  const failure = await loginLockGuard.registerFailure(lockKey);
+
+  if (failure.locked) {
+    return NextResponse.json(
+      { error: "Muitas tentativas de login. Tente novamente mais tarde." },
+      { status: 429, headers: buildRateLimitHeaders(rate, true, failure.retryAfterSeconds) }
+    );
+  }
+
+  return NextResponse.json(
+    { error: "Credenciais inválidas" },
+    { status: 401, headers: buildRateLimitHeaders(rate) }
+  );
 }
 
 export async function POST(request: Request) {
@@ -44,23 +61,25 @@ export async function POST(request: Request) {
       );
     }
 
+    const lock = await loginLockGuard.status(normalizedEmail);
+    if (lock.locked) {
+      return NextResponse.json(
+        { error: "Muitas tentativas de login. Tente novamente mais tarde." },
+        { status: 429, headers: buildRateLimitHeaders(rate, true, lock.retryAfterSeconds) }
+      );
+    }
+
     const user = await prisma.user.findUnique({
       where: { email: normalizedEmail }
     });
 
     if (!user || String(user.role) !== "CUSTOMER") {
-      return NextResponse.json(
-        { error: "Credenciais inválidas" },
-        { status: 401, headers: buildRateLimitHeaders(rate) }
-      );
+      return respondInvalidCredentials(rate, normalizedEmail);
     }
 
     const isPasswordValid = await compare(rawPassword, user.password);
     if (!isPasswordValid) {
-      return NextResponse.json(
-        { error: "Credenciais inválidas" },
-        { status: 401, headers: buildRateLimitHeaders(rate) }
-      );
+      return respondInvalidCredentials(rate, normalizedEmail);
     }
 
     const member = await prisma.funcionario.findUnique({
@@ -93,6 +112,7 @@ export async function POST(request: Request) {
     });
 
     await loginRateLimiter.reset(clientIp);
+    await loginLockGuard.reset(normalizedEmail);
 
     return NextResponse.json(
       {

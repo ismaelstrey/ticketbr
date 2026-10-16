@@ -676,9 +676,9 @@ const modules: Module[] = [
 const qualityMetrics: QualityMetric[] = [
   {
     label: "Testes Automatizados",
-    value: "90 arquivos",
+    value: "91 arquivos",
     status: "ok",
-    description: "248 testes passando, incluindo testes de contrato, unitários, integração, autorização, regras de status/SLA, observabilidade, notificações e relatórios gerenciais."
+    description: "262 testes passando, incluindo testes de contrato, unitários, integração, autorização, regras de status/SLA, observabilidade, notificações, relatórios gerenciais e bloqueio progressivo de login."
   },
   {
     label: "Lint (ESLint)",
@@ -791,6 +791,27 @@ const roadmap: RoadmapItem[] = [
     description: "Concluído: guia de deploy, política de backup/restore e runbook de incidentes em docs/operacional/, indexados no README.",
     priority: "P2",
     status: "done"
+  },
+  {
+    phase: "Fase 4 — Maturidade",
+    title: "Rate-limit e bloqueio progressivo de login",
+    description: "Concluído: limite por conta (e-mail) com bloqueio progressivo (1/5/15/60 min) das tentativas de login (staff e cliente), somado ao limite por IP existente. Configurável por LOGIN_MAX_FAILURES, LOGIN_FAILURE_WINDOW_MINUTES e LOGIN_LOCK_STEPS_MINUTES.",
+    priority: "P1",
+    status: "done"
+  },
+  {
+    phase: "Fase 4 — Maturidade",
+    title: "Persistir logs de webhook no banco",
+    description: "Migrar os logs de webhook hoje em memória (perdidos a cada deploy) para persistência no banco, com listagem, filtros e limpeza.",
+    priority: "P2",
+    status: "pending"
+  },
+  {
+    phase: "Fase 4 — Maturidade",
+    title: "Preferências de notificação",
+    description: "Implementar a aba de Notificações em Configurações (hoje placeholder), com preferências por evento e canal.",
+    priority: "P2",
+    status: "pending"
   }
 ];
 
@@ -802,13 +823,8 @@ const techDebt: TechDebtItem[] = [
     impact: "low"
   },
   {
-    title: "Rate-limit e bloqueio de login",
-    description: "Falta política de rate-limit em tentativas de login e bloqueio progressivo.",
-    impact: "medium"
-  },
-  {
     title: "Cobertura de testes",
-    description: "Há 90 arquivos de teste, mas sem métrica oficial de cobertura percentual.",
+    description: "Há 91 arquivos de teste, mas sem métrica oficial de cobertura percentual.",
     impact: "low"
   }
 ];
