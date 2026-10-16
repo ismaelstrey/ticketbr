@@ -2,8 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { ensureChatConversationFinalizedColumn } from "@/server/services/chat-conversation-schema";
+import { guardStaff } from "@/server/services/staff-context";
 
 export async function POST(request: NextRequest) {
+  // Garante que apenas staff (ADMIN/AGENT) marque o início de nova conversa
+  const unauthorized = await guardStaff();
+  if (unauthorized) return unauthorized;
+
   try {
     await ensureChatConversationFinalizedColumn();
     const session = await getSession();

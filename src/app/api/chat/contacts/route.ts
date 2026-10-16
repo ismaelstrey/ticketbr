@@ -7,6 +7,7 @@ import { ChatContact } from "@/types/chat";
 import { resolveWhatsAppConfig } from "@/server/services/whatsapp-settings";
 import { fetchConversationsFromUazapi } from "@/server/services/uazapi-service";
 import { resolveWhatsAppProvider } from "@/server/services/chat-provider";
+import { guardStaff } from "@/server/services/staff-context";
 
 function inferTags(name: string) {
   const tags: string[] = [];
@@ -58,6 +59,10 @@ function compareContactsByPriority(a: Pick<ChatContact, "hasOpenConversation" | 
 }
 
 export async function GET(request: NextRequest) {
+  // Garante que apenas staff (ADMIN/AGENT) acesse a listagem de contatos do chat
+  const unauthorized = await guardStaff();
+  if (unauthorized) return unauthorized;
+
   try {
     const config = await resolveWhatsAppConfig(request);
     const provider = resolveWhatsAppProvider(config, ["uazapi", "evolution", "n8n"]);

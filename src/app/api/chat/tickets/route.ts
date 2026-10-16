@@ -2,10 +2,15 @@ import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createRequestContext, jsonWithRequestId, logRouteEvent } from "@/lib/observability";
 import { trackRouteResponse } from "@/server/services/route-metrics-observability";
+import { guardStaff } from "@/server/services/staff-context";
 
 const ROUTE = "/api/chat/tickets";
 
 export async function GET(request: NextRequest) {
+  // Garante que apenas staff (ADMIN/AGENT) acesse os tickets usados no chat
+  const unauthorized = await guardStaff();
+  if (unauthorized) return unauthorized;
+
   const context = createRequestContext();
 
   try {

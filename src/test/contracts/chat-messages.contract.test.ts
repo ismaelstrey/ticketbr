@@ -31,6 +31,11 @@ vi.mock("@/lib/auth", () => ({
   getSession: getSessionMock,
 }));
 
+vi.mock("@/server/services/staff-context", () => ({
+  // Libera o acesso simulando uma sessão de staff válida
+  guardStaff: vi.fn(async () => null),
+}));
+
 describe("API Contract - POST /api/chat/messages", () => {
   beforeEach(() => {
     resolveWhatsAppConfigMock.mockReset();

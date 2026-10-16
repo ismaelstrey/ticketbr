@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { chatService } from "@/server/services/chat-service";
 import { recordCriticalFlowEvent } from "@/server/services/critical-flow-observability";
+import { guardStaff } from "@/server/services/staff-context";
 
 function normalizeWaChatId(value: string) {
   return value.trim();
@@ -52,6 +53,10 @@ export async function POST(request: NextRequest) {
 
     return jsonWithRequestId(outcome.body, context, { status: outcome.status });
   };
+
+  // Exige sessão de staff (ADMIN/AGENT) validada em banco antes de operar o atendimento
+  const unauthorized = await guardStaff();
+  if (unauthorized) return unauthorized;
 
   try {
     const session = await getSession();
@@ -172,10 +177,11 @@ export async function POST(request: NextRequest) {
 
     const targetUser = await prisma.user.findUnique({
       where: { id: targetUserId },
-      select: { id: true, name: true }
+      select: { id: true, name: true, role: true }
     });
 
-    if (!targetUser) {
+    // Somente usuários de staff (ADMIN/AGENT) podem receber a conversa
+    if (!targetUser || (targetUser.role !== "ADMIN" && targetUser.role !== "AGENT")) {
       return respond(
         { status: 404, body: { error: "Atendente de destino nao encontrado" } },
         {

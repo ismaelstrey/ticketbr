@@ -21,6 +21,11 @@ vi.mock("@/lib/prisma", () => ({
   }
 }));
 
+vi.mock("@/server/services/staff-context", () => ({
+  // Libera o acesso simulando uma sessão de staff válida
+  guardStaff: vi.fn(async () => null)
+}));
+
 vi.mock("@/server/services/whatsapp-settings", () => ({
   resolveWhatsAppConfig: resolveWhatsAppConfigMock
 }));

@@ -677,9 +677,9 @@ const modules: Module[] = [
 const qualityMetrics: QualityMetric[] = [
   {
     label: "Testes Automatizados",
-    value: "95 arquivos",
+    value: "97 arquivos",
     status: "ok",
-    description: "285 testes passando, incluindo testes de contrato, unitários, integração, autorização, regras de status/SLA, observabilidade, notificações, preferências de notificação, relatórios gerenciais, bloqueio progressivo de login e logs de webhook."
+    description: "289 testes passando, incluindo testes de contrato, unitários, integração, autorização, regras de status/SLA, observabilidade, notificações, preferências de notificação, relatórios gerenciais, bloqueio progressivo de login, logs de webhook e autorização fina das rotas de chat."
   },
   {
     label: "Lint (ESLint)",
@@ -813,19 +813,21 @@ const roadmap: RoadmapItem[] = [
     description: "Concluído: aba de Notificações em Configurações com chave geral por canal (in-app e e-mail) e por evento (status, comentário, atribuição, SLA próximo e estourado), persistidas em app_runtime_settings e respeitadas pelo dispatchNotification.",
     priority: "P2",
     status: "done"
+  },
+  {
+    phase: "Fase 4 — Maturidade",
+    title: "Autorização fina nas rotas de chat",
+    description: "Concluído: rotas internas de chat (contatos, tickets, mensagens, conversas, vínculos, atendentes e preferências) passaram a exigir sessão de staff (ADMIN/AGENT) validada em banco via guardStaff. A listagem de atendentes ficou restrita a papéis de staff (sem expor contas de clientes) e a transferência de atendimento só aceita destinos de staff. Webhooks de integração (inbound/webhook/status/presence/media-ready) seguem públicos por serem chamados por sistemas externos.",
+    priority: "P2",
+    status: "done"
   }
 ];
 
 // Dívida técnica identificada
 const techDebt: TechDebtItem[] = [
   {
-    title: "RBAC em rotas de chat",
-    description: "Rotas administrativas e de cadastro já estão protegidas; revisar autorização fina das rotas de chat/integração.",
-    impact: "low"
-  },
-  {
     title: "Cobertura de testes",
-    description: "Há 95 arquivos de teste, mas sem métrica oficial de cobertura percentual.",
+    description: "Há 97 arquivos de teste, mas sem métrica oficial de cobertura percentual.",
     impact: "low"
   }
 ];

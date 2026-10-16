@@ -14,6 +14,11 @@ vi.mock("@/lib/prisma", () => ({
   }
 }));
 
+vi.mock("@/server/services/staff-context", () => ({
+  // Libera o acesso simulando uma sessão de staff válida
+  guardStaff: vi.fn(async () => null)
+}));
+
 // Evita persistência real de métricas de rota durante os testes
 vi.mock("@/server/services/route-metrics-observability", () => ({
   recordRouteMetric: async () => {},
