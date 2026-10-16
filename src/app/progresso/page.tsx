@@ -697,13 +697,13 @@ const qualityMetrics: QualityMetric[] = [
     label: "CI/CD Pipeline",
     value: "Configurado",
     status: "ok",
-    description: "GitHub Actions com lint, typecheck, testes, contrato e build."
+    description: "GitHub Actions com lint, typecheck, testes com cobertura, contrato e build."
   },
   {
     label: "Cobertura de Testes",
-    value: "Parcial",
+    value: "30,59% linhas",
     status: "warning",
-    description: "Cobertura significativa em serviços e APIs, mas sem métrica oficial de %."
+    description: "Métrica oficial publicada pelo CI (Vitest/V8): statements 29,47%, branches 26,51%, functions 25,34%, lines 30,59%. Relatório lcov anexado como artefato do pipeline."
   },
   {
     label: "Segurança (npm audit)",
@@ -820,17 +820,18 @@ const roadmap: RoadmapItem[] = [
     description: "Concluído: rotas internas de chat (contatos, tickets, mensagens, conversas, vínculos, atendentes e preferências) passaram a exigir sessão de staff (ADMIN/AGENT) validada em banco via guardStaff. A listagem de atendentes ficou restrita a papéis de staff (sem expor contas de clientes) e a transferência de atendimento só aceita destinos de staff. Webhooks de integração (inbound/webhook/status/presence/media-ready) seguem públicos por serem chamados por sistemas externos.",
     priority: "P2",
     status: "done"
+  },
+  {
+    phase: "Fase 4 — Maturidade",
+    title: "Cobertura de testes no CI",
+    description: "Concluído: o pipeline passou a executar a suíte com cobertura (Vitest/V8), publicando o resumo no step summary do GitHub Actions e anexando o relatório lcov como artefato. Métrica base: statements 29,47%, branches 26,51%, functions 25,34%, lines 30,59%.",
+    priority: "P2",
+    status: "done"
   }
 ];
 
 // Dívida técnica identificada
-const techDebt: TechDebtItem[] = [
-  {
-    title: "Cobertura de testes",
-    description: "Há 97 arquivos de teste, mas sem métrica oficial de cobertura percentual.",
-    impact: "low"
-  }
-];
+const techDebt: TechDebtItem[] = [];
 
 // ============================================================
 // Componente Principal
@@ -1026,29 +1027,36 @@ export default function ProgressoPage() {
             <FiAlertCircle /> Dívida Técnica Identificada
           </SectionTitle>
           <DebtList>
-            {techDebt.map((debt) => (
-              <DebtItem key={debt.title} $impact={debt.impact}>
-                <FiAlertCircle
-                  style={{
-                    color:
-                      debt.impact === "high"
-                        ? "var(--status-warning)"
-                        : debt.impact === "medium"
-                          ? "var(--status-info)"
-                          : "var(--text-muted)",
-                    flexShrink: 0,
-                    marginTop: 2
-                  }}
-                />
-                <DebtContent>
-                  <DebtTitle>{debt.title}</DebtTitle>
-                  <DebtDesc>{debt.description}</DebtDesc>
-                </DebtContent>
-                <Badge tone={debt.impact === "high" ? "warning" : debt.impact === "medium" ? "info" : undefined}>
-                  {debt.impact === "high" ? "Alto" : debt.impact === "medium" ? "Médio" : "Baixo"}
-                </Badge>
-              </DebtItem>
-            ))}
+            {techDebt.length === 0 ? (
+              <DebtContent>
+                <DebtTitle>Nenhuma dívida técnica pendente</DebtTitle>
+                <DebtDesc>Todos os itens identificados foram resolvidos. Novos itens entram no roadmap acima.</DebtDesc>
+              </DebtContent>
+            ) : (
+              techDebt.map((debt) => (
+                <DebtItem key={debt.title} $impact={debt.impact}>
+                  <FiAlertCircle
+                    style={{
+                      color:
+                        debt.impact === "high"
+                          ? "var(--status-warning)"
+                          : debt.impact === "medium"
+                            ? "var(--status-info)"
+                            : "var(--text-muted)",
+                      flexShrink: 0,
+                      marginTop: 2
+                    }}
+                  />
+                  <DebtContent>
+                    <DebtTitle>{debt.title}</DebtTitle>
+                    <DebtDesc>{debt.description}</DebtDesc>
+                  </DebtContent>
+                  <Badge tone={debt.impact === "high" ? "warning" : debt.impact === "medium" ? "info" : undefined}>
+                    {debt.impact === "high" ? "Alto" : debt.impact === "medium" ? "Médio" : "Baixo"}
+                  </Badge>
+                </DebtItem>
+              ))
+            )}
           </DebtList>
         </Section>
 

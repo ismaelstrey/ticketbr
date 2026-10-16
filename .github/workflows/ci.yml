@@ -41,8 +41,21 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
-      - name: Test
-        run: npm test
+      - name: Test (com cobertura)
+        run: npm run test:coverage
+
+      - name: Resumo de cobertura
+        if: always()
+        run: |
+          node -e "const s=require('./coverage/coverage-summary.json').total; const p=(k)=>s[k].pct; console.log('- Cobertura: statements '+p('statements')+'%, branches '+p('branches')+'%, functions '+p('functions')+'%, lines '+p('lines')+'%')" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload de cobertura
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage/
+          retention-days: 7
 
       - name: Contract Test
         run: npm run test:contract
