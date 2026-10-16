@@ -1,5 +1,12 @@
 # TicketBR
 
+## Documentação
+
+- **Operacional** (`docs/operacional/`):
+  - [Guia de deploy](docs/operacional/guia-deploy.md) — pipeline, variáveis de ambiente, migrations, crons e rollback.
+  - [Backup e restore](docs/operacional/backup-restore.md) — política de backup e procedimentos de restauração do PostgreSQL.
+  - [Runbook de incidentes](docs/operacional/runbook-incidentes.md) — triagem e playbooks por tipo de incidente.
+
 ## Cadastros \u2192 Solicitantes
 
 - Acesso: `/cadastros/solicitante`
