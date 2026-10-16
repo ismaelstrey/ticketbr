@@ -5,6 +5,9 @@ const compareMock = vi.fn();
 const loginMock = vi.fn();
 const consumeMock = vi.fn();
 const resetMock = vi.fn();
+const lockStatusMock = vi.fn();
+const registerFailureMock = vi.fn();
+const lockResetMock = vi.fn();
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {
@@ -30,6 +33,11 @@ vi.mock("@/lib/rateLimit", async () => {
       consume: consumeMock,
       reset: resetMock,
     },
+    loginLockGuard: {
+      status: lockStatusMock,
+      registerFailure: registerFailureMock,
+      reset: lockResetMock,
+    },
   };
 });
 
@@ -52,6 +60,9 @@ describe("POST /api/auth/login", () => {
     loginMock.mockReset();
     consumeMock.mockReset();
     resetMock.mockReset();
+    lockStatusMock.mockReset();
+    registerFailureMock.mockReset();
+    lockResetMock.mockReset();
 
     consumeMock.mockReturnValue({
       allowed: true,
@@ -60,6 +71,10 @@ describe("POST /api/auth/login", () => {
       limit: 5,
       resetAt: 2000000000000,
     });
+
+    lockStatusMock.mockResolvedValue({ locked: false, retryAfterSeconds: 0, lockUntil: 0, failures: 0 });
+    registerFailureMock.mockResolvedValue({ locked: false, retryAfterSeconds: 0, lockUntil: 0, failures: 1 });
+    lockResetMock.mockResolvedValue(undefined);
   });
 
   it("returns 429 with retry and rate headers when blocked", async () => {
@@ -117,6 +132,42 @@ describe("POST /api/auth/login", () => {
     expect(res.status).toBe(200);
     expect(body.user.email).toBe("ok@user.com");
     expect(resetMock).toHaveBeenCalledWith("203.0.113.10");
+    expect(lockResetMock).toHaveBeenCalledWith("ok@user.com");
     expect(res.headers.get("X-RateLimit-Limit")).toBe("5");
+  });
+
+  it("returns 429 when the progressive account lock is active", async () => {
+    lockStatusMock.mockResolvedValueOnce({
+      locked: true,
+      retryAfterSeconds: 300,
+      lockUntil: 2000000000000,
+      failures: 6,
+    });
+
+    const { POST } = await import("./route");
+    const res = await POST(makeRequest({ email: "locked@user.com", password: "123" }));
+    const body = await res.json();
+
+    expect(res.status).toBe(429);
+    expect(body.error).toContain("Muitas tentativas");
+    expect(res.headers.get("Retry-After")).toBe("300");
+    expect(findUniqueMock).not.toHaveBeenCalled();
+  });
+
+  it("returns 429 and registers the failure when credentials cross the threshold", async () => {
+    findUniqueMock.mockResolvedValueOnce(null);
+    registerFailureMock.mockResolvedValueOnce({
+      locked: true,
+      retryAfterSeconds: 60,
+      lockUntil: 2000000000000,
+      failures: 5,
+    });
+
+    const { POST } = await import("./route");
+    const res = await POST(makeRequest({ email: "brute@user.com", password: "123" }));
+
+    expect(res.status).toBe(429);
+    expect(res.headers.get("Retry-After")).toBe("60");
+    expect(registerFailureMock).toHaveBeenCalledWith("brute@user.com");
   });
 });

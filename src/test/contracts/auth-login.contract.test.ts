@@ -6,6 +6,9 @@ const compareMock = vi.fn();
 const loginMock = vi.fn();
 const consumeMock = vi.fn();
 const resetMock = vi.fn();
+const lockStatusMock = vi.fn();
+const registerFailureMock = vi.fn();
+const lockResetMock = vi.fn();
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {
@@ -31,6 +34,11 @@ vi.mock("@/lib/rateLimit", async () => {
       consume: consumeMock,
       reset: resetMock,
     },
+    loginLockGuard: {
+      status: lockStatusMock,
+      registerFailure: registerFailureMock,
+      reset: lockResetMock,
+    },
   };
 });
 
@@ -53,6 +61,9 @@ describe("API Contract - POST /api/auth/login", () => {
     loginMock.mockReset();
     consumeMock.mockReset();
     resetMock.mockReset();
+    lockStatusMock.mockReset();
+    registerFailureMock.mockReset();
+    lockResetMock.mockReset();
     consumeMock.mockReturnValue({
       allowed: true,
       retryAfterSeconds: 0,
@@ -60,6 +71,9 @@ describe("API Contract - POST /api/auth/login", () => {
       limit: 5,
       resetAt: 2_000_000_000_000,
     });
+    lockStatusMock.mockResolvedValue({ locked: false, retryAfterSeconds: 0, lockUntil: 0, failures: 0 });
+    registerFailureMock.mockResolvedValue({ locked: false, retryAfterSeconds: 0, lockUntil: 0, failures: 1 });
+    lockResetMock.mockResolvedValue(undefined);
   });
 
   it("returns success payload with stable headers", async () => {

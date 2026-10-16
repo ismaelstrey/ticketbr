@@ -16,13 +16,21 @@ type RateLimitCounter = {
   resetAt: number;
 };
 
-interface RateLimitStore {
+export interface RateLimitStore {
   incrementAndGetWindow(key: string, windowMs: number): Promise<RateLimitCounter>;
   reset(key: string): Promise<void>;
+  get?(key: string): Promise<string | null>;
+  setWithTtl?(key: string, value: string, ttlMs: number): Promise<void>;
 }
 
-class MemoryRateLimitStore implements RateLimitStore {
+type KvEntry = {
+  value: string;
+  expiresAt: number;
+};
+
+export class MemoryRateLimitStore implements RateLimitStore {
   private readonly store = new Map<string, Entry>();
+  private readonly kv = new Map<string, KvEntry>();
 
   async incrementAndGetWindow(key: string, windowMs: number): Promise<RateLimitCounter> {
     const now = Date.now();
@@ -41,6 +49,23 @@ class MemoryRateLimitStore implements RateLimitStore {
 
   async reset(key: string): Promise<void> {
     this.store.delete(key);
+    this.kv.delete(key);
+  }
+
+  async get(key: string): Promise<string | null> {
+    const item = this.kv.get(key);
+    if (!item) {
+      return null;
+    }
+    if (item.expiresAt <= Date.now()) {
+      this.kv.delete(key);
+      return null;
+    }
+    return item.value;
+  }
+
+  async setWithTtl(key: string, value: string, ttlMs: number): Promise<void> {
+    this.kv.set(key, { value, expiresAt: Date.now() + ttlMs });
   }
 }
 
@@ -103,6 +128,17 @@ class UpstashRateLimitStore implements RateLimitStore {
   async reset(key: string): Promise<void> {
     const scopedKey = `${this.keyPrefix}:${key}`;
     await this.command(["DEL", scopedKey]);
+  }
+
+  async get(key: string): Promise<string | null> {
+    const scopedKey = `${this.keyPrefix}:${key}`;
+    const raw = await this.command(["GET", scopedKey]);
+    return raw === null || raw === undefined ? null : String(raw);
+  }
+
+  async setWithTtl(key: string, value: string, ttlMs: number): Promise<void> {
+    const scopedKey = `${this.keyPrefix}:${key}`;
+    await this.command(["SET", scopedKey, value, "PX", Math.max(1, Math.floor(ttlMs))]);
   }
 }
 
@@ -175,5 +211,140 @@ function createRateLimitStore(): RateLimitStore {
   return new UpstashRateLimitStore(url, token, prefix);
 }
 
-export const loginRateLimiter = new FixedWindowRateLimiter(5, 15 * 60 * 1000, createRateLimitStore());
-export const sensitiveRouteRateLimiter = new FixedWindowRateLimiter(30, 60 * 1000, createRateLimitStore());
+export type LoginLockStatus = {
+  locked: boolean;
+  retryAfterSeconds: number;
+  lockUntil: number;
+  failures: number;
+};
+
+const FAIL_KEY_SUFFIX = "fail";
+const LOCK_KEY_SUFFIX = "lock";
+
+export const DEFAULT_LOGIN_LOCK_STEPS_MINUTES = [1, 5, 15, 60];
+
+/**
+ * Guarda de bloqueio progressivo por conta (e-mail).
+ * Conta as falhas de credencial em uma janela e, ao exceder o limite,
+ * aplica um bloqueio com duração crescente (1min, 5min, 15min, 60min, ...).
+ */
+export class ProgressiveLoginGuard {
+  constructor(
+    private readonly maxFailures: number,
+    private readonly failureWindowMs: number,
+    private readonly lockDurationStepsMs: number[],
+    private readonly store: RateLimitStore
+  ) {}
+
+  private warn(action: string, error: unknown) {
+    console.warn(`[rateLimit] ProgressiveLoginGuard ${action} falhou; operando em modo permissivo`, {
+      message: error instanceof Error ? error.message : "unknown"
+    });
+  }
+
+  private lockKey(key: string) {
+    return `${key}:${LOCK_KEY_SUFFIX}`;
+  }
+
+  private failureKey(key: string) {
+    return `${key}:${FAIL_KEY_SUFFIX}`;
+  }
+
+  /** Verifica se a conta está bloqueada no momento. */
+  async status(key: string): Promise<LoginLockStatus> {
+    try {
+      const [lockRaw, failRaw] = await Promise.all([
+        this.store.get ? this.store.get(this.lockKey(key)) : Promise.resolve(null),
+        this.store.get ? this.store.get(this.failureKey(key)) : Promise.resolve(null)
+      ]);
+
+      const now = Date.now();
+      const lockUntil = Number(lockRaw ?? 0);
+      const failuresRaw = Number(failRaw ?? 0);
+      const failures = Number.isFinite(failuresRaw) ? failuresRaw : 0;
+
+      if (Number.isFinite(lockUntil) && lockUntil > now) {
+        return {
+          locked: true,
+          retryAfterSeconds: Math.max(1, Math.ceil((lockUntil - now) / 1000)),
+          lockUntil,
+          failures
+        };
+      }
+
+      return { locked: false, retryAfterSeconds: 0, lockUntil: 0, failures };
+    } catch (error) {
+      this.warn("status", error);
+      return { locked: false, retryAfterSeconds: 0, lockUntil: 0, failures: 0 };
+    }
+  }
+
+  /** Registra uma falha de credencial e aplica bloqueio progressivo se necessário. */
+  async registerFailure(key: string): Promise<LoginLockStatus> {
+    try {
+      const counter = await this.store.incrementAndGetWindow(this.failureKey(key), this.failureWindowMs);
+      const failures = counter.count;
+
+      if (failures < this.maxFailures) {
+        return { locked: false, retryAfterSeconds: 0, lockUntil: 0, failures };
+      }
+
+      const stepIndex = Math.min(failures - this.maxFailures, this.lockDurationStepsMs.length - 1);
+      const lockMs = this.lockDurationStepsMs[Math.max(0, stepIndex)];
+      const lockUntil = Date.now() + lockMs;
+
+      if (this.store.setWithTtl) {
+        await this.store.setWithTtl(this.lockKey(key), String(lockUntil), lockMs);
+      }
+
+      return {
+        locked: true,
+        retryAfterSeconds: Math.max(1, Math.ceil(lockMs / 1000)),
+        lockUntil,
+        failures
+      };
+    } catch (error) {
+      this.warn("registerFailure", error);
+      return { locked: false, retryAfterSeconds: 0, lockUntil: 0, failures: 0 };
+    }
+  }
+
+  /** Limpa falhas e bloqueio (usado após login bem-sucedido). */
+  async reset(key: string): Promise<void> {
+    try {
+      await Promise.all([
+        this.store.reset(this.failureKey(key)),
+        this.store.reset(this.lockKey(key))
+      ]);
+    } catch (error) {
+      this.warn("reset", error);
+    }
+  }
+}
+
+function resolvePositiveInt(raw: string | undefined, fallback: number): number {
+  const value = Number(raw);
+  return Number.isFinite(value) && value > 0 ? Math.floor(value) : fallback;
+}
+
+function resolveLockStepsMs(): number[] {
+  const raw = process.env.LOGIN_LOCK_STEPS_MINUTES;
+  const steps = (raw ?? DEFAULT_LOGIN_LOCK_STEPS_MINUTES.join(","))
+    .split(",")
+    .map((part) => resolvePositiveInt(part.trim(), 0))
+    .filter((minutes) => minutes > 0)
+    .map((minutes) => minutes * 60_000);
+
+  return steps.length > 0 ? steps : DEFAULT_LOGIN_LOCK_STEPS_MINUTES.map((minutes) => minutes * 60_000);
+}
+
+const sharedRateLimitStore = createRateLimitStore();
+
+export const loginRateLimiter = new FixedWindowRateLimiter(5, 15 * 60 * 1000, sharedRateLimitStore);
+export const sensitiveRouteRateLimiter = new FixedWindowRateLimiter(30, 60 * 1000, sharedRateLimitStore);
+export const loginLockGuard = new ProgressiveLoginGuard(
+  resolvePositiveInt(process.env.LOGIN_MAX_FAILURES, 5),
+  resolvePositiveInt(process.env.LOGIN_FAILURE_WINDOW_MINUTES, 15) * 60_000,
+  resolveLockStepsMs(),
+  sharedRateLimitStore
+);

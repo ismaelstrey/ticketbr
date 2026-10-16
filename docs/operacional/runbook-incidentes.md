@@ -88,10 +88,16 @@ Sintoma: `/api/*` falhando no middleware ou rotas protegidas retornando 503/redi
 
 ### INC-6 — Login bloqueado / rate-limit (HTTP 429)
 
-1. O login retorna **429** com headers de retry quando o limite é excedido.
-2. Verificar configuração do rate-limit distribuído (`UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN`). Sem eles, o rate-limit cai para modo permissivo por instância.
-3. Confirmar se o bloqueio é por tentativas legítimas ou por ataque; se necessário, investigar origem.
-4. Aguardar a janela de retry ou resetar a chave no store, conforme política.
+O login aplica **duas camadas** de proteção, ambas retornando **429** com headers de retry:
+
+- **Por IP** (`loginRateLimiter`): janela fixa de requisições por endereço de origem.
+- **Por conta/e-mail** (`loginLockGuard`): bloqueio **progressivo** após falhas de credencial, com duração crescente.
+
+1. Identificar a camada: o bloqueio por conta ocorre mesmo quando a senha está correta (o `X-RateLimit-*` ainda permite) — a conta está temporariamente bloqueada.
+2. Ajustar limites por ambiente, se necessário: `LOGIN_MAX_FAILURES` (falhas antes de bloquear, padrão `5`), `LOGIN_FAILURE_WINDOW_MINUTES` (janela de contagem, padrão `15`) e `LOGIN_LOCK_STEPS_MINUTES` (duração crescente do bloqueio em minutos, padrão `1,5,15,60`).
+3. Verificar configuração do rate-limit distribuído (`UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN`). Sem eles, o rate-limit cai para modo permissivo por instância (memória), o que também limita o bloqueio progressivo à instância que atendeu a requisição.
+4. Confirmar se o bloqueio é por tentativas legítimas ou por ataque; se necessário, investigar a origem (`x-forwarded-for`).
+5. Aguardar a janela de retry (o header `Retry-After` indica os segundos) ou resetar a chave no store, conforme política. Um login bem-sucedido limpa automaticamente as falhas e o bloqueio da conta.
 
 ### INC-7 — WhatsApp / Chat (Evolution, UAZAPI, n8n)
 
