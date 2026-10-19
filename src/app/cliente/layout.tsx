@@ -101,6 +101,7 @@ function SidebarInner() {
         <NavLink href="/cliente/chat">Chat</NavLink>
         <NavLink href="/cliente/dashboard">Dashboard</NavLink>
         {member?.isAdmin ? <NavLink href="/cliente/admin">Administracao</NavLink> : null}
+        <NavLink href="/cliente/perfil">Meus dados</NavLink>
       </Nav>
 
       <div style={{ marginTop: "auto" }}>

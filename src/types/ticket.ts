@@ -36,9 +36,13 @@ export interface Ticket {
   descricao?: string;
   contato?: string;
   tipoTicket?: string;
+  tipoTicketId?: string | null;
   categoria?: string;
+  categoriaId?: string | null;
   mesaTrabalho?: string;
+  mesaTrabalhoId?: string | null;
   operador?: string;
+  operadorId?: string | null;
   dataCriacao?: string;
   slaResposta?: string;
   slaSolucao?: string;

@@ -17,7 +17,18 @@ import { Button } from "@/components/ui/Button";
 import { Input, Select, Textarea } from "@/components/ui/Input";
 import { Card } from "@/components/ui/Card";
 import { getPriorityChipLabel, getSlaChipLabel, getSlaToneFromProgress } from "@/lib/tickets/sla-chip";
+import { api } from "@/services/api";
 import NewCommentModal from "./NewCommentModal";
+
+// Opções de domínio usadas nos selects do formulário de ticket
+type TicketLookups = {
+  tipos: Array<{ id: string; nome: string }>;
+  categorias: Array<{ id: string; nome: string; tipo_ticket_id: string }>;
+  mesas: Array<{ id: string; nome: string }>;
+  operadores: Array<{ id: string; nome: string }>;
+};
+
+const emptyLookups: TicketLookups = { tipos: [], categorias: [], mesas: [], operadores: [] };
 
 const Container = styled.section`
   display: flex;
@@ -272,6 +283,28 @@ export default function TicketDetails({
   onSave: () => void;
 }) {
   const [isCommentModalOpen, setIsCommentModalOpen] = React.useState(false);
+  const [lookups, setLookups] = React.useState<TicketLookups>(emptyLookups);
+
+  // Carrega as opções de domínio (tipo, categoria, mesa e operador) para os selects
+  React.useEffect(() => {
+    let active = true;
+    api.tickets
+      .lookups()
+      .then((res) => {
+        if (active) setLookups(res.data ?? emptyLookups);
+      })
+      .catch(() => {
+        if (active) setLookups(emptyLookups);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  // Filtra as categorias vinculadas ao tipo de ticket selecionado
+  const categoriaOptions = lookups.categorias.filter(
+    (categoria) => !ticket.tipoTicketId || categoria.tipo_ticket_id === ticket.tipoTicketId
+  );
 
   return (
     <Container>
@@ -412,22 +445,62 @@ export default function TicketDetails({
 
           <FormLabel>
             Tipo de Ticket
-            <Input value={ticket.tipoTicket ?? ""} onChange={(event) => onChange({ tipoTicket: event.target.value })} />
+            <Select
+              value={ticket.tipoTicketId ?? ""}
+              onChange={(event) => onChange({ tipoTicketId: event.target.value || null })}
+            >
+              <option value="">Selecione...</option>
+              {lookups.tipos.map((tipo) => (
+                <option key={tipo.id} value={tipo.id}>
+                  {tipo.nome}
+                </option>
+              ))}
+            </Select>
           </FormLabel>
 
           <FormLabel>
             Categorias
-            <Input value={ticket.categoria ?? ""} onChange={(event) => onChange({ categoria: event.target.value })} />
+            <Select
+              value={ticket.categoriaId ?? ""}
+              onChange={(event) => onChange({ categoriaId: event.target.value || null })}
+            >
+              <option value="">Selecione...</option>
+              {categoriaOptions.map((categoria) => (
+                <option key={categoria.id} value={categoria.id}>
+                  {categoria.nome}
+                </option>
+              ))}
+            </Select>
           </FormLabel>
 
           <FormLabel>
             Mesa de Trabalho
-            <Input value={ticket.mesaTrabalho ?? ""} onChange={(event) => onChange({ mesaTrabalho: event.target.value })} />
+            <Select
+              value={ticket.mesaTrabalhoId ?? ""}
+              onChange={(event) => onChange({ mesaTrabalhoId: event.target.value || null })}
+            >
+              <option value="">Selecione...</option>
+              {lookups.mesas.map((mesa) => (
+                <option key={mesa.id} value={mesa.id}>
+                  {mesa.nome}
+                </option>
+              ))}
+            </Select>
           </FormLabel>
 
           <FormLabel>
             Operador
-            <Input value={ticket.operador ?? ""} onChange={(event) => onChange({ operador: event.target.value })} />
+            <Select
+              value={ticket.operadorId ?? ""}
+              onChange={(event) => onChange({ operadorId: event.target.value || null })}
+            >
+              <option value="">Selecione...</option>
+              {lookups.operadores.map((operador) => (
+                <option key={operador.id} value={operador.id}>
+                  {operador.nome}
+                </option>
+              ))}
+            </Select>
           </FormLabel>
 
           <FormLabel>

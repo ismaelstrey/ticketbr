@@ -26,7 +26,19 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
         createdBy: { select: { id: true, name: true, email: true } },
         subtasks: { orderBy: { sortOrder: "asc" } },
         attachments: { orderBy: { createdAt: "desc" }, select: { id: true, fileName: true, mimeType: true, fileSize: true, createdAt: true, createdById: true } },
-        ticketLinks: { orderBy: { createdAt: "desc" } }
+        ticketLinks: { orderBy: { createdAt: "desc" } },
+        comments: {
+          orderBy: { createdAt: "asc" },
+          select: {
+            id: true,
+            taskId: true,
+            authorId: true,
+            body: true,
+            createdAt: true,
+            updatedAt: true,
+            author: { select: { id: true, name: true, email: true } }
+          }
+        }
       }
     });
 

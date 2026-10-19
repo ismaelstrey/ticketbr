@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { AppShellContainer, MainContent } from "@/components/layout/AppShell";
 import { Sidebar } from "@/components/layout/Sidebar";
@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/Button";
 import { api } from "@/services/api";
 import { Project } from "@/types/project";
 import { ProjectStatusPill } from "@/components/projects/ProjectStatusPill";
+
+type StaffUser = { id: string; name: string; email: string; role: string };
 
 function datePt(iso: string | null | undefined) {
   if (!iso) return "";
@@ -24,6 +26,21 @@ function dateTimePt(iso: string | null | undefined) {
   return d.toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
 }
 
+// Rótulo em português para o papel do membro
+function roleLabel(role: string) {
+  if (role === "owner") return "Dono";
+  if (role === "viewer") return "Visualizador";
+  return "Membro";
+}
+
+const selectStyle: React.CSSProperties = {
+  padding: "6px 8px",
+  borderRadius: 8,
+  border: "1px solid rgba(0,0,0,0.15)",
+  background: "transparent",
+  fontWeight: 700
+};
+
 export default function ProjectDetailsPage() {
   const router = useRouter();
   const params = useParams();
@@ -32,6 +49,27 @@ export default function ProjectDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [project, setProject] = useState<Project | null>(null);
+
+  const [staff, setStaff] = useState<StaffUser[]>([]);
+  const [newUserId, setNewUserId] = useState("");
+  const [newRole, setNewRole] = useState("member");
+  const [memberBusy, setMemberBusy] = useState(false);
+  const [memberError, setMemberError] = useState<string | null>(null);
+
+  // Carrega os dados do projeto a partir da API
+  const loadProject = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await api.projects.get(id);
+      setProject(res.data as Project);
+    } catch (err: any) {
+      setError(err.message || "Falha ao carregar projeto");
+      setProject(null);
+    } finally {
+      setLoading(false);
+    }
+  }, [id]);
 
   useEffect(() => {
     let active = true;
@@ -55,6 +93,22 @@ export default function ProjectDetailsPage() {
     };
   }, [id]);
 
+  // Carrega a lista de usuários staff disponíveis para compor o projeto
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+        const res = await api.tasks.assignees();
+        if (active) setStaff(res.data || []);
+      } catch {
+        if (active) setStaff([]);
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, []);
+
   const remove = async () => {
     if (!project) return;
     const ok = window.confirm(`Excluir o projeto "${project.name}"?`);
@@ -77,6 +131,57 @@ export default function ProjectDetailsPage() {
       setError(err.message || "Falha ao atualizar");
     }
   };
+
+  // Adiciona um membro ao projeto e recarrega os dados
+  const addMember = async () => {
+    if (!project || !newUserId) return;
+    setMemberBusy(true);
+    setMemberError(null);
+    try {
+      await api.projects.members.add(project.id, { userId: newUserId, role: newRole });
+      setNewUserId("");
+      setNewRole("member");
+      await loadProject();
+    } catch (err: any) {
+      setMemberError(err.message || "Falha ao adicionar membro");
+    } finally {
+      setMemberBusy(false);
+    }
+  };
+
+  // Altera o papel de um membro existente
+  const changeRole = async (memberId: string, role: string) => {
+    if (!project) return;
+    setMemberBusy(true);
+    setMemberError(null);
+    try {
+      await api.projects.members.update(project.id, memberId, { role });
+      await loadProject();
+    } catch (err: any) {
+      setMemberError(err.message || "Falha ao atualizar membro");
+    } finally {
+      setMemberBusy(false);
+    }
+  };
+
+  // Remove um membro do projeto
+  const removeMember = async (memberId: string) => {
+    if (!project) return;
+    setMemberBusy(true);
+    setMemberError(null);
+    try {
+      await api.projects.members.remove(project.id, memberId);
+      await loadProject();
+    } catch (err: any) {
+      setMemberError(err.message || "Falha ao remover membro");
+    } finally {
+      setMemberBusy(false);
+    }
+  };
+
+  const members = project?.members || [];
+  const memberUserIds = new Set(members.map((m) => m.userId));
+  const availableStaff = staff.filter((u) => !memberUserIds.has(u.id));
 
   return (
     <AppShellContainer>
@@ -142,6 +247,87 @@ export default function ProjectDetailsPage() {
                   </div>
                 </div>
               </Card>
+
+              <Card style={{ padding: "1rem" }} aria-label="Membros do projeto">
+                <div style={{ fontWeight: 950, marginBottom: 10 }}>Membros</div>
+
+                {memberError && (
+                  <div role="alert" style={{ marginBottom: 10, fontWeight: 700, color: "#c62828" }}>
+                    {memberError}
+                  </div>
+                )}
+
+                <div style={{ display: "grid", gap: 10 }}>
+                  {members.length > 0 ? (
+                    members.map((m) => (
+                      <div
+                        key={m.id}
+                        style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, flexWrap: "wrap" }}
+                      >
+                        <div>
+                          <div style={{ fontWeight: 800 }}>{m.user?.name || m.userId}</div>
+                          <div style={{ opacity: 0.7, fontSize: 13 }}>{m.user?.email || ""}</div>
+                        </div>
+                        <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                          {m.role === "owner" ? (
+                            <span style={{ fontSize: 12, fontWeight: 900, padding: "2px 10px", borderRadius: 999, background: "rgba(0,0,0,0.08)" }}>
+                              {roleLabel(m.role)}
+                            </span>
+                          ) : (
+                            <>
+                              <select
+                                aria-label={`Papel de ${m.user?.name || m.userId}`}
+                                value={m.role}
+                                onChange={(e) => changeRole(m.id, e.target.value)}
+                                disabled={memberBusy}
+                                style={selectStyle}
+                              >
+                                <option value="member">Membro</option>
+                                <option value="viewer">Visualizador</option>
+                              </select>
+                              <Button type="button" variant="ghost" onClick={() => removeMember(m.id)} disabled={memberBusy}>
+                                Remover
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div style={{ opacity: 0.7 }}>Nenhum membro cadastrado.</div>
+                  )}
+                </div>
+
+                <div style={{ marginTop: 14, display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+                  <select
+                    aria-label="Selecionar usuário"
+                    value={newUserId}
+                    onChange={(e) => setNewUserId(e.target.value)}
+                    disabled={memberBusy}
+                    style={{ ...selectStyle, minWidth: 220 }}
+                  >
+                    <option value="">Selecione um usuário</option>
+                    {availableStaff.map((u) => (
+                      <option key={u.id} value={u.id}>
+                        {u.name} ({u.email})
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    aria-label="Selecionar papel"
+                    value={newRole}
+                    onChange={(e) => setNewRole(e.target.value)}
+                    disabled={memberBusy}
+                    style={selectStyle}
+                  >
+                    <option value="member">Membro</option>
+                    <option value="viewer">Visualizador</option>
+                  </select>
+                  <Button type="button" onClick={addMember} disabled={memberBusy || !newUserId}>
+                    Adicionar
+                  </Button>
+                </div>
+              </Card>
             </>
           ) : null}
         </div>
@@ -149,4 +335,3 @@ export default function ProjectDetailsPage() {
     </AppShellContainer>
   );
 }
-

@@ -22,6 +22,18 @@ export const ProjectUpsertSchema = z.object({
   endDate: z.string().date().nullable().optional()
 });
 
+// Papéis atribuíveis manualmente a um membro (o papel "owner" é definido automaticamente)
+export const ProjectMemberRoleSchema = z.enum(["member", "viewer"]);
+
+export const ProjectMemberAddSchema = z.object({
+  userId: z.string().trim().min(1),
+  role: ProjectMemberRoleSchema.default("member")
+});
+
+export const ProjectMemberUpdateSchema = z.object({
+  role: ProjectMemberRoleSchema
+});
+
 export const ProjectExportSchema = z.object({
   format: z.enum(["csv", "xlsx", "json"]),
   query: ProjectListQuerySchema.partial().optional()

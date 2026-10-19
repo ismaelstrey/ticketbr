@@ -69,12 +69,14 @@ export const ModelName = {
   TaskSubtask: 'TaskSubtask',
   TaskAttachment: 'TaskAttachment',
   TaskTicketLink: 'TaskTicketLink',
+  TaskComment: 'TaskComment',
   Project: 'Project',
   ProjectMember: 'ProjectMember',
   ProjectExportAudit: 'ProjectExportAudit',
   Notification: 'Notification',
   KpiSnapshot: 'KpiSnapshot',
-  WebhookRequestLog: 'WebhookRequestLog'
+  WebhookRequestLog: 'WebhookRequestLog',
+  PasswordResetToken: 'PasswordResetToken'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -406,6 +408,18 @@ export const TaskTicketLinkScalarFieldEnum = {
 export type TaskTicketLinkScalarFieldEnum = (typeof TaskTicketLinkScalarFieldEnum)[keyof typeof TaskTicketLinkScalarFieldEnum]
 
 
+export const TaskCommentScalarFieldEnum = {
+  id: 'id',
+  taskId: 'taskId',
+  authorId: 'authorId',
+  body: 'body',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TaskCommentScalarFieldEnum = (typeof TaskCommentScalarFieldEnum)[keyof typeof TaskCommentScalarFieldEnum]
+
+
 export const ProjectScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -496,6 +510,18 @@ export const WebhookRequestLogScalarFieldEnum = {
 } as const
 
 export type WebhookRequestLogScalarFieldEnum = (typeof WebhookRequestLogScalarFieldEnum)[keyof typeof WebhookRequestLogScalarFieldEnum]
+
+
+export const PasswordResetTokenScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  tokenHash: 'tokenHash',
+  expiresAt: 'expiresAt',
+  usedAt: 'usedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type PasswordResetTokenScalarFieldEnum = (typeof PasswordResetTokenScalarFieldEnum)[keyof typeof PasswordResetTokenScalarFieldEnum]
 
 
 export const SortOrder = {

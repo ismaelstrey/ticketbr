@@ -132,6 +132,11 @@ export type TaskAttachment = Prisma.TaskAttachmentModel
  */
 export type TaskTicketLink = Prisma.TaskTicketLinkModel
 /**
+ * Model TaskComment
+ * 
+ */
+export type TaskComment = Prisma.TaskCommentModel
+/**
  * Model Project
  * 
  */
@@ -161,3 +166,8 @@ export type KpiSnapshot = Prisma.KpiSnapshotModel
  * 
  */
 export type WebhookRequestLog = Prisma.WebhookRequestLogModel
+/**
+ * Model PasswordResetToken
+ * 
+ */
+export type PasswordResetToken = Prisma.PasswordResetTokenModel

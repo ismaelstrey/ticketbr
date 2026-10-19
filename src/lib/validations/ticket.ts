@@ -35,6 +35,11 @@ export const CreateTicketSchema = z.object({
 export const UpdateTicketSchema = CreateTicketSchema.partial().extend({
   pauseReason: z.string().optional(),
   pauseSla: z.boolean().optional(),
+  // Permite limpar explicitamente os relacionamentos enviando null
+  tipoTicketId: z.string().min(1).nullable().optional(),
+  categoriaId: z.string().min(1).nullable().optional(),
+  mesaTrabalhoId: z.string().min(1).nullable().optional(),
+  operadorId: z.string().min(1).nullable().optional(),
 });
 
 export type CreateTicketInput = z.infer<typeof CreateTicketSchema>;
