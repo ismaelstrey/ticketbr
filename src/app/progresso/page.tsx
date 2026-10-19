@@ -19,7 +19,8 @@ import {
   FiUsers,
   FiWifi,
   FiSettings,
-  FiHome
+  FiHome,
+  FiServer
 } from "@/components/icons";
 
 // ============================================================
@@ -607,6 +608,21 @@ const modules: Module[] = [
     ]
   },
   {
+    name: "Inventário & Cofre de Senhas",
+    description: "Cadastro de equipamentos de TI (switch, roteador, VM, impressora) com cofre de credenciais cifradas e ACL por usuário, grupo ou papel.",
+    status: "done",
+    progress: 100,
+    icon: FiServer,
+    features: [
+      "Equipamentos com IP, hostname, MAC, série e função",
+      "Credenciais cifradas (AES-256-GCM) com máscara",
+      "Revelação de senha sob demanda com auditoria",
+      "Política de acesso: responsável, staff ou personalizada",
+      "Concessões para usuário, grupo ou papel (agente)",
+      "Grupos de usuários para a ACL"
+    ]
+  },
+  {
     name: "Chat / WhatsApp",
     description: "Integração com WhatsApp via Evolution API e Uazapi.",
     status: "done",
@@ -680,9 +696,9 @@ const modules: Module[] = [
 const qualityMetrics: QualityMetric[] = [
   {
     label: "Testes Automatizados",
-    value: "105 arquivos",
+    value: "109 arquivos",
     status: "ok",
-    description: "328 testes passando, incluindo testes de contrato, unitários, integração, autorização, regras de status/SLA, observabilidade, notificações, preferências de notificação, relatórios gerenciais, bloqueio progressivo de login, logs de webhook, autorização fina das rotas de chat, membros de projeto, lookups de tickets, comentários de tarefa e recuperação de senha do portal."
+    description: "347 testes passando, incluindo testes de contrato, unitários, integração, autorização, regras de status/SLA, observabilidade, notificações, preferências de notificação, relatórios gerenciais, bloqueio progressivo de login, logs de webhook, autorização fina das rotas de chat, membros de projeto, lookups de tickets, comentários de tarefa, recuperação de senha do portal, cofre de senhas do inventário e ACL de credenciais (usuário/grupo/papel)."
   },
   {
     label: "Lint (ESLint)",
@@ -835,6 +851,13 @@ const roadmap: RoadmapItem[] = [
     phase: "Fase 4 — Maturidade",
     title: "Fechamento de lacunas funcionais",
     description: "Concluído: gestão de membros de projeto (API + UI + testes), substituição dos campos de texto livre de ticket por seleções baseadas em IDs (tipos, categorias, mesas e operadores via /api/tickets/lookups), comentários de tarefa com autoria e exclusão controlada, e recuperação de senha por e-mail + edição de perfil (Meus dados) no portal do cliente.",
+    priority: "P1",
+    status: "done"
+  },
+  {
+    phase: "Fase 4 — Maturidade",
+    title: "Inventário de equipamentos e cofre de senhas",
+    description: "Concluído (fora do planejamento original): módulo /inventory para cadastro de equipamentos de TI (switch, roteador, VM, computador, impressora) com IP, hostname, MAC, série e função, e cofre de credenciais cifradas em AES-256-GCM (VAULT_ENCRYPTION_KEY). A revelação da senha é sob demanda e auditada, e a ACL de cada credencial aceita concessões por usuário, grupo ou papel (agente), além das políticas de acesso responsável/staff/personalizada. Inclui grupos de usuários para a ACL.",
     priority: "P1",
     status: "done"
   }

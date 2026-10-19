@@ -76,7 +76,12 @@ export const ModelName = {
   Notification: 'Notification',
   KpiSnapshot: 'KpiSnapshot',
   WebhookRequestLog: 'WebhookRequestLog',
-  PasswordResetToken: 'PasswordResetToken'
+  PasswordResetToken: 'PasswordResetToken',
+  Equipment: 'Equipment',
+  EquipmentCredential: 'EquipmentCredential',
+  CredentialAccessGrant: 'CredentialAccessGrant',
+  UserGroup: 'UserGroup',
+  UserGroupMember: 'UserGroupMember'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -522,6 +527,92 @@ export const PasswordResetTokenScalarFieldEnum = {
 } as const
 
 export type PasswordResetTokenScalarFieldEnum = (typeof PasswordResetTokenScalarFieldEnum)[keyof typeof PasswordResetTokenScalarFieldEnum]
+
+
+export const EquipmentScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  name: 'name',
+  type: 'type',
+  status: 'status',
+  brand: 'brand',
+  model: 'model',
+  serialNumber: 'serialNumber',
+  hostname: 'hostname',
+  ipAddress: 'ipAddress',
+  macAddress: 'macAddress',
+  location: 'location',
+  func: 'func',
+  description: 'description',
+  solicitanteId: 'solicitanteId',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  created_by: 'created_by',
+  updated_by: 'updated_by',
+  deleted_at: 'deleted_at'
+} as const
+
+export type EquipmentScalarFieldEnum = (typeof EquipmentScalarFieldEnum)[keyof typeof EquipmentScalarFieldEnum]
+
+
+export const EquipmentCredentialScalarFieldEnum = {
+  id: 'id',
+  equipmentId: 'equipmentId',
+  label: 'label',
+  protocol: 'protocol',
+  port: 'port',
+  username: 'username',
+  secret: 'secret',
+  notes: 'notes',
+  accessPolicy: 'accessPolicy',
+  ownerUserId: 'ownerUserId',
+  lastRotatedAt: 'lastRotatedAt',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  created_by: 'created_by',
+  updated_by: 'updated_by',
+  deleted_at: 'deleted_at'
+} as const
+
+export type EquipmentCredentialScalarFieldEnum = (typeof EquipmentCredentialScalarFieldEnum)[keyof typeof EquipmentCredentialScalarFieldEnum]
+
+
+export const CredentialAccessGrantScalarFieldEnum = {
+  id: 'id',
+  credentialId: 'credentialId',
+  subjectType: 'subjectType',
+  subjectId: 'subjectId',
+  role: 'role',
+  level: 'level',
+  createdAt: 'createdAt',
+  createdById: 'createdById'
+} as const
+
+export type CredentialAccessGrantScalarFieldEnum = (typeof CredentialAccessGrantScalarFieldEnum)[keyof typeof CredentialAccessGrantScalarFieldEnum]
+
+
+export const UserGroupScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  description: 'description',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  created_by: 'created_by',
+  updated_by: 'updated_by',
+  deleted_at: 'deleted_at'
+} as const
+
+export type UserGroupScalarFieldEnum = (typeof UserGroupScalarFieldEnum)[keyof typeof UserGroupScalarFieldEnum]
+
+
+export const UserGroupMemberScalarFieldEnum = {
+  id: 'id',
+  groupId: 'groupId',
+  userId: 'userId',
+  createdAt: 'createdAt'
+} as const
+
+export type UserGroupMemberScalarFieldEnum = (typeof UserGroupMemberScalarFieldEnum)[keyof typeof UserGroupMemberScalarFieldEnum]
 
 
 export const SortOrder = {

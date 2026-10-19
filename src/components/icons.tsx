@@ -42,5 +42,8 @@ export {
   FiSave,
   FiLock,
   FiEdit,
-  FiLayers
+  FiLayers,
+  FiServer,
+  FiKey,
+  FiShield
 } from "react-icons/fi";

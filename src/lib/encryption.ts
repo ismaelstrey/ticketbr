@@ -10,28 +10,28 @@ export interface EncryptedPayload {
   ciphertext: string;
 }
 
-function getKeyMaterial() {
-  const raw = String(process.env.STORAGE_SETTINGS_ENCRYPTION_KEY ?? "").trim();
+function getKeyMaterial(envVarName: string) {
+  const raw = String(process.env[envVarName] ?? "").trim();
   if (!raw) {
-    throw new Error("Missing STORAGE_SETTINGS_ENCRYPTION_KEY");
+    throw new Error(`Missing ${envVarName}`);
   }
 
   let key: Buffer;
   try {
     key = Buffer.from(raw, "base64");
   } catch {
-    throw new Error("Invalid STORAGE_SETTINGS_ENCRYPTION_KEY (expected base64)");
+    throw new Error(`Invalid ${envVarName} (expected base64)`);
   }
 
   if (key.length !== 32) {
-    throw new Error("Invalid STORAGE_SETTINGS_ENCRYPTION_KEY length (expected 32 bytes base64)");
+    throw new Error(`Invalid ${envVarName} length (expected 32 bytes base64)`);
   }
 
   return { key, keyVersion: DEFAULT_KEY_VERSION };
 }
 
-export function encryptJson(value: unknown): EncryptedPayload {
-  const { key, keyVersion } = getKeyMaterial();
+export function encryptJson(value: unknown, options?: { keyEnvVar?: string }): EncryptedPayload {
+  const { key, keyVersion } = getKeyMaterial(options?.keyEnvVar ?? "STORAGE_SETTINGS_ENCRYPTION_KEY");
   const iv = crypto.randomBytes(12);
   const cipher = crypto.createCipheriv("aes-256-gcm", key, iv);
   const plaintext = Buffer.from(JSON.stringify(value), "utf8");
@@ -47,12 +47,12 @@ export function encryptJson(value: unknown): EncryptedPayload {
   };
 }
 
-export function decryptJson<T>(payload: EncryptedPayload): T {
+export function decryptJson<T>(payload: EncryptedPayload, options?: { keyEnvVar?: string }): T {
   if (!payload || payload.alg !== "aes-256-gcm") {
     throw new Error("Unsupported encryption payload");
   }
 
-  const { key } = getKeyMaterial();
+  const { key } = getKeyMaterial(options?.keyEnvVar ?? "STORAGE_SETTINGS_ENCRYPTION_KEY");
   const iv = Buffer.from(payload.iv, "base64");
   const tag = Buffer.from(payload.tag, "base64");
   const ciphertext = Buffer.from(payload.ciphertext, "base64");

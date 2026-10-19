@@ -63,6 +63,56 @@ enum NotificationType {
   SLA_BREACHED
 }
 
+// Inventário de equipamentos e cofre de credenciais
+enum EquipmentType {
+  SWITCH
+  ROUTER
+  FIREWALL
+  SERVER
+  VM
+  COMPUTER
+  PRINTER
+  ACCESS_POINT
+  OTHER
+}
+
+enum EquipmentStatus {
+  ACTIVE
+  MAINTENANCE
+  INACTIVE
+  RETIRED
+}
+
+enum CredentialProtocol {
+  SSH
+  TELNET
+  HTTP
+  HTTPS
+  RDP
+  SNMP
+  OTHER
+}
+
+// Define quem, por padrão, consegue revelar a senha de uma credencial
+enum CredentialAccessPolicy {
+  OWNER_AND_ADMINS
+  STAFF
+  CUSTOM
+}
+
+// Nível de acesso concedido a um sujeito no cofre
+enum CredentialAccessLevel {
+  VIEW
+  REVEAL
+}
+
+// Tipo de sujeito que recebe uma concessão de acesso à credencial
+enum AccessSubjectType {
+  USER
+  GROUP
+  ROLE
+}
+
 // Existing User model - keeping for backward compatibility or future migration
 model User {
   id        String   @id @default(cuid())
@@ -89,6 +139,8 @@ model User {
   ownedProjects Project[] @relation("ProjectOwner")
   projectMemberships ProjectMember[]
   projectExports ProjectExportAudit[]
+  ownedCredentials EquipmentCredential[] @relation("CredentialOwner")
+  userGroups UserGroupMember[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -129,6 +181,7 @@ model Solicitante {
 
   funcionarios     Funcionario[]
   tickets          Ticket[]
+  equipment        Equipment[]
 
   @@index([cnpj])
   @@index([email])
@@ -616,4 +669,130 @@ model PasswordResetToken {
   @@index([userId])
   @@index([expiresAt])
   @@map("password_reset_tokens")
+}
+
+// ============================================================
+// Inventário de equipamentos
+// ============================================================
+model Equipment {
+  id            String          @id @default(cuid())
+  code          String?         @unique @db.VarChar(60) // patrimônio/etiqueta
+  name          String          @db.VarChar(180)
+  type          EquipmentType
+  status        EquipmentStatus @default(ACTIVE)
+  brand         String?         @db.VarChar(120)
+  model         String?         @db.VarChar(120)
+  serialNumber  String?         @map("serial_number") @db.VarChar(120)
+  hostname      String?         @db.VarChar(180)
+  ipAddress     String?         @map("ip_address") @db.VarChar(64)
+  macAddress    String?         @map("mac_address") @db.VarChar(64)
+  location      String?         @db.VarChar(180)
+  func          String?         @db.VarChar(180) // função do equipamento
+  description   String?         @db.Text
+
+  solicitanteId String?         @map("solicitante_id")
+  solicitante   Solicitante?    @relation(fields: [solicitanteId], references: [id], onDelete: SetNull)
+
+  credentials   EquipmentCredential[]
+
+  // Audit fields
+  created_at    DateTime        @default(now())
+  updated_at    DateTime        @updatedAt
+  created_by    String?
+  updated_by    String?
+  deleted_at    DateTime?
+
+  @@index([type, status])
+  @@index([ipAddress])
+  @@index([solicitanteId])
+  @@map("equipment")
+}
+
+// ============================================================
+// Cofre de credenciais (senhas cifradas)
+// ============================================================
+model EquipmentCredential {
+  id            String                 @id @default(cuid())
+  // Nulo permite credenciais avulsas (sem equipamento vinculado)
+  equipmentId   String?                @map("equipment_id")
+  equipment     Equipment?             @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+
+  label         String                 @db.VarChar(120) // ex.: "admin web", "console", "SSH"
+  protocol      CredentialProtocol     @default(SSH)
+  port          Int?
+  username      String?                @db.VarChar(180)
+  // Segredo cifrado (AES-256-GCM) — nunca armazenado em texto puro
+  secret        Json
+  notes         String?                @db.Text
+
+  accessPolicy  CredentialAccessPolicy @default(OWNER_AND_ADMINS) @map("access_policy")
+  ownerUserId   String?                @map("owner_user_id")
+  owner         User?                  @relation("CredentialOwner", fields: [ownerUserId], references: [id], onDelete: SetNull)
+
+  lastRotatedAt DateTime?              @map("last_rotated_at")
+
+  // Audit fields
+  created_at    DateTime               @default(now())
+  updated_at    DateTime               @updatedAt
+  created_by    String?
+  updated_by    String?
+  deleted_at    DateTime?
+
+  grants        CredentialAccessGrant[]
+
+  @@index([equipmentId])
+  @@index([ownerUserId])
+  @@map("equipment_credentials")
+}
+
+// Concessões de acesso por credencial (usuário específico, grupo ou papel)
+model CredentialAccessGrant {
+  id           String                @id @default(cuid())
+  credentialId String                @map("credential_id")
+  credential   EquipmentCredential   @relation(fields: [credentialId], references: [id], onDelete: Cascade)
+
+  subjectType  AccessSubjectType     @map("subject_type")
+  subjectId    String?               @map("subject_id") // userId ou groupId (nulo quando ROLE)
+  role         Role?                 // usado quando subjectType = ROLE
+  level        CredentialAccessLevel @default(REVEAL)
+
+  createdAt    DateTime              @default(now()) @map("created_at")
+  createdById  String?               @map("created_by_id")
+
+  @@index([credentialId])
+  @@index([subjectType, subjectId])
+  @@map("credential_access_grants")
+}
+
+// ============================================================
+// Grupos de usuários (para conceder acesso em massa)
+// ============================================================
+model UserGroup {
+  id          String            @id @default(cuid())
+  name        String            @unique @db.VarChar(120)
+  description String?           @db.Text
+
+  // Audit fields
+  created_at  DateTime          @default(now())
+  updated_at  DateTime          @updatedAt
+  created_by  String?
+  updated_by  String?
+  deleted_at  DateTime?
+
+  members     UserGroupMember[]
+
+  @@map("user_groups")
+}
+
+model UserGroupMember {
+  id        String    @id @default(cuid())
+  groupId   String    @map("group_id")
+  userId    String    @map("user_id")
+  group     UserGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  @@unique([groupId, userId])
+  @@index([userId])
+  @@map("user_group_members")
 }
