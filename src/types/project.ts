@@ -2,6 +2,16 @@ export type ProjectStatus = "DRAFT" | "ACTIVE" | "ARCHIVED";
 
 export type ProjectOwner = { id: string; name: string; email: string };
 
+export type ProjectMemberRole = "owner" | "member" | "viewer";
+
+export type ProjectMember = {
+  id: string;
+  userId: string;
+  role: string;
+  createdAt: string;
+  user: ProjectOwner;
+};
+
 export type Project = {
   id: string;
   name: string;
@@ -14,6 +24,7 @@ export type Project = {
   archivedAt: string | null;
   createdAt: string;
   updatedAt: string;
+  members?: ProjectMember[];
   _count?: { members: number };
 };
 

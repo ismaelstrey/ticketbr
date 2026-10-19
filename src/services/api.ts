@@ -1,6 +1,6 @@
 import { Ticket, TicketStatus } from "@/types/ticket";
-import { Task } from "@/types/task";
-import { Project } from "@/types/project";
+import { Task, TaskComment } from "@/types/task";
+import { Project, ProjectMember } from "@/types/project";
 import { TicketOperationalDashboardResponse, TicketDashboardFilters } from "@/types/ticketsDashboard";
 
 const API_BASE = "/api";
@@ -40,7 +40,13 @@ export const api = {
         fetchJson<{ data: Ticket }>(`/tickets/${id}/status`, {
             method: "POST",
             body: JSON.stringify({ status, pauseReason: reason, pauseSla })
-        })
+        }),
+    lookups: () => fetchJson<{ data: {
+      tipos: Array<{ id: string; nome: string }>;
+      categorias: Array<{ id: string; nome: string; tipo_ticket_id: string }>;
+      mesas: Array<{ id: string; nome: string }>;
+      operadores: Array<{ id: string; nome: string }>;
+    } }>("/tickets/lookups")
   },
   users: {
       list: () => fetchJson<any[]>("/users")
@@ -72,6 +78,11 @@ export const api = {
       list: (taskId: string) => fetchJson<{ data: any[] }>(`/tasks/${taskId}/attachments`),
       upload: (taskId: string, payload: any) => fetchJson<{ data: any }>(`/tasks/${taskId}/attachments`, { method: "POST", body: JSON.stringify(payload) }),
       remove: (attachmentId: string) => fetchJson<{ ok: boolean }>(`/tasks/attachments/${attachmentId}`, { method: "DELETE" })
+    },
+    comments: {
+      list: (taskId: string) => fetchJson<{ data: TaskComment[] }>(`/tasks/${taskId}/comments`),
+      create: (taskId: string, payload: { body: string }) => fetchJson<{ data: TaskComment }>(`/tasks/${taskId}/comments`, { method: "POST", body: JSON.stringify(payload) }),
+      remove: (taskId: string, commentId: string) => fetchJson<{ ok: boolean }>(`/tasks/${taskId}/comments/${commentId}`, { method: "DELETE" })
     }
   }
   ,
@@ -85,6 +96,15 @@ export const api = {
     create: (payload: any) => fetchJson<{ data: Project }>("/projects", { method: "POST", body: JSON.stringify(payload) }),
     update: (id: string, payload: any) => fetchJson<{ data: Project }>(`/projects/${id}`, { method: "PATCH", body: JSON.stringify(payload) }),
     remove: (id: string) => fetchJson<{ ok: boolean }>(`/projects/${id}`, { method: "DELETE" }),
+    members: {
+      list: (projectId: string) => fetchJson<{ data: ProjectMember[] }>(`/projects/${projectId}/members`),
+      add: (projectId: string, payload: { userId: string; role?: string }) =>
+        fetchJson<{ data: ProjectMember }>(`/projects/${projectId}/members`, { method: "POST", body: JSON.stringify(payload) }),
+      update: (projectId: string, memberId: string, payload: { role: string }) =>
+        fetchJson<{ data: ProjectMember }>(`/projects/${projectId}/members/${memberId}`, { method: "PATCH", body: JSON.stringify(payload) }),
+      remove: (projectId: string, memberId: string) =>
+        fetchJson<{ ok: boolean }>(`/projects/${projectId}/members/${memberId}`, { method: "DELETE" })
+    },
     export: (payload: any) => fetch(`${API_BASE}/projects/export`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },

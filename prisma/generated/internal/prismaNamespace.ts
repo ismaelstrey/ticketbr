@@ -402,12 +402,14 @@ export const ModelName = {
   TaskSubtask: 'TaskSubtask',
   TaskAttachment: 'TaskAttachment',
   TaskTicketLink: 'TaskTicketLink',
+  TaskComment: 'TaskComment',
   Project: 'Project',
   ProjectMember: 'ProjectMember',
   ProjectExportAudit: 'ProjectExportAudit',
   Notification: 'Notification',
   KpiSnapshot: 'KpiSnapshot',
-  WebhookRequestLog: 'WebhookRequestLog'
+  WebhookRequestLog: 'WebhookRequestLog',
+  PasswordResetToken: 'PasswordResetToken'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -423,7 +425,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "whatsAppContact" | "solicitante" | "funcionario" | "auditLog" | "tipo_Ticket" | "categoria_Ticket" | "mesa_Trabalho" | "operador" | "ticket" | "ticketEvent" | "chatConversation" | "conversation" | "message" | "task" | "taskSubtask" | "taskAttachment" | "taskTicketLink" | "project" | "projectMember" | "projectExportAudit" | "notification" | "kpiSnapshot" | "webhookRequestLog"
+    modelProps: "user" | "whatsAppContact" | "solicitante" | "funcionario" | "auditLog" | "tipo_Ticket" | "categoria_Ticket" | "mesa_Trabalho" | "operador" | "ticket" | "ticketEvent" | "chatConversation" | "conversation" | "message" | "task" | "taskSubtask" | "taskAttachment" | "taskTicketLink" | "taskComment" | "project" | "projectMember" | "projectExportAudit" | "notification" | "kpiSnapshot" | "webhookRequestLog" | "passwordResetToken"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1759,6 +1761,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    TaskComment: {
+      payload: Prisma.$TaskCommentPayload<ExtArgs>
+      fields: Prisma.TaskCommentFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TaskCommentFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskCommentPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TaskCommentFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskCommentPayload>
+        }
+        findFirst: {
+          args: Prisma.TaskCommentFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskCommentPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TaskCommentFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskCommentPayload>
+        }
+        findMany: {
+          args: Prisma.TaskCommentFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskCommentPayload>[]
+        }
+        create: {
+          args: Prisma.TaskCommentCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskCommentPayload>
+        }
+        createMany: {
+          args: Prisma.TaskCommentCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.TaskCommentCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskCommentPayload>[]
+        }
+        delete: {
+          args: Prisma.TaskCommentDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskCommentPayload>
+        }
+        update: {
+          args: Prisma.TaskCommentUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskCommentPayload>
+        }
+        deleteMany: {
+          args: Prisma.TaskCommentDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TaskCommentUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.TaskCommentUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskCommentPayload>[]
+        }
+        upsert: {
+          args: Prisma.TaskCommentUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskCommentPayload>
+        }
+        aggregate: {
+          args: Prisma.TaskCommentAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTaskComment>
+        }
+        groupBy: {
+          args: Prisma.TaskCommentGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TaskCommentGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TaskCommentCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TaskCommentCountAggregateOutputType> | number
+        }
+      }
+    }
     Project: {
       payload: Prisma.$ProjectPayload<ExtArgs>
       fields: Prisma.ProjectFieldRefs
@@ -2203,6 +2279,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    PasswordResetToken: {
+      payload: Prisma.$PasswordResetTokenPayload<ExtArgs>
+      fields: Prisma.PasswordResetTokenFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PasswordResetTokenFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PasswordResetTokenPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PasswordResetTokenFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PasswordResetTokenPayload>
+        }
+        findFirst: {
+          args: Prisma.PasswordResetTokenFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PasswordResetTokenPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PasswordResetTokenFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PasswordResetTokenPayload>
+        }
+        findMany: {
+          args: Prisma.PasswordResetTokenFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PasswordResetTokenPayload>[]
+        }
+        create: {
+          args: Prisma.PasswordResetTokenCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PasswordResetTokenPayload>
+        }
+        createMany: {
+          args: Prisma.PasswordResetTokenCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.PasswordResetTokenCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PasswordResetTokenPayload>[]
+        }
+        delete: {
+          args: Prisma.PasswordResetTokenDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PasswordResetTokenPayload>
+        }
+        update: {
+          args: Prisma.PasswordResetTokenUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PasswordResetTokenPayload>
+        }
+        deleteMany: {
+          args: Prisma.PasswordResetTokenDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PasswordResetTokenUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.PasswordResetTokenUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PasswordResetTokenPayload>[]
+        }
+        upsert: {
+          args: Prisma.PasswordResetTokenUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PasswordResetTokenPayload>
+        }
+        aggregate: {
+          args: Prisma.PasswordResetTokenAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePasswordResetToken>
+        }
+        groupBy: {
+          args: Prisma.PasswordResetTokenGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PasswordResetTokenGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PasswordResetTokenCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PasswordResetTokenCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -2555,6 +2705,18 @@ export const TaskTicketLinkScalarFieldEnum = {
 export type TaskTicketLinkScalarFieldEnum = (typeof TaskTicketLinkScalarFieldEnum)[keyof typeof TaskTicketLinkScalarFieldEnum]
 
 
+export const TaskCommentScalarFieldEnum = {
+  id: 'id',
+  taskId: 'taskId',
+  authorId: 'authorId',
+  body: 'body',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TaskCommentScalarFieldEnum = (typeof TaskCommentScalarFieldEnum)[keyof typeof TaskCommentScalarFieldEnum]
+
+
 export const ProjectScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -2645,6 +2807,18 @@ export const WebhookRequestLogScalarFieldEnum = {
 } as const
 
 export type WebhookRequestLogScalarFieldEnum = (typeof WebhookRequestLogScalarFieldEnum)[keyof typeof WebhookRequestLogScalarFieldEnum]
+
+
+export const PasswordResetTokenScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  tokenHash: 'tokenHash',
+  expiresAt: 'expiresAt',
+  usedAt: 'usedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type PasswordResetTokenScalarFieldEnum = (typeof PasswordResetTokenScalarFieldEnum)[keyof typeof PasswordResetTokenScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -3031,12 +3205,14 @@ export type GlobalOmitConfig = {
   taskSubtask?: Prisma.TaskSubtaskOmit
   taskAttachment?: Prisma.TaskAttachmentOmit
   taskTicketLink?: Prisma.TaskTicketLinkOmit
+  taskComment?: Prisma.TaskCommentOmit
   project?: Prisma.ProjectOmit
   projectMember?: Prisma.ProjectMemberOmit
   projectExportAudit?: Prisma.ProjectExportAuditOmit
   notification?: Prisma.NotificationOmit
   kpiSnapshot?: Prisma.KpiSnapshotOmit
   webhookRequestLog?: Prisma.WebhookRequestLogOmit
+  passwordResetToken?: Prisma.PasswordResetTokenOmit
 }
 
 /* Types for Logging */

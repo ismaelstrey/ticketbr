@@ -216,8 +216,12 @@ function mapTicket(ticket: any) {
     operador: ticket.operador_rel?.nome ?? null,
     contato: ticket.contact,
     tipoTicket: ticket.tipo_ticket?.nome ?? null,
+    tipoTicketId: ticket.tipo_ticket?.id ?? null,
     categoria: ticket.categoria?.nome ?? null,
+    categoriaId: ticket.categoria?.id ?? null,
     mesaTrabalho: ticket.mesa_trabalho_rel?.nome ?? null,
+    mesaTrabalhoId: ticket.mesa_trabalho_rel?.id ?? null,
+    operadorId: ticket.operador_rel?.id ?? null,
     dataCriacao: ticket.createdAt,
     dataAtualizacao: ticket.updatedAt,
     slaResposta: ticket.responseSlaAt,
@@ -434,23 +438,42 @@ export async function updateTicket(id: string, input: UpdateTicketInput) {
     data.solicitante_id = solicitanteId;
   }
 
-  // Resolve e sincroniza os relacionamentos (fonte de verdade) com base nos IDs/nomes
-  const tipoTicketId = (await resolveTipoTicketId(input)) ?? current.tipo_ticket_id ?? null;
-  if (tipoTicketId) {
+  // Resolve e sincroniza os relacionamentos (fonte de verdade) com base nos IDs/nomes.
+  // Enviar null no ID limpa explicitamente o relacionamento.
+  const tipoTicketIdInput = input.tipoTicketId as string | null | undefined;
+  const tipoTicketId =
+    tipoTicketIdInput === null ? null : (await resolveTipoTicketId(input)) ?? current.tipo_ticket_id ?? null;
+  if (tipoTicketIdInput === null) {
+    data.tipo_ticket_id = null;
+  } else if (tipoTicketId) {
     data.tipo_ticket_id = tipoTicketId;
   }
-  const categoriaId = await resolveCategoriaId(input, tipoTicketId);
-  if (categoriaId) {
-    data.categoria_id = categoriaId;
+
+  if (input.categoriaId === null) {
+    data.categoria_id = null;
+  } else {
+    const categoriaId = await resolveCategoriaId(input, tipoTicketId);
+    if (categoriaId) {
+      data.categoria_id = categoriaId;
+    }
   }
-  const mesaTrabalhoId = await resolveMesaTrabalhoId(input);
-  if (mesaTrabalhoId) {
-    data.mesa_trabalho_id = mesaTrabalhoId;
+
+  if (input.mesaTrabalhoId === null) {
+    data.mesa_trabalho_id = null;
+  } else {
+    const mesaTrabalhoId = await resolveMesaTrabalhoId(input);
+    if (mesaTrabalhoId) {
+      data.mesa_trabalho_id = mesaTrabalhoId;
+    }
   }
-  const operadorId = await resolveOperadorId(input);
+
+  const operadorIdInput = input.operadorId as string | null | undefined;
+  const operadorId = operadorIdInput === null ? null : await resolveOperadorId(input);
   // Detecta troca de responsável para disparar a notificação de atribuição
   const operadorChanged = Boolean(operadorId) && operadorId !== current.operador_id;
-  if (operadorId) {
+  if (operadorIdInput === null) {
+    data.operador_id = null;
+  } else if (operadorId) {
     data.operador_id = operadorId;
   }
 

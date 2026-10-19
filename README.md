@@ -39,6 +39,15 @@ Observações:
 - É possível ligar/desligar os canais **in-app** e **e-mail** e cada evento (mudança de status, comentário, atribuição, SLA próximo e SLA estourado).
 - Eventos desativados não geram registro in-app nem envio de e-mail.
 
+## Tarefas
+
+- Comentários por tarefa em `/tasks/[id]` (tabela `task_comments`), com autoria. A exclusão é permitida ao autor do comentário ou a um usuário `ADMIN`.
+
+## Portal do cliente
+
+- **Recuperação de senha**: `/cliente/esqueci-senha` solicita o envio do link e `/cliente/redefinir-senha` conclui a troca. O token é de uso único, expira em 1 hora e é persistido apenas como hash em `password_reset_tokens`. O link usa `APP_BASE_URL`.
+- **Meus dados**: `/cliente/perfil` permite atualizar o nome e trocar a senha (exige informar a senha atual).
+
 ## Desenvolvimento
 
 - Subir app: `npm run dev`

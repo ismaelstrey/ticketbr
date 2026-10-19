@@ -14,6 +14,8 @@ import { formatDateTimePtBR } from "@/components/tasks/task-format";
 import { SubtasksPanel, Subtask } from "@/components/tasks/SubtasksPanel";
 import { AttachmentsPanel, TaskAttachmentMeta } from "@/components/tasks/AttachmentsPanel";
 import { TicketLinksPanel, TaskTicketLink } from "@/components/tasks/TicketLinksPanel";
+import { CommentsPanel } from "@/components/tasks/CommentsPanel";
+import { TaskComment } from "@/types/task";
 import { HeaderRow, Label, Layout, Title } from "@/components/tasks/TaskDetailsLayout";
 import { useTaskDetail } from "@/hooks/useTaskDetail";
 
@@ -160,6 +162,13 @@ export default function TaskDetails() {
               links={(task.ticketLinks || []) as TaskTicketLink[]}
               onAdd={actions.addTicketLink}
               onRemove={actions.removeTicketLink}
+            />
+
+            <CommentsPanel
+              comments={(task.comments || []) as TaskComment[]}
+              loading={saving}
+              onCreate={actions.createComment}
+              onRemove={actions.removeComment}
             />
           </div>
         </Layout>

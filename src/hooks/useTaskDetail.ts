@@ -130,6 +130,16 @@ export function useTaskDetail(taskId: string) {
     await load();
   };
 
+  const createComment = async (body: string) => {
+    await api.tasks.comments.create(taskId, { body });
+    await load();
+  };
+
+  const removeComment = async (commentId: string) => {
+    await api.tasks.comments.remove(taskId, commentId);
+    await load();
+  };
+
   return {
     task,
     assignees,
@@ -150,7 +160,9 @@ export function useTaskDetail(taskId: string) {
       uploadAttachment,
       removeAttachment,
       addTicketLink,
-      removeTicketLink
+      removeTicketLink,
+      createComment,
+      removeComment
     }
   };
 }

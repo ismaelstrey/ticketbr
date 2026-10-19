@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import styled from "styled-components";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
@@ -51,6 +52,18 @@ const FormLabel = styled.label`
   font-weight: 600;
   color: ${({ theme }) => theme.colors.text.primary};
   margin-bottom: 0.25rem;
+`;
+
+const ForgotLink = styled(Link)`
+  margin-top: 1rem;
+  font-size: 0.875rem;
+  text-align: center;
+  color: ${({ theme }) => theme.colors.text.secondary};
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
 `;
 
 function CustomerLoginInner() {
@@ -108,6 +121,8 @@ function CustomerLoginInner() {
             {submitting ? "Entrando..." : "Entrar"}
           </Button>
         </FormStack>
+
+        <ForgotLink href="/cliente/esqueci-senha">Esqueci minha senha</ForgotLink>
       </LoginCard>
     </LoginContainer>
   );

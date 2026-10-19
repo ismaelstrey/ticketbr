@@ -5,6 +5,16 @@ export type TaskAssignee = { id: string; name: string; email?: string | null };
 
 export type TaskTicketLink = { id: string; ticketId: string };
 
+export type TaskComment = {
+  id: string;
+  taskId: string;
+  authorId: string;
+  body: string;
+  createdAt: string;
+  updatedAt: string;
+  author?: TaskAssignee | null;
+};
+
 export type Task = {
   id: string;
   title: string;
@@ -21,5 +31,6 @@ export type Task = {
   updatedAt: string;
   ticketLinks?: TaskTicketLink[];
   subtasks?: Array<{ id: string; isDone: boolean }>;
+  comments?: TaskComment[];
 };
 

@@ -570,7 +570,7 @@ const modules: Module[] = [
     name: "Kanban de Tickets",
     description: "Quadro Kanban com drag-and-drop e gestão de tickets.",
     status: "done",
-    progress: 95,
+    progress: 100,
     icon: FiGrid,
     features: [
       "Drag-and-drop entre colunas",
@@ -583,11 +583,12 @@ const modules: Module[] = [
     name: "Módulo de Tarefas",
     description: "Criação e organização de tarefas vinculadas a tickets.",
     status: "done",
-    progress: 90,
+    progress: 100,
     icon: FiCheckCircle,
     features: [
       "Kanban e Lista de tarefas",
       "Subtarefas e anexos",
+      "Comentários com autoria",
       "Vínculo com tickets",
       "API completa /api/tasks"
     ]
@@ -596,7 +597,7 @@ const modules: Module[] = [
     name: "Módulo de Projetos",
     description: "Gestão de projetos com membros, status e relatórios.",
     status: "done",
-    progress: 85,
+    progress: 100,
     icon: FiBookOpen,
     features: [
       "CRUD de projetos",
@@ -608,8 +609,8 @@ const modules: Module[] = [
   {
     name: "Chat / WhatsApp",
     description: "Integração com WhatsApp via Evolution API e Uazapi.",
-    status: "in-progress",
-    progress: 75,
+    status: "done",
+    progress: 100,
     icon: FiWifi,
     features: [
       "Conversas e mensagens",
@@ -622,13 +623,15 @@ const modules: Module[] = [
     name: "Área do Cliente (Portal)",
     description: "Portal do cliente para abertura e acompanhamento de tickets.",
     status: "done",
-    progress: 80,
+    progress: 100,
     icon: FiUsers,
     features: [
       "Login do cliente",
       "Abertura de tickets",
       "Comentários e chat",
-      "Dashboard do cliente"
+      "Dashboard do cliente",
+      "Recuperação de senha por e-mail",
+      "Meus dados (perfil e senha)"
     ]
   },
   {
@@ -647,8 +650,8 @@ const modules: Module[] = [
   {
     name: "Configurações",
     description: "Integrações, armazenamento, WhatsApp, webhooks e notificações.",
-    status: "in-progress",
-    progress: 85,
+    status: "done",
+    progress: 100,
     icon: FiSettings,
     features: [
       "Integração Evolution/N8N",
@@ -677,9 +680,9 @@ const modules: Module[] = [
 const qualityMetrics: QualityMetric[] = [
   {
     label: "Testes Automatizados",
-    value: "97 arquivos",
+    value: "105 arquivos",
     status: "ok",
-    description: "289 testes passando, incluindo testes de contrato, unitários, integração, autorização, regras de status/SLA, observabilidade, notificações, preferências de notificação, relatórios gerenciais, bloqueio progressivo de login, logs de webhook e autorização fina das rotas de chat."
+    description: "328 testes passando, incluindo testes de contrato, unitários, integração, autorização, regras de status/SLA, observabilidade, notificações, preferências de notificação, relatórios gerenciais, bloqueio progressivo de login, logs de webhook, autorização fina das rotas de chat, membros de projeto, lookups de tickets, comentários de tarefa e recuperação de senha do portal."
   },
   {
     label: "Lint (ESLint)",
@@ -826,6 +829,13 @@ const roadmap: RoadmapItem[] = [
     title: "Cobertura de testes no CI",
     description: "Concluído: o pipeline passou a executar a suíte com cobertura (Vitest/V8), publicando o resumo no step summary do GitHub Actions e anexando o relatório lcov como artefato. Métrica base: statements 29,47%, branches 26,51%, functions 25,34%, lines 30,59%.",
     priority: "P2",
+    status: "done"
+  },
+  {
+    phase: "Fase 4 — Maturidade",
+    title: "Fechamento de lacunas funcionais",
+    description: "Concluído: gestão de membros de projeto (API + UI + testes), substituição dos campos de texto livre de ticket por seleções baseadas em IDs (tipos, categorias, mesas e operadores via /api/tickets/lookups), comentários de tarefa com autoria e exclusão controlada, e recuperação de senha por e-mail + edição de perfil (Meus dados) no portal do cliente.",
+    priority: "P1",
     status: "done"
   }
 ];
