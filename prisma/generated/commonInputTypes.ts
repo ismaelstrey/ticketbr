@@ -528,6 +528,125 @@ export type FloatNullableWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedFloatNullableFilter<$PrismaModel>
 }
 
+export type EnumEquipmentTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.EquipmentType | Prisma.EnumEquipmentTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.EquipmentType[] | Prisma.ListEnumEquipmentTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.EquipmentType[] | Prisma.ListEnumEquipmentTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumEquipmentTypeFilter<$PrismaModel> | $Enums.EquipmentType
+}
+
+export type EnumEquipmentStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.EquipmentStatus | Prisma.EnumEquipmentStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.EquipmentStatus[] | Prisma.ListEnumEquipmentStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.EquipmentStatus[] | Prisma.ListEnumEquipmentStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumEquipmentStatusFilter<$PrismaModel> | $Enums.EquipmentStatus
+}
+
+export type EnumEquipmentTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.EquipmentType | Prisma.EnumEquipmentTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.EquipmentType[] | Prisma.ListEnumEquipmentTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.EquipmentType[] | Prisma.ListEnumEquipmentTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumEquipmentTypeWithAggregatesFilter<$PrismaModel> | $Enums.EquipmentType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumEquipmentTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumEquipmentTypeFilter<$PrismaModel>
+}
+
+export type EnumEquipmentStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.EquipmentStatus | Prisma.EnumEquipmentStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.EquipmentStatus[] | Prisma.ListEnumEquipmentStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.EquipmentStatus[] | Prisma.ListEnumEquipmentStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumEquipmentStatusWithAggregatesFilter<$PrismaModel> | $Enums.EquipmentStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumEquipmentStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumEquipmentStatusFilter<$PrismaModel>
+}
+
+export type EnumCredentialProtocolFilter<$PrismaModel = never> = {
+  equals?: $Enums.CredentialProtocol | Prisma.EnumCredentialProtocolFieldRefInput<$PrismaModel>
+  in?: $Enums.CredentialProtocol[] | Prisma.ListEnumCredentialProtocolFieldRefInput<$PrismaModel>
+  notIn?: $Enums.CredentialProtocol[] | Prisma.ListEnumCredentialProtocolFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumCredentialProtocolFilter<$PrismaModel> | $Enums.CredentialProtocol
+}
+
+export type EnumCredentialAccessPolicyFilter<$PrismaModel = never> = {
+  equals?: $Enums.CredentialAccessPolicy | Prisma.EnumCredentialAccessPolicyFieldRefInput<$PrismaModel>
+  in?: $Enums.CredentialAccessPolicy[] | Prisma.ListEnumCredentialAccessPolicyFieldRefInput<$PrismaModel>
+  notIn?: $Enums.CredentialAccessPolicy[] | Prisma.ListEnumCredentialAccessPolicyFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumCredentialAccessPolicyFilter<$PrismaModel> | $Enums.CredentialAccessPolicy
+}
+
+export type EnumCredentialProtocolWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.CredentialProtocol | Prisma.EnumCredentialProtocolFieldRefInput<$PrismaModel>
+  in?: $Enums.CredentialProtocol[] | Prisma.ListEnumCredentialProtocolFieldRefInput<$PrismaModel>
+  notIn?: $Enums.CredentialProtocol[] | Prisma.ListEnumCredentialProtocolFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumCredentialProtocolWithAggregatesFilter<$PrismaModel> | $Enums.CredentialProtocol
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumCredentialProtocolFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumCredentialProtocolFilter<$PrismaModel>
+}
+
+export type EnumCredentialAccessPolicyWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.CredentialAccessPolicy | Prisma.EnumCredentialAccessPolicyFieldRefInput<$PrismaModel>
+  in?: $Enums.CredentialAccessPolicy[] | Prisma.ListEnumCredentialAccessPolicyFieldRefInput<$PrismaModel>
+  notIn?: $Enums.CredentialAccessPolicy[] | Prisma.ListEnumCredentialAccessPolicyFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumCredentialAccessPolicyWithAggregatesFilter<$PrismaModel> | $Enums.CredentialAccessPolicy
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumCredentialAccessPolicyFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumCredentialAccessPolicyFilter<$PrismaModel>
+}
+
+export type EnumAccessSubjectTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.AccessSubjectType | Prisma.EnumAccessSubjectTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.AccessSubjectType[] | Prisma.ListEnumAccessSubjectTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AccessSubjectType[] | Prisma.ListEnumAccessSubjectTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAccessSubjectTypeFilter<$PrismaModel> | $Enums.AccessSubjectType
+}
+
+export type EnumRoleNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.Role | Prisma.EnumRoleFieldRefInput<$PrismaModel> | null
+  in?: $Enums.Role[] | Prisma.ListEnumRoleFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.Role[] | Prisma.ListEnumRoleFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumRoleNullableFilter<$PrismaModel> | $Enums.Role | null
+}
+
+export type EnumCredentialAccessLevelFilter<$PrismaModel = never> = {
+  equals?: $Enums.CredentialAccessLevel | Prisma.EnumCredentialAccessLevelFieldRefInput<$PrismaModel>
+  in?: $Enums.CredentialAccessLevel[] | Prisma.ListEnumCredentialAccessLevelFieldRefInput<$PrismaModel>
+  notIn?: $Enums.CredentialAccessLevel[] | Prisma.ListEnumCredentialAccessLevelFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumCredentialAccessLevelFilter<$PrismaModel> | $Enums.CredentialAccessLevel
+}
+
+export type EnumAccessSubjectTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.AccessSubjectType | Prisma.EnumAccessSubjectTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.AccessSubjectType[] | Prisma.ListEnumAccessSubjectTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AccessSubjectType[] | Prisma.ListEnumAccessSubjectTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAccessSubjectTypeWithAggregatesFilter<$PrismaModel> | $Enums.AccessSubjectType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumAccessSubjectTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumAccessSubjectTypeFilter<$PrismaModel>
+}
+
+export type EnumRoleNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.Role | Prisma.EnumRoleFieldRefInput<$PrismaModel> | null
+  in?: $Enums.Role[] | Prisma.ListEnumRoleFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.Role[] | Prisma.ListEnumRoleFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumRoleNullableWithAggregatesFilter<$PrismaModel> | $Enums.Role | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumRoleNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumRoleNullableFilter<$PrismaModel>
+}
+
+export type EnumCredentialAccessLevelWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.CredentialAccessLevel | Prisma.EnumCredentialAccessLevelFieldRefInput<$PrismaModel>
+  in?: $Enums.CredentialAccessLevel[] | Prisma.ListEnumCredentialAccessLevelFieldRefInput<$PrismaModel>
+  notIn?: $Enums.CredentialAccessLevel[] | Prisma.ListEnumCredentialAccessLevelFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumCredentialAccessLevelWithAggregatesFilter<$PrismaModel> | $Enums.CredentialAccessLevel
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumCredentialAccessLevelFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumCredentialAccessLevelFilter<$PrismaModel>
+}
+
 export type NestedStringFilter<$PrismaModel = never> = {
   equals?: string | Prisma.StringFieldRefInput<$PrismaModel>
   in?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
@@ -977,6 +1096,125 @@ export type NestedFloatNullableWithAggregatesFilter<$PrismaModel = never> = {
   _sum?: Prisma.NestedFloatNullableFilter<$PrismaModel>
   _min?: Prisma.NestedFloatNullableFilter<$PrismaModel>
   _max?: Prisma.NestedFloatNullableFilter<$PrismaModel>
+}
+
+export type NestedEnumEquipmentTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.EquipmentType | Prisma.EnumEquipmentTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.EquipmentType[] | Prisma.ListEnumEquipmentTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.EquipmentType[] | Prisma.ListEnumEquipmentTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumEquipmentTypeFilter<$PrismaModel> | $Enums.EquipmentType
+}
+
+export type NestedEnumEquipmentStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.EquipmentStatus | Prisma.EnumEquipmentStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.EquipmentStatus[] | Prisma.ListEnumEquipmentStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.EquipmentStatus[] | Prisma.ListEnumEquipmentStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumEquipmentStatusFilter<$PrismaModel> | $Enums.EquipmentStatus
+}
+
+export type NestedEnumEquipmentTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.EquipmentType | Prisma.EnumEquipmentTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.EquipmentType[] | Prisma.ListEnumEquipmentTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.EquipmentType[] | Prisma.ListEnumEquipmentTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumEquipmentTypeWithAggregatesFilter<$PrismaModel> | $Enums.EquipmentType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumEquipmentTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumEquipmentTypeFilter<$PrismaModel>
+}
+
+export type NestedEnumEquipmentStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.EquipmentStatus | Prisma.EnumEquipmentStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.EquipmentStatus[] | Prisma.ListEnumEquipmentStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.EquipmentStatus[] | Prisma.ListEnumEquipmentStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumEquipmentStatusWithAggregatesFilter<$PrismaModel> | $Enums.EquipmentStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumEquipmentStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumEquipmentStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumCredentialProtocolFilter<$PrismaModel = never> = {
+  equals?: $Enums.CredentialProtocol | Prisma.EnumCredentialProtocolFieldRefInput<$PrismaModel>
+  in?: $Enums.CredentialProtocol[] | Prisma.ListEnumCredentialProtocolFieldRefInput<$PrismaModel>
+  notIn?: $Enums.CredentialProtocol[] | Prisma.ListEnumCredentialProtocolFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumCredentialProtocolFilter<$PrismaModel> | $Enums.CredentialProtocol
+}
+
+export type NestedEnumCredentialAccessPolicyFilter<$PrismaModel = never> = {
+  equals?: $Enums.CredentialAccessPolicy | Prisma.EnumCredentialAccessPolicyFieldRefInput<$PrismaModel>
+  in?: $Enums.CredentialAccessPolicy[] | Prisma.ListEnumCredentialAccessPolicyFieldRefInput<$PrismaModel>
+  notIn?: $Enums.CredentialAccessPolicy[] | Prisma.ListEnumCredentialAccessPolicyFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumCredentialAccessPolicyFilter<$PrismaModel> | $Enums.CredentialAccessPolicy
+}
+
+export type NestedEnumCredentialProtocolWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.CredentialProtocol | Prisma.EnumCredentialProtocolFieldRefInput<$PrismaModel>
+  in?: $Enums.CredentialProtocol[] | Prisma.ListEnumCredentialProtocolFieldRefInput<$PrismaModel>
+  notIn?: $Enums.CredentialProtocol[] | Prisma.ListEnumCredentialProtocolFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumCredentialProtocolWithAggregatesFilter<$PrismaModel> | $Enums.CredentialProtocol
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumCredentialProtocolFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumCredentialProtocolFilter<$PrismaModel>
+}
+
+export type NestedEnumCredentialAccessPolicyWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.CredentialAccessPolicy | Prisma.EnumCredentialAccessPolicyFieldRefInput<$PrismaModel>
+  in?: $Enums.CredentialAccessPolicy[] | Prisma.ListEnumCredentialAccessPolicyFieldRefInput<$PrismaModel>
+  notIn?: $Enums.CredentialAccessPolicy[] | Prisma.ListEnumCredentialAccessPolicyFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumCredentialAccessPolicyWithAggregatesFilter<$PrismaModel> | $Enums.CredentialAccessPolicy
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumCredentialAccessPolicyFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumCredentialAccessPolicyFilter<$PrismaModel>
+}
+
+export type NestedEnumAccessSubjectTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.AccessSubjectType | Prisma.EnumAccessSubjectTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.AccessSubjectType[] | Prisma.ListEnumAccessSubjectTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AccessSubjectType[] | Prisma.ListEnumAccessSubjectTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAccessSubjectTypeFilter<$PrismaModel> | $Enums.AccessSubjectType
+}
+
+export type NestedEnumRoleNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.Role | Prisma.EnumRoleFieldRefInput<$PrismaModel> | null
+  in?: $Enums.Role[] | Prisma.ListEnumRoleFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.Role[] | Prisma.ListEnumRoleFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumRoleNullableFilter<$PrismaModel> | $Enums.Role | null
+}
+
+export type NestedEnumCredentialAccessLevelFilter<$PrismaModel = never> = {
+  equals?: $Enums.CredentialAccessLevel | Prisma.EnumCredentialAccessLevelFieldRefInput<$PrismaModel>
+  in?: $Enums.CredentialAccessLevel[] | Prisma.ListEnumCredentialAccessLevelFieldRefInput<$PrismaModel>
+  notIn?: $Enums.CredentialAccessLevel[] | Prisma.ListEnumCredentialAccessLevelFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumCredentialAccessLevelFilter<$PrismaModel> | $Enums.CredentialAccessLevel
+}
+
+export type NestedEnumAccessSubjectTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.AccessSubjectType | Prisma.EnumAccessSubjectTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.AccessSubjectType[] | Prisma.ListEnumAccessSubjectTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AccessSubjectType[] | Prisma.ListEnumAccessSubjectTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAccessSubjectTypeWithAggregatesFilter<$PrismaModel> | $Enums.AccessSubjectType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumAccessSubjectTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumAccessSubjectTypeFilter<$PrismaModel>
+}
+
+export type NestedEnumRoleNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.Role | Prisma.EnumRoleFieldRefInput<$PrismaModel> | null
+  in?: $Enums.Role[] | Prisma.ListEnumRoleFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.Role[] | Prisma.ListEnumRoleFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumRoleNullableWithAggregatesFilter<$PrismaModel> | $Enums.Role | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumRoleNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumRoleNullableFilter<$PrismaModel>
+}
+
+export type NestedEnumCredentialAccessLevelWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.CredentialAccessLevel | Prisma.EnumCredentialAccessLevelFieldRefInput<$PrismaModel>
+  in?: $Enums.CredentialAccessLevel[] | Prisma.ListEnumCredentialAccessLevelFieldRefInput<$PrismaModel>
+  notIn?: $Enums.CredentialAccessLevel[] | Prisma.ListEnumCredentialAccessLevelFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumCredentialAccessLevelWithAggregatesFilter<$PrismaModel> | $Enums.CredentialAccessLevel
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumCredentialAccessLevelFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumCredentialAccessLevelFilter<$PrismaModel>
 }
 
 

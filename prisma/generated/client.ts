@@ -171,3 +171,28 @@ export type WebhookRequestLog = Prisma.WebhookRequestLogModel
  * 
  */
 export type PasswordResetToken = Prisma.PasswordResetTokenModel
+/**
+ * Model Equipment
+ * 
+ */
+export type Equipment = Prisma.EquipmentModel
+/**
+ * Model EquipmentCredential
+ * 
+ */
+export type EquipmentCredential = Prisma.EquipmentCredentialModel
+/**
+ * Model CredentialAccessGrant
+ * 
+ */
+export type CredentialAccessGrant = Prisma.CredentialAccessGrantModel
+/**
+ * Model UserGroup
+ * 
+ */
+export type UserGroup = Prisma.UserGroupModel
+/**
+ * Model UserGroupMember
+ * 
+ */
+export type UserGroupMember = Prisma.UserGroupMemberModel

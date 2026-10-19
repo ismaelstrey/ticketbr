@@ -409,7 +409,12 @@ export const ModelName = {
   Notification: 'Notification',
   KpiSnapshot: 'KpiSnapshot',
   WebhookRequestLog: 'WebhookRequestLog',
-  PasswordResetToken: 'PasswordResetToken'
+  PasswordResetToken: 'PasswordResetToken',
+  Equipment: 'Equipment',
+  EquipmentCredential: 'EquipmentCredential',
+  CredentialAccessGrant: 'CredentialAccessGrant',
+  UserGroup: 'UserGroup',
+  UserGroupMember: 'UserGroupMember'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -425,7 +430,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "whatsAppContact" | "solicitante" | "funcionario" | "auditLog" | "tipo_Ticket" | "categoria_Ticket" | "mesa_Trabalho" | "operador" | "ticket" | "ticketEvent" | "chatConversation" | "conversation" | "message" | "task" | "taskSubtask" | "taskAttachment" | "taskTicketLink" | "taskComment" | "project" | "projectMember" | "projectExportAudit" | "notification" | "kpiSnapshot" | "webhookRequestLog" | "passwordResetToken"
+    modelProps: "user" | "whatsAppContact" | "solicitante" | "funcionario" | "auditLog" | "tipo_Ticket" | "categoria_Ticket" | "mesa_Trabalho" | "operador" | "ticket" | "ticketEvent" | "chatConversation" | "conversation" | "message" | "task" | "taskSubtask" | "taskAttachment" | "taskTicketLink" | "taskComment" | "project" | "projectMember" | "projectExportAudit" | "notification" | "kpiSnapshot" | "webhookRequestLog" | "passwordResetToken" | "equipment" | "equipmentCredential" | "credentialAccessGrant" | "userGroup" | "userGroupMember"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2353,6 +2358,376 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    Equipment: {
+      payload: Prisma.$EquipmentPayload<ExtArgs>
+      fields: Prisma.EquipmentFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.EquipmentFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EquipmentPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.EquipmentFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EquipmentPayload>
+        }
+        findFirst: {
+          args: Prisma.EquipmentFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EquipmentPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.EquipmentFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EquipmentPayload>
+        }
+        findMany: {
+          args: Prisma.EquipmentFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EquipmentPayload>[]
+        }
+        create: {
+          args: Prisma.EquipmentCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EquipmentPayload>
+        }
+        createMany: {
+          args: Prisma.EquipmentCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.EquipmentCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EquipmentPayload>[]
+        }
+        delete: {
+          args: Prisma.EquipmentDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EquipmentPayload>
+        }
+        update: {
+          args: Prisma.EquipmentUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EquipmentPayload>
+        }
+        deleteMany: {
+          args: Prisma.EquipmentDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.EquipmentUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.EquipmentUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EquipmentPayload>[]
+        }
+        upsert: {
+          args: Prisma.EquipmentUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EquipmentPayload>
+        }
+        aggregate: {
+          args: Prisma.EquipmentAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateEquipment>
+        }
+        groupBy: {
+          args: Prisma.EquipmentGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EquipmentGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.EquipmentCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EquipmentCountAggregateOutputType> | number
+        }
+      }
+    }
+    EquipmentCredential: {
+      payload: Prisma.$EquipmentCredentialPayload<ExtArgs>
+      fields: Prisma.EquipmentCredentialFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.EquipmentCredentialFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EquipmentCredentialPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.EquipmentCredentialFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EquipmentCredentialPayload>
+        }
+        findFirst: {
+          args: Prisma.EquipmentCredentialFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EquipmentCredentialPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.EquipmentCredentialFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EquipmentCredentialPayload>
+        }
+        findMany: {
+          args: Prisma.EquipmentCredentialFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EquipmentCredentialPayload>[]
+        }
+        create: {
+          args: Prisma.EquipmentCredentialCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EquipmentCredentialPayload>
+        }
+        createMany: {
+          args: Prisma.EquipmentCredentialCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.EquipmentCredentialCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EquipmentCredentialPayload>[]
+        }
+        delete: {
+          args: Prisma.EquipmentCredentialDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EquipmentCredentialPayload>
+        }
+        update: {
+          args: Prisma.EquipmentCredentialUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EquipmentCredentialPayload>
+        }
+        deleteMany: {
+          args: Prisma.EquipmentCredentialDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.EquipmentCredentialUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.EquipmentCredentialUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EquipmentCredentialPayload>[]
+        }
+        upsert: {
+          args: Prisma.EquipmentCredentialUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EquipmentCredentialPayload>
+        }
+        aggregate: {
+          args: Prisma.EquipmentCredentialAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateEquipmentCredential>
+        }
+        groupBy: {
+          args: Prisma.EquipmentCredentialGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EquipmentCredentialGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.EquipmentCredentialCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EquipmentCredentialCountAggregateOutputType> | number
+        }
+      }
+    }
+    CredentialAccessGrant: {
+      payload: Prisma.$CredentialAccessGrantPayload<ExtArgs>
+      fields: Prisma.CredentialAccessGrantFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.CredentialAccessGrantFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CredentialAccessGrantPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.CredentialAccessGrantFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CredentialAccessGrantPayload>
+        }
+        findFirst: {
+          args: Prisma.CredentialAccessGrantFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CredentialAccessGrantPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.CredentialAccessGrantFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CredentialAccessGrantPayload>
+        }
+        findMany: {
+          args: Prisma.CredentialAccessGrantFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CredentialAccessGrantPayload>[]
+        }
+        create: {
+          args: Prisma.CredentialAccessGrantCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CredentialAccessGrantPayload>
+        }
+        createMany: {
+          args: Prisma.CredentialAccessGrantCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.CredentialAccessGrantCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CredentialAccessGrantPayload>[]
+        }
+        delete: {
+          args: Prisma.CredentialAccessGrantDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CredentialAccessGrantPayload>
+        }
+        update: {
+          args: Prisma.CredentialAccessGrantUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CredentialAccessGrantPayload>
+        }
+        deleteMany: {
+          args: Prisma.CredentialAccessGrantDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.CredentialAccessGrantUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.CredentialAccessGrantUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CredentialAccessGrantPayload>[]
+        }
+        upsert: {
+          args: Prisma.CredentialAccessGrantUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CredentialAccessGrantPayload>
+        }
+        aggregate: {
+          args: Prisma.CredentialAccessGrantAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCredentialAccessGrant>
+        }
+        groupBy: {
+          args: Prisma.CredentialAccessGrantGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CredentialAccessGrantGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.CredentialAccessGrantCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CredentialAccessGrantCountAggregateOutputType> | number
+        }
+      }
+    }
+    UserGroup: {
+      payload: Prisma.$UserGroupPayload<ExtArgs>
+      fields: Prisma.UserGroupFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.UserGroupFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserGroupPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.UserGroupFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserGroupPayload>
+        }
+        findFirst: {
+          args: Prisma.UserGroupFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserGroupPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.UserGroupFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserGroupPayload>
+        }
+        findMany: {
+          args: Prisma.UserGroupFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserGroupPayload>[]
+        }
+        create: {
+          args: Prisma.UserGroupCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserGroupPayload>
+        }
+        createMany: {
+          args: Prisma.UserGroupCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.UserGroupCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserGroupPayload>[]
+        }
+        delete: {
+          args: Prisma.UserGroupDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserGroupPayload>
+        }
+        update: {
+          args: Prisma.UserGroupUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserGroupPayload>
+        }
+        deleteMany: {
+          args: Prisma.UserGroupDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.UserGroupUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.UserGroupUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserGroupPayload>[]
+        }
+        upsert: {
+          args: Prisma.UserGroupUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserGroupPayload>
+        }
+        aggregate: {
+          args: Prisma.UserGroupAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateUserGroup>
+        }
+        groupBy: {
+          args: Prisma.UserGroupGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.UserGroupGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.UserGroupCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.UserGroupCountAggregateOutputType> | number
+        }
+      }
+    }
+    UserGroupMember: {
+      payload: Prisma.$UserGroupMemberPayload<ExtArgs>
+      fields: Prisma.UserGroupMemberFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.UserGroupMemberFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserGroupMemberPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.UserGroupMemberFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserGroupMemberPayload>
+        }
+        findFirst: {
+          args: Prisma.UserGroupMemberFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserGroupMemberPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.UserGroupMemberFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserGroupMemberPayload>
+        }
+        findMany: {
+          args: Prisma.UserGroupMemberFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserGroupMemberPayload>[]
+        }
+        create: {
+          args: Prisma.UserGroupMemberCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserGroupMemberPayload>
+        }
+        createMany: {
+          args: Prisma.UserGroupMemberCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.UserGroupMemberCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserGroupMemberPayload>[]
+        }
+        delete: {
+          args: Prisma.UserGroupMemberDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserGroupMemberPayload>
+        }
+        update: {
+          args: Prisma.UserGroupMemberUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserGroupMemberPayload>
+        }
+        deleteMany: {
+          args: Prisma.UserGroupMemberDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.UserGroupMemberUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.UserGroupMemberUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserGroupMemberPayload>[]
+        }
+        upsert: {
+          args: Prisma.UserGroupMemberUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserGroupMemberPayload>
+        }
+        aggregate: {
+          args: Prisma.UserGroupMemberAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateUserGroupMember>
+        }
+        groupBy: {
+          args: Prisma.UserGroupMemberGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.UserGroupMemberGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.UserGroupMemberCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.UserGroupMemberCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -2821,6 +3196,92 @@ export const PasswordResetTokenScalarFieldEnum = {
 export type PasswordResetTokenScalarFieldEnum = (typeof PasswordResetTokenScalarFieldEnum)[keyof typeof PasswordResetTokenScalarFieldEnum]
 
 
+export const EquipmentScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  name: 'name',
+  type: 'type',
+  status: 'status',
+  brand: 'brand',
+  model: 'model',
+  serialNumber: 'serialNumber',
+  hostname: 'hostname',
+  ipAddress: 'ipAddress',
+  macAddress: 'macAddress',
+  location: 'location',
+  func: 'func',
+  description: 'description',
+  solicitanteId: 'solicitanteId',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  created_by: 'created_by',
+  updated_by: 'updated_by',
+  deleted_at: 'deleted_at'
+} as const
+
+export type EquipmentScalarFieldEnum = (typeof EquipmentScalarFieldEnum)[keyof typeof EquipmentScalarFieldEnum]
+
+
+export const EquipmentCredentialScalarFieldEnum = {
+  id: 'id',
+  equipmentId: 'equipmentId',
+  label: 'label',
+  protocol: 'protocol',
+  port: 'port',
+  username: 'username',
+  secret: 'secret',
+  notes: 'notes',
+  accessPolicy: 'accessPolicy',
+  ownerUserId: 'ownerUserId',
+  lastRotatedAt: 'lastRotatedAt',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  created_by: 'created_by',
+  updated_by: 'updated_by',
+  deleted_at: 'deleted_at'
+} as const
+
+export type EquipmentCredentialScalarFieldEnum = (typeof EquipmentCredentialScalarFieldEnum)[keyof typeof EquipmentCredentialScalarFieldEnum]
+
+
+export const CredentialAccessGrantScalarFieldEnum = {
+  id: 'id',
+  credentialId: 'credentialId',
+  subjectType: 'subjectType',
+  subjectId: 'subjectId',
+  role: 'role',
+  level: 'level',
+  createdAt: 'createdAt',
+  createdById: 'createdById'
+} as const
+
+export type CredentialAccessGrantScalarFieldEnum = (typeof CredentialAccessGrantScalarFieldEnum)[keyof typeof CredentialAccessGrantScalarFieldEnum]
+
+
+export const UserGroupScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  description: 'description',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  created_by: 'created_by',
+  updated_by: 'updated_by',
+  deleted_at: 'deleted_at'
+} as const
+
+export type UserGroupScalarFieldEnum = (typeof UserGroupScalarFieldEnum)[keyof typeof UserGroupScalarFieldEnum]
+
+
+export const UserGroupMemberScalarFieldEnum = {
+  id: 'id',
+  groupId: 'groupId',
+  userId: 'userId',
+  createdAt: 'createdAt'
+} as const
+
+export type UserGroupMemberScalarFieldEnum = (typeof UserGroupMemberScalarFieldEnum)[keyof typeof UserGroupMemberScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -3077,6 +3538,90 @@ export type EnumNotificationTypeFieldRefInput<$PrismaModel> = FieldRefInputType<
 export type ListEnumNotificationTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'NotificationType[]'>
     
 
+
+/**
+ * Reference to a field of type 'EquipmentType'
+ */
+export type EnumEquipmentTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EquipmentType'>
+    
+
+
+/**
+ * Reference to a field of type 'EquipmentType[]'
+ */
+export type ListEnumEquipmentTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EquipmentType[]'>
+    
+
+
+/**
+ * Reference to a field of type 'EquipmentStatus'
+ */
+export type EnumEquipmentStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EquipmentStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'EquipmentStatus[]'
+ */
+export type ListEnumEquipmentStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EquipmentStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'CredentialProtocol'
+ */
+export type EnumCredentialProtocolFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CredentialProtocol'>
+    
+
+
+/**
+ * Reference to a field of type 'CredentialProtocol[]'
+ */
+export type ListEnumCredentialProtocolFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CredentialProtocol[]'>
+    
+
+
+/**
+ * Reference to a field of type 'CredentialAccessPolicy'
+ */
+export type EnumCredentialAccessPolicyFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CredentialAccessPolicy'>
+    
+
+
+/**
+ * Reference to a field of type 'CredentialAccessPolicy[]'
+ */
+export type ListEnumCredentialAccessPolicyFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CredentialAccessPolicy[]'>
+    
+
+
+/**
+ * Reference to a field of type 'AccessSubjectType'
+ */
+export type EnumAccessSubjectTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AccessSubjectType'>
+    
+
+
+/**
+ * Reference to a field of type 'AccessSubjectType[]'
+ */
+export type ListEnumAccessSubjectTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AccessSubjectType[]'>
+    
+
+
+/**
+ * Reference to a field of type 'CredentialAccessLevel'
+ */
+export type EnumCredentialAccessLevelFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CredentialAccessLevel'>
+    
+
+
+/**
+ * Reference to a field of type 'CredentialAccessLevel[]'
+ */
+export type ListEnumCredentialAccessLevelFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CredentialAccessLevel[]'>
+    
+
 /**
  * Batch Payload for updateMany & deleteMany & createMany
  */
@@ -3213,6 +3758,11 @@ export type GlobalOmitConfig = {
   kpiSnapshot?: Prisma.KpiSnapshotOmit
   webhookRequestLog?: Prisma.WebhookRequestLogOmit
   passwordResetToken?: Prisma.PasswordResetTokenOmit
+  equipment?: Prisma.EquipmentOmit
+  equipmentCredential?: Prisma.EquipmentCredentialOmit
+  credentialAccessGrant?: Prisma.CredentialAccessGrantOmit
+  userGroup?: Prisma.UserGroupOmit
+  userGroupMember?: Prisma.UserGroupMemberOmit
 }
 
 /* Types for Logging */

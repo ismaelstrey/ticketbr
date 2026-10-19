@@ -87,3 +87,67 @@ export const NotificationType = {
 } as const
 
 export type NotificationType = (typeof NotificationType)[keyof typeof NotificationType]
+
+
+export const EquipmentType = {
+  SWITCH: 'SWITCH',
+  ROUTER: 'ROUTER',
+  FIREWALL: 'FIREWALL',
+  SERVER: 'SERVER',
+  VM: 'VM',
+  COMPUTER: 'COMPUTER',
+  PRINTER: 'PRINTER',
+  ACCESS_POINT: 'ACCESS_POINT',
+  OTHER: 'OTHER'
+} as const
+
+export type EquipmentType = (typeof EquipmentType)[keyof typeof EquipmentType]
+
+
+export const EquipmentStatus = {
+  ACTIVE: 'ACTIVE',
+  MAINTENANCE: 'MAINTENANCE',
+  INACTIVE: 'INACTIVE',
+  RETIRED: 'RETIRED'
+} as const
+
+export type EquipmentStatus = (typeof EquipmentStatus)[keyof typeof EquipmentStatus]
+
+
+export const CredentialProtocol = {
+  SSH: 'SSH',
+  TELNET: 'TELNET',
+  HTTP: 'HTTP',
+  HTTPS: 'HTTPS',
+  RDP: 'RDP',
+  SNMP: 'SNMP',
+  OTHER: 'OTHER'
+} as const
+
+export type CredentialProtocol = (typeof CredentialProtocol)[keyof typeof CredentialProtocol]
+
+
+export const CredentialAccessPolicy = {
+  OWNER_AND_ADMINS: 'OWNER_AND_ADMINS',
+  STAFF: 'STAFF',
+  CUSTOM: 'CUSTOM'
+} as const
+
+export type CredentialAccessPolicy = (typeof CredentialAccessPolicy)[keyof typeof CredentialAccessPolicy]
+
+
+export const CredentialAccessLevel = {
+  VIEW: 'VIEW',
+  REVEAL: 'REVEAL'
+} as const
+
+export type CredentialAccessLevel = (typeof CredentialAccessLevel)[keyof typeof CredentialAccessLevel]
+
+
+export const AccessSubjectType = {
+  USER: 'USER',
+  GROUP: 'GROUP',
+  ROLE: 'ROLE'
+} as const
+
+export type AccessSubjectType = (typeof AccessSubjectType)[keyof typeof AccessSubjectType]

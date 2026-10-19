@@ -2,6 +2,7 @@ import { Ticket, TicketStatus } from "@/types/ticket";
 import { Task, TaskComment } from "@/types/task";
 import { Project, ProjectMember } from "@/types/project";
 import { TicketOperationalDashboardResponse, TicketDashboardFilters } from "@/types/ticketsDashboard";
+import { Credential, CredentialGrant, Equipment, UserGroup } from "@/types/inventory";
 
 const API_BASE = "/api";
 
@@ -110,6 +111,58 @@ export const api = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     })
+  },
+  inventory: {
+    // Equipamentos
+    list: (params?: Record<string, string>) => {
+      const qs = params ? `?${new URLSearchParams(params).toString()}` : "";
+      return fetchJson<{ data: Equipment[]; total: number; page: number; pageSize: number }>(`/inventory${qs}`);
+    },
+    get: (id: string) => fetchJson<{ data: Equipment & { credentials: Credential[] } }>(`/inventory/${id}`),
+    create: (payload: Partial<Equipment>) =>
+      fetchJson<{ data: Equipment }>("/inventory", { method: "POST", body: JSON.stringify(payload) }),
+    update: (id: string, payload: Partial<Equipment>) =>
+      fetchJson<{ data: Equipment }>(`/inventory/${id}`, { method: "PUT", body: JSON.stringify(payload) }),
+    remove: (id: string) => fetchJson<{ ok: boolean }>(`/inventory/${id}`, { method: "DELETE" }),
+    // Cofre de senhas
+    credentials: {
+      list: (params?: Record<string, string>) => {
+        const qs = params ? `?${new URLSearchParams(params).toString()}` : "";
+        return fetchJson<{ data: Credential[]; total: number }>(`/inventory/credentials${qs}`);
+      },
+      get: (id: string) => fetchJson<{ data: Credential }>(`/inventory/credentials/${id}`),
+      create: (payload: Record<string, unknown>) =>
+        fetchJson<{ data: Credential }>("/inventory/credentials", { method: "POST", body: JSON.stringify(payload) }),
+      update: (id: string, payload: Record<string, unknown>) =>
+        fetchJson<{ data: Credential }>(`/inventory/credentials/${id}`, { method: "PUT", body: JSON.stringify(payload) }),
+      remove: (id: string) => fetchJson<{ ok: boolean }>(`/inventory/credentials/${id}`, { method: "DELETE" }),
+      // Revela a senha em texto puro (requer permissão e gera log de auditoria)
+      reveal: (id: string) =>
+        fetchJson<{ data: { id: string; secret: string } }>(`/inventory/credentials/${id}/reveal`, { method: "POST" }),
+      grants: {
+        list: (credentialId: string) =>
+          fetchJson<{ data: CredentialGrant[] }>(`/inventory/credentials/${credentialId}/grants`),
+        create: (credentialId: string, payload: Record<string, unknown>) =>
+          fetchJson<{ data: CredentialGrant }>(`/inventory/credentials/${credentialId}/grants`, {
+            method: "POST",
+            body: JSON.stringify(payload)
+          }),
+        remove: (credentialId: string, grantId: string) =>
+          fetchJson<{ ok: boolean }>(`/inventory/credentials/${credentialId}/grants/${grantId}`, { method: "DELETE" })
+      }
+    }
+  },
+  userGroups: {
+    list: (params?: Record<string, string>) => {
+      const qs = params ? `?${new URLSearchParams(params).toString()}` : "";
+      return fetchJson<{ data: UserGroup[] }>(`/user-groups${qs}`);
+    },
+    get: (id: string) => fetchJson<{ data: UserGroup }>(`/user-groups/${id}`),
+    create: (payload: Record<string, unknown>) =>
+      fetchJson<{ data: UserGroup }>("/user-groups", { method: "POST", body: JSON.stringify(payload) }),
+    update: (id: string, payload: Record<string, unknown>) =>
+      fetchJson<{ ok: boolean }>(`/user-groups/${id}`, { method: "PUT", body: JSON.stringify(payload) }),
+    remove: (id: string) => fetchJson<{ ok: boolean }>(`/user-groups/${id}`, { method: "DELETE" })
   },
   dashboard: {
     ticketsOperational: (params?: TicketDashboardFilters, options?: RequestInit) => {
