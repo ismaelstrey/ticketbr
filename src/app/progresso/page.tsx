@@ -696,9 +696,9 @@ const modules: Module[] = [
 const qualityMetrics: QualityMetric[] = [
   {
     label: "Testes Automatizados",
-    value: "118 arquivos",
+    value: "125 arquivos",
     status: "ok",
-    description: "422 testes passando, incluindo testes de contrato, unitários, integração, autorização, regras de status/SLA, observabilidade, notificações, preferências de notificação, relatórios gerenciais, bloqueio progressivo de login, logs de webhook, autorização fina das rotas de chat, membros de projeto, lookups de tickets, comentários de tarefa, recuperação de senha do portal, cofre de senhas do inventário, ACL de credenciais (usuário/grupo/papel), sessão/JWT, guardas de autorização de staff e admin, rate-limit de rotas sensíveis, serviço de chat, tema visual e validadores de ticket."
+    description: "472 testes passando, incluindo testes de contrato, unitários, integração, autorização, regras de status/SLA, observabilidade, notificações, preferências de notificação, relatórios gerenciais, bloqueio progressivo de login, logs de webhook, autorização fina das rotas de chat, membros de projeto, lookups de tickets, comentários de tarefa, recuperação de senha do portal, cofre de senhas do inventário, ACL de credenciais (usuário/grupo/papel), rotas de API e grupos de usuários do inventário, sessão/JWT, guardas de autorização de staff e admin, rate-limit de rotas sensíveis, serviço de chat, tema visual e validadores de ticket."
   },
   {
     label: "Lint (ESLint)",
@@ -720,9 +720,9 @@ const qualityMetrics: QualityMetric[] = [
   },
   {
     label: "Cobertura de Testes",
-    value: "29,68% linhas",
+    value: "32,15% linhas",
     status: "warning",
-    description: "Métrica publicada pelo CI (Vitest/V8): statements 28,67%, branches 26,07%, functions 23,92%, lines 29,68%. A variação frente à medição anterior (30,59%) reflete o volume de código do módulo de Inventário ainda sem testes. Relatório lcov anexado como artefato do pipeline."
+    description: "Métrica publicada pelo CI (Vitest/V8): statements 31,09%, branches 28,03%, functions 24,79%, lines 32,15%. A evolução frente à medição anterior (29,68%) é resultado da cobertura das rotas de API e grupos de usuários do módulo de Inventário. Relatório lcov anexado como artefato do pipeline."
   },
   {
     label: "Segurança (npm audit)",
