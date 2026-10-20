@@ -15,8 +15,8 @@ export const credentialSelect = {
   owner: { select: { id: true, name: true } },
   equipment: { select: { id: true, name: true } },
   lastRotatedAt: true,
-  createdAt: true,
-  updatedAt: true
+  created_at: true,
+  updated_at: true
 } as const;
 
 type CredentialRow = {
@@ -32,8 +32,8 @@ type CredentialRow = {
   owner?: { id: string; name: string } | null;
   equipment?: { id: string; name: string } | null;
   lastRotatedAt: Date | null;
-  createdAt: Date;
-  updatedAt: Date;
+  created_at: Date;
+  updated_at: Date;
 };
 
 /**
@@ -60,7 +60,7 @@ export function toCredentialDto(
     lastRotatedAt: credential.lastRotatedAt,
     canReveal: decision.canReveal,
     accessVia: decision.via,
-    createdAt: credential.createdAt,
-    updatedAt: credential.updatedAt
+    createdAt: credential.created_at,
+    updatedAt: credential.updated_at
   };
 }
