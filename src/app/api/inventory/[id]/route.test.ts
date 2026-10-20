@@ -69,8 +69,8 @@ function equipmentRow() {
         owner: { id: "u1", name: "Admin" },
         equipment: { id: "e1", name: "Switch core" },
         lastRotatedAt: null,
-        createdAt: new Date("2024-01-01T00:00:00Z"),
-        updatedAt: new Date("2024-01-01T00:00:00Z")
+        created_at: new Date("2024-01-01T00:00:00Z"),
+        updated_at: new Date("2024-01-01T00:00:00Z")
       }
     ]
   };
