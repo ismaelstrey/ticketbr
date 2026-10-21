@@ -198,6 +198,9 @@ export function CredentialList({ credentials, onEdit, onDelete, onReveal, onMana
 
             <Meta>{ACCESS_POLICY_LABELS[credential.accessPolicy]}</Meta>
             {credential.ownerName ? <Meta>Responsável: {credential.ownerName}</Meta> : null}
+            {credential.sharedSecretLabel ? (
+              <Meta>Senha padrão do cliente: {credential.sharedSecretLabel}</Meta>
+            ) : null}
 
             <Header>
               <Meta>

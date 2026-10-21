@@ -5,6 +5,7 @@ import styled from "styled-components";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { Input, Select, Textarea } from "@/components/ui/Input";
+import { api } from "@/services/api";
 import { Equipment } from "@/types/inventory";
 import { EQUIPMENT_STATUS_LABELS, EQUIPMENT_STATUS_OPTIONS, EQUIPMENT_TYPE_LABELS, EQUIPMENT_TYPE_OPTIONS } from "./labels";
 
@@ -49,6 +50,7 @@ type FormState = {
   location: string;
   func: string;
   description: string;
+  solicitanteId: string;
 };
 
 const emptyForm: FormState = {
@@ -64,8 +66,11 @@ const emptyForm: FormState = {
   macAddress: "",
   location: "",
   func: "",
-  description: ""
+  description: "",
+  solicitanteId: ""
 };
+
+type SolicitanteOption = { id: string; nome_fantasia: string };
 
 interface EquipmentFormModalProps {
   isOpen: boolean;
@@ -79,7 +84,17 @@ interface EquipmentFormModalProps {
  */
 export function EquipmentFormModal({ isOpen, onClose, onSubmit, equipment }: EquipmentFormModalProps) {
   const [form, setForm] = useState<FormState>(emptyForm);
+  const [solicitantes, setSolicitantes] = useState<SolicitanteOption[]>([]);
   const [saving, setSaving] = useState(false);
+
+  // Carrega os clientes disponíveis para vincular ao equipamento
+  useEffect(() => {
+    if (!isOpen) return;
+    api.solicitantes
+      .list({ page: "1", pageSize: "100", sortBy: "nome_fantasia", sortDir: "asc" })
+      .then((res) => setSolicitantes(res.data))
+      .catch(() => setSolicitantes([]));
+  }, [isOpen]);
 
   // Preenche o formulário ao abrir (edição) ou limpa (novo)
   useEffect(() => {
@@ -98,7 +113,8 @@ export function EquipmentFormModal({ isOpen, onClose, onSubmit, equipment }: Equ
         macAddress: equipment.macAddress ?? "",
         location: equipment.location ?? "",
         func: equipment.func ?? "",
-        description: equipment.description ?? ""
+        description: equipment.description ?? "",
+        solicitanteId: equipment.solicitanteId ?? ""
       });
     } else {
       setForm(emptyForm);
@@ -126,7 +142,8 @@ export function EquipmentFormModal({ isOpen, onClose, onSubmit, equipment }: Equ
         macAddress: form.macAddress.trim() || null,
         location: form.location.trim() || null,
         func: form.func.trim() || null,
-        description: form.description.trim() || null
+        description: form.description.trim() || null,
+        solicitanteId: form.solicitanteId || null
       };
       const ok = await onSubmit(payload);
       if (ok) onClose();
@@ -198,6 +215,17 @@ export function EquipmentFormModal({ isOpen, onClose, onSubmit, equipment }: Equ
           <Field>
             Função
             <Input value={form.func} onChange={(e) => setField("func", e.target.value)} maxLength={180} />
+          </Field>
+          <Field>
+            Cliente (Solicitante)
+            <Select value={form.solicitanteId} onChange={(e) => setField("solicitanteId", e.target.value)}>
+              <option value="">Sem cliente vinculado</option>
+              {solicitantes.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.nome_fantasia}
+                </option>
+              ))}
+            </Select>
           </Field>
           <Field $full>
             Descrição

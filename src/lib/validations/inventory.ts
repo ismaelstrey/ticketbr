@@ -64,17 +64,24 @@ export const EquipmentQuerySchema = z.object({
 // ============================================================
 // Credenciais (cofre)
 // ============================================================
-export const CreateCredentialSchema = z.object({
-  equipmentId: z.string().trim().min(1).nullable().optional(),
-  label: z.string().trim().min(1, "Rótulo é obrigatório").max(120),
-  protocol: CredentialProtocolSchema.optional(),
-  port: z.coerce.number().int().min(1).max(65535).nullable().optional(),
-  username: optionalText(180),
-  secret: z.string().min(1, "Senha é obrigatória"),
-  notes: optionalText(4000),
-  accessPolicy: CredentialAccessPolicySchema.optional(),
-  ownerUserId: z.string().trim().min(1).nullable().optional()
-});
+export const CreateCredentialSchema = z
+  .object({
+    equipmentId: z.string().trim().min(1).nullable().optional(),
+    label: z.string().trim().min(1, "Rótulo é obrigatório").max(120),
+    protocol: CredentialProtocolSchema.optional(),
+    port: z.coerce.number().int().min(1).max(65535).nullable().optional(),
+    username: optionalText(180),
+    // Obrigatória apenas quando a credencial não reaproveita uma senha padrão do cliente
+    secret: z.string().min(1, "Senha é obrigatória").optional(),
+    notes: optionalText(4000),
+    accessPolicy: CredentialAccessPolicySchema.optional(),
+    ownerUserId: z.string().trim().min(1).nullable().optional(),
+    sharedSecretId: z.string().trim().min(1).nullable().optional()
+  })
+  .refine((value) => Boolean(value.secret) || Boolean(value.sharedSecretId), {
+    message: "Informe a senha ou selecione uma senha padrão do cliente",
+    path: ["secret"]
+  });
 
 export const UpdateCredentialSchema = z.object({
   label: z.string().trim().min(1).max(120).optional(),
@@ -85,7 +92,26 @@ export const UpdateCredentialSchema = z.object({
   secret: z.string().min(1).optional(),
   notes: optionalText(4000),
   accessPolicy: CredentialAccessPolicySchema.optional(),
-  ownerUserId: z.string().trim().min(1).nullable().optional()
+  ownerUserId: z.string().trim().min(1).nullable().optional(),
+  // Nulo remove o vínculo e mantém a senha própria da credencial
+  sharedSecretId: z.string().trim().min(1).nullable().optional()
+});
+
+// ============================================================
+// Senhas padrão por cliente (compartilhadas entre equipamentos)
+// ============================================================
+export const CreateSharedSecretSchema = z.object({
+  solicitanteId: z.string().trim().min(1, "Cliente é obrigatório"),
+  label: z.string().trim().min(1, "Rótulo é obrigatório").max(120),
+  secret: z.string().min(1, "Senha é obrigatória"),
+  notes: optionalText(2000)
+});
+
+export const UpdateSharedSecretSchema = z.object({
+  label: z.string().trim().min(1).max(120).optional(),
+  // Ao alterar, todos os equipamentos vinculados passam a usar a nova senha
+  secret: z.string().min(1).optional(),
+  notes: optionalText(2000)
 });
 
 // ============================================================
@@ -122,6 +148,8 @@ export type CreateEquipmentInput = z.infer<typeof CreateEquipmentSchema>;
 export type UpdateEquipmentInput = z.infer<typeof UpdateEquipmentSchema>;
 export type CreateCredentialInput = z.infer<typeof CreateCredentialSchema>;
 export type UpdateCredentialInput = z.infer<typeof UpdateCredentialSchema>;
+export type CreateSharedSecretInput = z.infer<typeof CreateSharedSecretSchema>;
+export type UpdateSharedSecretInput = z.infer<typeof UpdateSharedSecretSchema>;
 export type CreateGrantInput = z.infer<typeof CreateGrantSchema>;
 export type CreateUserGroupInput = z.infer<typeof CreateUserGroupSchema>;
 export type UpdateUserGroupInput = z.infer<typeof UpdateUserGroupSchema>;

@@ -257,6 +257,7 @@ export type SolicitanteWhereInput = {
   funcionarios?: Prisma.FuncionarioListRelationFilter
   tickets?: Prisma.TicketListRelationFilter
   equipment?: Prisma.EquipmentListRelationFilter
+  sharedSecrets?: Prisma.ClientSharedSecretListRelationFilter
 }
 
 export type SolicitanteOrderByWithRelationInput = {
@@ -277,6 +278,7 @@ export type SolicitanteOrderByWithRelationInput = {
   funcionarios?: Prisma.FuncionarioOrderByRelationAggregateInput
   tickets?: Prisma.TicketOrderByRelationAggregateInput
   equipment?: Prisma.EquipmentOrderByRelationAggregateInput
+  sharedSecrets?: Prisma.ClientSharedSecretOrderByRelationAggregateInput
 }
 
 export type SolicitanteWhereUniqueInput = Prisma.AtLeast<{
@@ -300,6 +302,7 @@ export type SolicitanteWhereUniqueInput = Prisma.AtLeast<{
   funcionarios?: Prisma.FuncionarioListRelationFilter
   tickets?: Prisma.TicketListRelationFilter
   equipment?: Prisma.EquipmentListRelationFilter
+  sharedSecrets?: Prisma.ClientSharedSecretListRelationFilter
 }, "id" | "cnpj">
 
 export type SolicitanteOrderByWithAggregationInput = {
@@ -360,6 +363,7 @@ export type SolicitanteCreateInput = {
   funcionarios?: Prisma.FuncionarioCreateNestedManyWithoutSolicitanteInput
   tickets?: Prisma.TicketCreateNestedManyWithoutSolicitanteInput
   equipment?: Prisma.EquipmentCreateNestedManyWithoutSolicitanteInput
+  sharedSecrets?: Prisma.ClientSharedSecretCreateNestedManyWithoutSolicitanteInput
 }
 
 export type SolicitanteUncheckedCreateInput = {
@@ -380,6 +384,7 @@ export type SolicitanteUncheckedCreateInput = {
   funcionarios?: Prisma.FuncionarioUncheckedCreateNestedManyWithoutSolicitanteInput
   tickets?: Prisma.TicketUncheckedCreateNestedManyWithoutSolicitanteInput
   equipment?: Prisma.EquipmentUncheckedCreateNestedManyWithoutSolicitanteInput
+  sharedSecrets?: Prisma.ClientSharedSecretUncheckedCreateNestedManyWithoutSolicitanteInput
 }
 
 export type SolicitanteUpdateInput = {
@@ -400,6 +405,7 @@ export type SolicitanteUpdateInput = {
   funcionarios?: Prisma.FuncionarioUpdateManyWithoutSolicitanteNestedInput
   tickets?: Prisma.TicketUpdateManyWithoutSolicitanteNestedInput
   equipment?: Prisma.EquipmentUpdateManyWithoutSolicitanteNestedInput
+  sharedSecrets?: Prisma.ClientSharedSecretUpdateManyWithoutSolicitanteNestedInput
 }
 
 export type SolicitanteUncheckedUpdateInput = {
@@ -420,6 +426,7 @@ export type SolicitanteUncheckedUpdateInput = {
   funcionarios?: Prisma.FuncionarioUncheckedUpdateManyWithoutSolicitanteNestedInput
   tickets?: Prisma.TicketUncheckedUpdateManyWithoutSolicitanteNestedInput
   equipment?: Prisma.EquipmentUncheckedUpdateManyWithoutSolicitanteNestedInput
+  sharedSecrets?: Prisma.ClientSharedSecretUncheckedUpdateManyWithoutSolicitanteNestedInput
 }
 
 export type SolicitanteCreateManyInput = {
@@ -588,6 +595,20 @@ export type SolicitanteUpdateOneWithoutEquipmentNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.SolicitanteUpdateToOneWithWhereWithoutEquipmentInput, Prisma.SolicitanteUpdateWithoutEquipmentInput>, Prisma.SolicitanteUncheckedUpdateWithoutEquipmentInput>
 }
 
+export type SolicitanteCreateNestedOneWithoutSharedSecretsInput = {
+  create?: Prisma.XOR<Prisma.SolicitanteCreateWithoutSharedSecretsInput, Prisma.SolicitanteUncheckedCreateWithoutSharedSecretsInput>
+  connectOrCreate?: Prisma.SolicitanteCreateOrConnectWithoutSharedSecretsInput
+  connect?: Prisma.SolicitanteWhereUniqueInput
+}
+
+export type SolicitanteUpdateOneRequiredWithoutSharedSecretsNestedInput = {
+  create?: Prisma.XOR<Prisma.SolicitanteCreateWithoutSharedSecretsInput, Prisma.SolicitanteUncheckedCreateWithoutSharedSecretsInput>
+  connectOrCreate?: Prisma.SolicitanteCreateOrConnectWithoutSharedSecretsInput
+  upsert?: Prisma.SolicitanteUpsertWithoutSharedSecretsInput
+  connect?: Prisma.SolicitanteWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.SolicitanteUpdateToOneWithWhereWithoutSharedSecretsInput, Prisma.SolicitanteUpdateWithoutSharedSecretsInput>, Prisma.SolicitanteUncheckedUpdateWithoutSharedSecretsInput>
+}
+
 export type SolicitanteCreateWithoutFuncionariosInput = {
   id?: string
   razao_social: string
@@ -605,6 +626,7 @@ export type SolicitanteCreateWithoutFuncionariosInput = {
   deleted_at?: Date | string | null
   tickets?: Prisma.TicketCreateNestedManyWithoutSolicitanteInput
   equipment?: Prisma.EquipmentCreateNestedManyWithoutSolicitanteInput
+  sharedSecrets?: Prisma.ClientSharedSecretCreateNestedManyWithoutSolicitanteInput
 }
 
 export type SolicitanteUncheckedCreateWithoutFuncionariosInput = {
@@ -624,6 +646,7 @@ export type SolicitanteUncheckedCreateWithoutFuncionariosInput = {
   deleted_at?: Date | string | null
   tickets?: Prisma.TicketUncheckedCreateNestedManyWithoutSolicitanteInput
   equipment?: Prisma.EquipmentUncheckedCreateNestedManyWithoutSolicitanteInput
+  sharedSecrets?: Prisma.ClientSharedSecretUncheckedCreateNestedManyWithoutSolicitanteInput
 }
 
 export type SolicitanteCreateOrConnectWithoutFuncionariosInput = {
@@ -659,6 +682,7 @@ export type SolicitanteUpdateWithoutFuncionariosInput = {
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tickets?: Prisma.TicketUpdateManyWithoutSolicitanteNestedInput
   equipment?: Prisma.EquipmentUpdateManyWithoutSolicitanteNestedInput
+  sharedSecrets?: Prisma.ClientSharedSecretUpdateManyWithoutSolicitanteNestedInput
 }
 
 export type SolicitanteUncheckedUpdateWithoutFuncionariosInput = {
@@ -678,6 +702,7 @@ export type SolicitanteUncheckedUpdateWithoutFuncionariosInput = {
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tickets?: Prisma.TicketUncheckedUpdateManyWithoutSolicitanteNestedInput
   equipment?: Prisma.EquipmentUncheckedUpdateManyWithoutSolicitanteNestedInput
+  sharedSecrets?: Prisma.ClientSharedSecretUncheckedUpdateManyWithoutSolicitanteNestedInput
 }
 
 export type SolicitanteCreateWithoutTicketsInput = {
@@ -697,6 +722,7 @@ export type SolicitanteCreateWithoutTicketsInput = {
   deleted_at?: Date | string | null
   funcionarios?: Prisma.FuncionarioCreateNestedManyWithoutSolicitanteInput
   equipment?: Prisma.EquipmentCreateNestedManyWithoutSolicitanteInput
+  sharedSecrets?: Prisma.ClientSharedSecretCreateNestedManyWithoutSolicitanteInput
 }
 
 export type SolicitanteUncheckedCreateWithoutTicketsInput = {
@@ -716,6 +742,7 @@ export type SolicitanteUncheckedCreateWithoutTicketsInput = {
   deleted_at?: Date | string | null
   funcionarios?: Prisma.FuncionarioUncheckedCreateNestedManyWithoutSolicitanteInput
   equipment?: Prisma.EquipmentUncheckedCreateNestedManyWithoutSolicitanteInput
+  sharedSecrets?: Prisma.ClientSharedSecretUncheckedCreateNestedManyWithoutSolicitanteInput
 }
 
 export type SolicitanteCreateOrConnectWithoutTicketsInput = {
@@ -751,6 +778,7 @@ export type SolicitanteUpdateWithoutTicketsInput = {
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   funcionarios?: Prisma.FuncionarioUpdateManyWithoutSolicitanteNestedInput
   equipment?: Prisma.EquipmentUpdateManyWithoutSolicitanteNestedInput
+  sharedSecrets?: Prisma.ClientSharedSecretUpdateManyWithoutSolicitanteNestedInput
 }
 
 export type SolicitanteUncheckedUpdateWithoutTicketsInput = {
@@ -770,6 +798,7 @@ export type SolicitanteUncheckedUpdateWithoutTicketsInput = {
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   funcionarios?: Prisma.FuncionarioUncheckedUpdateManyWithoutSolicitanteNestedInput
   equipment?: Prisma.EquipmentUncheckedUpdateManyWithoutSolicitanteNestedInput
+  sharedSecrets?: Prisma.ClientSharedSecretUncheckedUpdateManyWithoutSolicitanteNestedInput
 }
 
 export type SolicitanteCreateWithoutEquipmentInput = {
@@ -789,6 +818,7 @@ export type SolicitanteCreateWithoutEquipmentInput = {
   deleted_at?: Date | string | null
   funcionarios?: Prisma.FuncionarioCreateNestedManyWithoutSolicitanteInput
   tickets?: Prisma.TicketCreateNestedManyWithoutSolicitanteInput
+  sharedSecrets?: Prisma.ClientSharedSecretCreateNestedManyWithoutSolicitanteInput
 }
 
 export type SolicitanteUncheckedCreateWithoutEquipmentInput = {
@@ -808,6 +838,7 @@ export type SolicitanteUncheckedCreateWithoutEquipmentInput = {
   deleted_at?: Date | string | null
   funcionarios?: Prisma.FuncionarioUncheckedCreateNestedManyWithoutSolicitanteInput
   tickets?: Prisma.TicketUncheckedCreateNestedManyWithoutSolicitanteInput
+  sharedSecrets?: Prisma.ClientSharedSecretUncheckedCreateNestedManyWithoutSolicitanteInput
 }
 
 export type SolicitanteCreateOrConnectWithoutEquipmentInput = {
@@ -843,6 +874,7 @@ export type SolicitanteUpdateWithoutEquipmentInput = {
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   funcionarios?: Prisma.FuncionarioUpdateManyWithoutSolicitanteNestedInput
   tickets?: Prisma.TicketUpdateManyWithoutSolicitanteNestedInput
+  sharedSecrets?: Prisma.ClientSharedSecretUpdateManyWithoutSolicitanteNestedInput
 }
 
 export type SolicitanteUncheckedUpdateWithoutEquipmentInput = {
@@ -862,6 +894,103 @@ export type SolicitanteUncheckedUpdateWithoutEquipmentInput = {
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   funcionarios?: Prisma.FuncionarioUncheckedUpdateManyWithoutSolicitanteNestedInput
   tickets?: Prisma.TicketUncheckedUpdateManyWithoutSolicitanteNestedInput
+  sharedSecrets?: Prisma.ClientSharedSecretUncheckedUpdateManyWithoutSolicitanteNestedInput
+}
+
+export type SolicitanteCreateWithoutSharedSecretsInput = {
+  id?: string
+  razao_social: string
+  nome_fantasia: string
+  cnpj: string
+  email: string
+  telefone: string
+  endereco_completo: string
+  data_cadastro?: Date | string
+  status?: boolean
+  created_at?: Date | string
+  updated_at?: Date | string
+  created_by?: string | null
+  updated_by?: string | null
+  deleted_at?: Date | string | null
+  funcionarios?: Prisma.FuncionarioCreateNestedManyWithoutSolicitanteInput
+  tickets?: Prisma.TicketCreateNestedManyWithoutSolicitanteInput
+  equipment?: Prisma.EquipmentCreateNestedManyWithoutSolicitanteInput
+}
+
+export type SolicitanteUncheckedCreateWithoutSharedSecretsInput = {
+  id?: string
+  razao_social: string
+  nome_fantasia: string
+  cnpj: string
+  email: string
+  telefone: string
+  endereco_completo: string
+  data_cadastro?: Date | string
+  status?: boolean
+  created_at?: Date | string
+  updated_at?: Date | string
+  created_by?: string | null
+  updated_by?: string | null
+  deleted_at?: Date | string | null
+  funcionarios?: Prisma.FuncionarioUncheckedCreateNestedManyWithoutSolicitanteInput
+  tickets?: Prisma.TicketUncheckedCreateNestedManyWithoutSolicitanteInput
+  equipment?: Prisma.EquipmentUncheckedCreateNestedManyWithoutSolicitanteInput
+}
+
+export type SolicitanteCreateOrConnectWithoutSharedSecretsInput = {
+  where: Prisma.SolicitanteWhereUniqueInput
+  create: Prisma.XOR<Prisma.SolicitanteCreateWithoutSharedSecretsInput, Prisma.SolicitanteUncheckedCreateWithoutSharedSecretsInput>
+}
+
+export type SolicitanteUpsertWithoutSharedSecretsInput = {
+  update: Prisma.XOR<Prisma.SolicitanteUpdateWithoutSharedSecretsInput, Prisma.SolicitanteUncheckedUpdateWithoutSharedSecretsInput>
+  create: Prisma.XOR<Prisma.SolicitanteCreateWithoutSharedSecretsInput, Prisma.SolicitanteUncheckedCreateWithoutSharedSecretsInput>
+  where?: Prisma.SolicitanteWhereInput
+}
+
+export type SolicitanteUpdateToOneWithWhereWithoutSharedSecretsInput = {
+  where?: Prisma.SolicitanteWhereInput
+  data: Prisma.XOR<Prisma.SolicitanteUpdateWithoutSharedSecretsInput, Prisma.SolicitanteUncheckedUpdateWithoutSharedSecretsInput>
+}
+
+export type SolicitanteUpdateWithoutSharedSecretsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  razao_social?: Prisma.StringFieldUpdateOperationsInput | string
+  nome_fantasia?: Prisma.StringFieldUpdateOperationsInput | string
+  cnpj?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  telefone?: Prisma.StringFieldUpdateOperationsInput | string
+  endereco_completo?: Prisma.StringFieldUpdateOperationsInput | string
+  data_cadastro?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  updated_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  funcionarios?: Prisma.FuncionarioUpdateManyWithoutSolicitanteNestedInput
+  tickets?: Prisma.TicketUpdateManyWithoutSolicitanteNestedInput
+  equipment?: Prisma.EquipmentUpdateManyWithoutSolicitanteNestedInput
+}
+
+export type SolicitanteUncheckedUpdateWithoutSharedSecretsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  razao_social?: Prisma.StringFieldUpdateOperationsInput | string
+  nome_fantasia?: Prisma.StringFieldUpdateOperationsInput | string
+  cnpj?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  telefone?: Prisma.StringFieldUpdateOperationsInput | string
+  endereco_completo?: Prisma.StringFieldUpdateOperationsInput | string
+  data_cadastro?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  updated_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  funcionarios?: Prisma.FuncionarioUncheckedUpdateManyWithoutSolicitanteNestedInput
+  tickets?: Prisma.TicketUncheckedUpdateManyWithoutSolicitanteNestedInput
+  equipment?: Prisma.EquipmentUncheckedUpdateManyWithoutSolicitanteNestedInput
 }
 
 
@@ -873,12 +1002,14 @@ export type SolicitanteCountOutputType = {
   funcionarios: number
   tickets: number
   equipment: number
+  sharedSecrets: number
 }
 
 export type SolicitanteCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   funcionarios?: boolean | SolicitanteCountOutputTypeCountFuncionariosArgs
   tickets?: boolean | SolicitanteCountOutputTypeCountTicketsArgs
   equipment?: boolean | SolicitanteCountOutputTypeCountEquipmentArgs
+  sharedSecrets?: boolean | SolicitanteCountOutputTypeCountSharedSecretsArgs
 }
 
 /**
@@ -912,6 +1043,13 @@ export type SolicitanteCountOutputTypeCountEquipmentArgs<ExtArgs extends runtime
   where?: Prisma.EquipmentWhereInput
 }
 
+/**
+ * SolicitanteCountOutputType without action
+ */
+export type SolicitanteCountOutputTypeCountSharedSecretsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ClientSharedSecretWhereInput
+}
+
 
 export type SolicitanteSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -931,6 +1069,7 @@ export type SolicitanteSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   funcionarios?: boolean | Prisma.Solicitante$funcionariosArgs<ExtArgs>
   tickets?: boolean | Prisma.Solicitante$ticketsArgs<ExtArgs>
   equipment?: boolean | Prisma.Solicitante$equipmentArgs<ExtArgs>
+  sharedSecrets?: boolean | Prisma.Solicitante$sharedSecretsArgs<ExtArgs>
   _count?: boolean | Prisma.SolicitanteCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["solicitante"]>
 
@@ -990,6 +1129,7 @@ export type SolicitanteInclude<ExtArgs extends runtime.Types.Extensions.Internal
   funcionarios?: boolean | Prisma.Solicitante$funcionariosArgs<ExtArgs>
   tickets?: boolean | Prisma.Solicitante$ticketsArgs<ExtArgs>
   equipment?: boolean | Prisma.Solicitante$equipmentArgs<ExtArgs>
+  sharedSecrets?: boolean | Prisma.Solicitante$sharedSecretsArgs<ExtArgs>
   _count?: boolean | Prisma.SolicitanteCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type SolicitanteIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1001,6 +1141,7 @@ export type $SolicitantePayload<ExtArgs extends runtime.Types.Extensions.Interna
     funcionarios: Prisma.$FuncionarioPayload<ExtArgs>[]
     tickets: Prisma.$TicketPayload<ExtArgs>[]
     equipment: Prisma.$EquipmentPayload<ExtArgs>[]
+    sharedSecrets: Prisma.$ClientSharedSecretPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1414,6 +1555,7 @@ export interface Prisma__SolicitanteClient<T, Null = never, ExtArgs extends runt
   funcionarios<T extends Prisma.Solicitante$funcionariosArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Solicitante$funcionariosArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FuncionarioPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   tickets<T extends Prisma.Solicitante$ticketsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Solicitante$ticketsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TicketPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   equipment<T extends Prisma.Solicitante$equipmentArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Solicitante$equipmentArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EquipmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  sharedSecrets<T extends Prisma.Solicitante$sharedSecretsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Solicitante$sharedSecretsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ClientSharedSecretPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1919,6 +2061,30 @@ export type Solicitante$equipmentArgs<ExtArgs extends runtime.Types.Extensions.I
   take?: number
   skip?: number
   distinct?: Prisma.EquipmentScalarFieldEnum | Prisma.EquipmentScalarFieldEnum[]
+}
+
+/**
+ * Solicitante.sharedSecrets
+ */
+export type Solicitante$sharedSecretsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ClientSharedSecret
+   */
+  select?: Prisma.ClientSharedSecretSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ClientSharedSecret
+   */
+  omit?: Prisma.ClientSharedSecretOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ClientSharedSecretInclude<ExtArgs> | null
+  where?: Prisma.ClientSharedSecretWhereInput
+  orderBy?: Prisma.ClientSharedSecretOrderByWithRelationInput | Prisma.ClientSharedSecretOrderByWithRelationInput[]
+  cursor?: Prisma.ClientSharedSecretWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ClientSharedSecretScalarFieldEnum | Prisma.ClientSharedSecretScalarFieldEnum[]
 }
 
 /**

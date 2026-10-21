@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { api } from "@/services/api";
 import { useToast } from "@/context/ToastContext";
-import { Credential, CredentialGrant, Equipment, UserGroup } from "@/types/inventory";
+import { Credential, CredentialGrant, Equipment, SharedSecret, UserGroup } from "@/types/inventory";
 
 // Filtros aceitos pela listagem de equipamentos
 export type InventoryFilters = {
@@ -275,6 +275,88 @@ export function useCredentialGrants(credentialId: string | null) {
   );
 
   return { grants, loading, reload: load, addGrant, removeGrant };
+}
+
+/**
+ * Hook de gestão das senhas padrão compartilhadas entre os equipamentos de um cliente.
+ */
+export function useSharedSecrets(solicitanteId: string | null) {
+  const [sharedSecrets, setSharedSecrets] = useState<SharedSecret[]>([]);
+  const [loading, setLoading] = useState(false);
+  const { showToast } = useToast();
+
+  const load = useCallback(async () => {
+    if (!solicitanteId) {
+      setSharedSecrets([]);
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await api.inventory.sharedSecrets.list(solicitanteId);
+      setSharedSecrets(res.data);
+    } catch (err: unknown) {
+      showToast(err instanceof Error ? err.message : "Falha ao carregar senhas padrão", "error");
+      setSharedSecrets([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [solicitanteId, showToast]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  // Cria uma senha padrão para o cliente
+  const create = useCallback(
+    async (payload: Record<string, unknown>) => {
+      if (!solicitanteId) return false;
+      try {
+        await api.inventory.sharedSecrets.create({ ...payload, solicitanteId });
+        showToast("Senha padrão cadastrada.", "success");
+        await load();
+        return true;
+      } catch (err: unknown) {
+        showToast(err instanceof Error ? err.message : "Falha ao cadastrar senha padrão", "error");
+        return false;
+      }
+    },
+    [solicitanteId, load, showToast]
+  );
+
+  // Atualiza a senha padrão; a troca de senha reflete em todos os equipamentos vinculados
+  const update = useCallback(
+    async (id: string, payload: Record<string, unknown>) => {
+      try {
+        await api.inventory.sharedSecrets.update(id, payload);
+        showToast("Senha padrão atualizada.", "success");
+        await load();
+        return true;
+      } catch (err: unknown) {
+        showToast(err instanceof Error ? err.message : "Falha ao atualizar senha padrão", "error");
+        return false;
+      }
+    },
+    [load, showToast]
+  );
+
+  // Remove (exclusão lógica) uma senha padrão sem uso
+  const remove = useCallback(
+    async (id: string) => {
+      if (typeof window !== "undefined" && !window.confirm("Deseja realmente excluir esta senha padrão?")) return false;
+      try {
+        await api.inventory.sharedSecrets.remove(id);
+        showToast("Senha padrão excluída.", "success");
+        await load();
+        return true;
+      } catch (err: unknown) {
+        showToast(err instanceof Error ? err.message : "Falha ao excluir senha padrão", "error");
+        return false;
+      }
+    },
+    [load, showToast]
+  );
+
+  return { sharedSecrets, loading, reload: load, create, update, remove };
 }
 
 /**

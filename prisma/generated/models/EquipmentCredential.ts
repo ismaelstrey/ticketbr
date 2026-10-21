@@ -42,6 +42,7 @@ export type EquipmentCredentialMinAggregateOutputType = {
   port: number | null
   username: string | null
   notes: string | null
+  sharedSecretId: string | null
   accessPolicy: $Enums.CredentialAccessPolicy | null
   ownerUserId: string | null
   lastRotatedAt: Date | null
@@ -60,6 +61,7 @@ export type EquipmentCredentialMaxAggregateOutputType = {
   port: number | null
   username: string | null
   notes: string | null
+  sharedSecretId: string | null
   accessPolicy: $Enums.CredentialAccessPolicy | null
   ownerUserId: string | null
   lastRotatedAt: Date | null
@@ -79,6 +81,7 @@ export type EquipmentCredentialCountAggregateOutputType = {
   username: number
   secret: number
   notes: number
+  sharedSecretId: number
   accessPolicy: number
   ownerUserId: number
   lastRotatedAt: number
@@ -107,6 +110,7 @@ export type EquipmentCredentialMinAggregateInputType = {
   port?: true
   username?: true
   notes?: true
+  sharedSecretId?: true
   accessPolicy?: true
   ownerUserId?: true
   lastRotatedAt?: true
@@ -125,6 +129,7 @@ export type EquipmentCredentialMaxAggregateInputType = {
   port?: true
   username?: true
   notes?: true
+  sharedSecretId?: true
   accessPolicy?: true
   ownerUserId?: true
   lastRotatedAt?: true
@@ -144,6 +149,7 @@ export type EquipmentCredentialCountAggregateInputType = {
   username?: true
   secret?: true
   notes?: true
+  sharedSecretId?: true
   accessPolicy?: true
   ownerUserId?: true
   lastRotatedAt?: true
@@ -248,8 +254,9 @@ export type EquipmentCredentialGroupByOutputType = {
   protocol: $Enums.CredentialProtocol
   port: number | null
   username: string | null
-  secret: runtime.JsonValue
+  secret: runtime.JsonValue | null
   notes: string | null
+  sharedSecretId: string | null
   accessPolicy: $Enums.CredentialAccessPolicy
   ownerUserId: string | null
   lastRotatedAt: Date | null
@@ -290,8 +297,9 @@ export type EquipmentCredentialWhereInput = {
   protocol?: Prisma.EnumCredentialProtocolFilter<"EquipmentCredential"> | $Enums.CredentialProtocol
   port?: Prisma.IntNullableFilter<"EquipmentCredential"> | number | null
   username?: Prisma.StringNullableFilter<"EquipmentCredential"> | string | null
-  secret?: Prisma.JsonFilter<"EquipmentCredential">
+  secret?: Prisma.JsonNullableFilter<"EquipmentCredential">
   notes?: Prisma.StringNullableFilter<"EquipmentCredential"> | string | null
+  sharedSecretId?: Prisma.StringNullableFilter<"EquipmentCredential"> | string | null
   accessPolicy?: Prisma.EnumCredentialAccessPolicyFilter<"EquipmentCredential"> | $Enums.CredentialAccessPolicy
   ownerUserId?: Prisma.StringNullableFilter<"EquipmentCredential"> | string | null
   lastRotatedAt?: Prisma.DateTimeNullableFilter<"EquipmentCredential"> | Date | string | null
@@ -301,6 +309,7 @@ export type EquipmentCredentialWhereInput = {
   updated_by?: Prisma.StringNullableFilter<"EquipmentCredential"> | string | null
   deleted_at?: Prisma.DateTimeNullableFilter<"EquipmentCredential"> | Date | string | null
   equipment?: Prisma.XOR<Prisma.EquipmentNullableScalarRelationFilter, Prisma.EquipmentWhereInput> | null
+  sharedSecret?: Prisma.XOR<Prisma.ClientSharedSecretNullableScalarRelationFilter, Prisma.ClientSharedSecretWhereInput> | null
   owner?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   grants?: Prisma.CredentialAccessGrantListRelationFilter
 }
@@ -312,8 +321,9 @@ export type EquipmentCredentialOrderByWithRelationInput = {
   protocol?: Prisma.SortOrder
   port?: Prisma.SortOrderInput | Prisma.SortOrder
   username?: Prisma.SortOrderInput | Prisma.SortOrder
-  secret?: Prisma.SortOrder
+  secret?: Prisma.SortOrderInput | Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
+  sharedSecretId?: Prisma.SortOrderInput | Prisma.SortOrder
   accessPolicy?: Prisma.SortOrder
   ownerUserId?: Prisma.SortOrderInput | Prisma.SortOrder
   lastRotatedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -323,6 +333,7 @@ export type EquipmentCredentialOrderByWithRelationInput = {
   updated_by?: Prisma.SortOrderInput | Prisma.SortOrder
   deleted_at?: Prisma.SortOrderInput | Prisma.SortOrder
   equipment?: Prisma.EquipmentOrderByWithRelationInput
+  sharedSecret?: Prisma.ClientSharedSecretOrderByWithRelationInput
   owner?: Prisma.UserOrderByWithRelationInput
   grants?: Prisma.CredentialAccessGrantOrderByRelationAggregateInput
 }
@@ -337,8 +348,9 @@ export type EquipmentCredentialWhereUniqueInput = Prisma.AtLeast<{
   protocol?: Prisma.EnumCredentialProtocolFilter<"EquipmentCredential"> | $Enums.CredentialProtocol
   port?: Prisma.IntNullableFilter<"EquipmentCredential"> | number | null
   username?: Prisma.StringNullableFilter<"EquipmentCredential"> | string | null
-  secret?: Prisma.JsonFilter<"EquipmentCredential">
+  secret?: Prisma.JsonNullableFilter<"EquipmentCredential">
   notes?: Prisma.StringNullableFilter<"EquipmentCredential"> | string | null
+  sharedSecretId?: Prisma.StringNullableFilter<"EquipmentCredential"> | string | null
   accessPolicy?: Prisma.EnumCredentialAccessPolicyFilter<"EquipmentCredential"> | $Enums.CredentialAccessPolicy
   ownerUserId?: Prisma.StringNullableFilter<"EquipmentCredential"> | string | null
   lastRotatedAt?: Prisma.DateTimeNullableFilter<"EquipmentCredential"> | Date | string | null
@@ -348,6 +360,7 @@ export type EquipmentCredentialWhereUniqueInput = Prisma.AtLeast<{
   updated_by?: Prisma.StringNullableFilter<"EquipmentCredential"> | string | null
   deleted_at?: Prisma.DateTimeNullableFilter<"EquipmentCredential"> | Date | string | null
   equipment?: Prisma.XOR<Prisma.EquipmentNullableScalarRelationFilter, Prisma.EquipmentWhereInput> | null
+  sharedSecret?: Prisma.XOR<Prisma.ClientSharedSecretNullableScalarRelationFilter, Prisma.ClientSharedSecretWhereInput> | null
   owner?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   grants?: Prisma.CredentialAccessGrantListRelationFilter
 }, "id">
@@ -359,8 +372,9 @@ export type EquipmentCredentialOrderByWithAggregationInput = {
   protocol?: Prisma.SortOrder
   port?: Prisma.SortOrderInput | Prisma.SortOrder
   username?: Prisma.SortOrderInput | Prisma.SortOrder
-  secret?: Prisma.SortOrder
+  secret?: Prisma.SortOrderInput | Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
+  sharedSecretId?: Prisma.SortOrderInput | Prisma.SortOrder
   accessPolicy?: Prisma.SortOrder
   ownerUserId?: Prisma.SortOrderInput | Prisma.SortOrder
   lastRotatedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -386,8 +400,9 @@ export type EquipmentCredentialScalarWhereWithAggregatesInput = {
   protocol?: Prisma.EnumCredentialProtocolWithAggregatesFilter<"EquipmentCredential"> | $Enums.CredentialProtocol
   port?: Prisma.IntNullableWithAggregatesFilter<"EquipmentCredential"> | number | null
   username?: Prisma.StringNullableWithAggregatesFilter<"EquipmentCredential"> | string | null
-  secret?: Prisma.JsonWithAggregatesFilter<"EquipmentCredential">
+  secret?: Prisma.JsonNullableWithAggregatesFilter<"EquipmentCredential">
   notes?: Prisma.StringNullableWithAggregatesFilter<"EquipmentCredential"> | string | null
+  sharedSecretId?: Prisma.StringNullableWithAggregatesFilter<"EquipmentCredential"> | string | null
   accessPolicy?: Prisma.EnumCredentialAccessPolicyWithAggregatesFilter<"EquipmentCredential"> | $Enums.CredentialAccessPolicy
   ownerUserId?: Prisma.StringNullableWithAggregatesFilter<"EquipmentCredential"> | string | null
   lastRotatedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"EquipmentCredential"> | Date | string | null
@@ -404,7 +419,7 @@ export type EquipmentCredentialCreateInput = {
   protocol?: $Enums.CredentialProtocol
   port?: number | null
   username?: string | null
-  secret: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  secret?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   notes?: string | null
   accessPolicy?: $Enums.CredentialAccessPolicy
   lastRotatedAt?: Date | string | null
@@ -414,6 +429,7 @@ export type EquipmentCredentialCreateInput = {
   updated_by?: string | null
   deleted_at?: Date | string | null
   equipment?: Prisma.EquipmentCreateNestedOneWithoutCredentialsInput
+  sharedSecret?: Prisma.ClientSharedSecretCreateNestedOneWithoutCredentialsInput
   owner?: Prisma.UserCreateNestedOneWithoutOwnedCredentialsInput
   grants?: Prisma.CredentialAccessGrantCreateNestedManyWithoutCredentialInput
 }
@@ -425,8 +441,9 @@ export type EquipmentCredentialUncheckedCreateInput = {
   protocol?: $Enums.CredentialProtocol
   port?: number | null
   username?: string | null
-  secret: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  secret?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   notes?: string | null
+  sharedSecretId?: string | null
   accessPolicy?: $Enums.CredentialAccessPolicy
   ownerUserId?: string | null
   lastRotatedAt?: Date | string | null
@@ -444,7 +461,7 @@ export type EquipmentCredentialUpdateInput = {
   protocol?: Prisma.EnumCredentialProtocolFieldUpdateOperationsInput | $Enums.CredentialProtocol
   port?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  secret?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  secret?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accessPolicy?: Prisma.EnumCredentialAccessPolicyFieldUpdateOperationsInput | $Enums.CredentialAccessPolicy
   lastRotatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -454,6 +471,7 @@ export type EquipmentCredentialUpdateInput = {
   updated_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   equipment?: Prisma.EquipmentUpdateOneWithoutCredentialsNestedInput
+  sharedSecret?: Prisma.ClientSharedSecretUpdateOneWithoutCredentialsNestedInput
   owner?: Prisma.UserUpdateOneWithoutOwnedCredentialsNestedInput
   grants?: Prisma.CredentialAccessGrantUpdateManyWithoutCredentialNestedInput
 }
@@ -465,8 +483,9 @@ export type EquipmentCredentialUncheckedUpdateInput = {
   protocol?: Prisma.EnumCredentialProtocolFieldUpdateOperationsInput | $Enums.CredentialProtocol
   port?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  secret?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  secret?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sharedSecretId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accessPolicy?: Prisma.EnumCredentialAccessPolicyFieldUpdateOperationsInput | $Enums.CredentialAccessPolicy
   ownerUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastRotatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -485,8 +504,9 @@ export type EquipmentCredentialCreateManyInput = {
   protocol?: $Enums.CredentialProtocol
   port?: number | null
   username?: string | null
-  secret: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  secret?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   notes?: string | null
+  sharedSecretId?: string | null
   accessPolicy?: $Enums.CredentialAccessPolicy
   ownerUserId?: string | null
   lastRotatedAt?: Date | string | null
@@ -503,7 +523,7 @@ export type EquipmentCredentialUpdateManyMutationInput = {
   protocol?: Prisma.EnumCredentialProtocolFieldUpdateOperationsInput | $Enums.CredentialProtocol
   port?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  secret?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  secret?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accessPolicy?: Prisma.EnumCredentialAccessPolicyFieldUpdateOperationsInput | $Enums.CredentialAccessPolicy
   lastRotatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -521,8 +541,9 @@ export type EquipmentCredentialUncheckedUpdateManyInput = {
   protocol?: Prisma.EnumCredentialProtocolFieldUpdateOperationsInput | $Enums.CredentialProtocol
   port?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  secret?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  secret?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sharedSecretId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accessPolicy?: Prisma.EnumCredentialAccessPolicyFieldUpdateOperationsInput | $Enums.CredentialAccessPolicy
   ownerUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastRotatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -552,6 +573,7 @@ export type EquipmentCredentialCountOrderByAggregateInput = {
   username?: Prisma.SortOrder
   secret?: Prisma.SortOrder
   notes?: Prisma.SortOrder
+  sharedSecretId?: Prisma.SortOrder
   accessPolicy?: Prisma.SortOrder
   ownerUserId?: Prisma.SortOrder
   lastRotatedAt?: Prisma.SortOrder
@@ -574,6 +596,7 @@ export type EquipmentCredentialMaxOrderByAggregateInput = {
   port?: Prisma.SortOrder
   username?: Prisma.SortOrder
   notes?: Prisma.SortOrder
+  sharedSecretId?: Prisma.SortOrder
   accessPolicy?: Prisma.SortOrder
   ownerUserId?: Prisma.SortOrder
   lastRotatedAt?: Prisma.SortOrder
@@ -592,6 +615,7 @@ export type EquipmentCredentialMinOrderByAggregateInput = {
   port?: Prisma.SortOrder
   username?: Prisma.SortOrder
   notes?: Prisma.SortOrder
+  sharedSecretId?: Prisma.SortOrder
   accessPolicy?: Prisma.SortOrder
   ownerUserId?: Prisma.SortOrder
   lastRotatedAt?: Prisma.SortOrder
@@ -703,6 +727,48 @@ export type EnumCredentialAccessPolicyFieldUpdateOperationsInput = {
   set?: $Enums.CredentialAccessPolicy
 }
 
+export type EquipmentCredentialCreateNestedManyWithoutSharedSecretInput = {
+  create?: Prisma.XOR<Prisma.EquipmentCredentialCreateWithoutSharedSecretInput, Prisma.EquipmentCredentialUncheckedCreateWithoutSharedSecretInput> | Prisma.EquipmentCredentialCreateWithoutSharedSecretInput[] | Prisma.EquipmentCredentialUncheckedCreateWithoutSharedSecretInput[]
+  connectOrCreate?: Prisma.EquipmentCredentialCreateOrConnectWithoutSharedSecretInput | Prisma.EquipmentCredentialCreateOrConnectWithoutSharedSecretInput[]
+  createMany?: Prisma.EquipmentCredentialCreateManySharedSecretInputEnvelope
+  connect?: Prisma.EquipmentCredentialWhereUniqueInput | Prisma.EquipmentCredentialWhereUniqueInput[]
+}
+
+export type EquipmentCredentialUncheckedCreateNestedManyWithoutSharedSecretInput = {
+  create?: Prisma.XOR<Prisma.EquipmentCredentialCreateWithoutSharedSecretInput, Prisma.EquipmentCredentialUncheckedCreateWithoutSharedSecretInput> | Prisma.EquipmentCredentialCreateWithoutSharedSecretInput[] | Prisma.EquipmentCredentialUncheckedCreateWithoutSharedSecretInput[]
+  connectOrCreate?: Prisma.EquipmentCredentialCreateOrConnectWithoutSharedSecretInput | Prisma.EquipmentCredentialCreateOrConnectWithoutSharedSecretInput[]
+  createMany?: Prisma.EquipmentCredentialCreateManySharedSecretInputEnvelope
+  connect?: Prisma.EquipmentCredentialWhereUniqueInput | Prisma.EquipmentCredentialWhereUniqueInput[]
+}
+
+export type EquipmentCredentialUpdateManyWithoutSharedSecretNestedInput = {
+  create?: Prisma.XOR<Prisma.EquipmentCredentialCreateWithoutSharedSecretInput, Prisma.EquipmentCredentialUncheckedCreateWithoutSharedSecretInput> | Prisma.EquipmentCredentialCreateWithoutSharedSecretInput[] | Prisma.EquipmentCredentialUncheckedCreateWithoutSharedSecretInput[]
+  connectOrCreate?: Prisma.EquipmentCredentialCreateOrConnectWithoutSharedSecretInput | Prisma.EquipmentCredentialCreateOrConnectWithoutSharedSecretInput[]
+  upsert?: Prisma.EquipmentCredentialUpsertWithWhereUniqueWithoutSharedSecretInput | Prisma.EquipmentCredentialUpsertWithWhereUniqueWithoutSharedSecretInput[]
+  createMany?: Prisma.EquipmentCredentialCreateManySharedSecretInputEnvelope
+  set?: Prisma.EquipmentCredentialWhereUniqueInput | Prisma.EquipmentCredentialWhereUniqueInput[]
+  disconnect?: Prisma.EquipmentCredentialWhereUniqueInput | Prisma.EquipmentCredentialWhereUniqueInput[]
+  delete?: Prisma.EquipmentCredentialWhereUniqueInput | Prisma.EquipmentCredentialWhereUniqueInput[]
+  connect?: Prisma.EquipmentCredentialWhereUniqueInput | Prisma.EquipmentCredentialWhereUniqueInput[]
+  update?: Prisma.EquipmentCredentialUpdateWithWhereUniqueWithoutSharedSecretInput | Prisma.EquipmentCredentialUpdateWithWhereUniqueWithoutSharedSecretInput[]
+  updateMany?: Prisma.EquipmentCredentialUpdateManyWithWhereWithoutSharedSecretInput | Prisma.EquipmentCredentialUpdateManyWithWhereWithoutSharedSecretInput[]
+  deleteMany?: Prisma.EquipmentCredentialScalarWhereInput | Prisma.EquipmentCredentialScalarWhereInput[]
+}
+
+export type EquipmentCredentialUncheckedUpdateManyWithoutSharedSecretNestedInput = {
+  create?: Prisma.XOR<Prisma.EquipmentCredentialCreateWithoutSharedSecretInput, Prisma.EquipmentCredentialUncheckedCreateWithoutSharedSecretInput> | Prisma.EquipmentCredentialCreateWithoutSharedSecretInput[] | Prisma.EquipmentCredentialUncheckedCreateWithoutSharedSecretInput[]
+  connectOrCreate?: Prisma.EquipmentCredentialCreateOrConnectWithoutSharedSecretInput | Prisma.EquipmentCredentialCreateOrConnectWithoutSharedSecretInput[]
+  upsert?: Prisma.EquipmentCredentialUpsertWithWhereUniqueWithoutSharedSecretInput | Prisma.EquipmentCredentialUpsertWithWhereUniqueWithoutSharedSecretInput[]
+  createMany?: Prisma.EquipmentCredentialCreateManySharedSecretInputEnvelope
+  set?: Prisma.EquipmentCredentialWhereUniqueInput | Prisma.EquipmentCredentialWhereUniqueInput[]
+  disconnect?: Prisma.EquipmentCredentialWhereUniqueInput | Prisma.EquipmentCredentialWhereUniqueInput[]
+  delete?: Prisma.EquipmentCredentialWhereUniqueInput | Prisma.EquipmentCredentialWhereUniqueInput[]
+  connect?: Prisma.EquipmentCredentialWhereUniqueInput | Prisma.EquipmentCredentialWhereUniqueInput[]
+  update?: Prisma.EquipmentCredentialUpdateWithWhereUniqueWithoutSharedSecretInput | Prisma.EquipmentCredentialUpdateWithWhereUniqueWithoutSharedSecretInput[]
+  updateMany?: Prisma.EquipmentCredentialUpdateManyWithWhereWithoutSharedSecretInput | Prisma.EquipmentCredentialUpdateManyWithWhereWithoutSharedSecretInput[]
+  deleteMany?: Prisma.EquipmentCredentialScalarWhereInput | Prisma.EquipmentCredentialScalarWhereInput[]
+}
+
 export type EquipmentCredentialCreateNestedOneWithoutGrantsInput = {
   create?: Prisma.XOR<Prisma.EquipmentCredentialCreateWithoutGrantsInput, Prisma.EquipmentCredentialUncheckedCreateWithoutGrantsInput>
   connectOrCreate?: Prisma.EquipmentCredentialCreateOrConnectWithoutGrantsInput
@@ -723,7 +789,7 @@ export type EquipmentCredentialCreateWithoutOwnerInput = {
   protocol?: $Enums.CredentialProtocol
   port?: number | null
   username?: string | null
-  secret: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  secret?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   notes?: string | null
   accessPolicy?: $Enums.CredentialAccessPolicy
   lastRotatedAt?: Date | string | null
@@ -733,6 +799,7 @@ export type EquipmentCredentialCreateWithoutOwnerInput = {
   updated_by?: string | null
   deleted_at?: Date | string | null
   equipment?: Prisma.EquipmentCreateNestedOneWithoutCredentialsInput
+  sharedSecret?: Prisma.ClientSharedSecretCreateNestedOneWithoutCredentialsInput
   grants?: Prisma.CredentialAccessGrantCreateNestedManyWithoutCredentialInput
 }
 
@@ -743,8 +810,9 @@ export type EquipmentCredentialUncheckedCreateWithoutOwnerInput = {
   protocol?: $Enums.CredentialProtocol
   port?: number | null
   username?: string | null
-  secret: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  secret?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   notes?: string | null
+  sharedSecretId?: string | null
   accessPolicy?: $Enums.CredentialAccessPolicy
   lastRotatedAt?: Date | string | null
   created_at?: Date | string
@@ -791,8 +859,9 @@ export type EquipmentCredentialScalarWhereInput = {
   protocol?: Prisma.EnumCredentialProtocolFilter<"EquipmentCredential"> | $Enums.CredentialProtocol
   port?: Prisma.IntNullableFilter<"EquipmentCredential"> | number | null
   username?: Prisma.StringNullableFilter<"EquipmentCredential"> | string | null
-  secret?: Prisma.JsonFilter<"EquipmentCredential">
+  secret?: Prisma.JsonNullableFilter<"EquipmentCredential">
   notes?: Prisma.StringNullableFilter<"EquipmentCredential"> | string | null
+  sharedSecretId?: Prisma.StringNullableFilter<"EquipmentCredential"> | string | null
   accessPolicy?: Prisma.EnumCredentialAccessPolicyFilter<"EquipmentCredential"> | $Enums.CredentialAccessPolicy
   ownerUserId?: Prisma.StringNullableFilter<"EquipmentCredential"> | string | null
   lastRotatedAt?: Prisma.DateTimeNullableFilter<"EquipmentCredential"> | Date | string | null
@@ -809,7 +878,7 @@ export type EquipmentCredentialCreateWithoutEquipmentInput = {
   protocol?: $Enums.CredentialProtocol
   port?: number | null
   username?: string | null
-  secret: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  secret?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   notes?: string | null
   accessPolicy?: $Enums.CredentialAccessPolicy
   lastRotatedAt?: Date | string | null
@@ -818,6 +887,7 @@ export type EquipmentCredentialCreateWithoutEquipmentInput = {
   created_by?: string | null
   updated_by?: string | null
   deleted_at?: Date | string | null
+  sharedSecret?: Prisma.ClientSharedSecretCreateNestedOneWithoutCredentialsInput
   owner?: Prisma.UserCreateNestedOneWithoutOwnedCredentialsInput
   grants?: Prisma.CredentialAccessGrantCreateNestedManyWithoutCredentialInput
 }
@@ -828,8 +898,9 @@ export type EquipmentCredentialUncheckedCreateWithoutEquipmentInput = {
   protocol?: $Enums.CredentialProtocol
   port?: number | null
   username?: string | null
-  secret: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  secret?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   notes?: string | null
+  sharedSecretId?: string | null
   accessPolicy?: $Enums.CredentialAccessPolicy
   ownerUserId?: string | null
   lastRotatedAt?: Date | string | null
@@ -867,13 +938,13 @@ export type EquipmentCredentialUpdateManyWithWhereWithoutEquipmentInput = {
   data: Prisma.XOR<Prisma.EquipmentCredentialUpdateManyMutationInput, Prisma.EquipmentCredentialUncheckedUpdateManyWithoutEquipmentInput>
 }
 
-export type EquipmentCredentialCreateWithoutGrantsInput = {
+export type EquipmentCredentialCreateWithoutSharedSecretInput = {
   id?: string
   label: string
   protocol?: $Enums.CredentialProtocol
   port?: number | null
   username?: string | null
-  secret: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  secret?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   notes?: string | null
   accessPolicy?: $Enums.CredentialAccessPolicy
   lastRotatedAt?: Date | string | null
@@ -884,6 +955,73 @@ export type EquipmentCredentialCreateWithoutGrantsInput = {
   deleted_at?: Date | string | null
   equipment?: Prisma.EquipmentCreateNestedOneWithoutCredentialsInput
   owner?: Prisma.UserCreateNestedOneWithoutOwnedCredentialsInput
+  grants?: Prisma.CredentialAccessGrantCreateNestedManyWithoutCredentialInput
+}
+
+export type EquipmentCredentialUncheckedCreateWithoutSharedSecretInput = {
+  id?: string
+  equipmentId?: string | null
+  label: string
+  protocol?: $Enums.CredentialProtocol
+  port?: number | null
+  username?: string | null
+  secret?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  notes?: string | null
+  accessPolicy?: $Enums.CredentialAccessPolicy
+  ownerUserId?: string | null
+  lastRotatedAt?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  created_by?: string | null
+  updated_by?: string | null
+  deleted_at?: Date | string | null
+  grants?: Prisma.CredentialAccessGrantUncheckedCreateNestedManyWithoutCredentialInput
+}
+
+export type EquipmentCredentialCreateOrConnectWithoutSharedSecretInput = {
+  where: Prisma.EquipmentCredentialWhereUniqueInput
+  create: Prisma.XOR<Prisma.EquipmentCredentialCreateWithoutSharedSecretInput, Prisma.EquipmentCredentialUncheckedCreateWithoutSharedSecretInput>
+}
+
+export type EquipmentCredentialCreateManySharedSecretInputEnvelope = {
+  data: Prisma.EquipmentCredentialCreateManySharedSecretInput | Prisma.EquipmentCredentialCreateManySharedSecretInput[]
+  skipDuplicates?: boolean
+}
+
+export type EquipmentCredentialUpsertWithWhereUniqueWithoutSharedSecretInput = {
+  where: Prisma.EquipmentCredentialWhereUniqueInput
+  update: Prisma.XOR<Prisma.EquipmentCredentialUpdateWithoutSharedSecretInput, Prisma.EquipmentCredentialUncheckedUpdateWithoutSharedSecretInput>
+  create: Prisma.XOR<Prisma.EquipmentCredentialCreateWithoutSharedSecretInput, Prisma.EquipmentCredentialUncheckedCreateWithoutSharedSecretInput>
+}
+
+export type EquipmentCredentialUpdateWithWhereUniqueWithoutSharedSecretInput = {
+  where: Prisma.EquipmentCredentialWhereUniqueInput
+  data: Prisma.XOR<Prisma.EquipmentCredentialUpdateWithoutSharedSecretInput, Prisma.EquipmentCredentialUncheckedUpdateWithoutSharedSecretInput>
+}
+
+export type EquipmentCredentialUpdateManyWithWhereWithoutSharedSecretInput = {
+  where: Prisma.EquipmentCredentialScalarWhereInput
+  data: Prisma.XOR<Prisma.EquipmentCredentialUpdateManyMutationInput, Prisma.EquipmentCredentialUncheckedUpdateManyWithoutSharedSecretInput>
+}
+
+export type EquipmentCredentialCreateWithoutGrantsInput = {
+  id?: string
+  label: string
+  protocol?: $Enums.CredentialProtocol
+  port?: number | null
+  username?: string | null
+  secret?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  notes?: string | null
+  accessPolicy?: $Enums.CredentialAccessPolicy
+  lastRotatedAt?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  created_by?: string | null
+  updated_by?: string | null
+  deleted_at?: Date | string | null
+  equipment?: Prisma.EquipmentCreateNestedOneWithoutCredentialsInput
+  sharedSecret?: Prisma.ClientSharedSecretCreateNestedOneWithoutCredentialsInput
+  owner?: Prisma.UserCreateNestedOneWithoutOwnedCredentialsInput
 }
 
 export type EquipmentCredentialUncheckedCreateWithoutGrantsInput = {
@@ -893,8 +1031,9 @@ export type EquipmentCredentialUncheckedCreateWithoutGrantsInput = {
   protocol?: $Enums.CredentialProtocol
   port?: number | null
   username?: string | null
-  secret: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  secret?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   notes?: string | null
+  sharedSecretId?: string | null
   accessPolicy?: $Enums.CredentialAccessPolicy
   ownerUserId?: string | null
   lastRotatedAt?: Date | string | null
@@ -927,7 +1066,7 @@ export type EquipmentCredentialUpdateWithoutGrantsInput = {
   protocol?: Prisma.EnumCredentialProtocolFieldUpdateOperationsInput | $Enums.CredentialProtocol
   port?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  secret?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  secret?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accessPolicy?: Prisma.EnumCredentialAccessPolicyFieldUpdateOperationsInput | $Enums.CredentialAccessPolicy
   lastRotatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -937,6 +1076,7 @@ export type EquipmentCredentialUpdateWithoutGrantsInput = {
   updated_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   equipment?: Prisma.EquipmentUpdateOneWithoutCredentialsNestedInput
+  sharedSecret?: Prisma.ClientSharedSecretUpdateOneWithoutCredentialsNestedInput
   owner?: Prisma.UserUpdateOneWithoutOwnedCredentialsNestedInput
 }
 
@@ -947,8 +1087,9 @@ export type EquipmentCredentialUncheckedUpdateWithoutGrantsInput = {
   protocol?: Prisma.EnumCredentialProtocolFieldUpdateOperationsInput | $Enums.CredentialProtocol
   port?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  secret?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  secret?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sharedSecretId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accessPolicy?: Prisma.EnumCredentialAccessPolicyFieldUpdateOperationsInput | $Enums.CredentialAccessPolicy
   ownerUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastRotatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -966,8 +1107,9 @@ export type EquipmentCredentialCreateManyOwnerInput = {
   protocol?: $Enums.CredentialProtocol
   port?: number | null
   username?: string | null
-  secret: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  secret?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   notes?: string | null
+  sharedSecretId?: string | null
   accessPolicy?: $Enums.CredentialAccessPolicy
   lastRotatedAt?: Date | string | null
   created_at?: Date | string
@@ -983,7 +1125,7 @@ export type EquipmentCredentialUpdateWithoutOwnerInput = {
   protocol?: Prisma.EnumCredentialProtocolFieldUpdateOperationsInput | $Enums.CredentialProtocol
   port?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  secret?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  secret?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accessPolicy?: Prisma.EnumCredentialAccessPolicyFieldUpdateOperationsInput | $Enums.CredentialAccessPolicy
   lastRotatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -993,6 +1135,7 @@ export type EquipmentCredentialUpdateWithoutOwnerInput = {
   updated_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   equipment?: Prisma.EquipmentUpdateOneWithoutCredentialsNestedInput
+  sharedSecret?: Prisma.ClientSharedSecretUpdateOneWithoutCredentialsNestedInput
   grants?: Prisma.CredentialAccessGrantUpdateManyWithoutCredentialNestedInput
 }
 
@@ -1003,8 +1146,9 @@ export type EquipmentCredentialUncheckedUpdateWithoutOwnerInput = {
   protocol?: Prisma.EnumCredentialProtocolFieldUpdateOperationsInput | $Enums.CredentialProtocol
   port?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  secret?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  secret?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sharedSecretId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accessPolicy?: Prisma.EnumCredentialAccessPolicyFieldUpdateOperationsInput | $Enums.CredentialAccessPolicy
   lastRotatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1022,8 +1166,9 @@ export type EquipmentCredentialUncheckedUpdateManyWithoutOwnerInput = {
   protocol?: Prisma.EnumCredentialProtocolFieldUpdateOperationsInput | $Enums.CredentialProtocol
   port?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  secret?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  secret?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sharedSecretId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accessPolicy?: Prisma.EnumCredentialAccessPolicyFieldUpdateOperationsInput | $Enums.CredentialAccessPolicy
   lastRotatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1039,8 +1184,9 @@ export type EquipmentCredentialCreateManyEquipmentInput = {
   protocol?: $Enums.CredentialProtocol
   port?: number | null
   username?: string | null
-  secret: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  secret?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   notes?: string | null
+  sharedSecretId?: string | null
   accessPolicy?: $Enums.CredentialAccessPolicy
   ownerUserId?: string | null
   lastRotatedAt?: Date | string | null
@@ -1057,7 +1203,7 @@ export type EquipmentCredentialUpdateWithoutEquipmentInput = {
   protocol?: Prisma.EnumCredentialProtocolFieldUpdateOperationsInput | $Enums.CredentialProtocol
   port?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  secret?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  secret?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accessPolicy?: Prisma.EnumCredentialAccessPolicyFieldUpdateOperationsInput | $Enums.CredentialAccessPolicy
   lastRotatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1066,6 +1212,7 @@ export type EquipmentCredentialUpdateWithoutEquipmentInput = {
   created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   updated_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sharedSecret?: Prisma.ClientSharedSecretUpdateOneWithoutCredentialsNestedInput
   owner?: Prisma.UserUpdateOneWithoutOwnedCredentialsNestedInput
   grants?: Prisma.CredentialAccessGrantUpdateManyWithoutCredentialNestedInput
 }
@@ -1076,8 +1223,9 @@ export type EquipmentCredentialUncheckedUpdateWithoutEquipmentInput = {
   protocol?: Prisma.EnumCredentialProtocolFieldUpdateOperationsInput | $Enums.CredentialProtocol
   port?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  secret?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  secret?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sharedSecretId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accessPolicy?: Prisma.EnumCredentialAccessPolicyFieldUpdateOperationsInput | $Enums.CredentialAccessPolicy
   ownerUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastRotatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1095,7 +1243,86 @@ export type EquipmentCredentialUncheckedUpdateManyWithoutEquipmentInput = {
   protocol?: Prisma.EnumCredentialProtocolFieldUpdateOperationsInput | $Enums.CredentialProtocol
   port?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  secret?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  secret?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sharedSecretId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  accessPolicy?: Prisma.EnumCredentialAccessPolicyFieldUpdateOperationsInput | $Enums.CredentialAccessPolicy
+  ownerUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastRotatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  updated_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
+export type EquipmentCredentialCreateManySharedSecretInput = {
+  id?: string
+  equipmentId?: string | null
+  label: string
+  protocol?: $Enums.CredentialProtocol
+  port?: number | null
+  username?: string | null
+  secret?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  notes?: string | null
+  accessPolicy?: $Enums.CredentialAccessPolicy
+  ownerUserId?: string | null
+  lastRotatedAt?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  created_by?: string | null
+  updated_by?: string | null
+  deleted_at?: Date | string | null
+}
+
+export type EquipmentCredentialUpdateWithoutSharedSecretInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  label?: Prisma.StringFieldUpdateOperationsInput | string
+  protocol?: Prisma.EnumCredentialProtocolFieldUpdateOperationsInput | $Enums.CredentialProtocol
+  port?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  secret?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  accessPolicy?: Prisma.EnumCredentialAccessPolicyFieldUpdateOperationsInput | $Enums.CredentialAccessPolicy
+  lastRotatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  updated_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  equipment?: Prisma.EquipmentUpdateOneWithoutCredentialsNestedInput
+  owner?: Prisma.UserUpdateOneWithoutOwnedCredentialsNestedInput
+  grants?: Prisma.CredentialAccessGrantUpdateManyWithoutCredentialNestedInput
+}
+
+export type EquipmentCredentialUncheckedUpdateWithoutSharedSecretInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  equipmentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  label?: Prisma.StringFieldUpdateOperationsInput | string
+  protocol?: Prisma.EnumCredentialProtocolFieldUpdateOperationsInput | $Enums.CredentialProtocol
+  port?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  secret?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  accessPolicy?: Prisma.EnumCredentialAccessPolicyFieldUpdateOperationsInput | $Enums.CredentialAccessPolicy
+  ownerUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastRotatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  updated_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  grants?: Prisma.CredentialAccessGrantUncheckedUpdateManyWithoutCredentialNestedInput
+}
+
+export type EquipmentCredentialUncheckedUpdateManyWithoutSharedSecretInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  equipmentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  label?: Prisma.StringFieldUpdateOperationsInput | string
+  protocol?: Prisma.EnumCredentialProtocolFieldUpdateOperationsInput | $Enums.CredentialProtocol
+  port?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  secret?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accessPolicy?: Prisma.EnumCredentialAccessPolicyFieldUpdateOperationsInput | $Enums.CredentialAccessPolicy
   ownerUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1147,6 +1374,7 @@ export type EquipmentCredentialSelect<ExtArgs extends runtime.Types.Extensions.I
   username?: boolean
   secret?: boolean
   notes?: boolean
+  sharedSecretId?: boolean
   accessPolicy?: boolean
   ownerUserId?: boolean
   lastRotatedAt?: boolean
@@ -1156,6 +1384,7 @@ export type EquipmentCredentialSelect<ExtArgs extends runtime.Types.Extensions.I
   updated_by?: boolean
   deleted_at?: boolean
   equipment?: boolean | Prisma.EquipmentCredential$equipmentArgs<ExtArgs>
+  sharedSecret?: boolean | Prisma.EquipmentCredential$sharedSecretArgs<ExtArgs>
   owner?: boolean | Prisma.EquipmentCredential$ownerArgs<ExtArgs>
   grants?: boolean | Prisma.EquipmentCredential$grantsArgs<ExtArgs>
   _count?: boolean | Prisma.EquipmentCredentialCountOutputTypeDefaultArgs<ExtArgs>
@@ -1170,6 +1399,7 @@ export type EquipmentCredentialSelectCreateManyAndReturn<ExtArgs extends runtime
   username?: boolean
   secret?: boolean
   notes?: boolean
+  sharedSecretId?: boolean
   accessPolicy?: boolean
   ownerUserId?: boolean
   lastRotatedAt?: boolean
@@ -1179,6 +1409,7 @@ export type EquipmentCredentialSelectCreateManyAndReturn<ExtArgs extends runtime
   updated_by?: boolean
   deleted_at?: boolean
   equipment?: boolean | Prisma.EquipmentCredential$equipmentArgs<ExtArgs>
+  sharedSecret?: boolean | Prisma.EquipmentCredential$sharedSecretArgs<ExtArgs>
   owner?: boolean | Prisma.EquipmentCredential$ownerArgs<ExtArgs>
 }, ExtArgs["result"]["equipmentCredential"]>
 
@@ -1191,6 +1422,7 @@ export type EquipmentCredentialSelectUpdateManyAndReturn<ExtArgs extends runtime
   username?: boolean
   secret?: boolean
   notes?: boolean
+  sharedSecretId?: boolean
   accessPolicy?: boolean
   ownerUserId?: boolean
   lastRotatedAt?: boolean
@@ -1200,6 +1432,7 @@ export type EquipmentCredentialSelectUpdateManyAndReturn<ExtArgs extends runtime
   updated_by?: boolean
   deleted_at?: boolean
   equipment?: boolean | Prisma.EquipmentCredential$equipmentArgs<ExtArgs>
+  sharedSecret?: boolean | Prisma.EquipmentCredential$sharedSecretArgs<ExtArgs>
   owner?: boolean | Prisma.EquipmentCredential$ownerArgs<ExtArgs>
 }, ExtArgs["result"]["equipmentCredential"]>
 
@@ -1212,6 +1445,7 @@ export type EquipmentCredentialSelectScalar = {
   username?: boolean
   secret?: boolean
   notes?: boolean
+  sharedSecretId?: boolean
   accessPolicy?: boolean
   ownerUserId?: boolean
   lastRotatedAt?: boolean
@@ -1222,19 +1456,22 @@ export type EquipmentCredentialSelectScalar = {
   deleted_at?: boolean
 }
 
-export type EquipmentCredentialOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "equipmentId" | "label" | "protocol" | "port" | "username" | "secret" | "notes" | "accessPolicy" | "ownerUserId" | "lastRotatedAt" | "created_at" | "updated_at" | "created_by" | "updated_by" | "deleted_at", ExtArgs["result"]["equipmentCredential"]>
+export type EquipmentCredentialOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "equipmentId" | "label" | "protocol" | "port" | "username" | "secret" | "notes" | "sharedSecretId" | "accessPolicy" | "ownerUserId" | "lastRotatedAt" | "created_at" | "updated_at" | "created_by" | "updated_by" | "deleted_at", ExtArgs["result"]["equipmentCredential"]>
 export type EquipmentCredentialInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   equipment?: boolean | Prisma.EquipmentCredential$equipmentArgs<ExtArgs>
+  sharedSecret?: boolean | Prisma.EquipmentCredential$sharedSecretArgs<ExtArgs>
   owner?: boolean | Prisma.EquipmentCredential$ownerArgs<ExtArgs>
   grants?: boolean | Prisma.EquipmentCredential$grantsArgs<ExtArgs>
   _count?: boolean | Prisma.EquipmentCredentialCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type EquipmentCredentialIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   equipment?: boolean | Prisma.EquipmentCredential$equipmentArgs<ExtArgs>
+  sharedSecret?: boolean | Prisma.EquipmentCredential$sharedSecretArgs<ExtArgs>
   owner?: boolean | Prisma.EquipmentCredential$ownerArgs<ExtArgs>
 }
 export type EquipmentCredentialIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   equipment?: boolean | Prisma.EquipmentCredential$equipmentArgs<ExtArgs>
+  sharedSecret?: boolean | Prisma.EquipmentCredential$sharedSecretArgs<ExtArgs>
   owner?: boolean | Prisma.EquipmentCredential$ownerArgs<ExtArgs>
 }
 
@@ -1242,6 +1479,7 @@ export type $EquipmentCredentialPayload<ExtArgs extends runtime.Types.Extensions
   name: "EquipmentCredential"
   objects: {
     equipment: Prisma.$EquipmentPayload<ExtArgs> | null
+    sharedSecret: Prisma.$ClientSharedSecretPayload<ExtArgs> | null
     owner: Prisma.$UserPayload<ExtArgs> | null
     grants: Prisma.$CredentialAccessGrantPayload<ExtArgs>[]
   }
@@ -1252,8 +1490,9 @@ export type $EquipmentCredentialPayload<ExtArgs extends runtime.Types.Extensions
     protocol: $Enums.CredentialProtocol
     port: number | null
     username: string | null
-    secret: runtime.JsonValue
+    secret: runtime.JsonValue | null
     notes: string | null
+    sharedSecretId: string | null
     accessPolicy: $Enums.CredentialAccessPolicy
     ownerUserId: string | null
     lastRotatedAt: Date | null
@@ -1657,6 +1896,7 @@ readonly fields: EquipmentCredentialFieldRefs;
 export interface Prisma__EquipmentCredentialClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   equipment<T extends Prisma.EquipmentCredential$equipmentArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.EquipmentCredential$equipmentArgs<ExtArgs>>): Prisma.Prisma__EquipmentClient<runtime.Types.Result.GetResult<Prisma.$EquipmentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  sharedSecret<T extends Prisma.EquipmentCredential$sharedSecretArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.EquipmentCredential$sharedSecretArgs<ExtArgs>>): Prisma.Prisma__ClientSharedSecretClient<runtime.Types.Result.GetResult<Prisma.$ClientSharedSecretPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   owner<T extends Prisma.EquipmentCredential$ownerArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.EquipmentCredential$ownerArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   grants<T extends Prisma.EquipmentCredential$grantsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.EquipmentCredential$grantsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CredentialAccessGrantPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
@@ -1696,6 +1936,7 @@ export interface EquipmentCredentialFieldRefs {
   readonly username: Prisma.FieldRef<"EquipmentCredential", 'String'>
   readonly secret: Prisma.FieldRef<"EquipmentCredential", 'Json'>
   readonly notes: Prisma.FieldRef<"EquipmentCredential", 'String'>
+  readonly sharedSecretId: Prisma.FieldRef<"EquipmentCredential", 'String'>
   readonly accessPolicy: Prisma.FieldRef<"EquipmentCredential", 'CredentialAccessPolicy'>
   readonly ownerUserId: Prisma.FieldRef<"EquipmentCredential", 'String'>
   readonly lastRotatedAt: Prisma.FieldRef<"EquipmentCredential", 'DateTime'>
@@ -2121,6 +2362,25 @@ export type EquipmentCredential$equipmentArgs<ExtArgs extends runtime.Types.Exte
    */
   include?: Prisma.EquipmentInclude<ExtArgs> | null
   where?: Prisma.EquipmentWhereInput
+}
+
+/**
+ * EquipmentCredential.sharedSecret
+ */
+export type EquipmentCredential$sharedSecretArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ClientSharedSecret
+   */
+  select?: Prisma.ClientSharedSecretSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ClientSharedSecret
+   */
+  omit?: Prisma.ClientSharedSecretOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ClientSharedSecretInclude<ExtArgs> | null
+  where?: Prisma.ClientSharedSecretWhereInput
 }
 
 /**
