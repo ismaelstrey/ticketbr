@@ -3,6 +3,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const requireStaffSessionMock = vi.fn();
 const credentialFindFirstMock = vi.fn();
 const credentialUpdateMock = vi.fn();
+const equipmentFindFirstMock = vi.fn();
+const sharedSecretFindFirstMock = vi.fn();
 const userFindUniqueMock = vi.fn();
 const resolveCredentialAccessBatchMock = vi.fn();
 const writeAuditLogMock = vi.fn();
@@ -25,12 +27,16 @@ vi.mock("@/server/services/inventory-access", () => ({
 }));
 vi.mock("@/lib/vault", () => ({
   MASKED_SECRET: "••••••••",
-  encryptSecret: () => ({ alg: "aes-256-gcm", keyVersion: 1, iv: "a", tag: "b", ciphertext: "rotated" })
+  encryptSecret: () => ({ alg: "aes-256-gcm", keyVersion: 1, iv: "a", tag: "b", ciphertext: "rotated" }),
+  isEncryptedPayload: (value: unknown) =>
+    Boolean(value && typeof value === "object" && (value as Record<string, unknown>).alg === "aes-256-gcm")
 }));
 vi.mock("@/lib/prisma", () => ({
   Prisma: { PrismaClientKnownRequestError },
   prisma: {
     equipmentCredential: { findFirst: credentialFindFirstMock, update: credentialUpdateMock },
+    equipment: { findFirst: equipmentFindFirstMock },
+    clientSharedSecret: { findFirst: sharedSecretFindFirstMock },
     user: { findUnique: userFindUniqueMock }
   }
 }));
@@ -50,6 +56,8 @@ function credentialRow(overrides: Record<string, unknown> = {}) {
     ownerUserId: "u1",
     owner: { id: "u1", name: "Admin" },
     equipment: null,
+    sharedSecretId: null,
+    sharedSecret: null,
     lastRotatedAt: null,
     created_at: new Date("2024-01-01T00:00:00Z"),
     updated_at: new Date("2024-01-01T00:00:00Z"),
@@ -63,6 +71,8 @@ describe("/api/inventory/credentials/[id]", () => {
     requireStaffSessionMock.mockReset().mockResolvedValue(session);
     credentialFindFirstMock.mockReset();
     credentialUpdateMock.mockReset();
+    equipmentFindFirstMock.mockReset();
+    sharedSecretFindFirstMock.mockReset();
     userFindUniqueMock.mockReset();
     resolveCredentialAccessBatchMock.mockReset().mockResolvedValue(new Map());
     writeAuditLogMock.mockReset();
@@ -164,5 +174,72 @@ describe("/api/inventory/credentials/[id]", () => {
     const res = await DELETE({} as any, { params: Promise.resolve({ id: "x" }) });
 
     expect(res.status).toBe(404);
+  });
+
+  it("PUT vincula a senha padrão do mesmo cliente", async () => {
+    credentialFindFirstMock.mockResolvedValueOnce({ id: "c1", label: "Admin", equipmentId: "e1", secret: null });
+    sharedSecretFindFirstMock.mockResolvedValueOnce({ id: "s1", solicitanteId: "sol1" });
+    equipmentFindFirstMock.mockResolvedValueOnce({ solicitanteId: "sol1" });
+    credentialUpdateMock.mockResolvedValueOnce(credentialRow({ sharedSecretId: "s1" }));
+
+    const { PUT } = await import("./route");
+    const req = { json: async () => ({ sharedSecretId: "s1" }) } as any;
+    const res = await PUT(req, { params: Promise.resolve({ id: "c1" }) });
+
+    expect(res.status).toBe(200);
+    expect(credentialUpdateMock.mock.calls[0][0].data.sharedSecret).toEqual({ connect: { id: "s1" } });
+  });
+
+  it("PUT retorna 409 quando a senha padrão pertence a outro cliente", async () => {
+    credentialFindFirstMock.mockResolvedValueOnce({ id: "c1", label: "Admin", equipmentId: "e1", secret: null });
+    sharedSecretFindFirstMock.mockResolvedValueOnce({ id: "s1", solicitanteId: "sol2" });
+    equipmentFindFirstMock.mockResolvedValueOnce({ solicitanteId: "sol1" });
+
+    const { PUT } = await import("./route");
+    const req = { json: async () => ({ sharedSecretId: "s1" }) } as any;
+    const res = await PUT(req, { params: Promise.resolve({ id: "c1" }) });
+
+    expect(res.status).toBe(409);
+    expect(credentialUpdateMock).not.toHaveBeenCalled();
+  });
+
+  it("PUT retorna 404 quando a senha padrão informada não existe", async () => {
+    credentialFindFirstMock.mockResolvedValueOnce({ id: "c1", label: "Admin", equipmentId: "e1", secret: null });
+    sharedSecretFindFirstMock.mockResolvedValueOnce(null);
+
+    const { PUT } = await import("./route");
+    const req = { json: async () => ({ sharedSecretId: "s9" }) } as any;
+    const res = await PUT(req, { params: Promise.resolve({ id: "c1" }) });
+
+    expect(res.status).toBe(404);
+    expect(credentialUpdateMock).not.toHaveBeenCalled();
+  });
+
+  it("PUT desvincula a senha padrão mantendo a senha própria existente", async () => {
+    credentialFindFirstMock.mockResolvedValueOnce({
+      id: "c1",
+      label: "Admin",
+      equipmentId: "e1",
+      secret: { alg: "aes-256-gcm", keyVersion: 1, iv: "a", tag: "b", ciphertext: "c" }
+    });
+    credentialUpdateMock.mockResolvedValueOnce(credentialRow());
+
+    const { PUT } = await import("./route");
+    const req = { json: async () => ({ sharedSecretId: null }) } as any;
+    const res = await PUT(req, { params: Promise.resolve({ id: "c1" }) });
+
+    expect(res.status).toBe(200);
+    expect(credentialUpdateMock.mock.calls[0][0].data.sharedSecret).toEqual({ disconnect: true });
+  });
+
+  it("PUT retorna 400 ao desvincular sem senha própria", async () => {
+    credentialFindFirstMock.mockResolvedValueOnce({ id: "c1", label: "Admin", equipmentId: "e1", secret: null });
+
+    const { PUT } = await import("./route");
+    const req = { json: async () => ({ sharedSecretId: null }) } as any;
+    const res = await PUT(req, { params: Promise.resolve({ id: "c1" }) });
+
+    expect(res.status).toBe(400);
+    expect(credentialUpdateMock).not.toHaveBeenCalled();
   });
 });

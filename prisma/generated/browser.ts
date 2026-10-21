@@ -158,6 +158,11 @@ export type Equipment = Prisma.EquipmentModel
  */
 export type EquipmentCredential = Prisma.EquipmentCredentialModel
 /**
+ * Model ClientSharedSecret
+ * 
+ */
+export type ClientSharedSecret = Prisma.ClientSharedSecretModel
+/**
  * Model CredentialAccessGrant
  * 
  */

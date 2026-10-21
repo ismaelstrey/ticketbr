@@ -79,6 +79,7 @@ export const ModelName = {
   PasswordResetToken: 'PasswordResetToken',
   Equipment: 'Equipment',
   EquipmentCredential: 'EquipmentCredential',
+  ClientSharedSecret: 'ClientSharedSecret',
   CredentialAccessGrant: 'CredentialAccessGrant',
   UserGroup: 'UserGroup',
   UserGroupMember: 'UserGroupMember'
@@ -564,6 +565,7 @@ export const EquipmentCredentialScalarFieldEnum = {
   username: 'username',
   secret: 'secret',
   notes: 'notes',
+  sharedSecretId: 'sharedSecretId',
   accessPolicy: 'accessPolicy',
   ownerUserId: 'ownerUserId',
   lastRotatedAt: 'lastRotatedAt',
@@ -575,6 +577,22 @@ export const EquipmentCredentialScalarFieldEnum = {
 } as const
 
 export type EquipmentCredentialScalarFieldEnum = (typeof EquipmentCredentialScalarFieldEnum)[keyof typeof EquipmentCredentialScalarFieldEnum]
+
+
+export const ClientSharedSecretScalarFieldEnum = {
+  id: 'id',
+  solicitanteId: 'solicitanteId',
+  label: 'label',
+  secret: 'secret',
+  notes: 'notes',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  created_by: 'created_by',
+  updated_by: 'updated_by',
+  deleted_at: 'deleted_at'
+} as const
+
+export type ClientSharedSecretScalarFieldEnum = (typeof ClientSharedSecretScalarFieldEnum)[keyof typeof ClientSharedSecretScalarFieldEnum]
 
 
 export const CredentialAccessGrantScalarFieldEnum = {

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma, Prisma } from "@/lib/prisma";
 import { UpdateCredentialSchema } from "@/lib/validations/inventory";
-import { encryptSecret } from "@/lib/vault";
+import { encryptSecret, isEncryptedPayload } from "@/lib/vault";
 import { requireStaffSession } from "@/server/services/staff-context";
 import { writeAuditLog } from "@/server/services/audit-log";
 import { resolveCredentialAccessBatch } from "@/server/services/inventory-access";
@@ -49,7 +49,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
     const existing = await prisma.equipmentCredential.findFirst({
       where: { id, deleted_at: null },
-      select: { id: true, label: true }
+      select: { id: true, label: true, equipmentId: true, secret: true }
     });
     if (!existing) {
       return NextResponse.json({ error: "Credencial não encontrada" }, { status: 404 });
@@ -63,6 +63,41 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     }
 
     const data: Prisma.EquipmentCredentialUpdateInput = { updated_by: session.userId };
+
+    // Troca/remoção do vínculo com a senha padrão do cliente
+    if (input.sharedSecretId !== undefined) {
+      if (input.sharedSecretId === null) {
+        // Ao desvincular, a credencial precisa ter (ou receber) uma senha própria
+        if (!input.secret && !isEncryptedPayload(existing.secret)) {
+          return NextResponse.json(
+            { error: "Informe a senha ao remover o vínculo com a senha padrão" },
+            { status: 400 }
+          );
+        }
+        data.sharedSecret = { disconnect: true };
+      } else {
+        const shared = await prisma.clientSharedSecret.findFirst({
+          where: { id: input.sharedSecretId, deleted_at: null },
+          select: { id: true, solicitanteId: true }
+        });
+        if (!shared) {
+          return NextResponse.json({ error: "Senha padrão não encontrada" }, { status: 404 });
+        }
+
+        const equipment = existing.equipmentId
+          ? await prisma.equipment.findFirst({
+              where: { id: existing.equipmentId, deleted_at: null },
+              select: { solicitanteId: true }
+            })
+          : null;
+        if (!equipment?.solicitanteId || equipment.solicitanteId !== shared.solicitanteId) {
+          return NextResponse.json({ error: "A senha padrão pertence a outro cliente" }, { status: 409 });
+        }
+
+        data.sharedSecret = { connect: { id: shared.id } };
+      }
+    }
+
     let rotated = false;
     if (input.label !== undefined) data.label = input.label;
     if (input.protocol !== undefined) data.protocol = input.protocol;

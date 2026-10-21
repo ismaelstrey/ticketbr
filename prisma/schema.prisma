@@ -182,6 +182,7 @@ model Solicitante {
   funcionarios     Funcionario[]
   tickets          Ticket[]
   equipment        Equipment[]
+  sharedSecrets    ClientSharedSecret[]
 
   @@index([cnpj])
   @@index([email])
@@ -721,9 +722,14 @@ model EquipmentCredential {
   protocol      CredentialProtocol     @default(SSH)
   port          Int?
   username      String?                @db.VarChar(180)
-  // Segredo cifrado (AES-256-GCM) — nunca armazenado em texto puro
-  secret        Json
+  // Segredo cifrado (AES-256-GCM) — nunca armazenado em texto puro.
+  // Nulo quando a credencial usa a senha padrão compartilhada do cliente.
+  secret        Json?
   notes         String?                @db.Text
+
+  // Senha padrão do cliente (quando definida, substitui a senha própria da credencial)
+  sharedSecretId String?               @map("shared_secret_id")
+  sharedSecret   ClientSharedSecret?   @relation(fields: [sharedSecretId], references: [id], onDelete: SetNull)
 
   accessPolicy  CredentialAccessPolicy @default(OWNER_AND_ADMINS) @map("access_policy")
   ownerUserId   String?                @map("owner_user_id")
@@ -742,7 +748,34 @@ model EquipmentCredential {
 
   @@index([equipmentId])
   @@index([ownerUserId])
+  @@index([sharedSecretId])
   @@map("equipment_credentials")
+}
+
+// ============================================================
+// Senhas padrão por cliente (compartilhadas entre equipamentos)
+// ============================================================
+model ClientSharedSecret {
+  id            String      @id @default(cuid())
+  solicitanteId String      @map("solicitante_id")
+  solicitante   Solicitante @relation(fields: [solicitanteId], references: [id], onDelete: Cascade)
+
+  label         String      @db.VarChar(120) // ex.: "Senha padrão roteadores"
+  // Segredo cifrado (AES-256-GCM) — nunca armazenado em texto puro
+  secret        Json
+  notes         String?     @db.Text
+
+  // Audit fields
+  created_at    DateTime    @default(now())
+  updated_at    DateTime    @updatedAt
+  created_by    String?
+  updated_by    String?
+  deleted_at    DateTime?
+
+  credentials   EquipmentCredential[]
+
+  @@index([solicitanteId])
+  @@map("client_shared_secrets")
 }
 
 // Concessões de acesso por credencial (usuário específico, grupo ou papel)

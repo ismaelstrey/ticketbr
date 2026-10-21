@@ -412,6 +412,7 @@ export const ModelName = {
   PasswordResetToken: 'PasswordResetToken',
   Equipment: 'Equipment',
   EquipmentCredential: 'EquipmentCredential',
+  ClientSharedSecret: 'ClientSharedSecret',
   CredentialAccessGrant: 'CredentialAccessGrant',
   UserGroup: 'UserGroup',
   UserGroupMember: 'UserGroupMember'
@@ -430,7 +431,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "whatsAppContact" | "solicitante" | "funcionario" | "auditLog" | "tipo_Ticket" | "categoria_Ticket" | "mesa_Trabalho" | "operador" | "ticket" | "ticketEvent" | "chatConversation" | "conversation" | "message" | "task" | "taskSubtask" | "taskAttachment" | "taskTicketLink" | "taskComment" | "project" | "projectMember" | "projectExportAudit" | "notification" | "kpiSnapshot" | "webhookRequestLog" | "passwordResetToken" | "equipment" | "equipmentCredential" | "credentialAccessGrant" | "userGroup" | "userGroupMember"
+    modelProps: "user" | "whatsAppContact" | "solicitante" | "funcionario" | "auditLog" | "tipo_Ticket" | "categoria_Ticket" | "mesa_Trabalho" | "operador" | "ticket" | "ticketEvent" | "chatConversation" | "conversation" | "message" | "task" | "taskSubtask" | "taskAttachment" | "taskTicketLink" | "taskComment" | "project" | "projectMember" | "projectExportAudit" | "notification" | "kpiSnapshot" | "webhookRequestLog" | "passwordResetToken" | "equipment" | "equipmentCredential" | "clientSharedSecret" | "credentialAccessGrant" | "userGroup" | "userGroupMember"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2506,6 +2507,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    ClientSharedSecret: {
+      payload: Prisma.$ClientSharedSecretPayload<ExtArgs>
+      fields: Prisma.ClientSharedSecretFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ClientSharedSecretFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClientSharedSecretPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ClientSharedSecretFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClientSharedSecretPayload>
+        }
+        findFirst: {
+          args: Prisma.ClientSharedSecretFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClientSharedSecretPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ClientSharedSecretFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClientSharedSecretPayload>
+        }
+        findMany: {
+          args: Prisma.ClientSharedSecretFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClientSharedSecretPayload>[]
+        }
+        create: {
+          args: Prisma.ClientSharedSecretCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClientSharedSecretPayload>
+        }
+        createMany: {
+          args: Prisma.ClientSharedSecretCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ClientSharedSecretCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClientSharedSecretPayload>[]
+        }
+        delete: {
+          args: Prisma.ClientSharedSecretDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClientSharedSecretPayload>
+        }
+        update: {
+          args: Prisma.ClientSharedSecretUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClientSharedSecretPayload>
+        }
+        deleteMany: {
+          args: Prisma.ClientSharedSecretDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ClientSharedSecretUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ClientSharedSecretUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClientSharedSecretPayload>[]
+        }
+        upsert: {
+          args: Prisma.ClientSharedSecretUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClientSharedSecretPayload>
+        }
+        aggregate: {
+          args: Prisma.ClientSharedSecretAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateClientSharedSecret>
+        }
+        groupBy: {
+          args: Prisma.ClientSharedSecretGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ClientSharedSecretGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ClientSharedSecretCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ClientSharedSecretCountAggregateOutputType> | number
+        }
+      }
+    }
     CredentialAccessGrant: {
       payload: Prisma.$CredentialAccessGrantPayload<ExtArgs>
       fields: Prisma.CredentialAccessGrantFieldRefs
@@ -3231,6 +3306,7 @@ export const EquipmentCredentialScalarFieldEnum = {
   username: 'username',
   secret: 'secret',
   notes: 'notes',
+  sharedSecretId: 'sharedSecretId',
   accessPolicy: 'accessPolicy',
   ownerUserId: 'ownerUserId',
   lastRotatedAt: 'lastRotatedAt',
@@ -3242,6 +3318,22 @@ export const EquipmentCredentialScalarFieldEnum = {
 } as const
 
 export type EquipmentCredentialScalarFieldEnum = (typeof EquipmentCredentialScalarFieldEnum)[keyof typeof EquipmentCredentialScalarFieldEnum]
+
+
+export const ClientSharedSecretScalarFieldEnum = {
+  id: 'id',
+  solicitanteId: 'solicitanteId',
+  label: 'label',
+  secret: 'secret',
+  notes: 'notes',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  created_by: 'created_by',
+  updated_by: 'updated_by',
+  deleted_at: 'deleted_at'
+} as const
+
+export type ClientSharedSecretScalarFieldEnum = (typeof ClientSharedSecretScalarFieldEnum)[keyof typeof ClientSharedSecretScalarFieldEnum]
 
 
 export const CredentialAccessGrantScalarFieldEnum = {
@@ -3760,6 +3852,7 @@ export type GlobalOmitConfig = {
   passwordResetToken?: Prisma.PasswordResetTokenOmit
   equipment?: Prisma.EquipmentOmit
   equipmentCredential?: Prisma.EquipmentCredentialOmit
+  clientSharedSecret?: Prisma.ClientSharedSecretOmit
   credentialAccessGrant?: Prisma.CredentialAccessGrantOmit
   userGroup?: Prisma.UserGroupOmit
   userGroupMember?: Prisma.UserGroupMemberOmit

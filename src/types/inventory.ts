@@ -66,10 +66,25 @@ export type Credential = {
   accessPolicy: CredentialAccessPolicy;
   ownerUserId: string | null;
   ownerName?: string | null;
+  // Preenchido quando a credencial reaproveita a senha padrão do cliente
+  sharedSecretId: string | null;
+  sharedSecretLabel?: string | null;
   lastRotatedAt: string | null;
   canReveal: boolean;
   accessVia: string | null;
   grants?: CredentialGrant[];
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type SharedSecret = {
+  id: string;
+  solicitanteId: string;
+  label: string;
+  // Sempre mascarado; a senha em claro só sai pelo endpoint de revelação da credencial
+  secret: string;
+  notes: string | null;
+  credentialCount: number;
   createdAt: string;
   updatedAt: string;
 };

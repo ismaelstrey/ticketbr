@@ -12,7 +12,17 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
 
     const credential = await prisma.equipmentCredential.findFirst({
       where: { id, deleted_at: null },
-      select: { id: true, label: true, ownerUserId: true, accessPolicy: true, secret: true, equipmentId: true }
+      select: {
+        id: true,
+        label: true,
+        ownerUserId: true,
+        accessPolicy: true,
+        secret: true,
+        equipmentId: true,
+        // Quando vinculada, a senha vem da senha padrão do cliente
+        sharedSecretId: true,
+        sharedSecret: { select: { secret: true } }
+      }
     });
 
     if (!credential) {
@@ -36,13 +46,16 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
       return NextResponse.json({ error: "Sem permissão para visualizar esta senha" }, { status: 403 });
     }
 
-    if (!isEncryptedPayload(credential.secret)) {
+    // Resolve o segredo efetivo: senha própria ou senha padrão do cliente
+    const payload = credential.sharedSecretId ? credential.sharedSecret?.secret : credential.secret;
+
+    if (!isEncryptedPayload(payload)) {
       return NextResponse.json({ error: "Segredo indisponível" }, { status: 500 });
     }
 
     let secret = "";
     try {
-      secret = decryptSecret(credential.secret);
+      secret = decryptSecret(payload);
     } catch {
       return NextResponse.json({ error: "Falha ao decifrar o segredo" }, { status: 500 });
     }
@@ -53,7 +66,12 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
       action: "inventory.credential_revealed",
       entity: "equipment_credential",
       entityId: credential.id,
-      metadata: { label: credential.label, via: decision.via, equipmentId: credential.equipmentId }
+      metadata: {
+        label: credential.label,
+        via: decision.via,
+        equipmentId: credential.equipmentId,
+        sharedSecretId: credential.sharedSecretId
+      }
     });
 
     return NextResponse.json({ data: { id: credential.id, secret } });

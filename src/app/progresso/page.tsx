@@ -619,7 +619,8 @@ const modules: Module[] = [
       "Revelação de senha sob demanda com auditoria",
       "Política de acesso: responsável, staff ou personalizada",
       "Concessões para usuário, grupo ou papel (agente)",
-      "Grupos de usuários para a ACL"
+      "Grupos de usuários para a ACL",
+      "Senha padrão compartilhada por cliente com propagação aos equipamentos vinculados"
     ]
   },
   {
@@ -857,7 +858,7 @@ const roadmap: RoadmapItem[] = [
   {
     phase: "Fase 4 — Maturidade",
     title: "Inventário de equipamentos e cofre de senhas",
-    description: "Concluído (fora do planejamento original): módulo /inventory para cadastro de equipamentos de TI (switch, roteador, VM, computador, impressora) com IP, hostname, MAC, série e função, e cofre de credenciais cifradas em AES-256-GCM (VAULT_ENCRYPTION_KEY). A revelação da senha é sob demanda e auditada, e a ACL de cada credencial aceita concessões por usuário, grupo ou papel (agente), além das políticas de acesso responsável/staff/personalizada. Inclui grupos de usuários para a ACL.",
+    description: "Concluído (fora do planejamento original): módulo /inventory para cadastro de equipamentos de TI (switch, roteador, VM, computador, impressora) com IP, hostname, MAC, série e função, e cofre de credenciais cifradas em AES-256-GCM (VAULT_ENCRYPTION_KEY). A revelação da senha é sob demanda e auditada, e a ACL de cada credencial aceita concessões por usuário, grupo ou papel (agente), além das políticas de acesso responsável/staff/personalizada. Inclui grupos de usuários para a ACL e senha padrão compartilhada por cliente (segredo referenciado, com propagação automática a todos os equipamentos vinculados).",
     priority: "P1",
     status: "done"
   }

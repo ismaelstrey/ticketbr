@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
     if (input.equipmentId) {
       const equipment = await prisma.equipment.findFirst({
         where: { id: input.equipmentId, deleted_at: null },
-        select: { id: true }
+        select: { id: true, solicitanteId: true }
       });
       if (!equipment) {
         return NextResponse.json({ error: "Equipamento não encontrado" }, { status: 404 });
@@ -87,7 +87,36 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // A senha é gravada apenas de forma cifrada (AES-256-GCM)
+    // Vincula a credencial a uma senha padrão do mesmo cliente do equipamento
+    let sharedSecretId: string | null = null;
+    if (input.sharedSecretId) {
+      if (!input.equipmentId) {
+        return NextResponse.json(
+          { error: "Vincule a credencial a um equipamento para usar a senha padrão do cliente" },
+          { status: 400 }
+        );
+      }
+
+      const shared = await prisma.clientSharedSecret.findFirst({
+        where: { id: input.sharedSecretId, deleted_at: null },
+        select: { id: true, solicitanteId: true }
+      });
+      if (!shared) {
+        return NextResponse.json({ error: "Senha padrão não encontrada" }, { status: 404 });
+      }
+
+      const equipment = await prisma.equipment.findFirst({
+        where: { id: input.equipmentId, deleted_at: null },
+        select: { solicitanteId: true }
+      });
+      if (!equipment?.solicitanteId || equipment.solicitanteId !== shared.solicitanteId) {
+        return NextResponse.json({ error: "A senha padrão pertence a outro cliente" }, { status: 409 });
+      }
+
+      sharedSecretId = shared.id;
+    }
+
+    // A senha é gravada apenas de forma cifrada (AES-256-GCM); com senha padrão, fica nula
     const created = await prisma.equipmentCredential.create({
       data: {
         equipmentId: input.equipmentId ?? null,
@@ -95,13 +124,15 @@ export async function POST(request: NextRequest) {
         protocol: input.protocol ?? "SSH",
         port: input.port ?? null,
         username: input.username ?? null,
-        secret: encryptSecret(input.secret) as unknown as Prisma.InputJsonValue,
+        sharedSecretId,
         notes: input.notes ?? null,
         accessPolicy: input.accessPolicy ?? "OWNER_AND_ADMINS",
         // Sem responsável informado, o autor da criação vira o dono da credencial
         ownerUserId: input.ownerUserId ?? session.userId,
         created_by: session.userId,
-        updated_by: session.userId
+        updated_by: session.userId,
+        // Só grava segredo próprio quando a credencial não reaproveita a senha padrão
+        ...(sharedSecretId ? {} : { secret: encryptSecret(input.secret ?? "") as unknown as Prisma.InputJsonValue })
       },
       select: credentialSelect
     });
@@ -111,7 +142,12 @@ export async function POST(request: NextRequest) {
       action: "inventory.credential_created",
       entity: "equipment_credential",
       entityId: created.id,
-      metadata: { label: created.label, equipmentId: created.equipmentId, accessPolicy: created.accessPolicy }
+      metadata: {
+        label: created.label,
+        equipmentId: created.equipmentId,
+        accessPolicy: created.accessPolicy,
+        sharedSecretId
+      }
     });
 
     return NextResponse.json(

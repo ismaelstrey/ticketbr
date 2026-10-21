@@ -6,6 +6,7 @@ const credentialFindManyMock = vi.fn();
 const credentialCreateMock = vi.fn();
 const equipmentFindFirstMock = vi.fn();
 const userFindUniqueMock = vi.fn();
+const sharedSecretFindFirstMock = vi.fn();
 const resolveCredentialAccessBatchMock = vi.fn();
 const writeAuditLogMock = vi.fn();
 
@@ -27,14 +28,15 @@ vi.mock("@/lib/prisma", () => ({
       create: credentialCreateMock
     },
     equipment: { findFirst: equipmentFindFirstMock },
-    user: { findUnique: userFindUniqueMock }
+    user: { findUnique: userFindUniqueMock },
+    clientSharedSecret: { findFirst: sharedSecretFindFirstMock }
   }
 }));
 
 const session = { userId: "u1", role: "ADMIN", name: "Admin", email: "a@a.com" };
 
 // Linha de credencial como o Prisma devolveria após o create
-function credentialRow() {
+function credentialRow(overrides: Record<string, unknown> = {}) {
   return {
     id: "c1",
     equipmentId: "e1",
@@ -47,9 +49,12 @@ function credentialRow() {
     ownerUserId: "u1",
     owner: { id: "u1", name: "Admin" },
     equipment: { id: "e1", name: "Switch core" },
+    sharedSecretId: null,
+    sharedSecret: null,
     lastRotatedAt: null,
     created_at: new Date("2024-01-01T00:00:00Z"),
-    updated_at: new Date("2024-01-01T00:00:00Z")
+    updated_at: new Date("2024-01-01T00:00:00Z"),
+    ...overrides
   };
 }
 
@@ -62,6 +67,7 @@ describe("/api/inventory/credentials", () => {
     credentialCreateMock.mockReset();
     equipmentFindFirstMock.mockReset();
     userFindUniqueMock.mockReset();
+    sharedSecretFindFirstMock.mockReset();
     resolveCredentialAccessBatchMock.mockReset().mockResolvedValue(new Map());
     writeAuditLogMock.mockReset();
   });
@@ -136,5 +142,67 @@ describe("/api/inventory/credentials", () => {
     const res = await POST(req);
 
     expect(res.status).toBe(400);
+  });
+
+  it("POST com senha padrão do cliente vincula sem gravar senha própria", async () => {
+    equipmentFindFirstMock
+      .mockResolvedValueOnce({ id: "e1", solicitanteId: "sol1" })
+      .mockResolvedValueOnce({ solicitanteId: "sol1" });
+    sharedSecretFindFirstMock.mockResolvedValueOnce({ id: "s1", solicitanteId: "sol1" });
+    credentialCreateMock.mockResolvedValueOnce(credentialRow({ sharedSecretId: "s1" }));
+
+    const { POST } = await import("./route");
+    const req = {
+      json: async () => ({ label: "Admin switch", equipmentId: "e1", sharedSecretId: "s1" })
+    } as any;
+    const res = await POST(req);
+    const body = await res.json();
+
+    expect(res.status).toBe(201);
+    const data = credentialCreateMock.mock.calls[0][0].data;
+    // Com senha padrão, a credencial não guarda segredo próprio
+    expect(data.secret).toBeUndefined();
+    expect(data.sharedSecretId).toBe("s1");
+    expect(writeAuditLogMock.mock.calls[0][0].metadata.sharedSecretId).toBe("s1");
+    expect(body.data.sharedSecretId).toBe("s1");
+  });
+
+  it("POST retorna 409 quando a senha padrão pertence a outro cliente", async () => {
+    equipmentFindFirstMock
+      .mockResolvedValueOnce({ id: "e1", solicitanteId: "sol1" })
+      .mockResolvedValueOnce({ solicitanteId: "sol1" });
+    sharedSecretFindFirstMock.mockResolvedValueOnce({ id: "s1", solicitanteId: "sol2" });
+
+    const { POST } = await import("./route");
+    const req = {
+      json: async () => ({ label: "Admin switch", equipmentId: "e1", sharedSecretId: "s1" })
+    } as any;
+    const res = await POST(req);
+
+    expect(res.status).toBe(409);
+    expect(credentialCreateMock).not.toHaveBeenCalled();
+  });
+
+  it("POST retorna 400 quando a senha padrão é enviada sem equipamento", async () => {
+    const { POST } = await import("./route");
+    const req = { json: async () => ({ label: "x", sharedSecretId: "s1" }) } as any;
+    const res = await POST(req);
+
+    expect(res.status).toBe(400);
+    expect(credentialCreateMock).not.toHaveBeenCalled();
+  });
+
+  it("POST retorna 404 quando a senha padrão informada não existe", async () => {
+    equipmentFindFirstMock.mockResolvedValueOnce({ id: "e1", solicitanteId: "sol1" });
+    sharedSecretFindFirstMock.mockResolvedValueOnce(null);
+
+    const { POST } = await import("./route");
+    const req = {
+      json: async () => ({ label: "x", equipmentId: "e1", sharedSecretId: "s9" })
+    } as any;
+    const res = await POST(req);
+
+    expect(res.status).toBe(404);
+    expect(credentialCreateMock).not.toHaveBeenCalled();
   });
 });

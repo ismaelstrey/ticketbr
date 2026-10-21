@@ -2,7 +2,7 @@ import { Ticket, TicketStatus } from "@/types/ticket";
 import { Task, TaskComment } from "@/types/task";
 import { Project, ProjectMember } from "@/types/project";
 import { TicketOperationalDashboardResponse, TicketDashboardFilters } from "@/types/ticketsDashboard";
-import { Credential, CredentialGrant, Equipment, UserGroup } from "@/types/inventory";
+import { Credential, CredentialGrant, Equipment, SharedSecret, UserGroup } from "@/types/inventory";
 
 const API_BASE = "/api";
 
@@ -51,6 +51,12 @@ export const api = {
   },
   users: {
       list: () => fetchJson<any[]>("/users")
+  },
+  solicitantes: {
+    list: (params?: Record<string, string>) => {
+      const qs = params ? `?${new URLSearchParams(params).toString()}` : "";
+      return fetchJson<{ data: Array<{ id: string; nome_fantasia: string; razao_social: string }> }>(`/solicitantes${qs}`);
+    }
   },
   tasks: {
     list: (params?: Record<string, string>) => {
@@ -150,6 +156,18 @@ export const api = {
         remove: (credentialId: string, grantId: string) =>
           fetchJson<{ ok: boolean }>(`/inventory/credentials/${credentialId}/grants/${grantId}`, { method: "DELETE" })
       }
+    },
+    // Senhas padrão compartilhadas entre os equipamentos de um cliente
+    sharedSecrets: {
+      list: (solicitanteId?: string) => {
+        const qs = solicitanteId ? `?${new URLSearchParams({ solicitanteId }).toString()}` : "";
+        return fetchJson<{ data: SharedSecret[] }>(`/inventory/shared-secrets${qs}`);
+      },
+      create: (payload: Record<string, unknown>) =>
+        fetchJson<{ data: SharedSecret }>("/inventory/shared-secrets", { method: "POST", body: JSON.stringify(payload) }),
+      update: (id: string, payload: Record<string, unknown>) =>
+        fetchJson<{ data: SharedSecret }>(`/inventory/shared-secrets/${id}`, { method: "PUT", body: JSON.stringify(payload) }),
+      remove: (id: string) => fetchJson<{ ok: boolean }>(`/inventory/shared-secrets/${id}`, { method: "DELETE" })
     }
   },
   userGroups: {

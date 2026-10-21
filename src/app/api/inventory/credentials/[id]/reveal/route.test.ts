@@ -94,4 +94,46 @@ describe("POST /api/inventory/credentials/[id]/reveal", () => {
 
     expect(res.status).toBe(404);
   });
+
+  it("revela a senha padrão do cliente quando a credencial está vinculada", async () => {
+    requireStaffSessionMock.mockResolvedValue({ userId: "admin1", role: "ADMIN", name: "Admin", email: "a@a.com" });
+    credentialFindFirstMock.mockResolvedValueOnce({
+      id: "c1",
+      label: "Admin switch",
+      ownerUserId: "outro",
+      accessPolicy: "OWNER_AND_ADMINS",
+      // Sem senha própria: o segredo vem da senha padrão do cliente
+      secret: null,
+      equipmentId: "e1",
+      sharedSecretId: "s1",
+      sharedSecret: { secret: encryptedSecret }
+    });
+
+    const { POST } = await import("./route");
+    const res = await POST({} as any, { params: Promise.resolve({ id: "c1" }) });
+    const body = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(body.data.secret).toBe("senha-revelada");
+    expect(writeAuditLogMock.mock.calls[0][0].metadata.sharedSecretId).toBe("s1");
+  });
+
+  it("retorna 500 quando o segredo não está disponível", async () => {
+    requireStaffSessionMock.mockResolvedValue({ userId: "admin1", role: "ADMIN", name: "Admin", email: "a@a.com" });
+    credentialFindFirstMock.mockResolvedValueOnce({
+      id: "c1",
+      label: "Admin switch",
+      ownerUserId: "outro",
+      accessPolicy: "OWNER_AND_ADMINS",
+      secret: null,
+      equipmentId: "e1",
+      sharedSecretId: null,
+      sharedSecret: null
+    });
+
+    const { POST } = await import("./route");
+    const res = await POST({} as any, { params: Promise.resolve({ id: "c1" }) });
+
+    expect(res.status).toBe(500);
+  });
 });

@@ -12,6 +12,7 @@ import { useEquipmentDetail } from "@/hooks/useInventory";
 import { Credential } from "@/types/inventory";
 import { CredentialList } from "@/components/inventory/CredentialList";
 import { CredentialModal } from "@/components/inventory/CredentialModal";
+import { SharedSecretsModal } from "@/components/inventory/SharedSecretsModal";
 import { GrantModal } from "@/components/inventory/GrantModal";
 import { EQUIPMENT_STATUS_LABELS, EQUIPMENT_STATUS_TONE, EQUIPMENT_TYPE_LABELS } from "@/components/inventory/labels";
 
@@ -104,6 +105,7 @@ export default function InventoryDetailPage() {
   const [credentialFormOpen, setCredentialFormOpen] = useState(false);
   const [editingCredential, setEditingCredential] = useState<Credential | null>(null);
   const [grantCredential, setGrantCredential] = useState<Credential | null>(null);
+  const [sharedSecretsOpen, setSharedSecretsOpen] = useState(false);
 
   const openNewCredential = () => {
     setEditingCredential(null);
@@ -207,9 +209,16 @@ export default function InventoryDetailPage() {
               <Card style={{ padding: "1.25rem" }}>
                 <SectionHeader>
                   <SectionTitle>Cofre de credenciais</SectionTitle>
-                  <Button type="button" variant="primary" onClick={openNewCredential}>
-                    Nova credencial
-                  </Button>
+                  <div style={{ display: "flex", gap: "0.6rem", flexWrap: "wrap" }}>
+                    {equipment.solicitanteId ? (
+                      <Button type="button" variant="ghost" onClick={() => setSharedSecretsOpen(true)}>
+                        Senhas padrão do cliente
+                      </Button>
+                    ) : null}
+                    <Button type="button" variant="primary" onClick={openNewCredential}>
+                      Nova credencial
+                    </Button>
+                  </div>
                 </SectionHeader>
                 <CredentialList
                   credentials={equipment.credentials}
@@ -228,6 +237,13 @@ export default function InventoryDetailPage() {
           onClose={() => setCredentialFormOpen(false)}
           onSubmit={handleCredentialSubmit}
           credential={editingCredential}
+          solicitanteId={equipment?.solicitanteId ?? null}
+        />
+        <SharedSecretsModal
+          isOpen={sharedSecretsOpen}
+          onClose={() => setSharedSecretsOpen(false)}
+          solicitanteId={equipment?.solicitanteId ?? null}
+          solicitanteName={equipment?.solicitante?.nome_fantasia ?? null}
         />
         <GrantModal isOpen={Boolean(grantCredential)} onClose={() => setGrantCredential(null)} credential={grantCredential} />
       </MainContent>
