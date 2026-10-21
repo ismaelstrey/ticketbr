@@ -23,6 +23,10 @@ jobs:
   dependency-audit:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      # prisma generate (postinstall) exige DATABASE_URL, mas não conecta ao banco.
+      # Configure o secret DATABASE_URL para usar a URL real; caso ausente, usa um placeholder.
+      DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://ci:ci@localhost:5432/ci' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4

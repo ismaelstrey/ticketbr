@@ -15,6 +15,10 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    env:
+      # prisma generate/validate exigem DATABASE_URL, mas não conectam ao banco.
+      # Configure o secret DATABASE_URL para usar a URL real; caso ausente, usa um placeholder.
+      DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://ci:ci@localhost:5432/ci' }}
 
     steps:
       - name: Checkout
