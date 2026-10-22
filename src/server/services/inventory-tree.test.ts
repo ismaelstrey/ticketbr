@@ -38,6 +38,7 @@ const row = (overrides: Record<string, unknown> = {}) => ({
   virtualizationPlatform: null,
   vmid: null,
   tags: [],
+  solicitanteId: null,
   _count: { credentials: 0 },
   ...overrides
 });
@@ -106,6 +107,18 @@ describe("buildInventoryTree", () => {
     const tree = await buildInventoryTree({ solicitanteId: "s1" });
 
     expect(tree.solicitante).toEqual({ id: "s1", nome_fantasia: "ACME" });
+  });
+
+  it("expõe o cliente em cada nó para permitir herança ao adicionar recursos filhos", async () => {
+    equipmentFindManyMock.mockResolvedValueOnce([
+      row({ id: "host", name: "proxmox-01", type: "HYPERVISOR", solicitanteId: "s1" }),
+      row({ id: "vm", name: "vm-zabbix", type: "VM", parentId: "host", solicitanteId: "s1" })
+    ]);
+
+    const tree = await buildInventoryTree();
+
+    expect(tree.nodes[0].solicitanteId).toBe("s1");
+    expect(tree.nodes[0].children[0].solicitanteId).toBe("s1");
   });
 });
 

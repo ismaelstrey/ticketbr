@@ -119,18 +119,29 @@ const emptyForm: FormState = {
 type SolicitanteOption = { id: string; nome_fantasia: string };
 type ParentOption = { id: string; name: string; type: string };
 
+// Contexto opcional ao abrir o formulário para adicionar um recurso dentro de um ativo
+export type EquipmentFormPreset = {
+  parentId?: string;
+  parentName?: string;
+  parentType?: string;
+  type?: string;
+  solicitanteId?: string | null;
+};
+
 interface EquipmentFormModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (payload: Record<string, unknown>) => Promise<boolean>;
   equipment?: Equipment | null;
+  preset?: EquipmentFormPreset | null;
 }
 
 /**
  * Modal de cadastro/edição de equipamento, com campos de hierarquia e virtualização
- * exibidos conforme o tipo do ativo.
+ * exibidos conforme o tipo do ativo. Aceita um contexto (`preset`) para já abrir
+ * vinculado a um host ao adicionar recursos filhos.
  */
-export function EquipmentFormModal({ isOpen, onClose, onSubmit, equipment }: EquipmentFormModalProps) {
+export function EquipmentFormModal({ isOpen, onClose, onSubmit, equipment, preset }: EquipmentFormModalProps) {
   const [form, setForm] = useState<FormState>(emptyForm);
   const [solicitantes, setSolicitantes] = useState<SolicitanteOption[]>([]);
   const [parents, setParents] = useState<ParentOption[]>([]);
@@ -158,17 +169,25 @@ export function EquipmentFormModal({ isOpen, onClose, onSubmit, equipment }: Equ
 
     api.inventory
       .list(params)
-      .then((res) =>
-        setParents(
-          res.data
-            .filter((item) => PARENT_CAPABLE_TYPES.includes(item.type) && item.id !== equipment?.id)
-            .map((item) => ({ id: item.id, name: item.name, type: item.type }))
-        )
-      )
-      .catch(() => setParents([]));
-  }, [isOpen, form.solicitanteId, equipment?.id]);
+      .then((res) => {
+        const list: ParentOption[] = res.data
+          .filter((item) => PARENT_CAPABLE_TYPES.includes(item.type) && item.id !== equipment?.id)
+          .map((item) => ({ id: item.id, name: item.name, type: item.type }));
 
-  // Preenche o formulário ao abrir (edição) ou limpa (novo)
+        // Garante que o host de origem apareça como opção mesmo fora do filtro atual
+        if (preset?.parentId && !list.some((parent) => parent.id === preset.parentId)) {
+          list.unshift({
+            id: preset.parentId,
+            name: preset.parentName ?? "Host selecionado",
+            type: preset.parentType ?? "HYPERVISOR"
+          });
+        }
+        setParents(list);
+      })
+      .catch(() => setParents([]));
+  }, [isOpen, form.solicitanteId, equipment?.id, preset?.parentId, preset?.parentName, preset?.parentType]);
+
+  // Preenche o formulário ao abrir (edição, novo recurso em um host ou novo ativo)
   useEffect(() => {
     if (!isOpen) return;
     if (equipment) {
@@ -203,10 +222,16 @@ export function EquipmentFormModal({ isOpen, onClose, onSubmit, equipment }: Equ
         diskGb: equipment.diskGb !== null && equipment.diskGb !== undefined ? String(equipment.diskGb) : "",
         tags: (equipment.tags ?? []).join(", ")
       });
-    } else {
-      setForm(emptyForm);
+      return;
     }
-  }, [isOpen, equipment]);
+
+    setForm({
+      ...emptyForm,
+      type: preset?.type ?? emptyForm.type,
+      parentId: preset?.parentId ?? "",
+      solicitanteId: preset?.solicitanteId ?? ""
+    });
+  }, [isOpen, equipment, preset]);
 
   const setField = <K extends keyof FormState>(key: K, value: FormState[K]) =>
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -262,8 +287,33 @@ export function EquipmentFormModal({ isOpen, onClose, onSubmit, equipment }: Equ
     }
   };
 
+  // Campo de vínculo com o host pai (recursos virtualizados e hosts de virtualização)
+  const parentField = (
+    <Field $full>
+      Host pai
+      <Select value={form.parentId} onChange={(e) => setField("parentId", e.target.value)}>
+        <option value="">Sem host vinculado</option>
+        {parents.map((parent) => (
+          <option key={parent.id} value={parent.id}>
+            {parent.name} ({EQUIPMENT_TYPE_LABELS[parent.type as keyof typeof EQUIPMENT_TYPE_LABELS]})
+          </option>
+        ))}
+      </Select>
+    </Field>
+  );
+
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={equipment ? "Editar equipamento" : "Novo equipamento"}>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={
+        equipment
+          ? "Editar equipamento"
+          : preset?.parentId
+            ? `Novo recurso em ${preset.parentName ?? "host selecionado"}`
+            : "Novo equipamento"
+      }
+    >
       <form onSubmit={handleSubmit}>
         <Grid>
           <Field>
@@ -341,17 +391,7 @@ export function EquipmentFormModal({ isOpen, onClose, onSubmit, equipment }: Equ
           {isVirtual ? (
             <>
               <SectionTitle>Recurso virtualizado</SectionTitle>
-              <Field $full>
-                Host pai
-                <Select value={form.parentId} onChange={(e) => setField("parentId", e.target.value)}>
-                  <option value="">Sem host vinculado</option>
-                  {parents.map((parent) => (
-                    <option key={parent.id} value={parent.id}>
-                      {parent.name} ({EQUIPMENT_TYPE_LABELS[parent.type as keyof typeof EQUIPMENT_TYPE_LABELS]})
-                    </option>
-                  ))}
-                </Select>
-              </Field>
+              {parentField}
               <Field>
                 VMID no hypervisor
                 <Input
@@ -386,6 +426,7 @@ export function EquipmentFormModal({ isOpen, onClose, onSubmit, equipment }: Equ
                   ))}
                 </Select>
               </Field>
+              {parentField}
             </>
           ) : null}
 

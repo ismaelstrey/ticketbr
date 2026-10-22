@@ -2,14 +2,16 @@
 
 import React, { useState } from "react";
 import styled from "styled-components";
-import { FiChevronDown, FiChevronRight, FiExternalLink, FiKey, FiServer } from "@/components/icons";
+import { FiChevronDown, FiChevronRight, FiExternalLink, FiKey, FiPlus, FiServer } from "@/components/icons";
 import { Badge } from "@/components/ui/Badge";
 import { InfraTree, InfraTreeNode } from "@/types/inventory";
 import {
+  CHILD_ADD_LABEL,
   EQUIPMENT_STATUS_LABELS,
   EQUIPMENT_STATUS_TONE,
   EQUIPMENT_TYPE_LABELS,
   MANAGEMENT_CONTROLLER_LABELS,
+  PARENT_CAPABLE_TYPES,
   VIRTUALIZATION_PLATFORM_LABELS
 } from "./labels";
 
@@ -123,6 +125,24 @@ const LinkButton = styled.a`
   }
 `;
 
+const AddButton = styled.button`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.25rem 0.5rem;
+  border: 1px dashed ${({ theme }) => theme.tokens.color.border.default};
+  border-radius: ${({ theme }) => theme.borderRadius.small};
+  background: none;
+  cursor: pointer;
+  font-size: 0.78rem;
+  color: ${({ theme }) => theme.tokens.color.interactive.primary};
+
+  &:hover {
+    background: ${({ theme }) => theme.tokens.color.interactive.ghostHover};
+    border-style: solid;
+  }
+`;
+
 const EmptyState = styled.div`
   padding: 2rem;
   text-align: center;
@@ -138,12 +158,14 @@ interface NodeRowProps {
   node: InfraTreeNode;
   depth: number;
   onSelect: (id: string) => void;
+  onAddChild: (node: InfraTreeNode) => void;
 }
 
 // Renderiza um nó da árvore e seus filhos de forma recursiva
-function NodeRow({ node, depth, onSelect }: NodeRowProps) {
+function NodeRow({ node, depth, onSelect, onAddChild }: NodeRowProps) {
   const [expanded, setExpanded] = useState(true);
   const hasChildren = node.children.length > 0;
+  const canAddChild = PARENT_CAPABLE_TYPES.includes(node.type);
 
   return (
     <>
@@ -190,6 +212,16 @@ function NodeRow({ node, depth, onSelect }: NodeRowProps) {
 
         <Spacer />
 
+        {canAddChild ? (
+          <AddButton
+            type="button"
+            onClick={() => onAddChild(node)}
+            title={`Adicionar um recurso dentro de ${node.name}`}
+          >
+            <FiPlus aria-hidden="true" /> {CHILD_ADD_LABEL[node.type]}
+          </AddButton>
+        ) : null}
+
         {node.url ? (
           <LinkButton href={normalizeUrl(node.url)} target="_blank" rel="noopener noreferrer">
             <FiExternalLink aria-hidden="true" /> Abrir
@@ -199,7 +231,7 @@ function NodeRow({ node, depth, onSelect }: NodeRowProps) {
 
       {hasChildren && expanded
         ? node.children.map((child) => (
-            <NodeRow key={child.id} node={child} depth={depth + 1} onSelect={onSelect} />
+            <NodeRow key={child.id} node={child} depth={depth + 1} onSelect={onSelect} onAddChild={onAddChild} />
           ))
         : null}
     </>
@@ -209,12 +241,14 @@ function NodeRow({ node, depth, onSelect }: NodeRowProps) {
 interface InfraTreeViewProps {
   tree: InfraTree;
   onSelect: (id: string) => void;
+  onAddChild: (node: InfraTreeNode) => void;
 }
 
 /**
- * Árvore de infraestrutura (host -> VM -> container) com resumo e links de acesso.
+ * Árvore de infraestrutura (host -> VM -> container) com resumo, links de acesso
+ * e atalho para adicionar recursos dentro de um host.
  */
-export function InfraTreeView({ tree, onSelect }: InfraTreeViewProps) {
+export function InfraTreeView({ tree, onSelect, onAddChild }: InfraTreeViewProps) {
   return (
     <Wrapper>
       <SummaryRow>
@@ -238,7 +272,9 @@ export function InfraTreeView({ tree, onSelect }: InfraTreeViewProps) {
 
       <TreeBox>
         {tree.nodes.length ? (
-          tree.nodes.map((node) => <NodeRow key={node.id} node={node} depth={0} onSelect={onSelect} />)
+          tree.nodes.map((node) => (
+            <NodeRow key={node.id} node={node} depth={0} onSelect={onSelect} onAddChild={onAddChild} />
+          ))
         ) : (
           <EmptyState>Nenhum servidor, host ou recurso virtualizado cadastrado para este cliente.</EmptyState>
         )}

@@ -91,3 +91,17 @@ export const MANAGEMENT_CONTROLLER_OPTIONS = Object.keys(
 
 // Tipos que podem ser host de outros recursos (aceitam recursos vinculados)
 export const PARENT_CAPABLE_TYPES: EquipmentType[] = ["SERVER", "HYPERVISOR", "VM"];
+
+// Tipo sugerido ao adicionar um recurso dentro de um ativo
+export const DEFAULT_CHILD_TYPE: Partial<Record<EquipmentType, EquipmentType>> = {
+  SERVER: "HYPERVISOR",
+  HYPERVISOR: "VM",
+  VM: "CONTAINER"
+};
+
+// Texto do botão que adiciona um recurso dentro de um ativo
+export const CHILD_ADD_LABEL: Partial<Record<EquipmentType, string>> = {
+  SERVER: "Adicionar host",
+  HYPERVISOR: "Adicionar VM",
+  VM: "Adicionar container"
+};

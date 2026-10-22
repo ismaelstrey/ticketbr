@@ -104,6 +104,8 @@ export type InfraTreeNode = {
   vmid: number | null;
   tags: string[];
   credentialCount: number;
+  // Cliente do ativo (usado para herdar o cliente ao adicionar recursos filhos)
+  solicitanteId: string | null;
   children: InfraTreeNode[];
 };
 
