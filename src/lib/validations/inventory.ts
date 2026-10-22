@@ -8,12 +8,26 @@ export const EquipmentTypeSchema = z.enum([
   "ROUTER",
   "FIREWALL",
   "SERVER",
+  "HYPERVISOR",
   "VM",
+  "CONTAINER",
   "COMPUTER",
   "PRINTER",
   "ACCESS_POINT",
   "OTHER"
 ]);
+
+export const VirtualizationPlatformSchema = z.enum([
+  "PROXMOX_VE",
+  "VMWARE_ESXI",
+  "VMWARE_VCENTER",
+  "MICROSOFT_HYPERV",
+  "XCP_NG",
+  "KVM",
+  "OTHER"
+]);
+
+export const ManagementControllerSchema = z.enum(["NONE", "ILO", "IDRAC", "IPMI", "ILO_AND_IDRAC", "OTHER"]);
 
 export const EquipmentStatusSchema = z.enum(["ACTIVE", "MAINTENANCE", "INACTIVE", "RETIRED"]);
 
@@ -31,8 +45,9 @@ export const StaffRoleSchema = z.enum(["ADMIN", "AGENT"]);
 // Equipamentos
 // ============================================================
 const optionalText = (max: number) => z.string().trim().max(max).nullable().optional();
+const optionalInt = (min: number, max: number) => z.coerce.number().int().min(min).max(max).nullable().optional();
 
-export const CreateEquipmentSchema = z.object({
+const EquipmentBaseSchema = z.object({
   code: optionalText(60),
   name: z.string().trim().min(2, "Nome é obrigatório").max(180),
   type: EquipmentTypeSchema,
@@ -46,11 +61,38 @@ export const CreateEquipmentSchema = z.object({
   location: optionalText(180),
   func: optionalText(180),
   description: optionalText(4000),
+  // Hierarquia de infraestrutura (host -> VM -> container)
+  parentId: z.string().trim().min(1).nullable().optional(),
+  // Virtualização e gerenciamento fora de banda (opcionais)
+  virtualizationPlatform: VirtualizationPlatformSchema.nullable().optional(),
+  managementController: ManagementControllerSchema.nullable().optional(),
+  managementIp: optionalText(64),
+  managementUrl: optionalText(500),
+  url: optionalText(500),
+  vmid: optionalInt(0, 999999),
+  guestOs: optionalText(120),
+  cpuCores: optionalInt(0, 4096),
+  memoryMb: optionalInt(0, 4194304),
+  diskGb: optionalInt(0, 1048576),
+  tags: z.array(z.string().trim().min(1).max(60)).max(30).optional(),
   solicitanteId: z.string().trim().min(1).nullable().optional()
 });
 
+// Todo host de virtualização precisa informar a plataforma
+const requiresPlatformWhenHypervisor = (value: { type?: string; virtualizationPlatform?: string | null }) =>
+  value.type !== "HYPERVISOR" || Boolean(value.virtualizationPlatform);
+
+export const CreateEquipmentSchema = EquipmentBaseSchema.refine(requiresPlatformWhenHypervisor, {
+  message: "Informe a plataforma de virtualização do host",
+  path: ["virtualizationPlatform"]
+});
+
 // Na atualização todos os campos são opcionais
-export const UpdateEquipmentSchema = CreateEquipmentSchema.partial();
+export const UpdateEquipmentSchema = EquipmentBaseSchema.partial().refine(
+  // Só bloqueia quando o cliente limpa a plataforma de um host explicitamente
+  (value) => !(value.type === "HYPERVISOR" && value.virtualizationPlatform === null),
+  { message: "Informe a plataforma de virtualização do host", path: ["virtualizationPlatform"] }
+);
 
 export const EquipmentQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
@@ -59,6 +101,18 @@ export const EquipmentQuerySchema = z.object({
   type: EquipmentTypeSchema.optional(),
   status: EquipmentStatusSchema.optional(),
   solicitanteId: z.string().trim().min(1).optional()
+});
+
+// Árvore de infraestrutura de um cliente (opcional: sem cliente, retorna todos)
+export const InventoryTreeQuerySchema = z.object({
+  solicitanteId: z.string().trim().min(1).optional()
+});
+
+// Busca rápida no inventário de infraestrutura
+export const InventorySearchQuerySchema = z.object({
+  q: z.string().trim().min(2, "Informe ao menos 2 caracteres"),
+  solicitanteId: z.string().trim().min(1).optional(),
+  limit: z.coerce.number().int().min(1).max(50).default(15)
 });
 
 // ============================================================
@@ -71,6 +125,8 @@ export const CreateCredentialSchema = z
     protocol: CredentialProtocolSchema.optional(),
     port: z.coerce.number().int().min(1).max(65535).nullable().optional(),
     username: optionalText(180),
+    // Link de acesso direto (ex.: https://10.0.0.5:8006)
+    url: optionalText(500),
     // Obrigatória apenas quando a credencial não reaproveita uma senha padrão do cliente
     secret: z.string().min(1, "Senha é obrigatória").optional(),
     notes: optionalText(4000),
@@ -88,6 +144,8 @@ export const UpdateCredentialSchema = z.object({
   protocol: CredentialProtocolSchema.optional(),
   port: z.coerce.number().int().min(1).max(65535).nullable().optional(),
   username: optionalText(180),
+  // Link de acesso direto (ex.: https://10.0.0.5:8006)
+  url: optionalText(500),
   // Quando omitida, a senha atual é mantida
   secret: z.string().min(1).optional(),
   notes: optionalText(4000),

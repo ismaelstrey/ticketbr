@@ -7,7 +7,17 @@ import { Button } from "@/components/ui/Button";
 import { Input, Select, Textarea } from "@/components/ui/Input";
 import { api } from "@/services/api";
 import { Equipment } from "@/types/inventory";
-import { EQUIPMENT_STATUS_LABELS, EQUIPMENT_STATUS_OPTIONS, EQUIPMENT_TYPE_LABELS, EQUIPMENT_TYPE_OPTIONS } from "./labels";
+import {
+  EQUIPMENT_STATUS_LABELS,
+  EQUIPMENT_STATUS_OPTIONS,
+  EQUIPMENT_TYPE_LABELS,
+  EQUIPMENT_TYPE_OPTIONS,
+  MANAGEMENT_CONTROLLER_LABELS,
+  MANAGEMENT_CONTROLLER_OPTIONS,
+  PARENT_CAPABLE_TYPES,
+  VIRTUALIZATION_PLATFORM_LABELS,
+  VIRTUALIZATION_PLATFORM_OPTIONS
+} from "./labels";
 
 const Grid = styled.div`
   display: grid;
@@ -27,6 +37,17 @@ const Field = styled.label<{ $full?: boolean }>`
   font-weight: ${({ theme }) => theme.typography.weight.semibold};
   color: ${({ theme }) => theme.tokens.color.text.secondary};
   grid-column: ${({ $full }) => ($full ? "1 / -1" : "auto")};
+`;
+
+const SectionTitle = styled.div`
+  grid-column: 1 / -1;
+  margin-top: 0.35rem;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: ${({ theme }) => theme.tokens.color.text.muted};
+  border-bottom: 1px solid ${({ theme }) => theme.tokens.color.border.default};
+  padding-bottom: 0.35rem;
 `;
 
 const Footer = styled.div`
@@ -51,6 +72,19 @@ type FormState = {
   func: string;
   description: string;
   solicitanteId: string;
+  // Hierarquia e infraestrutura virtualizada
+  parentId: string;
+  virtualizationPlatform: string;
+  managementController: string;
+  managementIp: string;
+  managementUrl: string;
+  url: string;
+  vmid: string;
+  guestOs: string;
+  cpuCores: string;
+  memoryGb: string;
+  diskGb: string;
+  tags: string;
 };
 
 const emptyForm: FormState = {
@@ -67,10 +101,23 @@ const emptyForm: FormState = {
   location: "",
   func: "",
   description: "",
-  solicitanteId: ""
+  solicitanteId: "",
+  parentId: "",
+  virtualizationPlatform: "",
+  managementController: "",
+  managementIp: "",
+  managementUrl: "",
+  url: "",
+  vmid: "",
+  guestOs: "",
+  cpuCores: "",
+  memoryGb: "",
+  diskGb: "",
+  tags: ""
 };
 
 type SolicitanteOption = { id: string; nome_fantasia: string };
+type ParentOption = { id: string; name: string; type: string };
 
 interface EquipmentFormModalProps {
   isOpen: boolean;
@@ -80,12 +127,19 @@ interface EquipmentFormModalProps {
 }
 
 /**
- * Modal de cadastro/edição de equipamento.
+ * Modal de cadastro/edição de equipamento, com campos de hierarquia e virtualização
+ * exibidos conforme o tipo do ativo.
  */
 export function EquipmentFormModal({ isOpen, onClose, onSubmit, equipment }: EquipmentFormModalProps) {
   const [form, setForm] = useState<FormState>(emptyForm);
   const [solicitantes, setSolicitantes] = useState<SolicitanteOption[]>([]);
+  const [parents, setParents] = useState<ParentOption[]>([]);
   const [saving, setSaving] = useState(false);
+
+  const isHypervisor = form.type === "HYPERVISOR";
+  const isServer = form.type === "SERVER";
+  const isVirtual = form.type === "VM" || form.type === "CONTAINER";
+  const isCompute = isHypervisor || isServer || isVirtual;
 
   // Carrega os clientes disponíveis para vincular ao equipamento
   useEffect(() => {
@@ -95,6 +149,24 @@ export function EquipmentFormModal({ isOpen, onClose, onSubmit, equipment }: Equ
       .then((res) => setSolicitantes(res.data))
       .catch(() => setSolicitantes([]));
   }, [isOpen]);
+
+  // Carrega os possíveis hosts (servidores/hypervisors/VMs) do cliente selecionado
+  useEffect(() => {
+    if (!isOpen) return;
+    const params: Record<string, string> = { page: "1", pageSize: "200" };
+    if (form.solicitanteId) params.solicitanteId = form.solicitanteId;
+
+    api.inventory
+      .list(params)
+      .then((res) =>
+        setParents(
+          res.data
+            .filter((item) => PARENT_CAPABLE_TYPES.includes(item.type) && item.id !== equipment?.id)
+            .map((item) => ({ id: item.id, name: item.name, type: item.type }))
+        )
+      )
+      .catch(() => setParents([]));
+  }, [isOpen, form.solicitanteId, equipment?.id]);
 
   // Preenche o formulário ao abrir (edição) ou limpa (novo)
   useEffect(() => {
@@ -114,7 +186,22 @@ export function EquipmentFormModal({ isOpen, onClose, onSubmit, equipment }: Equ
         location: equipment.location ?? "",
         func: equipment.func ?? "",
         description: equipment.description ?? "",
-        solicitanteId: equipment.solicitanteId ?? ""
+        solicitanteId: equipment.solicitanteId ?? "",
+        parentId: equipment.parentId ?? "",
+        virtualizationPlatform: equipment.virtualizationPlatform ?? "",
+        managementController: equipment.managementController ?? "",
+        managementIp: equipment.managementIp ?? "",
+        managementUrl: equipment.managementUrl ?? "",
+        url: equipment.url ?? "",
+        vmid: equipment.vmid !== null && equipment.vmid !== undefined ? String(equipment.vmid) : "",
+        guestOs: equipment.guestOs ?? "",
+        cpuCores: equipment.cpuCores !== null && equipment.cpuCores !== undefined ? String(equipment.cpuCores) : "",
+        memoryGb:
+          equipment.memoryMb !== null && equipment.memoryMb !== undefined
+            ? String(Math.round(equipment.memoryMb / 1024))
+            : "",
+        diskGb: equipment.diskGb !== null && equipment.diskGb !== undefined ? String(equipment.diskGb) : "",
+        tags: (equipment.tags ?? []).join(", ")
       });
     } else {
       setForm(emptyForm);
@@ -124,11 +211,18 @@ export function EquipmentFormModal({ isOpen, onClose, onSubmit, equipment }: Equ
   const setField = <K extends keyof FormState>(key: K, value: FormState[K]) =>
     setForm((prev) => ({ ...prev, [key]: value }));
 
+  // Converte texto vazio em null e números em inteiros
+  const toNumberOrNull = (value: string) => {
+    const parsed = Number.parseInt(value, 10);
+    return Number.isFinite(parsed) ? parsed : null;
+  };
+
   // Normaliza campos vazios como null antes de enviar
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setSaving(true);
     try {
+      const memoryGb = toNumberOrNull(form.memoryGb);
       const payload: Record<string, unknown> = {
         name: form.name.trim(),
         type: form.type,
@@ -143,7 +237,23 @@ export function EquipmentFormModal({ isOpen, onClose, onSubmit, equipment }: Equ
         location: form.location.trim() || null,
         func: form.func.trim() || null,
         description: form.description.trim() || null,
-        solicitanteId: form.solicitanteId || null
+        solicitanteId: form.solicitanteId || null,
+        parentId: form.parentId || null,
+        virtualizationPlatform: isHypervisor && form.virtualizationPlatform ? form.virtualizationPlatform : null,
+        managementController:
+          (isServer || isHypervisor) && form.managementController ? form.managementController : null,
+        managementIp: (isServer || isHypervisor) && form.managementIp.trim() ? form.managementIp.trim() : null,
+        managementUrl: (isServer || isHypervisor) && form.managementUrl.trim() ? form.managementUrl.trim() : null,
+        url: form.url.trim() || null,
+        vmid: isVirtual ? toNumberOrNull(form.vmid) : null,
+        guestOs: isVirtual && form.guestOs.trim() ? form.guestOs.trim() : null,
+        cpuCores: isCompute ? toNumberOrNull(form.cpuCores) : null,
+        memoryMb: isCompute && memoryGb !== null ? memoryGb * 1024 : null,
+        diskGb: isCompute ? toNumberOrNull(form.diskGb) : null,
+        tags: form.tags
+          .split(",")
+          .map((tag) => tag.trim())
+          .filter(Boolean)
       };
       const ok = await onSubmit(payload);
       if (ok) onClose();
@@ -216,7 +326,7 @@ export function EquipmentFormModal({ isOpen, onClose, onSubmit, equipment }: Equ
             Função
             <Input value={form.func} onChange={(e) => setField("func", e.target.value)} maxLength={180} />
           </Field>
-          <Field>
+          <Field $full>
             Cliente (Solicitante)
             <Select value={form.solicitanteId} onChange={(e) => setField("solicitanteId", e.target.value)}>
               <option value="">Sem cliente vinculado</option>
@@ -227,6 +337,127 @@ export function EquipmentFormModal({ isOpen, onClose, onSubmit, equipment }: Equ
               ))}
             </Select>
           </Field>
+
+          {isVirtual ? (
+            <>
+              <SectionTitle>Recurso virtualizado</SectionTitle>
+              <Field $full>
+                Host pai
+                <Select value={form.parentId} onChange={(e) => setField("parentId", e.target.value)}>
+                  <option value="">Sem host vinculado</option>
+                  {parents.map((parent) => (
+                    <option key={parent.id} value={parent.id}>
+                      {parent.name} ({EQUIPMENT_TYPE_LABELS[parent.type as keyof typeof EQUIPMENT_TYPE_LABELS]})
+                    </option>
+                  ))}
+                </Select>
+              </Field>
+              <Field>
+                VMID no hypervisor
+                <Input
+                  value={form.vmid}
+                  onChange={(e) => setField("vmid", e.target.value)}
+                  inputMode="numeric"
+                  placeholder="ex.: 100"
+                />
+              </Field>
+              <Field>
+                Sistema operacional
+                <Input value={form.guestOs} onChange={(e) => setField("guestOs", e.target.value)} maxLength={120} />
+              </Field>
+            </>
+          ) : null}
+
+          {isHypervisor ? (
+            <>
+              <SectionTitle>Host de virtualização</SectionTitle>
+              <Field $full>
+                Plataforma *
+                <Select
+                  value={form.virtualizationPlatform}
+                  onChange={(e) => setField("virtualizationPlatform", e.target.value)}
+                  required
+                >
+                  <option value="">Selecione a plataforma</option>
+                  {VIRTUALIZATION_PLATFORM_OPTIONS.map((platform) => (
+                    <option key={platform} value={platform}>
+                      {VIRTUALIZATION_PLATFORM_LABELS[platform]}
+                    </option>
+                  ))}
+                </Select>
+              </Field>
+            </>
+          ) : null}
+
+          {isCompute ? (
+            <>
+              <SectionTitle>Recursos</SectionTitle>
+              <Field>
+                vCPU (núcleos)
+                <Input value={form.cpuCores} onChange={(e) => setField("cpuCores", e.target.value)} inputMode="numeric" />
+              </Field>
+              <Field>
+                Memória (GB)
+                <Input value={form.memoryGb} onChange={(e) => setField("memoryGb", e.target.value)} inputMode="numeric" />
+              </Field>
+              <Field>
+                Disco (GB)
+                <Input value={form.diskGb} onChange={(e) => setField("diskGb", e.target.value)} inputMode="numeric" />
+              </Field>
+            </>
+          ) : null}
+
+          <SectionTitle>Gerenciamento fora de banda</SectionTitle>
+          <Field>
+            Controlador
+            <Select
+              value={form.managementController}
+              onChange={(e) => setField("managementController", e.target.value)}
+            >
+              <option value="">Não informado</option>
+              {MANAGEMENT_CONTROLLER_OPTIONS.map((controller) => (
+                <option key={controller} value={controller}>
+                  {MANAGEMENT_CONTROLLER_LABELS[controller]}
+                </option>
+              ))}
+            </Select>
+          </Field>
+          <Field>
+            IP de gerência
+            <Input
+              value={form.managementIp}
+              onChange={(e) => setField("managementIp", e.target.value)}
+              maxLength={64}
+              placeholder="ex.: 10.0.0.10"
+            />
+          </Field>
+          <Field>
+            URL de gerência
+            <Input
+              value={form.managementUrl}
+              onChange={(e) => setField("managementUrl", e.target.value)}
+              maxLength={500}
+              placeholder="ex.: https://10.0.0.10"
+            />
+          </Field>
+          <Field>
+            Link de acesso do ativo
+            <Input
+              value={form.url}
+              onChange={(e) => setField("url", e.target.value)}
+              maxLength={500}
+              placeholder="ex.: https://10.0.0.5:8006"
+            />
+          </Field>
+          <Field $full>
+            Tags (separadas por vírgula)
+            <Input
+              value={form.tags}
+              onChange={(e) => setField("tags", e.target.value)}
+              placeholder="ex.: produção, zabbix, cliente-x"
+            />
+          </Field>
+
           <Field $full>
             Descrição
             <Textarea value={form.description} onChange={(e) => setField("description", e.target.value)} />
@@ -236,7 +467,11 @@ export function EquipmentFormModal({ isOpen, onClose, onSubmit, equipment }: Equ
           <Button type="button" variant="ghost" onClick={onClose} disabled={saving}>
             Cancelar
           </Button>
-          <Button type="submit" variant="primary" disabled={saving || form.name.trim().length < 2}>
+          <Button
+            type="submit"
+            variant="primary"
+            disabled={saving || form.name.trim().length < 2 || (isHypervisor && !form.virtualizationPlatform)}
+          >
             {saving ? "Salvando..." : "Salvar"}
           </Button>
         </Footer>

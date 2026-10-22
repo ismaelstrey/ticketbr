@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import styled from "styled-components";
-import { FiCopy, FiEdit2, FiEye, FiEyeOff, FiKey, FiShield, FiTrash2 } from "react-icons/fi";
+import { FiCopy, FiEdit2, FiExternalLink, FiEye, FiEyeOff, FiKey, FiShield, FiTrash2 } from "react-icons/fi";
 import { Button } from "@/components/ui/Button";
 import { Credential } from "@/types/inventory";
 import { ACCESS_POLICY_LABELS, PROTOCOL_LABELS } from "./labels";
@@ -101,6 +101,27 @@ const EmptyState = styled.div`
   border: 1px dashed ${({ theme }) => theme.tokens.color.border.default};
   border-radius: ${({ theme }) => theme.borderRadius.medium};
 `;
+
+const OpenLink = styled.a`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid ${({ theme }) => theme.tokens.color.border.default};
+  border-radius: ${({ theme }) => theme.borderRadius.small};
+  font-size: 0.8rem;
+  color: ${({ theme }) => theme.tokens.color.interactive.primary};
+  text-decoration: none;
+
+  &:hover {
+    background: ${({ theme }) => theme.tokens.color.interactive.ghostHover};
+  }
+`;
+
+// Garante que o link abra como URL absoluta
+function normalizeUrl(url: string): string {
+  return /^https?:\/\//i.test(url) ? url : `https://${url}`;
+}
 
 interface CredentialListProps {
   credentials: Credential[];
@@ -209,6 +230,16 @@ export function CredentialList({ credentials, onEdit, onDelete, onReveal, onMana
                   : "Senha nunca alterada"}
               </Meta>
               <Actions>
+                {credential.loginUrl ? (
+                  <OpenLink
+                    href={normalizeUrl(credential.loginUrl)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="Abrir link de acesso"
+                  >
+                    <FiExternalLink aria-hidden="true" /> Abrir
+                  </OpenLink>
+                ) : null}
                 <Button type="button" variant="ghost" onClick={() => onManageAccess(credential)}>
                   Quem pode ver
                 </Button>

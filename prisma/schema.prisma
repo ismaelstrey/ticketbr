@@ -69,10 +69,35 @@ enum EquipmentType {
   ROUTER
   FIREWALL
   SERVER
+  // Host de virtualização (Proxmox VE, ESXi, vCenter...)
+  HYPERVISOR
   VM
+  // Container (Docker/LXC) executado dentro de uma VM ou host
+  CONTAINER
   COMPUTER
   PRINTER
   ACCESS_POINT
+  OTHER
+}
+
+// Plataforma de virtualização do host
+enum VirtualizationPlatform {
+  PROXMOX_VE
+  VMWARE_ESXI
+  VMWARE_VCENTER
+  MICROSOFT_HYPERV
+  XCP_NG
+  KVM
+  OTHER
+}
+
+// Controlador de gerenciamento fora de banda do servidor físico
+enum ManagementController {
+  NONE
+  ILO
+  IDRAC
+  IPMI
+  ILO_AND_IDRAC
   OTHER
 }
 
@@ -691,6 +716,24 @@ model Equipment {
   func          String?         @db.VarChar(180) // função do equipamento
   description   String?         @db.Text
 
+  // --- Hierarquia de infraestrutura: host -> VM -> container ---
+  parentId      String?         @map("parent_id")
+  parent        Equipment?      @relation("EquipmentHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children      Equipment[]     @relation("EquipmentHierarchy")
+
+  // --- Virtualização e gerenciamento fora de banda ---
+  virtualizationPlatform VirtualizationPlatform? @map("virtualization_platform")
+  managementController   ManagementController?   @map("management_controller")
+  managementIp           String?                 @map("management_ip") @db.VarChar(64)
+  managementUrl          String?                 @map("management_url")
+  url                    String? // link de acesso web do recurso
+  vmid                   Int? // ID da VM/container dentro do hypervisor
+  guestOs                String?                 @map("guest_os") @db.VarChar(120)
+  cpuCores               Int?                    @map("cpu_cores")
+  memoryMb               Int?                    @map("memory_mb")
+  diskGb                 Int?                    @map("disk_gb")
+  tags                   String[]                @default([])
+
   solicitanteId String?         @map("solicitante_id")
   solicitante   Solicitante?    @relation(fields: [solicitanteId], references: [id], onDelete: SetNull)
 
@@ -706,6 +749,8 @@ model Equipment {
   @@index([type, status])
   @@index([ipAddress])
   @@index([solicitanteId])
+  @@index([parentId])
+  @@index([solicitanteId, type])
   @@map("equipment")
 }
 
@@ -722,6 +767,8 @@ model EquipmentCredential {
   protocol      CredentialProtocol     @default(SSH)
   port          Int?
   username      String?                @db.VarChar(180)
+  // Link de acesso direto do recurso (ex.: https://10.0.0.5:8006)
+  url           String?
   // Segredo cifrado (AES-256-GCM) — nunca armazenado em texto puro.
   // Nulo quando a credencial usa a senha padrão compartilhada do cliente.
   secret        Json?

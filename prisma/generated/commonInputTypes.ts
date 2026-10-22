@@ -542,6 +542,20 @@ export type EnumEquipmentStatusFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumEquipmentStatusFilter<$PrismaModel> | $Enums.EquipmentStatus
 }
 
+export type EnumVirtualizationPlatformNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.VirtualizationPlatform | Prisma.EnumVirtualizationPlatformFieldRefInput<$PrismaModel> | null
+  in?: $Enums.VirtualizationPlatform[] | Prisma.ListEnumVirtualizationPlatformFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.VirtualizationPlatform[] | Prisma.ListEnumVirtualizationPlatformFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumVirtualizationPlatformNullableFilter<$PrismaModel> | $Enums.VirtualizationPlatform | null
+}
+
+export type EnumManagementControllerNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.ManagementController | Prisma.EnumManagementControllerFieldRefInput<$PrismaModel> | null
+  in?: $Enums.ManagementController[] | Prisma.ListEnumManagementControllerFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.ManagementController[] | Prisma.ListEnumManagementControllerFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumManagementControllerNullableFilter<$PrismaModel> | $Enums.ManagementController | null
+}
+
 export type EnumEquipmentTypeWithAggregatesFilter<$PrismaModel = never> = {
   equals?: $Enums.EquipmentType | Prisma.EnumEquipmentTypeFieldRefInput<$PrismaModel>
   in?: $Enums.EquipmentType[] | Prisma.ListEnumEquipmentTypeFieldRefInput<$PrismaModel>
@@ -560,6 +574,26 @@ export type EnumEquipmentStatusWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumEquipmentStatusFilter<$PrismaModel>
   _max?: Prisma.NestedEnumEquipmentStatusFilter<$PrismaModel>
+}
+
+export type EnumVirtualizationPlatformNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.VirtualizationPlatform | Prisma.EnumVirtualizationPlatformFieldRefInput<$PrismaModel> | null
+  in?: $Enums.VirtualizationPlatform[] | Prisma.ListEnumVirtualizationPlatformFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.VirtualizationPlatform[] | Prisma.ListEnumVirtualizationPlatformFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumVirtualizationPlatformNullableWithAggregatesFilter<$PrismaModel> | $Enums.VirtualizationPlatform | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumVirtualizationPlatformNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumVirtualizationPlatformNullableFilter<$PrismaModel>
+}
+
+export type EnumManagementControllerNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.ManagementController | Prisma.EnumManagementControllerFieldRefInput<$PrismaModel> | null
+  in?: $Enums.ManagementController[] | Prisma.ListEnumManagementControllerFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.ManagementController[] | Prisma.ListEnumManagementControllerFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumManagementControllerNullableWithAggregatesFilter<$PrismaModel> | $Enums.ManagementController | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumManagementControllerNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumManagementControllerNullableFilter<$PrismaModel>
 }
 
 export type EnumCredentialProtocolFilter<$PrismaModel = never> = {
@@ -1112,6 +1146,20 @@ export type NestedEnumEquipmentStatusFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumEquipmentStatusFilter<$PrismaModel> | $Enums.EquipmentStatus
 }
 
+export type NestedEnumVirtualizationPlatformNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.VirtualizationPlatform | Prisma.EnumVirtualizationPlatformFieldRefInput<$PrismaModel> | null
+  in?: $Enums.VirtualizationPlatform[] | Prisma.ListEnumVirtualizationPlatformFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.VirtualizationPlatform[] | Prisma.ListEnumVirtualizationPlatformFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumVirtualizationPlatformNullableFilter<$PrismaModel> | $Enums.VirtualizationPlatform | null
+}
+
+export type NestedEnumManagementControllerNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.ManagementController | Prisma.EnumManagementControllerFieldRefInput<$PrismaModel> | null
+  in?: $Enums.ManagementController[] | Prisma.ListEnumManagementControllerFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.ManagementController[] | Prisma.ListEnumManagementControllerFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumManagementControllerNullableFilter<$PrismaModel> | $Enums.ManagementController | null
+}
+
 export type NestedEnumEquipmentTypeWithAggregatesFilter<$PrismaModel = never> = {
   equals?: $Enums.EquipmentType | Prisma.EnumEquipmentTypeFieldRefInput<$PrismaModel>
   in?: $Enums.EquipmentType[] | Prisma.ListEnumEquipmentTypeFieldRefInput<$PrismaModel>
@@ -1130,6 +1178,26 @@ export type NestedEnumEquipmentStatusWithAggregatesFilter<$PrismaModel = never> 
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumEquipmentStatusFilter<$PrismaModel>
   _max?: Prisma.NestedEnumEquipmentStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumVirtualizationPlatformNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.VirtualizationPlatform | Prisma.EnumVirtualizationPlatformFieldRefInput<$PrismaModel> | null
+  in?: $Enums.VirtualizationPlatform[] | Prisma.ListEnumVirtualizationPlatformFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.VirtualizationPlatform[] | Prisma.ListEnumVirtualizationPlatformFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumVirtualizationPlatformNullableWithAggregatesFilter<$PrismaModel> | $Enums.VirtualizationPlatform | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumVirtualizationPlatformNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumVirtualizationPlatformNullableFilter<$PrismaModel>
+}
+
+export type NestedEnumManagementControllerNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.ManagementController | Prisma.EnumManagementControllerFieldRefInput<$PrismaModel> | null
+  in?: $Enums.ManagementController[] | Prisma.ListEnumManagementControllerFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.ManagementController[] | Prisma.ListEnumManagementControllerFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumManagementControllerNullableWithAggregatesFilter<$PrismaModel> | $Enums.ManagementController | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumManagementControllerNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumManagementControllerNullableFilter<$PrismaModel>
 }
 
 export type NestedEnumCredentialProtocolFilter<$PrismaModel = never> = {

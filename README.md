@@ -43,6 +43,21 @@ Observações:
 
 - Comentários por tarefa em `/tasks/[id]` (tabela `task_comments`), com autoria. A exclusão é permitida ao autor do comentário ou a um usuário `ADMIN`.
 
+## Inventário de infraestrutura
+
+- Acesso: `/infraestrutura` (com seletor de cliente) — visualiza a árvore de ativos do cliente: servidor físico → host de virtualização → VM → container.
+- A hierarquia usa o campo `parentId` do modelo `Equipment`; o vínculo só é aceito entre recursos do mesmo cliente e sem ciclos.
+- Campos de virtualização em `Equipment`: `virtualizationPlatform`, `managementController` (iLO/iDRAC/IPMI), `managementIp`/`managementUrl`, `url`, `vmid`, `guestOs`, `cpuCores`, `memoryMb`, `diskGb` e `tags`.
+- Todo host com `type = HYPERVISOR` exige uma `virtualizationPlatform` (Proxmox, VMware ESXi/vCenter, Hyper-V, XCP-ng, KVM).
+- Credenciais do cofre aceitam um link de acesso (`url`); quando ausente, o link é derivado de `hostname`/`ipAddress` + `protocol`/`port` (`loginUrl`) e exibido como botão **Abrir**.
+- Busca rápida global com **Ctrl/Cmd + K** (rota `/api/inventory/search`): responde "onde está o recurso?" pelo nome, código, hostname, IP, IP de gerência, VMID, tags ou dados de credenciais, exibindo o caminho completo.
+
+### API (Infraestrutura)
+
+- `GET /api/inventory/tree?solicitanteId=` — retorna `{ data: { solicitante, summary, nodes } }` com a árvore do cliente (ou de todos).
+- `GET /api/inventory/search?q=&solicitanteId=&limit=` — retorna `{ data, total }` com os recursos que casam com o termo e o caminho do recurso.
+- `POST /api/inventory` e `PUT /api/inventory/:id` — aceitam os campos de virtualização e `parentId` (validado no servidor).
+
 ## Portal do cliente
 
 - **Recuperação de senha**: `/cliente/esqueci-senha` solicita o envio do link e `/cliente/redefinir-senha` conclui a troca. O token é de uso único, expira em 1 hora e é persistido apenas como hash em `password_reset_tokens`. O link usa `APP_BASE_URL`.

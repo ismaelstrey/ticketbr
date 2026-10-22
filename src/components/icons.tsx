@@ -45,5 +45,6 @@ export {
   FiLayers,
   FiServer,
   FiKey,
-  FiShield
+  FiShield,
+  FiExternalLink
 } from "react-icons/fi";

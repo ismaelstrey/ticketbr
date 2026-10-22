@@ -9,11 +9,13 @@ export const credentialSelect = {
   protocol: true,
   port: true,
   username: true,
+  // Link de acesso direto do recurso (ex.: console web do Proxmox/iLO)
+  url: true,
   notes: true,
   accessPolicy: true,
   ownerUserId: true,
   owner: { select: { id: true, name: true } },
-  equipment: { select: { id: true, name: true } },
+  equipment: { select: { id: true, name: true, hostname: true, ipAddress: true } },
   // Quando a credencial reaproveita a senha padrão do cliente, é dela que vem o segredo
   sharedSecretId: true,
   sharedSecret: { select: { id: true, label: true, updated_at: true } },
@@ -29,17 +31,35 @@ type CredentialRow = {
   protocol: string;
   port: number | null;
   username: string | null;
+  url: string | null;
   notes: string | null;
   accessPolicy: string;
   ownerUserId: string | null;
   owner?: { id: string; name: string } | null;
-  equipment?: { id: string; name: string } | null;
+  equipment?: { id: string; name: string; hostname: string | null; ipAddress: string | null } | null;
   sharedSecretId?: string | null;
   sharedSecret?: { id: string; label: string; updated_at: Date } | null;
   lastRotatedAt: Date | null;
   created_at: Date;
   updated_at: Date;
 };
+
+/**
+ * Deriva o link de acesso da credencial.
+ * Usa o link informado manualmente e, quando ausente, monta a URL a partir
+ * do host/IP do equipamento para protocolos web (HTTP/HTTPS).
+ */
+function buildLoginUrl(credential: CredentialRow): string | null {
+  if (credential.url) return credential.url;
+
+  const protocol = credential.protocol?.toLowerCase();
+  if (protocol !== "http" && protocol !== "https") return null;
+
+  const host = credential.equipment?.hostname || credential.equipment?.ipAddress;
+  if (!host) return null;
+
+  return `${protocol}://${host}${credential.port ? `:${credential.port}` : ""}`;
+}
 
 /**
  * Monta a resposta de uma credencial aplicando a máscara da senha e o resultado da autorização.
@@ -58,6 +78,8 @@ export function toCredentialDto(
     protocol: credential.protocol,
     port: credential.port,
     username: credential.username,
+    url: credential.url,
+    loginUrl: buildLoginUrl(credential),
     secret: MASKED_SECRET,
     notes: credential.notes,
     accessPolicy: credential.accessPolicy,

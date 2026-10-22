@@ -67,6 +67,7 @@ export function CredentialModal({ isOpen, onClose, onSubmit, credential, solicit
   const [protocol, setProtocol] = useState("SSH");
   const [port, setPort] = useState("");
   const [username, setUsername] = useState("");
+  const [url, setUrl] = useState("");
   const [secret, setSecret] = useState("");
   const [notes, setNotes] = useState("");
   const [accessPolicy, setAccessPolicy] = useState("OWNER_AND_ADMINS");
@@ -113,6 +114,7 @@ export function CredentialModal({ isOpen, onClose, onSubmit, credential, solicit
       setProtocol(credential.protocol);
       setPort(credential.port ? String(credential.port) : "");
       setUsername(credential.username ?? "");
+      setUrl(credential.url ?? "");
       setSecret("");
       setNotes(credential.notes ?? "");
       setAccessPolicy(credential.accessPolicy);
@@ -124,6 +126,7 @@ export function CredentialModal({ isOpen, onClose, onSubmit, credential, solicit
       setProtocol("SSH");
       setPort("");
       setUsername("");
+      setUrl("");
       setSecret("");
       setNotes("");
       setAccessPolicy("OWNER_AND_ADMINS");
@@ -147,6 +150,7 @@ export function CredentialModal({ isOpen, onClose, onSubmit, credential, solicit
         protocol,
         port: port ? Number(port) : null,
         username: username.trim() || null,
+        url: url.trim() || null,
         notes: notes.trim() || null,
         accessPolicy,
         ownerUserId: ownerUserId || null
@@ -206,6 +210,16 @@ export function CredentialModal({ isOpen, onClose, onSubmit, credential, solicit
           <Field>
             Usuário
             <Input value={username} onChange={(e) => setUsername(e.target.value)} maxLength={180} autoComplete="off" />
+          </Field>
+          <Field $full>
+            Link de acesso
+            <Input
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              maxLength={500}
+              placeholder="ex.: https://10.0.0.5:8006"
+            />
+            <Hint>Para HTTP/HTTPS, quando vazio o link é montado com o IP/hostname do equipamento.</Hint>
           </Field>
           {solicitanteId ? (
             <Field>

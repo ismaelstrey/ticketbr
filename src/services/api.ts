@@ -2,7 +2,7 @@ import { Ticket, TicketStatus } from "@/types/ticket";
 import { Task, TaskComment } from "@/types/task";
 import { Project, ProjectMember } from "@/types/project";
 import { TicketOperationalDashboardResponse, TicketDashboardFilters } from "@/types/ticketsDashboard";
-import { Credential, CredentialGrant, Equipment, SharedSecret, UserGroup } from "@/types/inventory";
+import { Credential, CredentialGrant, Equipment, InfraSearchResult, InfraTree, SharedSecret, UserGroup } from "@/types/inventory";
 
 const API_BASE = "/api";
 
@@ -130,6 +130,16 @@ export const api = {
     update: (id: string, payload: Partial<Equipment>) =>
       fetchJson<{ data: Equipment }>(`/inventory/${id}`, { method: "PUT", body: JSON.stringify(payload) }),
     remove: (id: string) => fetchJson<{ ok: boolean }>(`/inventory/${id}`, { method: "DELETE" }),
+    // Árvore de infraestrutura (host -> VM -> container) de um cliente
+    tree: (solicitanteId?: string) => {
+      const qs = solicitanteId ? `?${new URLSearchParams({ solicitanteId }).toString()}` : "";
+      return fetchJson<{ data: InfraTree }>(`/inventory/tree${qs}`);
+    },
+    // Busca rápida no inventário ("onde está o Zabbix?")
+    search: (params: { q: string; solicitanteId?: string }) => {
+      const qs = `?${new URLSearchParams(params as Record<string, string>).toString()}`;
+      return fetchJson<{ data: InfraSearchResult[]; total: number }>(`/inventory/search${qs}`);
+    },
     // Cofre de senhas
     credentials: {
       list: (params?: Record<string, string>) => {

@@ -6,6 +6,7 @@ import { requireStaffSession } from "@/server/services/staff-context";
 import { writeAuditLog } from "@/server/services/audit-log";
 import { resolveCredentialAccessBatch } from "@/server/services/inventory-access";
 import { credentialSelect, toCredentialDto } from "@/server/services/inventory-credentials";
+import { validateParentAssignment } from "@/server/services/inventory-tree";
 
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -56,6 +57,19 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
         location: equipment.location,
         func: equipment.func,
         description: equipment.description,
+        // Hierarquia e dados de infraestrutura virtualizada
+        parentId: equipment.parentId,
+        virtualizationPlatform: equipment.virtualizationPlatform,
+        managementController: equipment.managementController,
+        managementIp: equipment.managementIp,
+        managementUrl: equipment.managementUrl,
+        url: equipment.url,
+        vmid: equipment.vmid,
+        guestOs: equipment.guestOs,
+        cpuCores: equipment.cpuCores,
+        memoryMb: equipment.memoryMb,
+        diskGb: equipment.diskGb,
+        tags: equipment.tags,
         solicitanteId: equipment.solicitanteId,
         solicitante: equipment.solicitante,
         createdAt: equipment.created_at,
@@ -77,7 +91,10 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     const body = await request.json().catch(() => ({}));
     const input = UpdateEquipmentSchema.parse(body);
 
-    const existing = await prisma.equipment.findFirst({ where: { id, deleted_at: null }, select: { id: true } });
+    const existing = await prisma.equipment.findFirst({
+      where: { id, deleted_at: null },
+      select: { id: true, solicitanteId: true }
+    });
     if (!existing) {
       return NextResponse.json({ error: "Equipamento não encontrado" }, { status: 404 });
     }
@@ -106,8 +123,43 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     if (input.location !== undefined) data.location = input.location ?? null;
     if (input.func !== undefined) data.func = input.func ?? null;
     if (input.description !== undefined) data.description = input.description ?? null;
+    // Hierarquia e dados de infraestrutura virtualizada
+    if (input.virtualizationPlatform !== undefined) data.virtualizationPlatform = input.virtualizationPlatform ?? null;
+    if (input.managementController !== undefined) data.managementController = input.managementController ?? null;
+    if (input.managementIp !== undefined) data.managementIp = input.managementIp ?? null;
+    if (input.managementUrl !== undefined) data.managementUrl = input.managementUrl ?? null;
+    if (input.url !== undefined) data.url = input.url ?? null;
+    if (input.vmid !== undefined) data.vmid = input.vmid ?? null;
+    if (input.guestOs !== undefined) data.guestOs = input.guestOs ?? null;
+    if (input.cpuCores !== undefined) data.cpuCores = input.cpuCores ?? null;
+    if (input.memoryMb !== undefined) data.memoryMb = input.memoryMb ?? null;
+    if (input.diskGb !== undefined) data.diskGb = input.diskGb ?? null;
+    if (input.tags !== undefined) data.tags = input.tags ?? [];
     if (input.solicitanteId !== undefined) {
       data.solicitante = input.solicitanteId ? { connect: { id: input.solicitanteId } } : { disconnect: true };
+    }
+
+    // Vínculo de hierarquia (host -> VM -> container) com validação de cliente e ciclos
+    if (input.parentId !== undefined) {
+      if (input.parentId === null) {
+        data.parent = { disconnect: true };
+      } else {
+        const effectiveSolicitanteId =
+          input.solicitanteId !== undefined ? input.solicitanteId ?? null : existing.solicitanteId;
+        const parentResult = await validateParentAssignment({
+          parentId: input.parentId,
+          childSolicitanteId: effectiveSolicitanteId,
+          childId: id
+        });
+        if (!parentResult.ok) {
+          return NextResponse.json({ error: parentResult.error }, { status: parentResult.status });
+        }
+        data.parent = { connect: { id: parentResult.parent.id } };
+        // O recurso vincula-se ao mesmo cliente do host
+        data.solicitante = parentResult.parent.solicitanteId
+          ? { connect: { id: parentResult.parent.solicitanteId } }
+          : { disconnect: true };
+      }
     }
 
     const updated = await prisma.equipment.update({
