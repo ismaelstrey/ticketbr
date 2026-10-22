@@ -79,6 +79,7 @@ type TreeRow = {
     | null;
   vmid: number | null;
   tags: string[];
+  solicitanteId: string | null;
   _count: { credentials: number };
 };
 
@@ -107,6 +108,7 @@ export async function buildInventoryTree(options: { solicitanteId?: string } = {
         virtualizationPlatform: true,
         vmid: true,
         tags: true,
+        solicitanteId: true,
         _count: { select: { credentials: { where: { deleted_at: null } } } }
       }
     }),
@@ -134,6 +136,7 @@ export async function buildInventoryTree(options: { solicitanteId?: string } = {
       vmid: row.vmid,
       tags: row.tags,
       credentialCount: row._count.credentials,
+      solicitanteId: row.solicitanteId,
       children: []
     });
   }

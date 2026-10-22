@@ -9,8 +9,10 @@ import { Button } from "@/components/ui/Button";
 import { Select } from "@/components/ui/Input";
 import { InfraTreeView } from "@/components/inventory/InfraTree";
 import { InfraSearchPalette } from "@/components/inventory/InfraSearchPalette";
-import { EquipmentFormModal } from "@/components/inventory/EquipmentFormModal";
+import { EquipmentFormModal, EquipmentFormPreset } from "@/components/inventory/EquipmentFormModal";
+import { DEFAULT_CHILD_TYPE } from "@/components/inventory/labels";
 import { useInventory, useInventoryTree, useSolicitantes } from "@/hooks/useInventory";
+import { InfraTreeNode } from "@/types/inventory";
 
 const Page = styled.div`
   padding: 1rem;
@@ -88,6 +90,7 @@ export default function InfraestruturaPage() {
 
   const [searchOpen, setSearchOpen] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
+  const [formPreset, setFormPreset] = useState<EquipmentFormPreset | null>(null);
 
   // Atalho global Ctrl/Cmd + K para abrir a busca rápida
   useEffect(() => {
@@ -108,6 +111,31 @@ export default function InfraestruturaPage() {
     return ok;
   };
 
+  // Abre o formulário para um novo ativo sem vínculo
+  const handleNewAsset = () => {
+    setFormPreset(null);
+    setFormOpen(true);
+  };
+
+  // Abre o formulário já vinculado ao host, sugerindo o tipo de recurso filho
+  // (host de virtualização -> VM, VM -> container)
+  const handleAddChild = (node: InfraTreeNode) => {
+    setFormPreset({
+      parentId: node.id,
+      parentName: node.name,
+      parentType: node.type,
+      type: DEFAULT_CHILD_TYPE[node.type],
+      solicitanteId: node.solicitanteId ?? (solicitanteId || null)
+    });
+    setFormOpen(true);
+  };
+
+  // Fecha o formulário limpando o contexto de host selecionado
+  const handleCloseForm = () => {
+    setFormOpen(false);
+    setFormPreset(null);
+  };
+
   return (
     <AppShellContainer>
       <Sidebar />
@@ -124,7 +152,7 @@ export default function InfraestruturaPage() {
               <Button type="button" variant="ghost" onClick={() => setSearchOpen(true)}>
                 Busca rápida
               </Button>
-              <Button type="button" variant="primary" onClick={() => setFormOpen(true)}>
+              <Button type="button" variant="primary" onClick={handleNewAsset}>
                 Novo ativo
               </Button>
             </HeaderActions>
@@ -153,7 +181,11 @@ export default function InfraestruturaPage() {
           {loading && !tree ? (
             <LoadingBox>Carregando infraestrutura...</LoadingBox>
           ) : tree ? (
-            <InfraTreeView tree={tree} onSelect={(id) => router.push(`/inventory/${id}`)} />
+            <InfraTreeView
+              tree={tree}
+              onSelect={(id) => router.push(`/inventory/${id}`)}
+              onAddChild={handleAddChild}
+            />
           ) : null}
         </Page>
 
@@ -164,7 +196,12 @@ export default function InfraestruturaPage() {
           solicitanteId={solicitanteId || undefined}
         />
 
-        <EquipmentFormModal isOpen={formOpen} onClose={() => setFormOpen(false)} onSubmit={handleSubmit} />
+        <EquipmentFormModal
+          isOpen={formOpen}
+          onClose={handleCloseForm}
+          onSubmit={handleSubmit}
+          preset={formPreset}
+        />
       </MainContent>
     </AppShellContainer>
   );
