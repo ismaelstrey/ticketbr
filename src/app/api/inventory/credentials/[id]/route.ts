@@ -103,6 +103,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     if (input.protocol !== undefined) data.protocol = input.protocol;
     if (input.port !== undefined) data.port = input.port ?? null;
     if (input.username !== undefined) data.username = input.username ?? null;
+    if (input.url !== undefined) data.url = input.url ?? null;
     if (input.notes !== undefined) data.notes = input.notes ?? null;
     if (input.accessPolicy !== undefined) data.accessPolicy = input.accessPolicy;
     if (input.ownerUserId !== undefined) {

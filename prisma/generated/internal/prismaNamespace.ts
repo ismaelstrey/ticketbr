@@ -3286,6 +3286,18 @@ export const EquipmentScalarFieldEnum = {
   location: 'location',
   func: 'func',
   description: 'description',
+  parentId: 'parentId',
+  virtualizationPlatform: 'virtualizationPlatform',
+  managementController: 'managementController',
+  managementIp: 'managementIp',
+  managementUrl: 'managementUrl',
+  url: 'url',
+  vmid: 'vmid',
+  guestOs: 'guestOs',
+  cpuCores: 'cpuCores',
+  memoryMb: 'memoryMb',
+  diskGb: 'diskGb',
+  tags: 'tags',
   solicitanteId: 'solicitanteId',
   created_at: 'created_at',
   updated_at: 'updated_at',
@@ -3304,6 +3316,7 @@ export const EquipmentCredentialScalarFieldEnum = {
   protocol: 'protocol',
   port: 'port',
   username: 'username',
+  url: 'url',
   secret: 'secret',
   notes: 'notes',
   sharedSecretId: 'sharedSecretId',
@@ -3656,6 +3669,34 @@ export type EnumEquipmentStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$
  * Reference to a field of type 'EquipmentStatus[]'
  */
 export type ListEnumEquipmentStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EquipmentStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'VirtualizationPlatform'
+ */
+export type EnumVirtualizationPlatformFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'VirtualizationPlatform'>
+    
+
+
+/**
+ * Reference to a field of type 'VirtualizationPlatform[]'
+ */
+export type ListEnumVirtualizationPlatformFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'VirtualizationPlatform[]'>
+    
+
+
+/**
+ * Reference to a field of type 'ManagementController'
+ */
+export type EnumManagementControllerFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ManagementController'>
+    
+
+
+/**
+ * Reference to a field of type 'ManagementController[]'
+ */
+export type ListEnumManagementControllerFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ManagementController[]'>
     
 
 

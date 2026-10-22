@@ -3,7 +3,15 @@
 import { useCallback, useEffect, useState } from "react";
 import { api } from "@/services/api";
 import { useToast } from "@/context/ToastContext";
-import { Credential, CredentialGrant, Equipment, SharedSecret, UserGroup } from "@/types/inventory";
+import {
+  Credential,
+  CredentialGrant,
+  Equipment,
+  InfraSearchResult,
+  InfraTree,
+  SharedSecret,
+  UserGroup
+} from "@/types/inventory";
 
 // Filtros aceitos pela listagem de equipamentos
 export type InventoryFilters = {
@@ -431,4 +439,105 @@ export function useUserGroups() {
   );
 
   return { groups, loading, reload: load, create, update, remove };
+}
+
+/**
+ * Hook da árvore de infraestrutura (host -> VM -> container) de um cliente.
+ * Sem cliente selecionado, retorna a infraestrutura de todos.
+ */
+export function useInventoryTree(solicitanteId: string | null) {
+  const [tree, setTree] = useState<InfraTree | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await api.inventory.tree(solicitanteId ?? undefined);
+      setTree(res.data);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Falha ao carregar a infraestrutura");
+      setTree(null);
+    } finally {
+      setLoading(false);
+    }
+  }, [solicitanteId]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  return { tree, loading, error, reload: load };
+}
+
+/**
+ * Hook da busca rápida do inventário ("onde está o Zabbix?").
+ * O componente é responsável pelo debounce da digitação.
+ */
+export function useInventorySearch(solicitanteId?: string) {
+  const [results, setResults] = useState<InfraSearchResult[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const search = useCallback(
+    async (term: string) => {
+      const q = term.trim();
+      if (q.length < 2) {
+        setResults([]);
+        setError(null);
+        return;
+      }
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await api.inventory.search({ q, ...(solicitanteId ? { solicitanteId } : {}) });
+        setResults(res.data);
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : "Falha na busca");
+        setResults([]);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [solicitanteId]
+  );
+
+  const clear = useCallback(() => {
+    setResults([]);
+    setError(null);
+  }, []);
+
+  return { results, loading, error, search, clear };
+}
+
+/**
+ * Hook com a lista de clientes (solicitantes) usada nos seletores de infraestrutura.
+ */
+export function useSolicitantes() {
+  const [solicitantes, setSolicitantes] = useState<Array<{ id: string; nome_fantasia: string }>>([]);
+  const [loading, setLoading] = useState(false);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await api.solicitantes.list({
+        page: "1",
+        pageSize: "200",
+        sortBy: "nome_fantasia",
+        sortDir: "asc"
+      });
+      setSolicitantes(res.data);
+    } catch {
+      setSolicitantes([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  return { solicitantes, loading, reload: load };
 }

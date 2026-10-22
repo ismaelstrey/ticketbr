@@ -4,6 +4,7 @@ import { prisma, Prisma } from "@/lib/prisma";
 import { CreateEquipmentSchema, EquipmentQuerySchema } from "@/lib/validations/inventory";
 import { requireStaffSession } from "@/server/services/staff-context";
 import { writeAuditLog } from "@/server/services/audit-log";
+import { validateParentAssignment } from "@/server/services/inventory-tree";
 
 // Monta o filtro de listagem do inventário a partir dos parâmetros de consulta
 function buildWhere(query: z.infer<typeof EquipmentQuerySchema>): Prisma.EquipmentWhereInput {
@@ -70,6 +71,19 @@ export async function GET(request: NextRequest) {
       location: row.location,
       func: row.func,
       description: row.description,
+      // Hierarquia e dados de infraestrutura virtualizada
+      parentId: row.parentId,
+      virtualizationPlatform: row.virtualizationPlatform,
+      managementController: row.managementController,
+      managementIp: row.managementIp,
+      managementUrl: row.managementUrl,
+      url: row.url,
+      vmid: row.vmid,
+      guestOs: row.guestOs,
+      cpuCores: row.cpuCores,
+      memoryMb: row.memoryMb,
+      diskGb: row.diskGb,
+      tags: row.tags,
       solicitanteId: row.solicitanteId,
       solicitante: row.solicitante,
       credentialCount: row._count.credentials,
@@ -91,9 +105,22 @@ export async function POST(request: NextRequest) {
     const body = await request.json().catch(() => ({}));
     const input = CreateEquipmentSchema.parse(body);
 
-    if (input.solicitanteId) {
+    // O cliente do recurso pode ser herdado do host informado
+    let solicitanteId: string | null = input.solicitanteId ?? null;
+    let parentId: string | null = null;
+
+    if (input.parentId) {
+      const parentResult = await validateParentAssignment({ parentId: input.parentId, childSolicitanteId: solicitanteId });
+      if (!parentResult.ok) {
+        return NextResponse.json({ error: parentResult.error }, { status: parentResult.status });
+      }
+      parentId = parentResult.parent.id;
+      solicitanteId = parentResult.parent.solicitanteId;
+    }
+
+    if (solicitanteId) {
       const solicitante = await prisma.solicitante.findFirst({
-        where: { id: input.solicitanteId, status: true },
+        where: { id: solicitanteId, status: true },
         select: { id: true }
       });
       if (!solicitante) {
@@ -116,7 +143,20 @@ export async function POST(request: NextRequest) {
         location: input.location ?? null,
         func: input.func ?? null,
         description: input.description ?? null,
-        solicitanteId: input.solicitanteId ?? null,
+        // Hierarquia e dados de infraestrutura virtualizada
+        parentId,
+        virtualizationPlatform: input.virtualizationPlatform ?? null,
+        managementController: input.managementController ?? null,
+        managementIp: input.managementIp ?? null,
+        managementUrl: input.managementUrl ?? null,
+        url: input.url ?? null,
+        vmid: input.vmid ?? null,
+        guestOs: input.guestOs ?? null,
+        cpuCores: input.cpuCores ?? null,
+        memoryMb: input.memoryMb ?? null,
+        diskGb: input.diskGb ?? null,
+        tags: input.tags ?? [],
+        solicitanteId,
         created_by: session.userId,
         updated_by: session.userId
       },

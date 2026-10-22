@@ -32,7 +32,8 @@ export async function GET(request: NextRequest) {
     if (q) {
       where.OR = [
         { label: { contains: q, mode: "insensitive" } },
-        { username: { contains: q, mode: "insensitive" } }
+        { username: { contains: q, mode: "insensitive" } },
+        { url: { contains: q, mode: "insensitive" } }
       ];
     }
 
@@ -124,6 +125,8 @@ export async function POST(request: NextRequest) {
         protocol: input.protocol ?? "SSH",
         port: input.port ?? null,
         username: input.username ?? null,
+        // Link de acesso direto do recurso (ex.: console web)
+        url: input.url ?? null,
         sharedSecretId,
         notes: input.notes ?? null,
         accessPolicy: input.accessPolicy ?? "OWNER_AND_ADMINS",

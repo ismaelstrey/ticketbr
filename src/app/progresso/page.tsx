@@ -624,6 +624,22 @@ const modules: Module[] = [
     ]
   },
   {
+    name: "Infraestrutura & Virtualização",
+    description: "Hierarquia de ativos (servidor físico -> host de virtualização -> VM -> container) com dados de acesso, iLO/iDRAC e busca rápida global.",
+    status: "done",
+    progress: 100,
+    icon: FiLayers,
+    features: [
+      "Hierarquia de ativos via parentId (servidor, host, VM e container)",
+      "Plataforma de virtualização (Proxmox, VMware ESXi/vCenter, Hyper-V, XCP-ng, KVM)",
+      "Controlador de gerência iLO/iDRAC/IPMI com IP opcional",
+      "Recursos de VM/container: VMID, sistema convidado, vCPU, memória e disco",
+      "Link de acesso HTTP/HTTPS clicável na listagem e nas credenciais",
+      "Página /infraestrutura com seletor de cliente e árvore de ativos",
+      "Busca rápida global com atalho Ctrl/Cmd + K respondendo \"onde está o recurso?\""
+    ]
+  },
+  {
     name: "Chat / WhatsApp",
     description: "Integração com WhatsApp via Evolution API e Uazapi.",
     status: "done",
@@ -861,6 +877,20 @@ const roadmap: RoadmapItem[] = [
     description: "Concluído (fora do planejamento original): módulo /inventory para cadastro de equipamentos de TI (switch, roteador, VM, computador, impressora) com IP, hostname, MAC, série e função, e cofre de credenciais cifradas em AES-256-GCM (VAULT_ENCRYPTION_KEY). A revelação da senha é sob demanda e auditada, e a ACL de cada credencial aceita concessões por usuário, grupo ou papel (agente), além das políticas de acesso responsável/staff/personalizada. Inclui grupos de usuários para a ACL e senha padrão compartilhada por cliente (segredo referenciado, com propagação automática a todos os equipamentos vinculados).",
     priority: "P1",
     status: "done"
+  },
+  {
+    phase: "Fase 4 — Maturidade",
+    title: "Inventário de infraestrutura e virtualização",
+    description: "Concluído: hierarquia de ativos (servidor físico -> host de virtualização -> VM -> container) via parentId, com plataforma de virtualização (Proxmox, VMware ESXi/vCenter, Hyper-V, XCP-ng, KVM) e controlador de gerência iLO/iDRAC/IPMI de IP opcional. Cada recurso guarda VMID, sistema convidado, vCPU, memória e disco, além de link de acesso HTTP/HTTPS clicável. Página /infraestrutura com seletor de cliente e árvore de ativos, e busca rápida global (Ctrl/Cmd + K) respondendo \"onde está o recurso?\" com o caminho completo.",
+    priority: "P1",
+    status: "done"
+  },
+  {
+    phase: "Fase 4 — Maturidade",
+    title: "Descoberta automática de hosts de virtualização",
+    description: "Pendente: sincronização automática de VMs e containers a partir das APIs do Proxmox VE e do VMware (ESXi/vCenter), reduzindo o cadastro manual. Depende de credenciais de API por host e de agendamento via cron.",
+    priority: "P2",
+    status: "pending"
   }
 ];
 

@@ -94,7 +94,9 @@ export const EquipmentType = {
   ROUTER: 'ROUTER',
   FIREWALL: 'FIREWALL',
   SERVER: 'SERVER',
+  HYPERVISOR: 'HYPERVISOR',
   VM: 'VM',
+  CONTAINER: 'CONTAINER',
   COMPUTER: 'COMPUTER',
   PRINTER: 'PRINTER',
   ACCESS_POINT: 'ACCESS_POINT',
@@ -102,6 +104,31 @@ export const EquipmentType = {
 } as const
 
 export type EquipmentType = (typeof EquipmentType)[keyof typeof EquipmentType]
+
+
+export const VirtualizationPlatform = {
+  PROXMOX_VE: 'PROXMOX_VE',
+  VMWARE_ESXI: 'VMWARE_ESXI',
+  VMWARE_VCENTER: 'VMWARE_VCENTER',
+  MICROSOFT_HYPERV: 'MICROSOFT_HYPERV',
+  XCP_NG: 'XCP_NG',
+  KVM: 'KVM',
+  OTHER: 'OTHER'
+} as const
+
+export type VirtualizationPlatform = (typeof VirtualizationPlatform)[keyof typeof VirtualizationPlatform]
+
+
+export const ManagementController = {
+  NONE: 'NONE',
+  ILO: 'ILO',
+  IDRAC: 'IDRAC',
+  IPMI: 'IPMI',
+  ILO_AND_IDRAC: 'ILO_AND_IDRAC',
+  OTHER: 'OTHER'
+} as const
+
+export type ManagementController = (typeof ManagementController)[keyof typeof ManagementController]
 
 
 export const EquipmentStatus = {

@@ -2,7 +2,9 @@ import type {
   CredentialAccessPolicy,
   CredentialProtocol,
   EquipmentStatus,
-  EquipmentType
+  EquipmentType,
+  ManagementController,
+  VirtualizationPlatform
 } from "@/types/inventory";
 
 // Rótulos legíveis dos tipos de equipamento
@@ -11,10 +13,33 @@ export const EQUIPMENT_TYPE_LABELS: Record<EquipmentType, string> = {
   ROUTER: "Roteador",
   FIREWALL: "Firewall",
   SERVER: "Servidor",
+  HYPERVISOR: "Host de virtualização",
   VM: "Máquina virtual",
+  CONTAINER: "Container",
   COMPUTER: "Computador",
   PRINTER: "Impressora",
   ACCESS_POINT: "Access point",
+  OTHER: "Outro"
+};
+
+// Rótulos das plataformas de virtualização
+export const VIRTUALIZATION_PLATFORM_LABELS: Record<VirtualizationPlatform, string> = {
+  PROXMOX_VE: "Proxmox VE",
+  VMWARE_ESXI: "VMware ESXi",
+  VMWARE_VCENTER: "VMware vCenter",
+  MICROSOFT_HYPERV: "Microsoft Hyper-V",
+  XCP_NG: "XCP-ng",
+  KVM: "KVM",
+  OTHER: "Outra"
+};
+
+// Rótulos dos controladores de gerenciamento fora de banda
+export const MANAGEMENT_CONTROLLER_LABELS: Record<ManagementController, string> = {
+  NONE: "Nenhum",
+  ILO: "iLO",
+  IDRAC: "iDRAC",
+  IPMI: "IPMI",
+  ILO_AND_IDRAC: "iLO e iDRAC",
   OTHER: "Outro"
 };
 
@@ -57,3 +82,12 @@ export const EQUIPMENT_TYPE_OPTIONS = Object.keys(EQUIPMENT_TYPE_LABELS) as Equi
 export const EQUIPMENT_STATUS_OPTIONS = Object.keys(EQUIPMENT_STATUS_LABELS) as EquipmentStatus[];
 export const PROTOCOL_OPTIONS = Object.keys(PROTOCOL_LABELS) as CredentialProtocol[];
 export const ACCESS_POLICY_OPTIONS = Object.keys(ACCESS_POLICY_LABELS) as CredentialAccessPolicy[];
+export const VIRTUALIZATION_PLATFORM_OPTIONS = Object.keys(
+  VIRTUALIZATION_PLATFORM_LABELS
+) as VirtualizationPlatform[];
+export const MANAGEMENT_CONTROLLER_OPTIONS = Object.keys(
+  MANAGEMENT_CONTROLLER_LABELS
+) as ManagementController[];
+
+// Tipos que podem ser host de outros recursos (aceitam recursos vinculados)
+export const PARENT_CAPABLE_TYPES: EquipmentType[] = ["SERVER", "HYPERVISOR", "VM"];

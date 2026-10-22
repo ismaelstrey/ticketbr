@@ -20,8 +20,24 @@ export type EquipmentModel = runtime.Types.Result.DefaultSelection<Prisma.$Equip
 
 export type AggregateEquipment = {
   _count: EquipmentCountAggregateOutputType | null
+  _avg: EquipmentAvgAggregateOutputType | null
+  _sum: EquipmentSumAggregateOutputType | null
   _min: EquipmentMinAggregateOutputType | null
   _max: EquipmentMaxAggregateOutputType | null
+}
+
+export type EquipmentAvgAggregateOutputType = {
+  vmid: number | null
+  cpuCores: number | null
+  memoryMb: number | null
+  diskGb: number | null
+}
+
+export type EquipmentSumAggregateOutputType = {
+  vmid: number | null
+  cpuCores: number | null
+  memoryMb: number | null
+  diskGb: number | null
 }
 
 export type EquipmentMinAggregateOutputType = {
@@ -39,6 +55,17 @@ export type EquipmentMinAggregateOutputType = {
   location: string | null
   func: string | null
   description: string | null
+  parentId: string | null
+  virtualizationPlatform: $Enums.VirtualizationPlatform | null
+  managementController: $Enums.ManagementController | null
+  managementIp: string | null
+  managementUrl: string | null
+  url: string | null
+  vmid: number | null
+  guestOs: string | null
+  cpuCores: number | null
+  memoryMb: number | null
+  diskGb: number | null
   solicitanteId: string | null
   created_at: Date | null
   updated_at: Date | null
@@ -62,6 +89,17 @@ export type EquipmentMaxAggregateOutputType = {
   location: string | null
   func: string | null
   description: string | null
+  parentId: string | null
+  virtualizationPlatform: $Enums.VirtualizationPlatform | null
+  managementController: $Enums.ManagementController | null
+  managementIp: string | null
+  managementUrl: string | null
+  url: string | null
+  vmid: number | null
+  guestOs: string | null
+  cpuCores: number | null
+  memoryMb: number | null
+  diskGb: number | null
   solicitanteId: string | null
   created_at: Date | null
   updated_at: Date | null
@@ -85,6 +123,18 @@ export type EquipmentCountAggregateOutputType = {
   location: number
   func: number
   description: number
+  parentId: number
+  virtualizationPlatform: number
+  managementController: number
+  managementIp: number
+  managementUrl: number
+  url: number
+  vmid: number
+  guestOs: number
+  cpuCores: number
+  memoryMb: number
+  diskGb: number
+  tags: number
   solicitanteId: number
   created_at: number
   updated_at: number
@@ -94,6 +144,20 @@ export type EquipmentCountAggregateOutputType = {
   _all: number
 }
 
+
+export type EquipmentAvgAggregateInputType = {
+  vmid?: true
+  cpuCores?: true
+  memoryMb?: true
+  diskGb?: true
+}
+
+export type EquipmentSumAggregateInputType = {
+  vmid?: true
+  cpuCores?: true
+  memoryMb?: true
+  diskGb?: true
+}
 
 export type EquipmentMinAggregateInputType = {
   id?: true
@@ -110,6 +174,17 @@ export type EquipmentMinAggregateInputType = {
   location?: true
   func?: true
   description?: true
+  parentId?: true
+  virtualizationPlatform?: true
+  managementController?: true
+  managementIp?: true
+  managementUrl?: true
+  url?: true
+  vmid?: true
+  guestOs?: true
+  cpuCores?: true
+  memoryMb?: true
+  diskGb?: true
   solicitanteId?: true
   created_at?: true
   updated_at?: true
@@ -133,6 +208,17 @@ export type EquipmentMaxAggregateInputType = {
   location?: true
   func?: true
   description?: true
+  parentId?: true
+  virtualizationPlatform?: true
+  managementController?: true
+  managementIp?: true
+  managementUrl?: true
+  url?: true
+  vmid?: true
+  guestOs?: true
+  cpuCores?: true
+  memoryMb?: true
+  diskGb?: true
   solicitanteId?: true
   created_at?: true
   updated_at?: true
@@ -156,6 +242,18 @@ export type EquipmentCountAggregateInputType = {
   location?: true
   func?: true
   description?: true
+  parentId?: true
+  virtualizationPlatform?: true
+  managementController?: true
+  managementIp?: true
+  managementUrl?: true
+  url?: true
+  vmid?: true
+  guestOs?: true
+  cpuCores?: true
+  memoryMb?: true
+  diskGb?: true
+  tags?: true
   solicitanteId?: true
   created_at?: true
   updated_at?: true
@@ -203,6 +301,18 @@ export type EquipmentAggregateArgs<ExtArgs extends runtime.Types.Extensions.Inte
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: EquipmentAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: EquipmentSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: EquipmentMinAggregateInputType
@@ -233,6 +343,8 @@ export type EquipmentGroupByArgs<ExtArgs extends runtime.Types.Extensions.Intern
   take?: number
   skip?: number
   _count?: EquipmentCountAggregateInputType | true
+  _avg?: EquipmentAvgAggregateInputType
+  _sum?: EquipmentSumAggregateInputType
   _min?: EquipmentMinAggregateInputType
   _max?: EquipmentMaxAggregateInputType
 }
@@ -252,6 +364,18 @@ export type EquipmentGroupByOutputType = {
   location: string | null
   func: string | null
   description: string | null
+  parentId: string | null
+  virtualizationPlatform: $Enums.VirtualizationPlatform | null
+  managementController: $Enums.ManagementController | null
+  managementIp: string | null
+  managementUrl: string | null
+  url: string | null
+  vmid: number | null
+  guestOs: string | null
+  cpuCores: number | null
+  memoryMb: number | null
+  diskGb: number | null
+  tags: string[]
   solicitanteId: string | null
   created_at: Date
   updated_at: Date
@@ -259,6 +383,8 @@ export type EquipmentGroupByOutputType = {
   updated_by: string | null
   deleted_at: Date | null
   _count: EquipmentCountAggregateOutputType | null
+  _avg: EquipmentAvgAggregateOutputType | null
+  _sum: EquipmentSumAggregateOutputType | null
   _min: EquipmentMinAggregateOutputType | null
   _max: EquipmentMaxAggregateOutputType | null
 }
@@ -296,12 +422,26 @@ export type EquipmentWhereInput = {
   location?: Prisma.StringNullableFilter<"Equipment"> | string | null
   func?: Prisma.StringNullableFilter<"Equipment"> | string | null
   description?: Prisma.StringNullableFilter<"Equipment"> | string | null
+  parentId?: Prisma.StringNullableFilter<"Equipment"> | string | null
+  virtualizationPlatform?: Prisma.EnumVirtualizationPlatformNullableFilter<"Equipment"> | $Enums.VirtualizationPlatform | null
+  managementController?: Prisma.EnumManagementControllerNullableFilter<"Equipment"> | $Enums.ManagementController | null
+  managementIp?: Prisma.StringNullableFilter<"Equipment"> | string | null
+  managementUrl?: Prisma.StringNullableFilter<"Equipment"> | string | null
+  url?: Prisma.StringNullableFilter<"Equipment"> | string | null
+  vmid?: Prisma.IntNullableFilter<"Equipment"> | number | null
+  guestOs?: Prisma.StringNullableFilter<"Equipment"> | string | null
+  cpuCores?: Prisma.IntNullableFilter<"Equipment"> | number | null
+  memoryMb?: Prisma.IntNullableFilter<"Equipment"> | number | null
+  diskGb?: Prisma.IntNullableFilter<"Equipment"> | number | null
+  tags?: Prisma.StringNullableListFilter<"Equipment">
   solicitanteId?: Prisma.StringNullableFilter<"Equipment"> | string | null
   created_at?: Prisma.DateTimeFilter<"Equipment"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"Equipment"> | Date | string
   created_by?: Prisma.StringNullableFilter<"Equipment"> | string | null
   updated_by?: Prisma.StringNullableFilter<"Equipment"> | string | null
   deleted_at?: Prisma.DateTimeNullableFilter<"Equipment"> | Date | string | null
+  parent?: Prisma.XOR<Prisma.EquipmentNullableScalarRelationFilter, Prisma.EquipmentWhereInput> | null
+  children?: Prisma.EquipmentListRelationFilter
   solicitante?: Prisma.XOR<Prisma.SolicitanteNullableScalarRelationFilter, Prisma.SolicitanteWhereInput> | null
   credentials?: Prisma.EquipmentCredentialListRelationFilter
 }
@@ -321,12 +461,26 @@ export type EquipmentOrderByWithRelationInput = {
   location?: Prisma.SortOrderInput | Prisma.SortOrder
   func?: Prisma.SortOrderInput | Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
+  parentId?: Prisma.SortOrderInput | Prisma.SortOrder
+  virtualizationPlatform?: Prisma.SortOrderInput | Prisma.SortOrder
+  managementController?: Prisma.SortOrderInput | Prisma.SortOrder
+  managementIp?: Prisma.SortOrderInput | Prisma.SortOrder
+  managementUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  url?: Prisma.SortOrderInput | Prisma.SortOrder
+  vmid?: Prisma.SortOrderInput | Prisma.SortOrder
+  guestOs?: Prisma.SortOrderInput | Prisma.SortOrder
+  cpuCores?: Prisma.SortOrderInput | Prisma.SortOrder
+  memoryMb?: Prisma.SortOrderInput | Prisma.SortOrder
+  diskGb?: Prisma.SortOrderInput | Prisma.SortOrder
+  tags?: Prisma.SortOrder
   solicitanteId?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   created_by?: Prisma.SortOrderInput | Prisma.SortOrder
   updated_by?: Prisma.SortOrderInput | Prisma.SortOrder
   deleted_at?: Prisma.SortOrderInput | Prisma.SortOrder
+  parent?: Prisma.EquipmentOrderByWithRelationInput
+  children?: Prisma.EquipmentOrderByRelationAggregateInput
   solicitante?: Prisma.SolicitanteOrderByWithRelationInput
   credentials?: Prisma.EquipmentCredentialOrderByRelationAggregateInput
 }
@@ -349,12 +503,26 @@ export type EquipmentWhereUniqueInput = Prisma.AtLeast<{
   location?: Prisma.StringNullableFilter<"Equipment"> | string | null
   func?: Prisma.StringNullableFilter<"Equipment"> | string | null
   description?: Prisma.StringNullableFilter<"Equipment"> | string | null
+  parentId?: Prisma.StringNullableFilter<"Equipment"> | string | null
+  virtualizationPlatform?: Prisma.EnumVirtualizationPlatformNullableFilter<"Equipment"> | $Enums.VirtualizationPlatform | null
+  managementController?: Prisma.EnumManagementControllerNullableFilter<"Equipment"> | $Enums.ManagementController | null
+  managementIp?: Prisma.StringNullableFilter<"Equipment"> | string | null
+  managementUrl?: Prisma.StringNullableFilter<"Equipment"> | string | null
+  url?: Prisma.StringNullableFilter<"Equipment"> | string | null
+  vmid?: Prisma.IntNullableFilter<"Equipment"> | number | null
+  guestOs?: Prisma.StringNullableFilter<"Equipment"> | string | null
+  cpuCores?: Prisma.IntNullableFilter<"Equipment"> | number | null
+  memoryMb?: Prisma.IntNullableFilter<"Equipment"> | number | null
+  diskGb?: Prisma.IntNullableFilter<"Equipment"> | number | null
+  tags?: Prisma.StringNullableListFilter<"Equipment">
   solicitanteId?: Prisma.StringNullableFilter<"Equipment"> | string | null
   created_at?: Prisma.DateTimeFilter<"Equipment"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"Equipment"> | Date | string
   created_by?: Prisma.StringNullableFilter<"Equipment"> | string | null
   updated_by?: Prisma.StringNullableFilter<"Equipment"> | string | null
   deleted_at?: Prisma.DateTimeNullableFilter<"Equipment"> | Date | string | null
+  parent?: Prisma.XOR<Prisma.EquipmentNullableScalarRelationFilter, Prisma.EquipmentWhereInput> | null
+  children?: Prisma.EquipmentListRelationFilter
   solicitante?: Prisma.XOR<Prisma.SolicitanteNullableScalarRelationFilter, Prisma.SolicitanteWhereInput> | null
   credentials?: Prisma.EquipmentCredentialListRelationFilter
 }, "id" | "code">
@@ -374,6 +542,18 @@ export type EquipmentOrderByWithAggregationInput = {
   location?: Prisma.SortOrderInput | Prisma.SortOrder
   func?: Prisma.SortOrderInput | Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
+  parentId?: Prisma.SortOrderInput | Prisma.SortOrder
+  virtualizationPlatform?: Prisma.SortOrderInput | Prisma.SortOrder
+  managementController?: Prisma.SortOrderInput | Prisma.SortOrder
+  managementIp?: Prisma.SortOrderInput | Prisma.SortOrder
+  managementUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  url?: Prisma.SortOrderInput | Prisma.SortOrder
+  vmid?: Prisma.SortOrderInput | Prisma.SortOrder
+  guestOs?: Prisma.SortOrderInput | Prisma.SortOrder
+  cpuCores?: Prisma.SortOrderInput | Prisma.SortOrder
+  memoryMb?: Prisma.SortOrderInput | Prisma.SortOrder
+  diskGb?: Prisma.SortOrderInput | Prisma.SortOrder
+  tags?: Prisma.SortOrder
   solicitanteId?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
@@ -381,8 +561,10 @@ export type EquipmentOrderByWithAggregationInput = {
   updated_by?: Prisma.SortOrderInput | Prisma.SortOrder
   deleted_at?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.EquipmentCountOrderByAggregateInput
+  _avg?: Prisma.EquipmentAvgOrderByAggregateInput
   _max?: Prisma.EquipmentMaxOrderByAggregateInput
   _min?: Prisma.EquipmentMinOrderByAggregateInput
+  _sum?: Prisma.EquipmentSumOrderByAggregateInput
 }
 
 export type EquipmentScalarWhereWithAggregatesInput = {
@@ -403,6 +585,18 @@ export type EquipmentScalarWhereWithAggregatesInput = {
   location?: Prisma.StringNullableWithAggregatesFilter<"Equipment"> | string | null
   func?: Prisma.StringNullableWithAggregatesFilter<"Equipment"> | string | null
   description?: Prisma.StringNullableWithAggregatesFilter<"Equipment"> | string | null
+  parentId?: Prisma.StringNullableWithAggregatesFilter<"Equipment"> | string | null
+  virtualizationPlatform?: Prisma.EnumVirtualizationPlatformNullableWithAggregatesFilter<"Equipment"> | $Enums.VirtualizationPlatform | null
+  managementController?: Prisma.EnumManagementControllerNullableWithAggregatesFilter<"Equipment"> | $Enums.ManagementController | null
+  managementIp?: Prisma.StringNullableWithAggregatesFilter<"Equipment"> | string | null
+  managementUrl?: Prisma.StringNullableWithAggregatesFilter<"Equipment"> | string | null
+  url?: Prisma.StringNullableWithAggregatesFilter<"Equipment"> | string | null
+  vmid?: Prisma.IntNullableWithAggregatesFilter<"Equipment"> | number | null
+  guestOs?: Prisma.StringNullableWithAggregatesFilter<"Equipment"> | string | null
+  cpuCores?: Prisma.IntNullableWithAggregatesFilter<"Equipment"> | number | null
+  memoryMb?: Prisma.IntNullableWithAggregatesFilter<"Equipment"> | number | null
+  diskGb?: Prisma.IntNullableWithAggregatesFilter<"Equipment"> | number | null
+  tags?: Prisma.StringNullableListFilter<"Equipment">
   solicitanteId?: Prisma.StringNullableWithAggregatesFilter<"Equipment"> | string | null
   created_at?: Prisma.DateTimeWithAggregatesFilter<"Equipment"> | Date | string
   updated_at?: Prisma.DateTimeWithAggregatesFilter<"Equipment"> | Date | string
@@ -426,11 +620,24 @@ export type EquipmentCreateInput = {
   location?: string | null
   func?: string | null
   description?: string | null
+  virtualizationPlatform?: $Enums.VirtualizationPlatform | null
+  managementController?: $Enums.ManagementController | null
+  managementIp?: string | null
+  managementUrl?: string | null
+  url?: string | null
+  vmid?: number | null
+  guestOs?: string | null
+  cpuCores?: number | null
+  memoryMb?: number | null
+  diskGb?: number | null
+  tags?: Prisma.EquipmentCreatetagsInput | string[]
   created_at?: Date | string
   updated_at?: Date | string
   created_by?: string | null
   updated_by?: string | null
   deleted_at?: Date | string | null
+  parent?: Prisma.EquipmentCreateNestedOneWithoutChildrenInput
+  children?: Prisma.EquipmentCreateNestedManyWithoutParentInput
   solicitante?: Prisma.SolicitanteCreateNestedOneWithoutEquipmentInput
   credentials?: Prisma.EquipmentCredentialCreateNestedManyWithoutEquipmentInput
 }
@@ -450,12 +657,25 @@ export type EquipmentUncheckedCreateInput = {
   location?: string | null
   func?: string | null
   description?: string | null
+  parentId?: string | null
+  virtualizationPlatform?: $Enums.VirtualizationPlatform | null
+  managementController?: $Enums.ManagementController | null
+  managementIp?: string | null
+  managementUrl?: string | null
+  url?: string | null
+  vmid?: number | null
+  guestOs?: string | null
+  cpuCores?: number | null
+  memoryMb?: number | null
+  diskGb?: number | null
+  tags?: Prisma.EquipmentCreatetagsInput | string[]
   solicitanteId?: string | null
   created_at?: Date | string
   updated_at?: Date | string
   created_by?: string | null
   updated_by?: string | null
   deleted_at?: Date | string | null
+  children?: Prisma.EquipmentUncheckedCreateNestedManyWithoutParentInput
   credentials?: Prisma.EquipmentCredentialUncheckedCreateNestedManyWithoutEquipmentInput
 }
 
@@ -474,11 +694,24 @@ export type EquipmentUpdateInput = {
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   func?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  virtualizationPlatform?: Prisma.NullableEnumVirtualizationPlatformFieldUpdateOperationsInput | $Enums.VirtualizationPlatform | null
+  managementController?: Prisma.NullableEnumManagementControllerFieldUpdateOperationsInput | $Enums.ManagementController | null
+  managementIp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  managementUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vmid?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  guestOs?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cpuCores?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  memoryMb?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  diskGb?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tags?: Prisma.EquipmentUpdatetagsInput | string[]
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   updated_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  parent?: Prisma.EquipmentUpdateOneWithoutChildrenNestedInput
+  children?: Prisma.EquipmentUpdateManyWithoutParentNestedInput
   solicitante?: Prisma.SolicitanteUpdateOneWithoutEquipmentNestedInput
   credentials?: Prisma.EquipmentCredentialUpdateManyWithoutEquipmentNestedInput
 }
@@ -498,12 +731,25 @@ export type EquipmentUncheckedUpdateInput = {
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   func?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  parentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  virtualizationPlatform?: Prisma.NullableEnumVirtualizationPlatformFieldUpdateOperationsInput | $Enums.VirtualizationPlatform | null
+  managementController?: Prisma.NullableEnumManagementControllerFieldUpdateOperationsInput | $Enums.ManagementController | null
+  managementIp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  managementUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vmid?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  guestOs?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cpuCores?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  memoryMb?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  diskGb?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tags?: Prisma.EquipmentUpdatetagsInput | string[]
   solicitanteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   updated_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  children?: Prisma.EquipmentUncheckedUpdateManyWithoutParentNestedInput
   credentials?: Prisma.EquipmentCredentialUncheckedUpdateManyWithoutEquipmentNestedInput
 }
 
@@ -522,6 +768,18 @@ export type EquipmentCreateManyInput = {
   location?: string | null
   func?: string | null
   description?: string | null
+  parentId?: string | null
+  virtualizationPlatform?: $Enums.VirtualizationPlatform | null
+  managementController?: $Enums.ManagementController | null
+  managementIp?: string | null
+  managementUrl?: string | null
+  url?: string | null
+  vmid?: number | null
+  guestOs?: string | null
+  cpuCores?: number | null
+  memoryMb?: number | null
+  diskGb?: number | null
+  tags?: Prisma.EquipmentCreatetagsInput | string[]
   solicitanteId?: string | null
   created_at?: Date | string
   updated_at?: Date | string
@@ -545,6 +803,17 @@ export type EquipmentUpdateManyMutationInput = {
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   func?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  virtualizationPlatform?: Prisma.NullableEnumVirtualizationPlatformFieldUpdateOperationsInput | $Enums.VirtualizationPlatform | null
+  managementController?: Prisma.NullableEnumManagementControllerFieldUpdateOperationsInput | $Enums.ManagementController | null
+  managementIp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  managementUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vmid?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  guestOs?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cpuCores?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  memoryMb?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  diskGb?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tags?: Prisma.EquipmentUpdatetagsInput | string[]
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -567,6 +836,18 @@ export type EquipmentUncheckedUpdateManyInput = {
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   func?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  parentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  virtualizationPlatform?: Prisma.NullableEnumVirtualizationPlatformFieldUpdateOperationsInput | $Enums.VirtualizationPlatform | null
+  managementController?: Prisma.NullableEnumManagementControllerFieldUpdateOperationsInput | $Enums.ManagementController | null
+  managementIp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  managementUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vmid?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  guestOs?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cpuCores?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  memoryMb?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  diskGb?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tags?: Prisma.EquipmentUpdatetagsInput | string[]
   solicitanteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -585,6 +866,19 @@ export type EquipmentOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
+export type StringNullableListFilter<$PrismaModel = never> = {
+  equals?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel> | null
+  has?: string | Prisma.StringFieldRefInput<$PrismaModel> | null
+  hasEvery?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
+  hasSome?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
+  isEmpty?: boolean
+}
+
+export type EquipmentNullableScalarRelationFilter = {
+  is?: Prisma.EquipmentWhereInput | null
+  isNot?: Prisma.EquipmentWhereInput | null
+}
+
 export type EquipmentCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   code?: Prisma.SortOrder
@@ -600,12 +894,31 @@ export type EquipmentCountOrderByAggregateInput = {
   location?: Prisma.SortOrder
   func?: Prisma.SortOrder
   description?: Prisma.SortOrder
+  parentId?: Prisma.SortOrder
+  virtualizationPlatform?: Prisma.SortOrder
+  managementController?: Prisma.SortOrder
+  managementIp?: Prisma.SortOrder
+  managementUrl?: Prisma.SortOrder
+  url?: Prisma.SortOrder
+  vmid?: Prisma.SortOrder
+  guestOs?: Prisma.SortOrder
+  cpuCores?: Prisma.SortOrder
+  memoryMb?: Prisma.SortOrder
+  diskGb?: Prisma.SortOrder
+  tags?: Prisma.SortOrder
   solicitanteId?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   created_by?: Prisma.SortOrder
   updated_by?: Prisma.SortOrder
   deleted_at?: Prisma.SortOrder
+}
+
+export type EquipmentAvgOrderByAggregateInput = {
+  vmid?: Prisma.SortOrder
+  cpuCores?: Prisma.SortOrder
+  memoryMb?: Prisma.SortOrder
+  diskGb?: Prisma.SortOrder
 }
 
 export type EquipmentMaxOrderByAggregateInput = {
@@ -623,6 +936,17 @@ export type EquipmentMaxOrderByAggregateInput = {
   location?: Prisma.SortOrder
   func?: Prisma.SortOrder
   description?: Prisma.SortOrder
+  parentId?: Prisma.SortOrder
+  virtualizationPlatform?: Prisma.SortOrder
+  managementController?: Prisma.SortOrder
+  managementIp?: Prisma.SortOrder
+  managementUrl?: Prisma.SortOrder
+  url?: Prisma.SortOrder
+  vmid?: Prisma.SortOrder
+  guestOs?: Prisma.SortOrder
+  cpuCores?: Prisma.SortOrder
+  memoryMb?: Prisma.SortOrder
+  diskGb?: Prisma.SortOrder
   solicitanteId?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
@@ -646,6 +970,17 @@ export type EquipmentMinOrderByAggregateInput = {
   location?: Prisma.SortOrder
   func?: Prisma.SortOrder
   description?: Prisma.SortOrder
+  parentId?: Prisma.SortOrder
+  virtualizationPlatform?: Prisma.SortOrder
+  managementController?: Prisma.SortOrder
+  managementIp?: Prisma.SortOrder
+  managementUrl?: Prisma.SortOrder
+  url?: Prisma.SortOrder
+  vmid?: Prisma.SortOrder
+  guestOs?: Prisma.SortOrder
+  cpuCores?: Prisma.SortOrder
+  memoryMb?: Prisma.SortOrder
+  diskGb?: Prisma.SortOrder
   solicitanteId?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
@@ -654,9 +989,11 @@ export type EquipmentMinOrderByAggregateInput = {
   deleted_at?: Prisma.SortOrder
 }
 
-export type EquipmentNullableScalarRelationFilter = {
-  is?: Prisma.EquipmentWhereInput | null
-  isNot?: Prisma.EquipmentWhereInput | null
+export type EquipmentSumOrderByAggregateInput = {
+  vmid?: Prisma.SortOrder
+  cpuCores?: Prisma.SortOrder
+  memoryMb?: Prisma.SortOrder
+  diskGb?: Prisma.SortOrder
 }
 
 export type EquipmentCreateNestedManyWithoutSolicitanteInput = {
@@ -701,12 +1038,87 @@ export type EquipmentUncheckedUpdateManyWithoutSolicitanteNestedInput = {
   deleteMany?: Prisma.EquipmentScalarWhereInput | Prisma.EquipmentScalarWhereInput[]
 }
 
+export type EquipmentCreatetagsInput = {
+  set: string[]
+}
+
+export type EquipmentCreateNestedOneWithoutChildrenInput = {
+  create?: Prisma.XOR<Prisma.EquipmentCreateWithoutChildrenInput, Prisma.EquipmentUncheckedCreateWithoutChildrenInput>
+  connectOrCreate?: Prisma.EquipmentCreateOrConnectWithoutChildrenInput
+  connect?: Prisma.EquipmentWhereUniqueInput
+}
+
+export type EquipmentCreateNestedManyWithoutParentInput = {
+  create?: Prisma.XOR<Prisma.EquipmentCreateWithoutParentInput, Prisma.EquipmentUncheckedCreateWithoutParentInput> | Prisma.EquipmentCreateWithoutParentInput[] | Prisma.EquipmentUncheckedCreateWithoutParentInput[]
+  connectOrCreate?: Prisma.EquipmentCreateOrConnectWithoutParentInput | Prisma.EquipmentCreateOrConnectWithoutParentInput[]
+  createMany?: Prisma.EquipmentCreateManyParentInputEnvelope
+  connect?: Prisma.EquipmentWhereUniqueInput | Prisma.EquipmentWhereUniqueInput[]
+}
+
+export type EquipmentUncheckedCreateNestedManyWithoutParentInput = {
+  create?: Prisma.XOR<Prisma.EquipmentCreateWithoutParentInput, Prisma.EquipmentUncheckedCreateWithoutParentInput> | Prisma.EquipmentCreateWithoutParentInput[] | Prisma.EquipmentUncheckedCreateWithoutParentInput[]
+  connectOrCreate?: Prisma.EquipmentCreateOrConnectWithoutParentInput | Prisma.EquipmentCreateOrConnectWithoutParentInput[]
+  createMany?: Prisma.EquipmentCreateManyParentInputEnvelope
+  connect?: Prisma.EquipmentWhereUniqueInput | Prisma.EquipmentWhereUniqueInput[]
+}
+
 export type EnumEquipmentTypeFieldUpdateOperationsInput = {
   set?: $Enums.EquipmentType
 }
 
 export type EnumEquipmentStatusFieldUpdateOperationsInput = {
   set?: $Enums.EquipmentStatus
+}
+
+export type NullableEnumVirtualizationPlatformFieldUpdateOperationsInput = {
+  set?: $Enums.VirtualizationPlatform | null
+}
+
+export type NullableEnumManagementControllerFieldUpdateOperationsInput = {
+  set?: $Enums.ManagementController | null
+}
+
+export type EquipmentUpdatetagsInput = {
+  set?: string[]
+  push?: string | string[]
+}
+
+export type EquipmentUpdateOneWithoutChildrenNestedInput = {
+  create?: Prisma.XOR<Prisma.EquipmentCreateWithoutChildrenInput, Prisma.EquipmentUncheckedCreateWithoutChildrenInput>
+  connectOrCreate?: Prisma.EquipmentCreateOrConnectWithoutChildrenInput
+  upsert?: Prisma.EquipmentUpsertWithoutChildrenInput
+  disconnect?: Prisma.EquipmentWhereInput | boolean
+  delete?: Prisma.EquipmentWhereInput | boolean
+  connect?: Prisma.EquipmentWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.EquipmentUpdateToOneWithWhereWithoutChildrenInput, Prisma.EquipmentUpdateWithoutChildrenInput>, Prisma.EquipmentUncheckedUpdateWithoutChildrenInput>
+}
+
+export type EquipmentUpdateManyWithoutParentNestedInput = {
+  create?: Prisma.XOR<Prisma.EquipmentCreateWithoutParentInput, Prisma.EquipmentUncheckedCreateWithoutParentInput> | Prisma.EquipmentCreateWithoutParentInput[] | Prisma.EquipmentUncheckedCreateWithoutParentInput[]
+  connectOrCreate?: Prisma.EquipmentCreateOrConnectWithoutParentInput | Prisma.EquipmentCreateOrConnectWithoutParentInput[]
+  upsert?: Prisma.EquipmentUpsertWithWhereUniqueWithoutParentInput | Prisma.EquipmentUpsertWithWhereUniqueWithoutParentInput[]
+  createMany?: Prisma.EquipmentCreateManyParentInputEnvelope
+  set?: Prisma.EquipmentWhereUniqueInput | Prisma.EquipmentWhereUniqueInput[]
+  disconnect?: Prisma.EquipmentWhereUniqueInput | Prisma.EquipmentWhereUniqueInput[]
+  delete?: Prisma.EquipmentWhereUniqueInput | Prisma.EquipmentWhereUniqueInput[]
+  connect?: Prisma.EquipmentWhereUniqueInput | Prisma.EquipmentWhereUniqueInput[]
+  update?: Prisma.EquipmentUpdateWithWhereUniqueWithoutParentInput | Prisma.EquipmentUpdateWithWhereUniqueWithoutParentInput[]
+  updateMany?: Prisma.EquipmentUpdateManyWithWhereWithoutParentInput | Prisma.EquipmentUpdateManyWithWhereWithoutParentInput[]
+  deleteMany?: Prisma.EquipmentScalarWhereInput | Prisma.EquipmentScalarWhereInput[]
+}
+
+export type EquipmentUncheckedUpdateManyWithoutParentNestedInput = {
+  create?: Prisma.XOR<Prisma.EquipmentCreateWithoutParentInput, Prisma.EquipmentUncheckedCreateWithoutParentInput> | Prisma.EquipmentCreateWithoutParentInput[] | Prisma.EquipmentUncheckedCreateWithoutParentInput[]
+  connectOrCreate?: Prisma.EquipmentCreateOrConnectWithoutParentInput | Prisma.EquipmentCreateOrConnectWithoutParentInput[]
+  upsert?: Prisma.EquipmentUpsertWithWhereUniqueWithoutParentInput | Prisma.EquipmentUpsertWithWhereUniqueWithoutParentInput[]
+  createMany?: Prisma.EquipmentCreateManyParentInputEnvelope
+  set?: Prisma.EquipmentWhereUniqueInput | Prisma.EquipmentWhereUniqueInput[]
+  disconnect?: Prisma.EquipmentWhereUniqueInput | Prisma.EquipmentWhereUniqueInput[]
+  delete?: Prisma.EquipmentWhereUniqueInput | Prisma.EquipmentWhereUniqueInput[]
+  connect?: Prisma.EquipmentWhereUniqueInput | Prisma.EquipmentWhereUniqueInput[]
+  update?: Prisma.EquipmentUpdateWithWhereUniqueWithoutParentInput | Prisma.EquipmentUpdateWithWhereUniqueWithoutParentInput[]
+  updateMany?: Prisma.EquipmentUpdateManyWithWhereWithoutParentInput | Prisma.EquipmentUpdateManyWithWhereWithoutParentInput[]
+  deleteMany?: Prisma.EquipmentScalarWhereInput | Prisma.EquipmentScalarWhereInput[]
 }
 
 export type EquipmentCreateNestedOneWithoutCredentialsInput = {
@@ -740,11 +1152,24 @@ export type EquipmentCreateWithoutSolicitanteInput = {
   location?: string | null
   func?: string | null
   description?: string | null
+  virtualizationPlatform?: $Enums.VirtualizationPlatform | null
+  managementController?: $Enums.ManagementController | null
+  managementIp?: string | null
+  managementUrl?: string | null
+  url?: string | null
+  vmid?: number | null
+  guestOs?: string | null
+  cpuCores?: number | null
+  memoryMb?: number | null
+  diskGb?: number | null
+  tags?: Prisma.EquipmentCreatetagsInput | string[]
   created_at?: Date | string
   updated_at?: Date | string
   created_by?: string | null
   updated_by?: string | null
   deleted_at?: Date | string | null
+  parent?: Prisma.EquipmentCreateNestedOneWithoutChildrenInput
+  children?: Prisma.EquipmentCreateNestedManyWithoutParentInput
   credentials?: Prisma.EquipmentCredentialCreateNestedManyWithoutEquipmentInput
 }
 
@@ -763,11 +1188,24 @@ export type EquipmentUncheckedCreateWithoutSolicitanteInput = {
   location?: string | null
   func?: string | null
   description?: string | null
+  parentId?: string | null
+  virtualizationPlatform?: $Enums.VirtualizationPlatform | null
+  managementController?: $Enums.ManagementController | null
+  managementIp?: string | null
+  managementUrl?: string | null
+  url?: string | null
+  vmid?: number | null
+  guestOs?: string | null
+  cpuCores?: number | null
+  memoryMb?: number | null
+  diskGb?: number | null
+  tags?: Prisma.EquipmentCreatetagsInput | string[]
   created_at?: Date | string
   updated_at?: Date | string
   created_by?: string | null
   updated_by?: string | null
   deleted_at?: Date | string | null
+  children?: Prisma.EquipmentUncheckedCreateNestedManyWithoutParentInput
   credentials?: Prisma.EquipmentCredentialUncheckedCreateNestedManyWithoutEquipmentInput
 }
 
@@ -815,12 +1253,282 @@ export type EquipmentScalarWhereInput = {
   location?: Prisma.StringNullableFilter<"Equipment"> | string | null
   func?: Prisma.StringNullableFilter<"Equipment"> | string | null
   description?: Prisma.StringNullableFilter<"Equipment"> | string | null
+  parentId?: Prisma.StringNullableFilter<"Equipment"> | string | null
+  virtualizationPlatform?: Prisma.EnumVirtualizationPlatformNullableFilter<"Equipment"> | $Enums.VirtualizationPlatform | null
+  managementController?: Prisma.EnumManagementControllerNullableFilter<"Equipment"> | $Enums.ManagementController | null
+  managementIp?: Prisma.StringNullableFilter<"Equipment"> | string | null
+  managementUrl?: Prisma.StringNullableFilter<"Equipment"> | string | null
+  url?: Prisma.StringNullableFilter<"Equipment"> | string | null
+  vmid?: Prisma.IntNullableFilter<"Equipment"> | number | null
+  guestOs?: Prisma.StringNullableFilter<"Equipment"> | string | null
+  cpuCores?: Prisma.IntNullableFilter<"Equipment"> | number | null
+  memoryMb?: Prisma.IntNullableFilter<"Equipment"> | number | null
+  diskGb?: Prisma.IntNullableFilter<"Equipment"> | number | null
+  tags?: Prisma.StringNullableListFilter<"Equipment">
   solicitanteId?: Prisma.StringNullableFilter<"Equipment"> | string | null
   created_at?: Prisma.DateTimeFilter<"Equipment"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"Equipment"> | Date | string
   created_by?: Prisma.StringNullableFilter<"Equipment"> | string | null
   updated_by?: Prisma.StringNullableFilter<"Equipment"> | string | null
   deleted_at?: Prisma.DateTimeNullableFilter<"Equipment"> | Date | string | null
+}
+
+export type EquipmentCreateWithoutChildrenInput = {
+  id?: string
+  code?: string | null
+  name: string
+  type: $Enums.EquipmentType
+  status?: $Enums.EquipmentStatus
+  brand?: string | null
+  model?: string | null
+  serialNumber?: string | null
+  hostname?: string | null
+  ipAddress?: string | null
+  macAddress?: string | null
+  location?: string | null
+  func?: string | null
+  description?: string | null
+  virtualizationPlatform?: $Enums.VirtualizationPlatform | null
+  managementController?: $Enums.ManagementController | null
+  managementIp?: string | null
+  managementUrl?: string | null
+  url?: string | null
+  vmid?: number | null
+  guestOs?: string | null
+  cpuCores?: number | null
+  memoryMb?: number | null
+  diskGb?: number | null
+  tags?: Prisma.EquipmentCreatetagsInput | string[]
+  created_at?: Date | string
+  updated_at?: Date | string
+  created_by?: string | null
+  updated_by?: string | null
+  deleted_at?: Date | string | null
+  parent?: Prisma.EquipmentCreateNestedOneWithoutChildrenInput
+  solicitante?: Prisma.SolicitanteCreateNestedOneWithoutEquipmentInput
+  credentials?: Prisma.EquipmentCredentialCreateNestedManyWithoutEquipmentInput
+}
+
+export type EquipmentUncheckedCreateWithoutChildrenInput = {
+  id?: string
+  code?: string | null
+  name: string
+  type: $Enums.EquipmentType
+  status?: $Enums.EquipmentStatus
+  brand?: string | null
+  model?: string | null
+  serialNumber?: string | null
+  hostname?: string | null
+  ipAddress?: string | null
+  macAddress?: string | null
+  location?: string | null
+  func?: string | null
+  description?: string | null
+  parentId?: string | null
+  virtualizationPlatform?: $Enums.VirtualizationPlatform | null
+  managementController?: $Enums.ManagementController | null
+  managementIp?: string | null
+  managementUrl?: string | null
+  url?: string | null
+  vmid?: number | null
+  guestOs?: string | null
+  cpuCores?: number | null
+  memoryMb?: number | null
+  diskGb?: number | null
+  tags?: Prisma.EquipmentCreatetagsInput | string[]
+  solicitanteId?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  created_by?: string | null
+  updated_by?: string | null
+  deleted_at?: Date | string | null
+  credentials?: Prisma.EquipmentCredentialUncheckedCreateNestedManyWithoutEquipmentInput
+}
+
+export type EquipmentCreateOrConnectWithoutChildrenInput = {
+  where: Prisma.EquipmentWhereUniqueInput
+  create: Prisma.XOR<Prisma.EquipmentCreateWithoutChildrenInput, Prisma.EquipmentUncheckedCreateWithoutChildrenInput>
+}
+
+export type EquipmentCreateWithoutParentInput = {
+  id?: string
+  code?: string | null
+  name: string
+  type: $Enums.EquipmentType
+  status?: $Enums.EquipmentStatus
+  brand?: string | null
+  model?: string | null
+  serialNumber?: string | null
+  hostname?: string | null
+  ipAddress?: string | null
+  macAddress?: string | null
+  location?: string | null
+  func?: string | null
+  description?: string | null
+  virtualizationPlatform?: $Enums.VirtualizationPlatform | null
+  managementController?: $Enums.ManagementController | null
+  managementIp?: string | null
+  managementUrl?: string | null
+  url?: string | null
+  vmid?: number | null
+  guestOs?: string | null
+  cpuCores?: number | null
+  memoryMb?: number | null
+  diskGb?: number | null
+  tags?: Prisma.EquipmentCreatetagsInput | string[]
+  created_at?: Date | string
+  updated_at?: Date | string
+  created_by?: string | null
+  updated_by?: string | null
+  deleted_at?: Date | string | null
+  children?: Prisma.EquipmentCreateNestedManyWithoutParentInput
+  solicitante?: Prisma.SolicitanteCreateNestedOneWithoutEquipmentInput
+  credentials?: Prisma.EquipmentCredentialCreateNestedManyWithoutEquipmentInput
+}
+
+export type EquipmentUncheckedCreateWithoutParentInput = {
+  id?: string
+  code?: string | null
+  name: string
+  type: $Enums.EquipmentType
+  status?: $Enums.EquipmentStatus
+  brand?: string | null
+  model?: string | null
+  serialNumber?: string | null
+  hostname?: string | null
+  ipAddress?: string | null
+  macAddress?: string | null
+  location?: string | null
+  func?: string | null
+  description?: string | null
+  virtualizationPlatform?: $Enums.VirtualizationPlatform | null
+  managementController?: $Enums.ManagementController | null
+  managementIp?: string | null
+  managementUrl?: string | null
+  url?: string | null
+  vmid?: number | null
+  guestOs?: string | null
+  cpuCores?: number | null
+  memoryMb?: number | null
+  diskGb?: number | null
+  tags?: Prisma.EquipmentCreatetagsInput | string[]
+  solicitanteId?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  created_by?: string | null
+  updated_by?: string | null
+  deleted_at?: Date | string | null
+  children?: Prisma.EquipmentUncheckedCreateNestedManyWithoutParentInput
+  credentials?: Prisma.EquipmentCredentialUncheckedCreateNestedManyWithoutEquipmentInput
+}
+
+export type EquipmentCreateOrConnectWithoutParentInput = {
+  where: Prisma.EquipmentWhereUniqueInput
+  create: Prisma.XOR<Prisma.EquipmentCreateWithoutParentInput, Prisma.EquipmentUncheckedCreateWithoutParentInput>
+}
+
+export type EquipmentCreateManyParentInputEnvelope = {
+  data: Prisma.EquipmentCreateManyParentInput | Prisma.EquipmentCreateManyParentInput[]
+  skipDuplicates?: boolean
+}
+
+export type EquipmentUpsertWithoutChildrenInput = {
+  update: Prisma.XOR<Prisma.EquipmentUpdateWithoutChildrenInput, Prisma.EquipmentUncheckedUpdateWithoutChildrenInput>
+  create: Prisma.XOR<Prisma.EquipmentCreateWithoutChildrenInput, Prisma.EquipmentUncheckedCreateWithoutChildrenInput>
+  where?: Prisma.EquipmentWhereInput
+}
+
+export type EquipmentUpdateToOneWithWhereWithoutChildrenInput = {
+  where?: Prisma.EquipmentWhereInput
+  data: Prisma.XOR<Prisma.EquipmentUpdateWithoutChildrenInput, Prisma.EquipmentUncheckedUpdateWithoutChildrenInput>
+}
+
+export type EquipmentUpdateWithoutChildrenInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumEquipmentTypeFieldUpdateOperationsInput | $Enums.EquipmentType
+  status?: Prisma.EnumEquipmentStatusFieldUpdateOperationsInput | $Enums.EquipmentStatus
+  brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serialNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostname?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  macAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  func?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  virtualizationPlatform?: Prisma.NullableEnumVirtualizationPlatformFieldUpdateOperationsInput | $Enums.VirtualizationPlatform | null
+  managementController?: Prisma.NullableEnumManagementControllerFieldUpdateOperationsInput | $Enums.ManagementController | null
+  managementIp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  managementUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vmid?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  guestOs?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cpuCores?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  memoryMb?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  diskGb?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tags?: Prisma.EquipmentUpdatetagsInput | string[]
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  updated_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  parent?: Prisma.EquipmentUpdateOneWithoutChildrenNestedInput
+  solicitante?: Prisma.SolicitanteUpdateOneWithoutEquipmentNestedInput
+  credentials?: Prisma.EquipmentCredentialUpdateManyWithoutEquipmentNestedInput
+}
+
+export type EquipmentUncheckedUpdateWithoutChildrenInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumEquipmentTypeFieldUpdateOperationsInput | $Enums.EquipmentType
+  status?: Prisma.EnumEquipmentStatusFieldUpdateOperationsInput | $Enums.EquipmentStatus
+  brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serialNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostname?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  macAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  func?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  parentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  virtualizationPlatform?: Prisma.NullableEnumVirtualizationPlatformFieldUpdateOperationsInput | $Enums.VirtualizationPlatform | null
+  managementController?: Prisma.NullableEnumManagementControllerFieldUpdateOperationsInput | $Enums.ManagementController | null
+  managementIp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  managementUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vmid?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  guestOs?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cpuCores?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  memoryMb?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  diskGb?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tags?: Prisma.EquipmentUpdatetagsInput | string[]
+  solicitanteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  updated_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  credentials?: Prisma.EquipmentCredentialUncheckedUpdateManyWithoutEquipmentNestedInput
+}
+
+export type EquipmentUpsertWithWhereUniqueWithoutParentInput = {
+  where: Prisma.EquipmentWhereUniqueInput
+  update: Prisma.XOR<Prisma.EquipmentUpdateWithoutParentInput, Prisma.EquipmentUncheckedUpdateWithoutParentInput>
+  create: Prisma.XOR<Prisma.EquipmentCreateWithoutParentInput, Prisma.EquipmentUncheckedCreateWithoutParentInput>
+}
+
+export type EquipmentUpdateWithWhereUniqueWithoutParentInput = {
+  where: Prisma.EquipmentWhereUniqueInput
+  data: Prisma.XOR<Prisma.EquipmentUpdateWithoutParentInput, Prisma.EquipmentUncheckedUpdateWithoutParentInput>
+}
+
+export type EquipmentUpdateManyWithWhereWithoutParentInput = {
+  where: Prisma.EquipmentScalarWhereInput
+  data: Prisma.XOR<Prisma.EquipmentUpdateManyMutationInput, Prisma.EquipmentUncheckedUpdateManyWithoutParentInput>
 }
 
 export type EquipmentCreateWithoutCredentialsInput = {
@@ -838,11 +1546,24 @@ export type EquipmentCreateWithoutCredentialsInput = {
   location?: string | null
   func?: string | null
   description?: string | null
+  virtualizationPlatform?: $Enums.VirtualizationPlatform | null
+  managementController?: $Enums.ManagementController | null
+  managementIp?: string | null
+  managementUrl?: string | null
+  url?: string | null
+  vmid?: number | null
+  guestOs?: string | null
+  cpuCores?: number | null
+  memoryMb?: number | null
+  diskGb?: number | null
+  tags?: Prisma.EquipmentCreatetagsInput | string[]
   created_at?: Date | string
   updated_at?: Date | string
   created_by?: string | null
   updated_by?: string | null
   deleted_at?: Date | string | null
+  parent?: Prisma.EquipmentCreateNestedOneWithoutChildrenInput
+  children?: Prisma.EquipmentCreateNestedManyWithoutParentInput
   solicitante?: Prisma.SolicitanteCreateNestedOneWithoutEquipmentInput
 }
 
@@ -861,12 +1582,25 @@ export type EquipmentUncheckedCreateWithoutCredentialsInput = {
   location?: string | null
   func?: string | null
   description?: string | null
+  parentId?: string | null
+  virtualizationPlatform?: $Enums.VirtualizationPlatform | null
+  managementController?: $Enums.ManagementController | null
+  managementIp?: string | null
+  managementUrl?: string | null
+  url?: string | null
+  vmid?: number | null
+  guestOs?: string | null
+  cpuCores?: number | null
+  memoryMb?: number | null
+  diskGb?: number | null
+  tags?: Prisma.EquipmentCreatetagsInput | string[]
   solicitanteId?: string | null
   created_at?: Date | string
   updated_at?: Date | string
   created_by?: string | null
   updated_by?: string | null
   deleted_at?: Date | string | null
+  children?: Prisma.EquipmentUncheckedCreateNestedManyWithoutParentInput
 }
 
 export type EquipmentCreateOrConnectWithoutCredentialsInput = {
@@ -900,11 +1634,24 @@ export type EquipmentUpdateWithoutCredentialsInput = {
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   func?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  virtualizationPlatform?: Prisma.NullableEnumVirtualizationPlatformFieldUpdateOperationsInput | $Enums.VirtualizationPlatform | null
+  managementController?: Prisma.NullableEnumManagementControllerFieldUpdateOperationsInput | $Enums.ManagementController | null
+  managementIp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  managementUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vmid?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  guestOs?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cpuCores?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  memoryMb?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  diskGb?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tags?: Prisma.EquipmentUpdatetagsInput | string[]
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   updated_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  parent?: Prisma.EquipmentUpdateOneWithoutChildrenNestedInput
+  children?: Prisma.EquipmentUpdateManyWithoutParentNestedInput
   solicitante?: Prisma.SolicitanteUpdateOneWithoutEquipmentNestedInput
 }
 
@@ -923,12 +1670,25 @@ export type EquipmentUncheckedUpdateWithoutCredentialsInput = {
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   func?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  parentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  virtualizationPlatform?: Prisma.NullableEnumVirtualizationPlatformFieldUpdateOperationsInput | $Enums.VirtualizationPlatform | null
+  managementController?: Prisma.NullableEnumManagementControllerFieldUpdateOperationsInput | $Enums.ManagementController | null
+  managementIp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  managementUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vmid?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  guestOs?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cpuCores?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  memoryMb?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  diskGb?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tags?: Prisma.EquipmentUpdatetagsInput | string[]
   solicitanteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   updated_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  children?: Prisma.EquipmentUncheckedUpdateManyWithoutParentNestedInput
 }
 
 export type EquipmentCreateManySolicitanteInput = {
@@ -946,6 +1706,18 @@ export type EquipmentCreateManySolicitanteInput = {
   location?: string | null
   func?: string | null
   description?: string | null
+  parentId?: string | null
+  virtualizationPlatform?: $Enums.VirtualizationPlatform | null
+  managementController?: $Enums.ManagementController | null
+  managementIp?: string | null
+  managementUrl?: string | null
+  url?: string | null
+  vmid?: number | null
+  guestOs?: string | null
+  cpuCores?: number | null
+  memoryMb?: number | null
+  diskGb?: number | null
+  tags?: Prisma.EquipmentCreatetagsInput | string[]
   created_at?: Date | string
   updated_at?: Date | string
   created_by?: string | null
@@ -968,11 +1740,24 @@ export type EquipmentUpdateWithoutSolicitanteInput = {
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   func?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  virtualizationPlatform?: Prisma.NullableEnumVirtualizationPlatformFieldUpdateOperationsInput | $Enums.VirtualizationPlatform | null
+  managementController?: Prisma.NullableEnumManagementControllerFieldUpdateOperationsInput | $Enums.ManagementController | null
+  managementIp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  managementUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vmid?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  guestOs?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cpuCores?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  memoryMb?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  diskGb?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tags?: Prisma.EquipmentUpdatetagsInput | string[]
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   updated_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  parent?: Prisma.EquipmentUpdateOneWithoutChildrenNestedInput
+  children?: Prisma.EquipmentUpdateManyWithoutParentNestedInput
   credentials?: Prisma.EquipmentCredentialUpdateManyWithoutEquipmentNestedInput
 }
 
@@ -991,11 +1776,24 @@ export type EquipmentUncheckedUpdateWithoutSolicitanteInput = {
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   func?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  parentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  virtualizationPlatform?: Prisma.NullableEnumVirtualizationPlatformFieldUpdateOperationsInput | $Enums.VirtualizationPlatform | null
+  managementController?: Prisma.NullableEnumManagementControllerFieldUpdateOperationsInput | $Enums.ManagementController | null
+  managementIp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  managementUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vmid?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  guestOs?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cpuCores?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  memoryMb?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  diskGb?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tags?: Prisma.EquipmentUpdatetagsInput | string[]
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   updated_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  children?: Prisma.EquipmentUncheckedUpdateManyWithoutParentNestedInput
   credentials?: Prisma.EquipmentCredentialUncheckedUpdateManyWithoutEquipmentNestedInput
 }
 
@@ -1014,6 +1812,158 @@ export type EquipmentUncheckedUpdateManyWithoutSolicitanteInput = {
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   func?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  parentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  virtualizationPlatform?: Prisma.NullableEnumVirtualizationPlatformFieldUpdateOperationsInput | $Enums.VirtualizationPlatform | null
+  managementController?: Prisma.NullableEnumManagementControllerFieldUpdateOperationsInput | $Enums.ManagementController | null
+  managementIp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  managementUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vmid?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  guestOs?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cpuCores?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  memoryMb?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  diskGb?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tags?: Prisma.EquipmentUpdatetagsInput | string[]
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  updated_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
+export type EquipmentCreateManyParentInput = {
+  id?: string
+  code?: string | null
+  name: string
+  type: $Enums.EquipmentType
+  status?: $Enums.EquipmentStatus
+  brand?: string | null
+  model?: string | null
+  serialNumber?: string | null
+  hostname?: string | null
+  ipAddress?: string | null
+  macAddress?: string | null
+  location?: string | null
+  func?: string | null
+  description?: string | null
+  virtualizationPlatform?: $Enums.VirtualizationPlatform | null
+  managementController?: $Enums.ManagementController | null
+  managementIp?: string | null
+  managementUrl?: string | null
+  url?: string | null
+  vmid?: number | null
+  guestOs?: string | null
+  cpuCores?: number | null
+  memoryMb?: number | null
+  diskGb?: number | null
+  tags?: Prisma.EquipmentCreatetagsInput | string[]
+  solicitanteId?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  created_by?: string | null
+  updated_by?: string | null
+  deleted_at?: Date | string | null
+}
+
+export type EquipmentUpdateWithoutParentInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumEquipmentTypeFieldUpdateOperationsInput | $Enums.EquipmentType
+  status?: Prisma.EnumEquipmentStatusFieldUpdateOperationsInput | $Enums.EquipmentStatus
+  brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serialNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostname?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  macAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  func?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  virtualizationPlatform?: Prisma.NullableEnumVirtualizationPlatformFieldUpdateOperationsInput | $Enums.VirtualizationPlatform | null
+  managementController?: Prisma.NullableEnumManagementControllerFieldUpdateOperationsInput | $Enums.ManagementController | null
+  managementIp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  managementUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vmid?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  guestOs?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cpuCores?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  memoryMb?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  diskGb?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tags?: Prisma.EquipmentUpdatetagsInput | string[]
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  updated_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  children?: Prisma.EquipmentUpdateManyWithoutParentNestedInput
+  solicitante?: Prisma.SolicitanteUpdateOneWithoutEquipmentNestedInput
+  credentials?: Prisma.EquipmentCredentialUpdateManyWithoutEquipmentNestedInput
+}
+
+export type EquipmentUncheckedUpdateWithoutParentInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumEquipmentTypeFieldUpdateOperationsInput | $Enums.EquipmentType
+  status?: Prisma.EnumEquipmentStatusFieldUpdateOperationsInput | $Enums.EquipmentStatus
+  brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serialNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostname?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  macAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  func?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  virtualizationPlatform?: Prisma.NullableEnumVirtualizationPlatformFieldUpdateOperationsInput | $Enums.VirtualizationPlatform | null
+  managementController?: Prisma.NullableEnumManagementControllerFieldUpdateOperationsInput | $Enums.ManagementController | null
+  managementIp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  managementUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vmid?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  guestOs?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cpuCores?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  memoryMb?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  diskGb?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tags?: Prisma.EquipmentUpdatetagsInput | string[]
+  solicitanteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  updated_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  children?: Prisma.EquipmentUncheckedUpdateManyWithoutParentNestedInput
+  credentials?: Prisma.EquipmentCredentialUncheckedUpdateManyWithoutEquipmentNestedInput
+}
+
+export type EquipmentUncheckedUpdateManyWithoutParentInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumEquipmentTypeFieldUpdateOperationsInput | $Enums.EquipmentType
+  status?: Prisma.EnumEquipmentStatusFieldUpdateOperationsInput | $Enums.EquipmentStatus
+  brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serialNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hostname?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  macAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  func?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  virtualizationPlatform?: Prisma.NullableEnumVirtualizationPlatformFieldUpdateOperationsInput | $Enums.VirtualizationPlatform | null
+  managementController?: Prisma.NullableEnumManagementControllerFieldUpdateOperationsInput | $Enums.ManagementController | null
+  managementIp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  managementUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vmid?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  guestOs?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cpuCores?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  memoryMb?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  diskGb?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tags?: Prisma.EquipmentUpdatetagsInput | string[]
+  solicitanteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1027,10 +1977,12 @@ export type EquipmentUncheckedUpdateManyWithoutSolicitanteInput = {
  */
 
 export type EquipmentCountOutputType = {
+  children: number
   credentials: number
 }
 
 export type EquipmentCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  children?: boolean | EquipmentCountOutputTypeCountChildrenArgs
   credentials?: boolean | EquipmentCountOutputTypeCountCredentialsArgs
 }
 
@@ -1042,6 +1994,13 @@ export type EquipmentCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Ex
    * Select specific fields to fetch from the EquipmentCountOutputType
    */
   select?: Prisma.EquipmentCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * EquipmentCountOutputType without action
+ */
+export type EquipmentCountOutputTypeCountChildrenArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.EquipmentWhereInput
 }
 
 /**
@@ -1067,12 +2026,26 @@ export type EquipmentSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   location?: boolean
   func?: boolean
   description?: boolean
+  parentId?: boolean
+  virtualizationPlatform?: boolean
+  managementController?: boolean
+  managementIp?: boolean
+  managementUrl?: boolean
+  url?: boolean
+  vmid?: boolean
+  guestOs?: boolean
+  cpuCores?: boolean
+  memoryMb?: boolean
+  diskGb?: boolean
+  tags?: boolean
   solicitanteId?: boolean
   created_at?: boolean
   updated_at?: boolean
   created_by?: boolean
   updated_by?: boolean
   deleted_at?: boolean
+  parent?: boolean | Prisma.Equipment$parentArgs<ExtArgs>
+  children?: boolean | Prisma.Equipment$childrenArgs<ExtArgs>
   solicitante?: boolean | Prisma.Equipment$solicitanteArgs<ExtArgs>
   credentials?: boolean | Prisma.Equipment$credentialsArgs<ExtArgs>
   _count?: boolean | Prisma.EquipmentCountOutputTypeDefaultArgs<ExtArgs>
@@ -1093,12 +2066,25 @@ export type EquipmentSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   location?: boolean
   func?: boolean
   description?: boolean
+  parentId?: boolean
+  virtualizationPlatform?: boolean
+  managementController?: boolean
+  managementIp?: boolean
+  managementUrl?: boolean
+  url?: boolean
+  vmid?: boolean
+  guestOs?: boolean
+  cpuCores?: boolean
+  memoryMb?: boolean
+  diskGb?: boolean
+  tags?: boolean
   solicitanteId?: boolean
   created_at?: boolean
   updated_at?: boolean
   created_by?: boolean
   updated_by?: boolean
   deleted_at?: boolean
+  parent?: boolean | Prisma.Equipment$parentArgs<ExtArgs>
   solicitante?: boolean | Prisma.Equipment$solicitanteArgs<ExtArgs>
 }, ExtArgs["result"]["equipment"]>
 
@@ -1117,12 +2103,25 @@ export type EquipmentSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   location?: boolean
   func?: boolean
   description?: boolean
+  parentId?: boolean
+  virtualizationPlatform?: boolean
+  managementController?: boolean
+  managementIp?: boolean
+  managementUrl?: boolean
+  url?: boolean
+  vmid?: boolean
+  guestOs?: boolean
+  cpuCores?: boolean
+  memoryMb?: boolean
+  diskGb?: boolean
+  tags?: boolean
   solicitanteId?: boolean
   created_at?: boolean
   updated_at?: boolean
   created_by?: boolean
   updated_by?: boolean
   deleted_at?: boolean
+  parent?: boolean | Prisma.Equipment$parentArgs<ExtArgs>
   solicitante?: boolean | Prisma.Equipment$solicitanteArgs<ExtArgs>
 }, ExtArgs["result"]["equipment"]>
 
@@ -1141,6 +2140,18 @@ export type EquipmentSelectScalar = {
   location?: boolean
   func?: boolean
   description?: boolean
+  parentId?: boolean
+  virtualizationPlatform?: boolean
+  managementController?: boolean
+  managementIp?: boolean
+  managementUrl?: boolean
+  url?: boolean
+  vmid?: boolean
+  guestOs?: boolean
+  cpuCores?: boolean
+  memoryMb?: boolean
+  diskGb?: boolean
+  tags?: boolean
   solicitanteId?: boolean
   created_at?: boolean
   updated_at?: boolean
@@ -1149,22 +2160,28 @@ export type EquipmentSelectScalar = {
   deleted_at?: boolean
 }
 
-export type EquipmentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "code" | "name" | "type" | "status" | "brand" | "model" | "serialNumber" | "hostname" | "ipAddress" | "macAddress" | "location" | "func" | "description" | "solicitanteId" | "created_at" | "updated_at" | "created_by" | "updated_by" | "deleted_at", ExtArgs["result"]["equipment"]>
+export type EquipmentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "code" | "name" | "type" | "status" | "brand" | "model" | "serialNumber" | "hostname" | "ipAddress" | "macAddress" | "location" | "func" | "description" | "parentId" | "virtualizationPlatform" | "managementController" | "managementIp" | "managementUrl" | "url" | "vmid" | "guestOs" | "cpuCores" | "memoryMb" | "diskGb" | "tags" | "solicitanteId" | "created_at" | "updated_at" | "created_by" | "updated_by" | "deleted_at", ExtArgs["result"]["equipment"]>
 export type EquipmentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  parent?: boolean | Prisma.Equipment$parentArgs<ExtArgs>
+  children?: boolean | Prisma.Equipment$childrenArgs<ExtArgs>
   solicitante?: boolean | Prisma.Equipment$solicitanteArgs<ExtArgs>
   credentials?: boolean | Prisma.Equipment$credentialsArgs<ExtArgs>
   _count?: boolean | Prisma.EquipmentCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type EquipmentIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  parent?: boolean | Prisma.Equipment$parentArgs<ExtArgs>
   solicitante?: boolean | Prisma.Equipment$solicitanteArgs<ExtArgs>
 }
 export type EquipmentIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  parent?: boolean | Prisma.Equipment$parentArgs<ExtArgs>
   solicitante?: boolean | Prisma.Equipment$solicitanteArgs<ExtArgs>
 }
 
 export type $EquipmentPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Equipment"
   objects: {
+    parent: Prisma.$EquipmentPayload<ExtArgs> | null
+    children: Prisma.$EquipmentPayload<ExtArgs>[]
     solicitante: Prisma.$SolicitantePayload<ExtArgs> | null
     credentials: Prisma.$EquipmentCredentialPayload<ExtArgs>[]
   }
@@ -1183,6 +2200,18 @@ export type $EquipmentPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     location: string | null
     func: string | null
     description: string | null
+    parentId: string | null
+    virtualizationPlatform: $Enums.VirtualizationPlatform | null
+    managementController: $Enums.ManagementController | null
+    managementIp: string | null
+    managementUrl: string | null
+    url: string | null
+    vmid: number | null
+    guestOs: string | null
+    cpuCores: number | null
+    memoryMb: number | null
+    diskGb: number | null
+    tags: string[]
     solicitanteId: string | null
     created_at: Date
     updated_at: Date
@@ -1583,6 +2612,8 @@ readonly fields: EquipmentFieldRefs;
  */
 export interface Prisma__EquipmentClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  parent<T extends Prisma.Equipment$parentArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Equipment$parentArgs<ExtArgs>>): Prisma.Prisma__EquipmentClient<runtime.Types.Result.GetResult<Prisma.$EquipmentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  children<T extends Prisma.Equipment$childrenArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Equipment$childrenArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EquipmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   solicitante<T extends Prisma.Equipment$solicitanteArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Equipment$solicitanteArgs<ExtArgs>>): Prisma.Prisma__SolicitanteClient<runtime.Types.Result.GetResult<Prisma.$SolicitantePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   credentials<T extends Prisma.Equipment$credentialsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Equipment$credentialsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EquipmentCredentialPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
@@ -1628,6 +2659,18 @@ export interface EquipmentFieldRefs {
   readonly location: Prisma.FieldRef<"Equipment", 'String'>
   readonly func: Prisma.FieldRef<"Equipment", 'String'>
   readonly description: Prisma.FieldRef<"Equipment", 'String'>
+  readonly parentId: Prisma.FieldRef<"Equipment", 'String'>
+  readonly virtualizationPlatform: Prisma.FieldRef<"Equipment", 'VirtualizationPlatform'>
+  readonly managementController: Prisma.FieldRef<"Equipment", 'ManagementController'>
+  readonly managementIp: Prisma.FieldRef<"Equipment", 'String'>
+  readonly managementUrl: Prisma.FieldRef<"Equipment", 'String'>
+  readonly url: Prisma.FieldRef<"Equipment", 'String'>
+  readonly vmid: Prisma.FieldRef<"Equipment", 'Int'>
+  readonly guestOs: Prisma.FieldRef<"Equipment", 'String'>
+  readonly cpuCores: Prisma.FieldRef<"Equipment", 'Int'>
+  readonly memoryMb: Prisma.FieldRef<"Equipment", 'Int'>
+  readonly diskGb: Prisma.FieldRef<"Equipment", 'Int'>
+  readonly tags: Prisma.FieldRef<"Equipment", 'String[]'>
   readonly solicitanteId: Prisma.FieldRef<"Equipment", 'String'>
   readonly created_at: Prisma.FieldRef<"Equipment", 'DateTime'>
   readonly updated_at: Prisma.FieldRef<"Equipment", 'DateTime'>
@@ -2032,6 +3075,49 @@ export type EquipmentDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Int
    * Limit how many Equipment to delete.
    */
   limit?: number
+}
+
+/**
+ * Equipment.parent
+ */
+export type Equipment$parentArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Equipment
+   */
+  select?: Prisma.EquipmentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Equipment
+   */
+  omit?: Prisma.EquipmentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EquipmentInclude<ExtArgs> | null
+  where?: Prisma.EquipmentWhereInput
+}
+
+/**
+ * Equipment.children
+ */
+export type Equipment$childrenArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Equipment
+   */
+  select?: Prisma.EquipmentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Equipment
+   */
+  omit?: Prisma.EquipmentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EquipmentInclude<ExtArgs> | null
+  where?: Prisma.EquipmentWhereInput
+  orderBy?: Prisma.EquipmentOrderByWithRelationInput | Prisma.EquipmentOrderByWithRelationInput[]
+  cursor?: Prisma.EquipmentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.EquipmentScalarFieldEnum | Prisma.EquipmentScalarFieldEnum[]
 }
 
 /**
