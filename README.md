@@ -67,7 +67,12 @@ Observações:
 
 - Subir app: `npm run dev`
 - Aplicar migrations: `npm run prisma:migrate`
-- Seed: `npm run seed`
+- Bootstrap de produção: `npm run seed` — idempotente; cria apenas o administrador e as configurações base (tipos e categorias de ticket + mesa de trabalho). Não gera dados fictícios.
+  - Exige `ADMIN_PASSWORD` (mínimo 8 caracteres) — sem essa variável o script aborta.
+  - Variáveis opcionais: `ADMIN_EMAIL` (default `admin@ticketbr.com`), `ADMIN_NAME` (default `Administrador`), `ADMIN_MATRICULA` (default `ADM001`).
+  - A senha só é aplicada na criação; execuções seguintes não sobrescrevem a senha existente.
+- Limpeza de dados: `npm run db:clean` — **dry-run** que lista quantos registros seriam removidos de cada tabela, preservando o admin e as configurações base.
+  - Aplicar a limpeza: `npm run db:clean:apply` (remove todos os dados operacionais e reinicia a sequência de numeração de tickets).
 
 ## Build/Deploy
 

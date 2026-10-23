@@ -881,7 +881,14 @@ const roadmap: RoadmapItem[] = [
   {
     phase: "Fase 4 — Maturidade",
     title: "Inventário de infraestrutura e virtualização",
-    description: "Concluído: hierarquia de ativos (servidor físico -> host de virtualização -> VM -> container) via parentId, com plataforma de virtualização (Proxmox, VMware ESXi/vCenter, Hyper-V, XCP-ng, KVM) e controlador de gerência iLO/iDRAC/IPMI de IP opcional. Cada recurso guarda VMID, sistema convidado, vCPU, memória e disco, além de link de acesso HTTP/HTTPS clicável. Página /infraestrutura com seletor de cliente e árvore de ativos, e busca rápida global (Ctrl/Cmd + K) respondendo \"onde está o recurso?\" com o caminho completo.",
+    description: "Concluído: hierarquia de ativos (servidor físico -> host de virtualização -> VM -> container) via parentId, com plataforma de virtualização (Proxmox, VMware ESXi/vCenter, Hyper-V, XCP-ng, KVM) e controlador de gerência iLO/iDRAC/IPMI de IP opcional. Cada recurso guarda VMID, sistema convidado, vCPU, memória e disco, além de link de acesso HTTP/HTTPS clicável. Página /infraestrutura com seletor de cliente e árvore de ativos, e busca rápida global (Ctrl/Cmd + K) respondendo \"onde está o recurso?\" com o caminho completo. A árvore permite criar recursos filhos diretamente em cada host (servidor -> host, host -> VM, VM -> container), herdando o cliente (solicitanteId) do pai.",
+    priority: "P1",
+    status: "done"
+  },
+  {
+    phase: "Fase 4 — Maturidade",
+    title: "Prontidão para produção (limpeza de dados e bootstrap)",
+    description: "Concluído: remoção dos dados fictícios do banco (script db:clean com dry-run e db:clean:apply, preservando o administrador e as configurações base e reiniciando a sequência de numeração de tickets). O seed foi reescrito como bootstrap idempotente que exige ADMIN_PASSWORD e cria apenas o admin e as configurações (tipos/categorias de ticket e mesa de trabalho), com @faker-js/faker removido das dependências.",
     priority: "P1",
     status: "done"
   },
