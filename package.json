@@ -23,13 +23,14 @@
     "db:push": "node scripts/db-push.cjs",
     "seed": "tsx prisma/seed.ts",
     "db:seed": "node scripts/db-seed.cjs",
+    "db:clean": "tsx scripts/db-clean.ts",
+    "db:clean:apply": "tsx scripts/db-clean.ts --execute",
     "db:deploy": "node scripts/db-deploy.cjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1030.0",
     "@aws-sdk/client-sts": "^3.1030.0",
     "@aws-sdk/s3-request-presigner": "^3.1030.0",
-    "@faker-js/faker": "^10.6.0",
     "@prisma/adapter-pg": "^7.4.1",
     "@prisma/adapter-ppg": "^7.4.1",
     "@prisma/client": "^7.7.0",
