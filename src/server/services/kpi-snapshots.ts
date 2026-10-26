@@ -1,5 +1,6 @@
 import { Prisma, prisma } from "@/lib/prisma";
 import { computeWindow, getTicketsOperationalDashboard } from "@/server/services/tickets-operational-dashboard";
+import { getContractComplianceReport } from "@/server/services/contract-service";
 import type {
   KpiDelta,
   KpiTrendPoint,
@@ -123,7 +124,7 @@ function computeDelta(current: number | null, previous: number | null): KpiDelta
 export async function getManagementReport(filters: ManagementReportFilters): Promise<ManagementReportResponse> {
   const window = computeWindow(filters);
 
-  const [current, previous, trend, latest] = await Promise.all([
+  const [current, previous, trend, latest, contracts] = await Promise.all([
     getTicketsOperationalDashboard({
       preset: "custom",
       from: window.from.toISOString(),
@@ -135,7 +136,8 @@ export async function getManagementReport(filters: ManagementReportFilters): Pro
       to: window.prevTo.toISOString()
     }),
     listKpiSnapshots({ from: window.from, to: window.to }),
-    prisma.kpiSnapshot.findFirst({ orderBy: { snapshotDate: "desc" } })
+    prisma.kpiSnapshot.findFirst({ orderBy: { snapshotDate: "desc" } }),
+    getContractComplianceReport({ from: window.from, to: window.to })
   ]);
 
   const kpis = current.data.kpis;
@@ -167,6 +169,7 @@ export async function getManagementReport(filters: ManagementReportFilters): Pro
         topCategories: current.data.tables.topCategories
       },
       trend,
+      contracts,
       latestSnapshotAt: latest ? startOfUtcDay(latest.snapshotDate).toISOString() : null
     }
   };

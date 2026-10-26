@@ -415,7 +415,10 @@ export const ModelName = {
   ClientSharedSecret: 'ClientSharedSecret',
   CredentialAccessGrant: 'CredentialAccessGrant',
   UserGroup: 'UserGroup',
-  UserGroupMember: 'UserGroupMember'
+  UserGroupMember: 'UserGroupMember',
+  SlaPolicy: 'SlaPolicy',
+  Contrato: 'Contrato',
+  ContratoSlaTermo: 'ContratoSlaTermo'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -431,7 +434,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "whatsAppContact" | "solicitante" | "funcionario" | "auditLog" | "tipo_Ticket" | "categoria_Ticket" | "mesa_Trabalho" | "operador" | "ticket" | "ticketEvent" | "chatConversation" | "conversation" | "message" | "task" | "taskSubtask" | "taskAttachment" | "taskTicketLink" | "taskComment" | "project" | "projectMember" | "projectExportAudit" | "notification" | "kpiSnapshot" | "webhookRequestLog" | "passwordResetToken" | "equipment" | "equipmentCredential" | "clientSharedSecret" | "credentialAccessGrant" | "userGroup" | "userGroupMember"
+    modelProps: "user" | "whatsAppContact" | "solicitante" | "funcionario" | "auditLog" | "tipo_Ticket" | "categoria_Ticket" | "mesa_Trabalho" | "operador" | "ticket" | "ticketEvent" | "chatConversation" | "conversation" | "message" | "task" | "taskSubtask" | "taskAttachment" | "taskTicketLink" | "taskComment" | "project" | "projectMember" | "projectExportAudit" | "notification" | "kpiSnapshot" | "webhookRequestLog" | "passwordResetToken" | "equipment" | "equipmentCredential" | "clientSharedSecret" | "credentialAccessGrant" | "userGroup" | "userGroupMember" | "slaPolicy" | "contrato" | "contratoSlaTermo"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2803,6 +2806,228 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    SlaPolicy: {
+      payload: Prisma.$SlaPolicyPayload<ExtArgs>
+      fields: Prisma.SlaPolicyFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SlaPolicyFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SlaPolicyPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SlaPolicyFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SlaPolicyPayload>
+        }
+        findFirst: {
+          args: Prisma.SlaPolicyFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SlaPolicyPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SlaPolicyFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SlaPolicyPayload>
+        }
+        findMany: {
+          args: Prisma.SlaPolicyFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SlaPolicyPayload>[]
+        }
+        create: {
+          args: Prisma.SlaPolicyCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SlaPolicyPayload>
+        }
+        createMany: {
+          args: Prisma.SlaPolicyCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SlaPolicyCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SlaPolicyPayload>[]
+        }
+        delete: {
+          args: Prisma.SlaPolicyDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SlaPolicyPayload>
+        }
+        update: {
+          args: Prisma.SlaPolicyUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SlaPolicyPayload>
+        }
+        deleteMany: {
+          args: Prisma.SlaPolicyDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SlaPolicyUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SlaPolicyUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SlaPolicyPayload>[]
+        }
+        upsert: {
+          args: Prisma.SlaPolicyUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SlaPolicyPayload>
+        }
+        aggregate: {
+          args: Prisma.SlaPolicyAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSlaPolicy>
+        }
+        groupBy: {
+          args: Prisma.SlaPolicyGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SlaPolicyGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SlaPolicyCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SlaPolicyCountAggregateOutputType> | number
+        }
+      }
+    }
+    Contrato: {
+      payload: Prisma.$ContratoPayload<ExtArgs>
+      fields: Prisma.ContratoFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ContratoFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContratoPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ContratoFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContratoPayload>
+        }
+        findFirst: {
+          args: Prisma.ContratoFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContratoPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ContratoFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContratoPayload>
+        }
+        findMany: {
+          args: Prisma.ContratoFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContratoPayload>[]
+        }
+        create: {
+          args: Prisma.ContratoCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContratoPayload>
+        }
+        createMany: {
+          args: Prisma.ContratoCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ContratoCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContratoPayload>[]
+        }
+        delete: {
+          args: Prisma.ContratoDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContratoPayload>
+        }
+        update: {
+          args: Prisma.ContratoUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContratoPayload>
+        }
+        deleteMany: {
+          args: Prisma.ContratoDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ContratoUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ContratoUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContratoPayload>[]
+        }
+        upsert: {
+          args: Prisma.ContratoUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContratoPayload>
+        }
+        aggregate: {
+          args: Prisma.ContratoAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateContrato>
+        }
+        groupBy: {
+          args: Prisma.ContratoGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ContratoGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ContratoCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ContratoCountAggregateOutputType> | number
+        }
+      }
+    }
+    ContratoSlaTermo: {
+      payload: Prisma.$ContratoSlaTermoPayload<ExtArgs>
+      fields: Prisma.ContratoSlaTermoFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ContratoSlaTermoFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContratoSlaTermoPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ContratoSlaTermoFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContratoSlaTermoPayload>
+        }
+        findFirst: {
+          args: Prisma.ContratoSlaTermoFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContratoSlaTermoPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ContratoSlaTermoFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContratoSlaTermoPayload>
+        }
+        findMany: {
+          args: Prisma.ContratoSlaTermoFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContratoSlaTermoPayload>[]
+        }
+        create: {
+          args: Prisma.ContratoSlaTermoCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContratoSlaTermoPayload>
+        }
+        createMany: {
+          args: Prisma.ContratoSlaTermoCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ContratoSlaTermoCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContratoSlaTermoPayload>[]
+        }
+        delete: {
+          args: Prisma.ContratoSlaTermoDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContratoSlaTermoPayload>
+        }
+        update: {
+          args: Prisma.ContratoSlaTermoUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContratoSlaTermoPayload>
+        }
+        deleteMany: {
+          args: Prisma.ContratoSlaTermoDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ContratoSlaTermoUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ContratoSlaTermoUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContratoSlaTermoPayload>[]
+        }
+        upsert: {
+          args: Prisma.ContratoSlaTermoUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContratoSlaTermoPayload>
+        }
+        aggregate: {
+          args: Prisma.ContratoSlaTermoAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateContratoSlaTermo>
+        }
+        groupBy: {
+          args: Prisma.ContratoSlaTermoGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ContratoSlaTermoGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ContratoSlaTermoCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ContratoSlaTermoCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -2884,6 +3109,10 @@ export const SolicitanteScalarFieldEnum = {
   endereco_completo: 'endereco_completo',
   data_cadastro: 'data_cadastro',
   status: 'status',
+  servico_bloqueado: 'servico_bloqueado',
+  servico_bloqueado_em: 'servico_bloqueado_em',
+  servico_bloqueado_motivo: 'servico_bloqueado_motivo',
+  contratoVigenteId: 'contratoVigenteId',
   created_at: 'created_at',
   updated_at: 'updated_at',
   created_by: 'created_by',
@@ -3022,6 +3251,10 @@ export const TicketScalarFieldEnum = {
   pauseSla: 'pauseSla',
   pausedStartedAt: 'pausedStartedAt',
   pausedTotalSeconds: 'pausedTotalSeconds',
+  contrato_id: 'contrato_id',
+  slaHorasAplicadas: 'slaHorasAplicadas',
+  slaFonte: 'slaFonte',
+  foraDeContrato: 'foraDeContrato',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   created_by: 'created_by',
@@ -3387,6 +3620,79 @@ export const UserGroupMemberScalarFieldEnum = {
 export type UserGroupMemberScalarFieldEnum = (typeof UserGroupMemberScalarFieldEnum)[keyof typeof UserGroupMemberScalarFieldEnum]
 
 
+export const SlaPolicyScalarFieldEnum = {
+  id: 'id',
+  nome: 'nome',
+  descricao: 'descricao',
+  isDefault: 'isDefault',
+  slaRespostaHoras: 'slaRespostaHoras',
+  slaSolucaoHoras: 'slaSolucaoHoras',
+  alertaAtencaoPct: 'alertaAtencaoPct',
+  alertaCriticoPct: 'alertaCriticoPct',
+  ativo: 'ativo',
+  horarioComercialAtivo: 'horarioComercialAtivo',
+  horarioComercial: 'horarioComercial',
+  feriados: 'feriados',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  created_by: 'created_by',
+  updated_by: 'updated_by'
+} as const
+
+export type SlaPolicyScalarFieldEnum = (typeof SlaPolicyScalarFieldEnum)[keyof typeof SlaPolicyScalarFieldEnum]
+
+
+export const ContratoScalarFieldEnum = {
+  id: 'id',
+  numero: 'numero',
+  titulo: 'titulo',
+  descricao: 'descricao',
+  solicitante_id: 'solicitante_id',
+  slaPolicyId: 'slaPolicyId',
+  slaRespostaHoras: 'slaRespostaHoras',
+  slaSolucaoHoras: 'slaSolucaoHoras',
+  status: 'status',
+  inicioVigencia: 'inicioVigencia',
+  fimVigencia: 'fimVigencia',
+  renovacaoAutomatica: 'renovacaoAutomatica',
+  diasAvisoVencimento: 'diasAvisoVencimento',
+  valorMensal: 'valorMensal',
+  penalidadeDescricao: 'penalidadeDescricao',
+  documentoUrl: 'documentoUrl',
+  observacoes: 'observacoes',
+  canceladoEm: 'canceladoEm',
+  canceladoPor: 'canceladoPor',
+  motivoCancelamento: 'motivoCancelamento',
+  renovadoDeId: 'renovadoDeId',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  created_by: 'created_by',
+  updated_by: 'updated_by',
+  deleted_at: 'deleted_at'
+} as const
+
+export type ContratoScalarFieldEnum = (typeof ContratoScalarFieldEnum)[keyof typeof ContratoScalarFieldEnum]
+
+
+export const ContratoSlaTermoScalarFieldEnum = {
+  id: 'id',
+  contratoId: 'contratoId',
+  escopo: 'escopo',
+  tipoTicketId: 'tipoTicketId',
+  categoriaId: 'categoriaId',
+  prioridade: 'prioridade',
+  slaRespostaHoras: 'slaRespostaHoras',
+  slaSolucaoHoras: 'slaSolucaoHoras',
+  ativo: 'ativo',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  created_by: 'created_by',
+  updated_by: 'updated_by'
+} as const
+
+export type ContratoSlaTermoScalarFieldEnum = (typeof ContratoSlaTermoScalarFieldEnum)[keyof typeof ContratoSlaTermoScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -3491,6 +3797,20 @@ export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel,
 
 
 /**
+ * Reference to a field of type 'ServiceBlockReason'
+ */
+export type EnumServiceBlockReasonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ServiceBlockReason'>
+    
+
+
+/**
+ * Reference to a field of type 'ServiceBlockReason[]'
+ */
+export type ListEnumServiceBlockReasonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ServiceBlockReason[]'>
+    
+
+
+/**
  * Reference to a field of type 'Json'
  */
 export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
@@ -3543,6 +3863,20 @@ export type EnumTicketPriorityFieldRefInput<$PrismaModel> = FieldRefInputType<$P
  * Reference to a field of type 'TicketPriority[]'
  */
 export type ListEnumTicketPriorityFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TicketPriority[]'>
+    
+
+
+/**
+ * Reference to a field of type 'SlaSource'
+ */
+export type EnumSlaSourceFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SlaSource'>
+    
+
+
+/**
+ * Reference to a field of type 'SlaSource[]'
+ */
+export type ListEnumSlaSourceFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SlaSource[]'>
     
 
 
@@ -3755,6 +4089,48 @@ export type EnumCredentialAccessLevelFieldRefInput<$PrismaModel> = FieldRefInput
 export type ListEnumCredentialAccessLevelFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CredentialAccessLevel[]'>
     
 
+
+/**
+ * Reference to a field of type 'ContractStatus'
+ */
+export type EnumContractStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ContractStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'ContractStatus[]'
+ */
+export type ListEnumContractStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ContractStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Decimal'
+ */
+export type DecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal'>
+    
+
+
+/**
+ * Reference to a field of type 'Decimal[]'
+ */
+export type ListDecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal[]'>
+    
+
+
+/**
+ * Reference to a field of type 'SlaTermScope'
+ */
+export type EnumSlaTermScopeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SlaTermScope'>
+    
+
+
+/**
+ * Reference to a field of type 'SlaTermScope[]'
+ */
+export type ListEnumSlaTermScopeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SlaTermScope[]'>
+    
+
 /**
  * Batch Payload for updateMany & deleteMany & createMany
  */
@@ -3897,6 +4273,9 @@ export type GlobalOmitConfig = {
   credentialAccessGrant?: Prisma.CredentialAccessGrantOmit
   userGroup?: Prisma.UserGroupOmit
   userGroupMember?: Prisma.UserGroupMemberOmit
+  slaPolicy?: Prisma.SlaPolicyOmit
+  contrato?: Prisma.ContratoOmit
+  contratoSlaTermo?: Prisma.ContratoSlaTermoOmit
 }
 
 /* Types for Logging */

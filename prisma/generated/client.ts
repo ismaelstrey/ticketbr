@@ -201,3 +201,18 @@ export type UserGroup = Prisma.UserGroupModel
  * 
  */
 export type UserGroupMember = Prisma.UserGroupMemberModel
+/**
+ * Model SlaPolicy
+ * 
+ */
+export type SlaPolicy = Prisma.SlaPolicyModel
+/**
+ * Model Contrato
+ * 
+ */
+export type Contrato = Prisma.ContratoModel
+/**
+ * Model ContratoSlaTermo
+ * 
+ */
+export type ContratoSlaTermo = Prisma.ContratoSlaTermoModel

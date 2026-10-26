@@ -76,6 +76,27 @@ async function buildPdf(report: ManagementReportResponse) {
     if (y < 60) break;
   }
 
+  if (y > 120) {
+    y -= 10;
+    const c = report.data.contracts;
+    line("Conformidade por contrato", 13, true);
+    line(
+      `Ativos: ${c.summary.contratosAtivos} · vencendo em 30d: ${c.summary.contratosVencendo30d} · cancelados: ${c.summary.contratosCancelados}`,
+      10
+    );
+    line(
+      `Valor mensal (ativos): ${c.summary.valorMensalTotal.toFixed(2)} · fora de contrato: ${c.summary.ticketsForaDeContrato} · cumprimento medio: ${c.summary.cumprimentoMedioPct ?? "-"}%`,
+      10
+    );
+    for (const item of c.items.slice(0, 12)) {
+      line(
+        `${item.numero} · ${item.cliente ?? "-"} · ${item.status} · cumprimento ${item.cumprimentoPct ?? "-"}% · valor ${item.valorMensal ?? "-"}`,
+        9
+      );
+      if (y < 60) break;
+    }
+  }
+
   return Buffer.from(await doc.save());
 }
 
@@ -134,9 +155,25 @@ export async function GET(request: NextRequest) {
         firstContactResolutionRate: point.firstContactResolutionRate
       }));
 
+      const contractRows = report.data.contracts.items.map((item) => ({
+        numero: item.numero,
+        titulo: item.titulo,
+        cliente: item.cliente,
+        status: item.status,
+        slaSolucaoHoras: item.slaSolucaoHoras,
+        valorMensal: item.valorMensal,
+        ticketsTotal: item.ticketsTotal,
+        ticketsResolvidos: item.ticketsResolvidos,
+        ticketsDentroSla: item.ticketsDentroSla,
+        cumprimentoPct: item.cumprimentoPct,
+        vigenciaInicio: item.vigencia.inicio.slice(0, 10),
+        vigenciaFim: item.vigencia.fim ? item.vigencia.fim.slice(0, 10) : null
+      }));
+
       const bytes = await createXlsxWorkbook([
         { name: "Resumo", rows: summaryRows },
-        { name: "Tendencia", rows: trendRows }
+        { name: "Tendencia", rows: trendRows },
+        { name: "Contratos", rows: contractRows }
       ]);
 
       return new NextResponse(Buffer.from(bytes), {

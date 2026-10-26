@@ -7,6 +7,8 @@ const notifyTicketCreatedMock = vi.fn();
 const ticketFindManyMock = vi.fn();
 const ticketCreateMock = vi.fn();
 const categoriaFindUniqueMock = vi.fn();
+const tipoTicketFindUniqueMock = vi.fn();
+const solicitanteFindUniqueMock = vi.fn();
 
 vi.mock("@/server/services/customer-context", () => ({
   requireCustomerContext: requireCustomerContextMock
@@ -28,6 +30,12 @@ vi.mock("@/lib/prisma", () => ({
     },
     categoria_Ticket: {
       findUnique: categoriaFindUniqueMock
+    },
+    tipo_Ticket: {
+      findUnique: tipoTicketFindUniqueMock
+    },
+    solicitante: {
+      findUnique: solicitanteFindUniqueMock
     }
   }
 }));
@@ -52,6 +60,10 @@ describe("/api/customer/tickets", () => {
     ticketFindManyMock.mockReset();
     ticketCreateMock.mockReset();
     categoriaFindUniqueMock.mockReset();
+    tipoTicketFindUniqueMock.mockReset();
+    solicitanteFindUniqueMock.mockReset();
+    tipoTicketFindUniqueMock.mockResolvedValue(null);
+    solicitanteFindUniqueMock.mockResolvedValue(null);
   });
 
   it("GET lista apenas tickets da empresa do cliente", async () => {

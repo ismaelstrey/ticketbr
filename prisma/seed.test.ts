@@ -112,6 +112,12 @@ function createPrismaStub() {
     deleteMany: vi.fn(async () => ({ count: 0 }))
   };
 
+  const slaPolicy = {
+    findFirst: vi.fn(async () => null),
+    create: vi.fn(async () => ({ id: "sla_default" })),
+    update: vi.fn(async () => ({ id: "sla_existing" }))
+  };
+
   const task = {
     create: vi.fn(async (args: any) => ({ id: `task_${idSeq()}`, title: args.data.title })),
     deleteMany: vi.fn(async () => ({ count: 0 }))
@@ -144,6 +150,7 @@ function createPrismaStub() {
     chatConversation,
     ticketEvent,
     auditLog,
+    slaPolicy,
     task,
     taskSubtask,
     taskAttachment,

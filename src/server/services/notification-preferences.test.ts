@@ -111,7 +111,10 @@ describe("notification-preferences service", () => {
         TICKET_COMMENT: false,
         TICKET_ASSIGNED: true,
         SLA_WARNING: true,
-        SLA_BREACHED: true
+        SLA_BREACHED: true,
+        CONTRACT_EXPIRING: true,
+        CONTRACT_EXPIRED: true,
+        CONTRACT_CANCELLED: true
       }
     };
 

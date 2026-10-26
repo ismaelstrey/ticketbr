@@ -30,6 +30,37 @@ export type KpiTrendPoint = {
   firstContactResolutionRate: number | null;
 };
 
+// Conformidade de SLA e valor por contrato (F3 — operação)
+export type ContractComplianceItem = {
+  contratoId: string;
+  numero: string;
+  titulo: string;
+  cliente: string | null;
+  status: string;
+  valorMensal: number | null;
+  slaSolucaoHoras: number | null;
+  vigencia: { inicio: string; fim: string | null };
+  ticketsTotal: number;
+  ticketsForaDeContrato: number;
+  ticketsResolvidos: number;
+  ticketsDentroSla: number;
+  cumprimentoPct: number | null;
+};
+
+export type ContractComplianceSummary = {
+  contratosAtivos: number;
+  contratosVencendo30d: number;
+  contratosCancelados: number;
+  valorMensalTotal: number;
+  ticketsForaDeContrato: number;
+  cumprimentoMedioPct: number | null;
+};
+
+export type ContractComplianceReport = {
+  summary: ContractComplianceSummary;
+  items: ContractComplianceItem[];
+};
+
 export type ManagementReportResponse = {
   data: {
     window: { from: string; to: string; prevFrom: string; prevTo: string };
@@ -48,6 +79,7 @@ export type ManagementReportResponse = {
       topCategories: TicketTopCategory[];
     };
     trend: KpiTrendPoint[];
+    contracts: ContractComplianceReport;
     latestSnapshotAt: string | null;
   };
 };

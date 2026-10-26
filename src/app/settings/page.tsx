@@ -11,7 +11,49 @@ import { Input, Select } from "@/components/ui/Input";
 import { useThemeMode } from "@/context/ThemeModeContext";
 import { useSettings, type NotificationPreferenceType } from "@/hooks/useSettings";
 
-type TabKey = "general" | "evolution" | "n8n" | "uazapi" | "contactsSync" | "webhookLogs" | "notifications" | "storage";
+type TabKey =
+  | "general"
+  | "evolution"
+  | "n8n"
+  | "uazapi"
+  | "contactsSync"
+  | "webhookLogs"
+  | "notifications"
+  | "sla"
+  | "storage";
+
+/** Estado do formulário da política global de SLA (horário comercial e feriados). */
+interface SlaPolicyForm {
+  slaSolucaoHoras: string;
+  slaRespostaHoras: string;
+  horarioComercialAtivo: boolean;
+  timezone: string;
+  inicio: string;
+  fim: string;
+  diasUteis: number[];
+  feriadosTexto: string;
+}
+
+const DIAS_SEMANA: Array<{ value: number; label: string }> = [
+  { value: 1, label: "Seg" },
+  { value: 2, label: "Ter" },
+  { value: 3, label: "Qua" },
+  { value: 4, label: "Qui" },
+  { value: 5, label: "Sex" },
+  { value: 6, label: "Sáb" },
+  { value: 0, label: "Dom" }
+];
+
+const SLA_POLICY_FORM_INICIAL: SlaPolicyForm = {
+  slaSolucaoHoras: "8",
+  slaRespostaHoras: "",
+  horarioComercialAtivo: false,
+  timezone: "America/Sao_Paulo",
+  inicio: "09:00",
+  fim: "18:00",
+  diasUteis: [1, 2, 3, 4, 5],
+  feriadosTexto: ""
+};
 
 // Eventos configuráveis na aba de notificações, com o rótulo exibido ao usuário
 const notificationEvents: Array<{ key: NotificationPreferenceType; title: string; description: string }> = [
@@ -39,6 +81,21 @@ const notificationEvents: Array<{ key: NotificationPreferenceType; title: string
     key: "SLA_BREACHED",
     title: "SLA estourado",
     description: "Alerta o staff quando o prazo de resposta/solução já foi ultrapassado."
+  },
+  {
+    key: "CONTRACT_EXPIRING",
+    title: "Contrato próximo do vencimento",
+    description: "Avisa o staff e o cliente nos marcos de antecedência configurados no contrato."
+  },
+  {
+    key: "CONTRACT_EXPIRED",
+    title: "Contrato vencido",
+    description: "Avisa quando o contrato vence sem renovação e o serviço do cliente é interrompido."
+  },
+  {
+    key: "CONTRACT_CANCELLED",
+    title: "Contrato cancelado",
+    description: "Confirma o cancelamento do contrato e informa a interrupção do serviço."
   }
 ];
 
@@ -240,6 +297,48 @@ const ToggleStack = styled.div`
   margin-top: 0.75rem;
 `;
 
+const DaysRow = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+`;
+
+const Textarea = styled.textarea`
+  width: 100%;
+  border-radius: 14px;
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  background: ${({ theme }) => theme.colors.surface};
+  color: ${({ theme }) => theme.colors.text.primary};
+  padding: 0.6rem 0.75rem;
+  font-family: inherit;
+  font-size: 0.9rem;
+  resize: vertical;
+
+  &:focus {
+    outline: none;
+    border-color: ${({ theme }) => theme.colors.primary};
+  }
+`;
+
+const DayOption = styled.label<{ $active?: boolean }>`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid ${({ theme, $active }) => ($active ? theme.colors.primary : theme.colors.border)};
+  background: ${({ theme, $active }) => ($active ? `${theme.colors.primary}22` : theme.colors.surface)};
+  color: ${({ theme, $active }) => ($active ? theme.colors.primary : theme.colors.text.secondary)};
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+
+  input {
+    accent-color: ${({ theme }) => theme.colors.primary};
+  }
+`;
+
 const StatusPanel = styled.div`
   margin-top: 16px;
   border: 1px solid ${({ theme }) => theme.colors.border};
@@ -351,6 +450,11 @@ export default function SettingsPage() {
   } = useSettings();
 
   const [selectedWebhookLogId, setSelectedWebhookLogId] = useState<string | null>(null);
+  const [slaPolicy, setSlaPolicy] = useState<SlaPolicyForm>(SLA_POLICY_FORM_INICIAL);
+  const [slaPolicyLoading, setSlaPolicyLoading] = useState(false);
+  const [slaPolicySaving, setSlaPolicySaving] = useState(false);
+  const [slaPolicyError, setSlaPolicyError] = useState<string | null>(null);
+  const [slaPolicyNotice, setSlaPolicyNotice] = useState<string | null>(null);
 
   useEffect(() => {
     fetchSettings();
@@ -371,12 +475,113 @@ export default function SettingsPage() {
     loadNotificationPreferences();
   }, [activeTab, loadNotificationPreferences]);
 
+  // Carrega a política global de SLA ao abrir a aba (inclui horário comercial)
+  useEffect(() => {
+    if (activeTab !== "sla") return;
+
+    let ativo = true;
+    setSlaPolicyLoading(true);
+    setSlaPolicyError(null);
+
+    fetch("/api/settings/sla-policy")
+      .then((res) => (res.ok ? res.json() : Promise.reject(new Error("Erro ao carregar política de SLA"))))
+      .then((json) => {
+        if (!ativo) return;
+        const policy = json?.data;
+        const horario = policy?.horarioComercial;
+        setSlaPolicy({
+          slaSolucaoHoras: policy?.slaSolucaoHoras != null ? String(policy.slaSolucaoHoras) : "8",
+          slaRespostaHoras: policy?.slaRespostaHoras != null ? String(policy.slaRespostaHoras) : "",
+          horarioComercialAtivo: Boolean(policy?.horarioComercialAtivo),
+          timezone: horario?.timezone || "America/Sao_Paulo",
+          inicio: horario?.inicio || "09:00",
+          fim: horario?.fim || "18:00",
+          diasUteis: Array.isArray(horario?.diasUteis) && horario.diasUteis.length ? horario.diasUteis : [1, 2, 3, 4, 5],
+          feriadosTexto: Array.isArray(policy?.feriados) ? policy.feriados.join("\n") : ""
+        });
+      })
+      .catch((error: unknown) => {
+        if (!ativo) return;
+        setSlaPolicyError(error instanceof Error ? error.message : "Erro ao carregar política de SLA");
+      })
+      .finally(() => {
+        if (ativo) setSlaPolicyLoading(false);
+      });
+
+    return () => {
+      ativo = false;
+    };
+  }, [activeTab]);
+
+  const handleSaveSlaPolicy = async () => {
+    const solucao = Number(slaPolicy.slaSolucaoHoras);
+    if (!Number.isFinite(solucao) || solucao <= 0) {
+      setSlaPolicyError("Informe as horas de solução (maior que zero).");
+      return;
+    }
+    if (slaPolicy.horarioComercialAtivo && slaPolicy.diasUteis.length === 0) {
+      setSlaPolicyError("Selecione ao menos um dia útil para o horário comercial.");
+      return;
+    }
+
+    const resposta = Number(slaPolicy.slaRespostaHoras);
+    const feriados = slaPolicy.feriadosTexto
+      .split(/[\n,;]+/)
+      .map((item) => item.trim())
+      .filter((item) => /^\d{4}-\d{2}-\d{2}$/.test(item));
+
+    setSlaPolicySaving(true);
+    setSlaPolicyError(null);
+    setSlaPolicyNotice(null);
+
+    try {
+      const res = await fetch("/api/settings/sla-policy", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          slaSolucaoHoras: solucao,
+          slaRespostaHoras: Number.isFinite(resposta) && resposta > 0 ? resposta : null,
+          horarioComercialAtivo: slaPolicy.horarioComercialAtivo,
+          ...(slaPolicy.horarioComercialAtivo
+            ? {
+                horarioComercial: {
+                  timezone: slaPolicy.timezone.trim() || "America/Sao_Paulo",
+                  diasUteis: slaPolicy.diasUteis,
+                  inicio: slaPolicy.inicio,
+                  fim: slaPolicy.fim
+                }
+              }
+            : {}),
+          feriados
+        })
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json?.error || "Erro ao salvar política de SLA");
+
+      setSlaPolicyNotice("Política de SLA atualizada.");
+    } catch (error: unknown) {
+      setSlaPolicyError(error instanceof Error ? error.message : "Erro ao salvar política de SLA");
+    } finally {
+      setSlaPolicySaving(false);
+    }
+  };
+
+  const toggleDiaUtil = (dia: number) => {
+    setSlaPolicy((atual) => ({
+      ...atual,
+      diasUteis: atual.diasUteis.includes(dia)
+        ? atual.diasUteis.filter((item) => item !== dia)
+        : [...atual.diasUteis, dia].sort((a, b) => a - b)
+    }));
+  };
+
   const tabs = useMemo(
     () => [
       { key: "general" as const, label: "Geral" },
       { key: "evolution" as const, label: "Evolution API" },
       { key: "n8n" as const, label: "N8N" },
       { key: "uazapi" as const, label: "UAZAPI" },
+      { key: "sla" as const, label: "SLA" },
       { key: "storage" as const, label: "Storage (S3)" },
       { key: "contactsSync" as const, label: "Sincronizar Contatos" },
       { key: "webhookLogs" as const, label: "Logs Externos" },
@@ -772,6 +977,126 @@ export default function SettingsPage() {
                   })()}
                 </DetailCard>
               </LogsGrid>
+            </div>
+          )}
+
+          {activeTab === "sla" && (
+            <div>
+              <h3>Política global de SLA</h3>
+              <Info>
+                Horas de solução usadas como fallback quando o contrato ou o tipo de ticket não definem um prazo.
+                Habilite o horário comercial para contar o prazo em horas úteis (fora de fins de semana e feriados).
+              </Info>
+
+              {slaPolicyLoading ? (
+                <Info>Carregando política de SLA...</Info>
+              ) : (
+                <>
+                  <FormGrid>
+                    <Field>
+                      SLA de solução (h)
+                      <Input
+                        inputMode="numeric"
+                        value={slaPolicy.slaSolucaoHoras}
+                        onChange={(e) => setSlaPolicy({ ...slaPolicy, slaSolucaoHoras: e.target.value })}
+                      />
+                    </Field>
+                    <Field>
+                      SLA de resposta (h)
+                      <Input
+                        inputMode="numeric"
+                        placeholder="Opcional"
+                        value={slaPolicy.slaRespostaHoras}
+                        onChange={(e) => setSlaPolicy({ ...slaPolicy, slaRespostaHoras: e.target.value })}
+                      />
+                    </Field>
+                  </FormGrid>
+
+                  <ToggleCard style={{ marginTop: 16 }}>
+                    <ToggleContent>
+                      <ToggleTitle>Contar prazo em horas úteis</ToggleTitle>
+                      <ToggleDescription>
+                        Quando desativado, o SLA é contado em horas corridas (comportamento atual).
+                      </ToggleDescription>
+                    </ToggleContent>
+                    <PreferenceToggle
+                      type="button"
+                      $active={slaPolicy.horarioComercialAtivo}
+                      aria-pressed={slaPolicy.horarioComercialAtivo}
+                      onClick={() => setSlaPolicy({ ...slaPolicy, horarioComercialAtivo: !slaPolicy.horarioComercialAtivo })}
+                    >
+                      {slaPolicy.horarioComercialAtivo ? "Ativado" : "Desativado"}
+                    </PreferenceToggle>
+                  </ToggleCard>
+
+                  {slaPolicy.horarioComercialAtivo ? (
+                    <div style={{ marginTop: 16 }}>
+                      <FormGrid>
+                        <Field>
+                          Fuso horário (IANA)
+                          <Input
+                            value={slaPolicy.timezone}
+                            placeholder="America/Sao_Paulo"
+                            onChange={(e) => setSlaPolicy({ ...slaPolicy, timezone: e.target.value })}
+                          />
+                        </Field>
+                        <Field>
+                          Início da janela
+                          <Input
+                            type="time"
+                            value={slaPolicy.inicio}
+                            onChange={(e) => setSlaPolicy({ ...slaPolicy, inicio: e.target.value })}
+                          />
+                        </Field>
+                        <Field>
+                          Fim da janela
+                          <Input
+                            type="time"
+                            value={slaPolicy.fim}
+                            onChange={(e) => setSlaPolicy({ ...slaPolicy, fim: e.target.value })}
+                          />
+                        </Field>
+                      </FormGrid>
+
+                      <h3 style={{ marginTop: 20 }}>Dias úteis</h3>
+                      <DaysRow>
+                        {DIAS_SEMANA.map((dia) => {
+                          const ativo = slaPolicy.diasUteis.includes(dia.value);
+                          return (
+                            <DayOption key={dia.value} $active={ativo}>
+                              <input
+                                type="checkbox"
+                                checked={ativo}
+                                onChange={() => toggleDiaUtil(dia.value)}
+                              />
+                              {dia.label}
+                            </DayOption>
+                          );
+                        })}
+                      </DaysRow>
+
+                      <Field style={{ marginTop: 20 }}>
+                        Feriados (um por linha, formato aaaa-mm-dd)
+                        <Textarea
+                          rows={4}
+                          value={slaPolicy.feriadosTexto}
+                          placeholder={"2026-01-01\n2026-12-25"}
+                          onChange={(e) => setSlaPolicy({ ...slaPolicy, feriadosTexto: e.target.value })}
+                        />
+                      </Field>
+                    </div>
+                  ) : null}
+
+                  {slaPolicyError ? <Info role="alert">{slaPolicyError}</Info> : null}
+                  {slaPolicyNotice ? <Info role="status">{slaPolicyNotice}</Info> : null}
+
+                  <Footer>
+                    <Button variant="save" onClick={handleSaveSlaPolicy} disabled={slaPolicySaving}>
+                      {slaPolicySaving ? "Salvando..." : "Salvar política de SLA"}
+                    </Button>
+                  </Footer>
+                </>
+              )}
             </div>
           )}
 
