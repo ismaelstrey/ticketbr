@@ -58,6 +58,21 @@ const StateText = styled.p`
   font-size: ${({ theme }) => theme.typography.size.sm};
 `;
 
+const PageWrapper = styled.main`
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: ${({ theme }) => theme.spacing[6]};
+`;
+
+const PageContent = styled.div`
+  width: 100%;
+  max-width: 440px;
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing[3]};
+`;
+
 interface FeedbackStateProps {
   title: string;
   description: string;
@@ -129,4 +144,12 @@ export function EmptyState({
   description = "Ajuste os filtros para ver resultados."
 }: EmptyStateProps) {
   return <FeedbackState title={title} description={description} tone="empty" />;
+}
+
+export function FeedbackPage({ children }: { children: React.ReactNode }) {
+  return (
+    <PageWrapper>
+      <PageContent>{children}</PageContent>
+    </PageWrapper>
+  );
 }

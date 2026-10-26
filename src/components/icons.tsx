@@ -46,5 +46,13 @@ export {
   FiServer,
   FiKey,
   FiShield,
-  FiExternalLink
+  FiExternalLink,
+  FiFileText,
+  FiPlay,
+  FiSlash,
+  FiRefreshCw,
+  FiTrash2,
+  FiArrowLeft,
+  FiXCircle,
+  FiDollarSign
 } from "react-icons/fi";

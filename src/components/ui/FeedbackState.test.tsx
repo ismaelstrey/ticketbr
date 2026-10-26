@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { ThemeProvider } from "styled-components";
 import { getTheme } from "@/styles/theme";
-import { EmptyState, ErrorState, LoadingState } from "./FeedbackState";
+import { EmptyState, ErrorState, FeedbackPage, LoadingState } from "./FeedbackState";
 import type { ReactNode } from "react";
 
 function renderWithTheme(ui: ReactNode) {
@@ -35,5 +35,15 @@ describe("FeedbackState", () => {
     renderWithTheme(<EmptyState />);
     expect(screen.getByText("Nada por aqui")).toBeInTheDocument();
     expect(screen.queryByRole("button")).not.toBeInTheDocument();
+  });
+
+  it("FeedbackPage envolve o conteúdo com landmark main", () => {
+    renderWithTheme(
+      <FeedbackPage>
+        <LoadingState />
+      </FeedbackPage>
+    );
+    expect(screen.getByRole("main")).toBeInTheDocument();
+    expect(screen.getByRole("status")).toBeInTheDocument();
   });
 });

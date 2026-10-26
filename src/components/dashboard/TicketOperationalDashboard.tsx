@@ -17,6 +17,7 @@ import { api } from "@/services/api";
 import { TicketDashboardFilters, TicketOperationalDashboardResponse } from "@/types/ticketsDashboard";
 
 const Page = styled(PageContainer)`
+  max-width: none;
   padding: ${({ theme }) => theme.spacing[4]};
 `;
 

@@ -9,7 +9,7 @@ const Wrap = styled(Card)`
   padding: 1rem;
   height: 320px;
   display: grid;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: auto minmax(0, 1fr);
   gap: 10px;
 `;
 
@@ -17,9 +17,32 @@ const Title = styled.div`
   font-weight: 950;
 `;
 
+const Body = styled.div`
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 140px);
+  gap: 10px;
+  min-height: 0;
+`;
+
+const ChartCell = styled.div`
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+`;
+
+const Empty = styled.div`
+  display: grid;
+  place-items: center;
+  height: 100%;
+  font-size: 0.8rem;
+  color: ${({ theme }) => theme.colors.text.secondary};
+`;
+
 const Legend = styled.div`
   display: grid;
   gap: 6px;
+  align-content: start;
+  overflow-y: auto;
   font-size: 0.8rem;
   color: ${({ theme }) => theme.colors.text.secondary};
 `;
@@ -38,6 +61,7 @@ const Swatch = styled.span<{ $color: string }>`
   background: ${({ $color }) => $color};
   display: inline-block;
   margin-right: 8px;
+  flex-shrink: 0;
 `;
 
 function labelForStatus(status: string) {
@@ -65,27 +89,33 @@ export function StatusDonut({ data }: { data: Array<{ status: string; count: num
         <div style={{ fontSize: 12, opacity: 0.75 }}>{total} ticket(s)</div>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 160px", gap: 10, minHeight: 0 }}>
-        <div style={{ minHeight: 0 }}>
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={series}
-                dataKey="count"
-                nameKey="name"
-                innerRadius={72}
-                outerRadius={110}
-                paddingAngle={2}
-                animationDuration={300}
-              >
-                {series.map((entry, index) => (
-                  <Cell key={index} fill={entry.color} />
-                ))}
-              </Pie>
-              <Tooltip formatter={(value: any, name: any) => [value, name]} />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
+      <Body>
+        <ChartCell>
+          {total > 0 ? (
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={series}
+                  dataKey="count"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  innerRadius="58%"
+                  outerRadius="82%"
+                  paddingAngle={2}
+                  animationDuration={300}
+                >
+                  {series.map((entry) => (
+                    <Cell key={entry.status} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip formatter={(value: any, name: any) => [value, name]} />
+              </PieChart>
+            </ResponsiveContainer>
+          ) : (
+            <Empty>Sem dados no período</Empty>
+          )}
+        </ChartCell>
 
         <Legend aria-label="Legenda por status">
           {series.map((s) => (
@@ -98,8 +128,7 @@ export function StatusDonut({ data }: { data: Array<{ status: string; count: num
             </LegendRow>
           ))}
         </Legend>
-      </div>
+      </Body>
     </Wrap>
   );
 }
-

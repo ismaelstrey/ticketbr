@@ -16,7 +16,8 @@ import { Ticket, TicketPriority, TicketStatus } from "@/types/ticket";
 import { Button } from "@/components/ui/Button";
 import { Input, Select, Textarea } from "@/components/ui/Input";
 import { Card } from "@/components/ui/Card";
-import { getPriorityChipLabel, getSlaChipLabel, getSlaToneFromProgress } from "@/lib/tickets/sla-chip";
+import { getPriorityChipLabel, getSlaChipLabel, getSlaToneColor, getSlaToneFromProgress } from "@/lib/tickets/sla-chip";
+import { SlaCountdown } from "@/components/ui/SlaCountdown";
 import { api } from "@/services/api";
 import NewCommentModal from "./NewCommentModal";
 
@@ -105,78 +106,151 @@ const RoadmapWrapper = styled(Card)`
 `;
 
 const RoadmapTitle = styled.h3`
-  margin: 0 0 0.9rem;
+  margin: 0 0 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   font-size: 1rem;
   color: ${({ theme }) => theme.colors.text.primary};
-`;
 
-const Timeline = styled.div`
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 0.8rem;
-  padding-left: 2rem;
-
-  &::before {
-    content: "";
-    position: absolute;
-    left: 0.68rem;
-    top: 0.2rem;
-    bottom: 0.2rem;
-    width: 2px;
-    background: ${({ theme }) => theme.colors.border};
+  span {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: ${({ theme }) => theme.colors.text.muted};
+    background: ${({ theme }) => theme.colors.surfaceAlt};
+    border: 1px solid ${({ theme }) => theme.colors.border};
+    border-radius: ${({ theme }) => theme.borderRadius.pill};
+    padding: 0.05rem 0.5rem;
   }
 `;
 
-const TimelineItem = styled.article`
+// Coluna do marcador com largura fixa: a linha conectora fica exatamente no centro dela
+const MARKER_COLUMN = "1.5rem";
+const MARKER_CENTER = "0.75rem";
+const MARKER_OFFSET = "1rem";
+
+const Timeline = styled.ol`
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing[3]};
+`;
+
+const TimelineItem = styled.li`
   position: relative;
+  display: grid;
+  grid-template-columns: ${MARKER_COLUMN} 1fr;
+  column-gap: ${({ theme }) => theme.spacing[3]};
+  align-items: start;
+
+  /* Conector contínuo: parte do marcador atual e alcança o centro do próximo */
+  &::before {
+    content: "";
+    position: absolute;
+    left: ${MARKER_CENTER};
+    top: ${MARKER_OFFSET};
+    bottom: calc(-1 * ${({ theme }) => theme.spacing[3]} - ${MARKER_OFFSET});
+    width: 2px;
+    transform: translateX(-50%);
+    background: ${({ theme }) => theme.colors.border};
+  }
+
+  &:last-child::before {
+    display: none;
+  }
 `;
 
 const TimelineMarker = styled.span<{ $bg: string }>`
-  position: absolute;
-  left: -2rem;
-  top: 0.65rem;
+  grid-column: 1;
+  justify-self: center;
+  align-self: start;
+  position: relative;
+  z-index: 1;
   width: 16px;
   height: 16px;
-  border-radius: 999px;
+  margin-top: 0.5rem;
+  border-radius: 50%;
   background: ${({ $bg }) => $bg};
-  border: 3px solid #fff;
-  box-shadow: 0 0 0 2px ${({ theme }) => theme.colors.border};
+  border: 3px solid ${({ theme }) => theme.colors.surface};
+  box-shadow: 0 0 0 1px ${({ theme }) => theme.colors.border};
 `;
 
 const TimelineCard = styled(Card)`
+  grid-column: 2;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
   border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: ${({ theme }) => theme.borderRadius.medium};
   background: ${({ theme }) => theme.colors.surface};
-  padding: 0.75rem 0.85rem;
+  padding: 0.7rem 0.85rem;
+  box-shadow: none;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
 
-  p {
-    margin: 0.25rem 0 0;
-    color: ${({ theme }) => theme.colors.text.secondary};
+  &:hover {
+    border-color: ${({ theme }) => theme.colors.borderStrong};
+    box-shadow: ${({ theme }) => theme.shadows.card};
   }
 `;
 
 const TimelineHead = styled.div`
   display: flex;
-  gap: 0.5rem;
   align-items: center;
+  gap: 0.5rem;
   flex-wrap: wrap;
 
   strong {
     color: ${({ theme }) => theme.colors.text.primary};
+    font-size: 0.9rem;
   }
+`;
+
+const TimelineTime = styled.span`
+  margin-left: auto;
+  color: ${({ theme }) => theme.colors.text.muted};
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+`;
+
+const TimelineTitle = styled.p`
+  margin: 0;
+  color: ${({ theme }) => theme.colors.text.primary};
+  font-size: 0.9rem;
+  font-weight: 600;
+  overflow-wrap: anywhere;
 
   span {
+    margin-left: 0.35rem;
     color: ${({ theme }) => theme.colors.text.secondary};
-    font-size: 0.85rem;
+    font-weight: 500;
+  }
+`;
+
+const TimelineDescription = styled.p`
+  margin: 0;
+  color: ${({ theme }) => theme.colors.text.secondary};
+  font-size: 0.85rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+
+  strong {
+    color: ${({ theme }) => theme.colors.text.primary};
   }
 `;
 
 const EventBadge = styled.span<{ $tone: string }>`
-  font-size: 0.75rem !important;
-  border-radius: 999px;
+  border-radius: ${({ theme }) => theme.borderRadius.pill};
   padding: 0.1rem 0.5rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.6;
   border: 1px solid ${({ $tone }) => $tone};
-  color: ${({ $tone }) => $tone} !important;
+  color: ${({ $tone }) => $tone};
+  background: ${({ $tone }) => `${$tone}14`};
 `;
 
 const SidebarForm = styled(Card)`
@@ -198,6 +272,15 @@ const Metric = styled.div`
     color: ${({ theme }) => theme.colors.text.primary};
     font-size: 0.95rem;
   }
+`;
+
+const CountdownLine = styled.div`
+  margin-top: 0.2rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.85rem;
+  color: ${({ theme }) => theme.colors.text.secondary};
 `;
 
 const SummaryChips = styled.div`
@@ -257,18 +340,15 @@ function getRoadmapTypeLabel(eventType: string) {
   return eventType;
 }
 
-function formatRoadmapDate(value: string | Date) {
+/** Formata uma data no padrão brasileiro (ex.: 26/10/2026, 13:50). */
+function formatDateTime(value?: string | Date | null) {
+  if (!value) return "-";
   const date = value instanceof Date ? value : new Date(value);
-  if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleString("pt-BR");
-}
-
-function getSlaChipColor(progress: number) {
-  const tone = getSlaToneFromProgress(progress);
-  if (tone === "breach") return "#dc2626";
-  if (tone === "danger") return "#ef4444";
-  if (tone === "warning") return "#f59e0b";
-  return "#22c55e";
+  if (Number.isNaN(date.getTime())) {
+    // Valores já pré-formatados pelo backend (ex.: ticket.data) passam direto
+    return typeof value === "string" ? value : "-";
+  }
+  return date.toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
 }
 
 export default function TicketDetails({
@@ -305,6 +385,8 @@ export default function TicketDetails({
   const categoriaOptions = lookups.categorias.filter(
     (categoria) => !ticket.tipoTicketId || categoria.tipo_ticket_id === ticket.tipoTicketId
   );
+
+  const roadmapEvents = ticket.roadmap ?? [];
 
   return (
     <Container>
@@ -350,45 +432,51 @@ export default function TicketDetails({
 
       <ContentGrid>
         <RoadmapWrapper>
-          <RoadmapTitle>Roadmap</RoadmapTitle>
+          <RoadmapTitle>
+            Roadmap
+            {roadmapEvents.length > 0 && <span>{roadmapEvents.length}</span>}
+          </RoadmapTitle>
           <Timeline>
-            {(ticket.roadmap && ticket.roadmap.length > 0 ? ticket.roadmap : []).map((event) => {
-              const markerColor = getRoadmapColor(event.type);
-              const transition =
-                event.fromStatus && event.toStatus
-                  ? ` (${statusLabels[event.fromStatus]} → ${statusLabels[event.toStatus]})`
-                  : "";
-
-              return (
-                <TimelineItem key={event.id}>
-                  <TimelineMarker $bg={markerColor} />
-                  <TimelineCard>
-                    <TimelineHead>
-                      <strong>{event.author ?? "Sistema"}</strong>
-                      <span>{formatRoadmapDate(event.createdAt)}</span>
-                      <EventBadge $tone={markerColor}>{getRoadmapTypeLabel(event.type)}</EventBadge>
-                    </TimelineHead>
-                    <p>
-                      <strong>{event.title}</strong>
-                      {transition}
-                    </p>
-                    {event.description ? <p>{event.description}</p> : null}
-                    {event.pauseReason ? (
-                      <p>
-                        <strong>Motivo da pausa:</strong> {event.pauseReason}
-                      </p>
-                    ) : null}
-                  </TimelineCard>
-                </TimelineItem>
-              );
-            })}
-            {(!ticket.roadmap || ticket.roadmap.length === 0) && (
+            {roadmapEvents.length === 0 ? (
               <TimelineItem>
                 <TimelineMarker $bg="#9ca3af" />
                 <TimelineCard>
-                  <p>Sem histórico registrado para este ticket.</p>
+                  <TimelineDescription>Sem histórico registrado para este ticket.</TimelineDescription>
                 </TimelineCard>
               </TimelineItem>
+            ) : (
+              roadmapEvents.map((event) => {
+                const markerColor = getRoadmapColor(event.type);
+                const transition =
+                  event.fromStatus && event.toStatus
+                    ? `(${statusLabels[event.fromStatus]} → ${statusLabels[event.toStatus]})`
+                    : "";
+
+                return (
+                  <TimelineItem key={event.id}>
+                    <TimelineMarker $bg={markerColor} />
+                    <TimelineCard>
+                      <TimelineHead>
+                        <EventBadge $tone={markerColor}>{getRoadmapTypeLabel(event.type)}</EventBadge>
+                        <strong>{event.author ?? "Sistema"}</strong>
+                        <TimelineTime>{formatDateTime(event.createdAt)}</TimelineTime>
+                      </TimelineHead>
+                      <TimelineTitle>
+                        {event.title}
+                        {transition ? <span>{transition}</span> : null}
+                      </TimelineTitle>
+                      {event.description ? (
+                        <TimelineDescription>{event.description}</TimelineDescription>
+                      ) : null}
+                      {event.pauseReason ? (
+                        <TimelineDescription>
+                          <strong>Motivo da pausa:</strong> {event.pauseReason}
+                        </TimelineDescription>
+                      ) : null}
+                    </TimelineCard>
+                  </TimelineItem>
+                );
+              })
             )}
           </Timeline>
         </RoadmapWrapper>
@@ -396,21 +484,33 @@ export default function TicketDetails({
         <SidebarForm>
           <Metric>
             <p>Data de criação</p>
-            <strong>{ticket.dataCriacao ?? ticket.data}</strong>
+            <strong>{formatDateTime(ticket.dataCriacao ?? ticket.data)}</strong>
           </Metric>
 
           <Metric>
             <p>SLA Resposta</p>
-            <strong>{ticket.slaResposta ?? "-"}</strong>
+            <strong>{formatDateTime(ticket.slaResposta)}</strong>
           </Metric>
 
           <Metric>
             <p>SLA Solução</p>
-            <strong>{ticket.slaSolucao ?? "-"}</strong>
+            <strong>{formatDateTime(ticket.slaSolucao)}</strong>
+            <CountdownLine>
+              <FiClock aria-hidden="true" />
+              <SlaCountdown
+                deadline={ticket.slaSolucao}
+                start={ticket.dataCriacao}
+                paused={ticket.status === "paused" && Boolean(ticket.pauseSla)}
+                pausedSince={ticket.pausedStartedAt}
+                pausedTotalMs={(ticket.pausedTotalSeconds ?? 0) * 1000}
+                done={ticket.status === "done"}
+                doneLabel="Finalizado"
+              />
+            </CountdownLine>
           </Metric>
 
           <SummaryChips>
-            <SummaryChip $tone={getSlaChipColor(ticket.progressoSla)}>
+            <SummaryChip $tone={getSlaToneColor(getSlaToneFromProgress(ticket.progressoSla))}>
               {getSlaChipLabel(getSlaToneFromProgress(ticket.progressoSla))}
             </SummaryChip>
             <SummaryChip $tone="#6366f1">{getPriorityChipLabel(ticket.prioridade)}</SummaryChip>
@@ -518,7 +618,7 @@ export default function TicketDetails({
           </FormLabel>
 
           <UpdatedAt>
-            <FiClock aria-hidden="true" /> Última atualização: {ticket.data}
+            <FiClock aria-hidden="true" /> Última atualização: {formatDateTime(ticket.dataAtualizacao ?? ticket.data)}
           </UpdatedAt>
           <UpdatedAt>
             <FiUser aria-hidden="true" /> Solicitante: {ticket.solicitante}

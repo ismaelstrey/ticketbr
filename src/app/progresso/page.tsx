@@ -180,6 +180,12 @@ const ProgressBarFill = styled(motion.div)<{ $percent: number }>`
   box-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
 `;
 
+const ProgressCaption = styled.p`
+  margin: ${({ theme }) => `${theme.spacing[2]} 0 0`};
+  font-size: ${({ theme }) => theme.typography.size.sm};
+  color: ${({ theme }) => theme.tokens.color.text.muted};
+`;
+
 const StatsGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -339,6 +345,11 @@ const FeatureItem = styled.li`
   gap: ${({ theme }) => theme.spacing[2]};
   font-size: ${({ theme }) => theme.typography.size.sm};
   color: ${({ theme }) => theme.tokens.color.text.secondary};
+`;
+
+const FeatureIcon = styled(FiCheckCircle)`
+  color: ${({ theme }) => theme.tokens.color.status.success};
+  flex-shrink: 0;
 `;
 
 // --- Qualidade Técnica ---
@@ -502,6 +513,17 @@ const DebtItem = styled.div<{ $impact: "high" | "medium" | "low" }>`
           : theme.tokens.color.text.muted};
 `;
 
+const DebtIcon = styled(FiAlertCircle)<{ $impact: "high" | "medium" | "low" }>`
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: ${({ theme, $impact }) =>
+    $impact === "high"
+      ? theme.tokens.color.status.warning
+      : $impact === "medium"
+        ? theme.tokens.color.status.info
+        : theme.tokens.color.text.muted};
+`;
+
 const DebtContent = styled.div`
   display: flex;
   flex-direction: column;
@@ -538,6 +560,9 @@ const FooterText = styled.p`
 // ============================================================
 // Dados do Projeto
 // ============================================================
+
+// Data de referência da última atualização desta página
+const LAST_UPDATED = "26/10/2026";
 
 // Módulos implementados e seu status
 const modules: Module[] = [
@@ -762,7 +787,6 @@ const techStack = [
   { name: "TypeScript", version: "5.9.3", abbr: "TS" },
   { name: "Prisma", version: "7.7.0", abbr: "Pr" },
   { name: "PostgreSQL", version: "—", abbr: "PG" },
-  { name: "Tailwind", version: "v4", abbr: "TW" },
   { name: "Framer Motion", version: "12.34", abbr: "FM" },
   { name: "styled-components", version: "6.3.9", abbr: "SC" },
   { name: "Vitest", version: "4.0.18", abbr: "Vt" },
@@ -902,15 +926,19 @@ const techDebt: TechDebtItem[] = [];
 // ============================================================
 
 export default function ProgressoPage() {
-  // Calcula o progresso geral baseado na média dos módulos
+  // Considera módulos e itens do roadmap; itens pendentes reduzem o progresso geral
   const overallProgress = useMemo(() => {
-    const total = modules.reduce((acc, m) => acc + m.progress, 0);
-    return Math.round(total / modules.length);
+    const totalItems = modules.length + roadmap.length;
+    const doneItems =
+      modules.filter((m) => m.status === "done").length +
+      roadmap.filter((item) => item.status === "done").length;
+    return Math.round((doneItems / totalItems) * 100);
   }, []);
 
   const doneCount = modules.filter((m) => m.status === "done").length;
   const inProgressCount = modules.filter((m) => m.status === "in-progress").length;
   const pendingCount = modules.filter((m) => m.status === "pending").length;
+  const doneRoadmapCount = roadmap.filter((item) => item.status === "done").length;
 
   const statusLabel = (status: ModuleStatus) => {
     if (status === "done") return "Concluído";
@@ -931,7 +959,7 @@ export default function ProgressoPage() {
         <Header>
           <HeaderRow>
             <Title>
-              <FiLayers />
+              <FiLayers aria-hidden />
               Progresso do Projeto
             </Title>
             <VersionBadge>v0.1.0 — TicketBR</VersionBadge>
@@ -949,7 +977,13 @@ export default function ProgressoPage() {
               <ProgressTitle>Progresso Geral</ProgressTitle>
               <ProgressPercent $percent={overallProgress}>{overallProgress}%</ProgressPercent>
             </ProgressHeader>
-            <ProgressBarTrack>
+            <ProgressBarTrack
+              role="progressbar"
+              aria-valuenow={overallProgress}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-label="Progresso geral do projeto"
+            >
               <ProgressBarFill
                 $percent={overallProgress}
                 initial={{ width: 0 }}
@@ -957,6 +991,10 @@ export default function ProgressoPage() {
                 transition={{ duration: 1, ease: "easeOut" }}
               />
             </ProgressBarTrack>
+            <ProgressCaption>
+              Cálculo: {doneCount} de {modules.length} módulos e {doneRoadmapCount} de {roadmap.length} itens do
+              roadmap concluídos.
+            </ProgressCaption>
             <StatsGrid>
               <StatItem>
                 <StatValue>{modules.length}</StatValue>
@@ -981,7 +1019,7 @@ export default function ProgressoPage() {
         {/* Módulos */}
         <Section>
           <SectionTitle>
-            <FiGrid /> Módulos do Sistema
+            <FiGrid aria-hidden /> Módulos do Sistema
           </SectionTitle>
           <ModulesGrid>
             {modules.map((mod) => (
@@ -994,7 +1032,7 @@ export default function ProgressoPage() {
                 <ModuleHeader>
                   <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
                     <ModuleIconWrap $status={mod.status}>
-                      <mod.icon />
+                      <mod.icon aria-hidden />
                     </ModuleIconWrap>
                     <div>
                       <ModuleName>{mod.name}</ModuleName>
@@ -1004,7 +1042,13 @@ export default function ProgressoPage() {
                 </ModuleHeader>
                 <ModuleDesc>{mod.description}</ModuleDesc>
                 <ModuleProgressRow>
-                  <MiniProgressTrack>
+                  <MiniProgressTrack
+                    role="progressbar"
+                    aria-valuenow={mod.progress}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-label={`Progresso do módulo ${mod.name}`}
+                  >
                     <MiniProgressFill $percent={mod.progress} $status={mod.status} />
                   </MiniProgressTrack>
                   <ProgressText>{mod.progress}%</ProgressText>
@@ -1012,7 +1056,7 @@ export default function ProgressoPage() {
                 <FeatureList>
                   {mod.features.map((feat) => (
                     <FeatureItem key={feat}>
-                      <FiCheckCircle style={{ color: "var(--status-success)", flexShrink: 0 }} />
+                      <FeatureIcon aria-hidden />
                       {feat}
                     </FeatureItem>
                   ))}
@@ -1025,7 +1069,7 @@ export default function ProgressoPage() {
         {/* Qualidade Técnica */}
         <Section>
           <SectionTitle>
-            <FiZap /> Qualidade Técnica
+            <FiZap aria-hidden /> Qualidade Técnica
           </SectionTitle>
           <QualityGrid>
             {qualityMetrics.map((metric) => (
@@ -1041,7 +1085,7 @@ export default function ProgressoPage() {
         {/* Stack Tecnológica */}
         <Section>
           <SectionTitle>
-            <FiLayers /> Stack Tecnológica
+            <FiLayers aria-hidden /> Stack Tecnológica
           </SectionTitle>
           <StackGrid>
             {techStack.map((tech) => (
@@ -1059,7 +1103,7 @@ export default function ProgressoPage() {
         {/* Roadmap para Conclusão */}
         <Section>
           <SectionTitle>
-            <FiClock /> Roadmap para Conclusão
+            <FiClock aria-hidden /> Roadmap para Conclusão
           </SectionTitle>
           <RoadmapList>
             {roadmap.map((item, idx) => (
@@ -1088,7 +1132,7 @@ export default function ProgressoPage() {
         {/* Dívida Técnica */}
         <Section>
           <SectionTitle>
-            <FiAlertCircle /> Dívida Técnica Identificada
+            <FiAlertCircle aria-hidden /> Dívida Técnica Identificada
           </SectionTitle>
           <DebtList>
             {techDebt.length === 0 ? (
@@ -1099,18 +1143,7 @@ export default function ProgressoPage() {
             ) : (
               techDebt.map((debt) => (
                 <DebtItem key={debt.title} $impact={debt.impact}>
-                  <FiAlertCircle
-                    style={{
-                      color:
-                        debt.impact === "high"
-                          ? "var(--status-warning)"
-                          : debt.impact === "medium"
-                            ? "var(--status-info)"
-                            : "var(--text-muted)",
-                      flexShrink: 0,
-                      marginTop: 2
-                    }}
-                  />
+                  <DebtIcon $impact={debt.impact} aria-hidden />
                   <DebtContent>
                     <DebtTitle>{debt.title}</DebtTitle>
                     <DebtDesc>{debt.description}</DebtDesc>
@@ -1127,7 +1160,7 @@ export default function ProgressoPage() {
         {/* Rodapé */}
         <Footer>
           <FooterText>
-            Última atualização: {new Date().toLocaleDateString("pt-BR")} • TicketBR — Sistema de Ordem de Serviço
+            Última atualização: {LAST_UPDATED} • TicketBR — Sistema de Ordem de Serviço
           </FooterText>
           <FooterText>
             Esta página reflete o estado atual do projeto e serve como guia para a conclusão.
