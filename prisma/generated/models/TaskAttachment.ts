@@ -513,14 +513,6 @@ export type TaskAttachmentUncheckedUpdateManyWithoutTaskNestedInput = {
   deleteMany?: Prisma.TaskAttachmentScalarWhereInput | Prisma.TaskAttachmentScalarWhereInput[]
 }
 
-export type NullableIntFieldUpdateOperationsInput = {
-  set?: number | null
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
-}
-
 export type BytesFieldUpdateOperationsInput = {
   set?: runtime.Bytes
 }

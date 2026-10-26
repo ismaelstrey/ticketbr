@@ -10,6 +10,7 @@ const solicitanteFindUniqueMock = vi.fn();
 const funcionarioFindManyMock = vi.fn();
 const ticketFindUniqueMock = vi.fn();
 const ticketFindManyMock = vi.fn();
+const contratoFindManyMock = vi.fn();
 const sendEmailMock = vi.fn();
 const getNotificationPreferencesMock = vi.fn();
 
@@ -43,6 +44,9 @@ vi.mock("@/lib/prisma", () => ({
     ticket: {
       findUnique: ticketFindUniqueMock,
       findMany: ticketFindManyMock
+    },
+    contrato: {
+      findMany: contratoFindManyMock
     }
   }
 }));
@@ -84,6 +88,7 @@ describe("notifications service", () => {
     funcionarioFindManyMock.mockResolvedValue([]);
     ticketFindUniqueMock.mockResolvedValue(null);
     ticketFindManyMock.mockResolvedValue([]);
+    contratoFindManyMock.mockResolvedValue([]);
     sendEmailMock.mockResolvedValue(undefined);
     getNotificationPreferencesMock.mockResolvedValue(preferencesFixture());
   });
@@ -243,5 +248,99 @@ describe("notifications service", () => {
 
     expect(audience.userIds).toEqual(["u1"]);
     expect(audience.emails).toEqual(["empresa@a.com", "membro@a.com"]);
+  });
+
+  it("avisa o marco de vencimento do contrato para staff e cliente", async () => {
+    const now = new Date("2026-01-01T00:00:00.000Z");
+    contratoFindManyMock.mockResolvedValueOnce([
+      {
+        id: "c1",
+        numero: "CT-001",
+        titulo: "Suporte 24x7",
+        solicitante_id: "s1",
+        fimVigencia: new Date("2026-01-06T00:00:00.000Z"), // 5 dias → marco 7
+        diasAvisoVencimento: [30, 15, 7],
+        solicitante: { nome_fantasia: "ACME", razao_social: null }
+      }
+    ]);
+    userFindManyMock.mockResolvedValue([{ id: "admin1", email: "admin@a.com" }]);
+    solicitanteFindUniqueMock.mockResolvedValue({ email: "empresa@a.com" });
+
+    const { runContractExpiryScan } = await import("./notifications");
+    const result = await runContractExpiryScan(now);
+
+    expect(result.scanned).toBe(1);
+    expect(result.avisos).toBe(1);
+    expect(notificationCreateMock).toHaveBeenCalledTimes(1);
+    expect(notificationCreateMock.mock.calls[0][0].data.tipo).toBe("CONTRACT_EXPIRING");
+    expect(notificationCreateMock.mock.calls[0][0].data.dedupeKey).toBe("contract_expiring:c1:7:admin1");
+    expect(sendEmailMock).toHaveBeenCalledTimes(1);
+    expect(sendEmailMock.mock.calls[0][0].to).toEqual(["admin@a.com", "empresa@a.com"]);
+  });
+
+  it("não avisa contrato fora de todos os marcos de vencimento", async () => {
+    const now = new Date("2026-01-01T00:00:00.000Z");
+    contratoFindManyMock.mockResolvedValueOnce([
+      {
+        id: "c1",
+        numero: "CT-001",
+        titulo: "Suporte 24x7",
+        solicitante_id: "s1",
+        fimVigencia: new Date("2026-03-01T00:00:00.000Z"), // 59 dias → nenhum marco
+        diasAvisoVencimento: [30, 15, 7],
+        solicitante: null
+      }
+    ]);
+
+    const { runContractExpiryScan } = await import("./notifications");
+    const result = await runContractExpiryScan(now);
+
+    expect(result.scanned).toBe(1);
+    expect(result.avisos).toBe(0);
+    expect(notificationCreateMock).not.toHaveBeenCalled();
+  });
+
+  it("notifica cancelamento do contrato com o motivo", async () => {
+    userFindManyMock.mockResolvedValue([{ id: "admin1", email: "admin@a.com" }]);
+    solicitanteFindUniqueMock.mockResolvedValue({ email: "empresa@a.com" });
+
+    const { notifyContractCancelled } = await import("./notifications");
+    await notifyContractCancelled({
+      contrato: {
+        id: "c1",
+        numero: "CT-001",
+        titulo: "Suporte 24x7",
+        solicitante_id: "s1",
+        solicitanteNome: "ACME"
+      },
+      motivo: "Inadimplência"
+    });
+
+    expect(notificationCreateMock).toHaveBeenCalledTimes(1);
+    const data = notificationCreateMock.mock.calls[0][0].data;
+    expect(data.tipo).toBe("CONTRACT_CANCELLED");
+    expect(data.body).toContain("Inadimplência");
+    expect(data.dedupeKey).toBe("contract_cancelled:c1:admin1");
+  });
+
+  it("notifica contrato vencido sem renovação", async () => {
+    userFindManyMock.mockResolvedValue([{ id: "admin1", email: "admin@a.com" }]);
+    solicitanteFindUniqueMock.mockResolvedValue({ email: "empresa@a.com" });
+
+    const { notifyContractExpired } = await import("./notifications");
+    await notifyContractExpired({
+      contrato: {
+        id: "c1",
+        numero: "CT-001",
+        titulo: "Suporte 24x7",
+        solicitante_id: "s1",
+        solicitanteNome: "ACME"
+      }
+    });
+
+    expect(notificationCreateMock).toHaveBeenCalledTimes(1);
+    const data = notificationCreateMock.mock.calls[0][0].data;
+    expect(data.tipo).toBe("CONTRACT_EXPIRED");
+    expect(data.dedupeKey).toBe("contract_expired:c1:admin1");
   });
 });

@@ -15,7 +15,9 @@ vi.mock("@/server/services/tickets-operational-dashboard", () => ({
 vi.mock("@/lib/prisma", () => ({
   Prisma: {},
   prisma: {
-    ticket: { count: ticketCountMock },
+    ticket: { count: ticketCountMock, findMany: vi.fn(async () => []) },
+    ticketEvent: { groupBy: vi.fn(async () => []) },
+    contrato: { findMany: vi.fn(async () => []), count: vi.fn(async () => 0) },
     kpiSnapshot: {
       upsert: kpiUpsertMock,
       findMany: kpiFindManyMock,

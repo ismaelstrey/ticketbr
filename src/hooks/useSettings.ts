@@ -72,7 +72,10 @@ export type NotificationPreferenceType =
   | "TICKET_COMMENT"
   | "TICKET_ASSIGNED"
   | "SLA_WARNING"
-  | "SLA_BREACHED";
+  | "SLA_BREACHED"
+  | "CONTRACT_EXPIRING"
+  | "CONTRACT_EXPIRED"
+  | "CONTRACT_CANCELLED";
 
 export interface NotificationPreferences {
   inAppEnabled: boolean;
@@ -88,7 +91,10 @@ export const defaultNotificationPreferences: NotificationPreferences = {
     TICKET_COMMENT: true,
     TICKET_ASSIGNED: true,
     SLA_WARNING: true,
-    SLA_BREACHED: true
+    SLA_BREACHED: true,
+    CONTRACT_EXPIRING: true,
+    CONTRACT_EXPIRED: true,
+    CONTRACT_CANCELLED: true
   }
 };
 

@@ -199,6 +199,57 @@ const Hint = styled.div`
   font-size: ${({ theme }) => theme.typography.size.sm};
 `;
 
+const SummaryGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: ${({ theme }) => theme.spacing[3]};
+  margin-bottom: ${({ theme }) => theme.spacing[4]};
+`;
+
+const SummaryItem = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: ${({ theme }) => theme.spacing[3]};
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: ${({ theme }) => theme.borderRadius.medium};
+`;
+
+const SummaryValue = styled.div`
+  font-size: 1.25rem;
+  font-weight: ${({ theme }) => theme.typography.weight.extrabold};
+  color: ${({ theme }) => theme.colors.text.primary};
+`;
+
+const SummaryLabel = styled.div`
+  font-size: ${({ theme }) => theme.typography.size.xs};
+  color: ${({ theme }) => theme.colors.text.muted};
+`;
+
+const TableScroll = styled.div`
+  overflow-x: auto;
+`;
+
+const Compliance = styled.span<{ $pct: number | null }>`
+  font-weight: ${({ theme }) => theme.typography.weight.bold};
+  color: ${({ theme, $pct }) => {
+    if ($pct == null) return theme.colors.text.muted;
+    if ($pct >= 90) return theme.colors.status.success;
+    if ($pct >= 70) return theme.colors.status.info;
+    return theme.colors.status.warning;
+  }};
+`;
+
+const StatusTag = styled.span`
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: ${({ theme }) => theme.borderRadius.pill};
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  font-size: ${({ theme }) => theme.typography.size.xs};
+  font-weight: ${({ theme }) => theme.typography.weight.semibold};
+  color: ${({ theme }) => theme.colors.text.muted};
+`;
+
 // Formata um número inteiro em pt-BR
 function formatNumber(value: number): string {
   return new Intl.NumberFormat("pt-BR").format(value);
@@ -209,6 +260,17 @@ function formatDeltaPercent(percent: number | null): string {
   if (percent == null) return "sem base de comparação";
   const signal = percent > 0 ? "+" : "";
   return `${signal}${percent.toFixed(1)}% vs período anterior`;
+}
+
+// Formata um valor monetário em BRL
+function formatCurrency(value: number | null): string {
+  if (value == null) return "—";
+  return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
+}
+
+// Formata um percentual já calculado (0-100)
+function formatPct(value: number | null): string {
+  return value == null ? "—" : `${value.toFixed(1)}%`;
 }
 
 // Define o tom (cor) da variação conforme a métrica (menor é melhor, exceto FCR)
@@ -239,6 +301,7 @@ export default function ManagementReportsPage() {
 
   const kpis = data?.kpis;
   const deltas = data?.deltas;
+  const contracts = data?.contracts;
   const fcr = kpis?.firstContactResolutionRate == null ? "—" : `${Math.round(kpis.firstContactResolutionRate * 100)}%`;
 
   return (
@@ -355,6 +418,84 @@ export default function ManagementReportsPage() {
 
           <VolumeLine data={data?.charts.volume ?? []} />
         </ChartsGrid>
+
+        <Card>
+          <CardTitle style={{ marginBottom: 10 }}>Conformidade e valor por contrato</CardTitle>
+          {contracts && contracts.items.length ? (
+            <>
+              <SummaryGrid aria-label="Resumo de contratos">
+                <SummaryItem>
+                  <SummaryValue>{formatNumber(contracts.summary.contratosAtivos)}</SummaryValue>
+                  <SummaryLabel>Contratos ativos</SummaryLabel>
+                </SummaryItem>
+                <SummaryItem>
+                  <SummaryValue>{formatNumber(contracts.summary.contratosVencendo30d)}</SummaryValue>
+                  <SummaryLabel>Vencendo em 30 dias</SummaryLabel>
+                </SummaryItem>
+                <SummaryItem>
+                  <SummaryValue>{formatNumber(contracts.summary.contratosCancelados)}</SummaryValue>
+                  <SummaryLabel>Cancelados no período</SummaryLabel>
+                </SummaryItem>
+                <SummaryItem>
+                  <SummaryValue>{formatCurrency(contracts.summary.valorMensalTotal)}</SummaryValue>
+                  <SummaryLabel>Valor mensal (ativos)</SummaryLabel>
+                </SummaryItem>
+                <SummaryItem>
+                  <SummaryValue>{formatPct(contracts.summary.cumprimentoMedioPct)}</SummaryValue>
+                  <SummaryLabel>Cumprimento médio de SLA</SummaryLabel>
+                </SummaryItem>
+                <SummaryItem>
+                  <SummaryValue>{formatNumber(contracts.summary.ticketsForaDeContrato)}</SummaryValue>
+                  <SummaryLabel>Tickets fora de contrato</SummaryLabel>
+                </SummaryItem>
+              </SummaryGrid>
+
+              <TableScroll>
+                <Table>
+                  <thead>
+                    <tr>
+                      <Th>Contrato</Th>
+                      <Th>Cliente</Th>
+                      <Th>Situação</Th>
+                      <Th>Tickets</Th>
+                      <Th>Resolvidos</Th>
+                      <Th>Cumprimento</Th>
+                      <Th>Valor mensal</Th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {contracts.items.map((item) => (
+                      <tr key={item.contratoId}>
+                        <Td>
+                          {item.numero} · {item.titulo}
+                        </Td>
+                        <Td>{item.cliente ?? "—"}</Td>
+                        <Td>
+                          <StatusTag>{item.status}</StatusTag>
+                        </Td>
+                        <Td>
+                          {formatNumber(item.ticketsTotal)}
+                          {item.ticketsForaDeContrato > 0 ? ` (${item.ticketsForaDeContrato} fora)` : ""}
+                        </Td>
+                        <Td>
+                          {formatNumber(item.ticketsDentroSla)}/{formatNumber(item.ticketsResolvidos)}
+                        </Td>
+                        <Td>
+                          <Compliance $pct={item.cumprimentoPct}>{formatPct(item.cumprimentoPct)}</Compliance>
+                        </Td>
+                        <Td>{formatCurrency(item.valorMensal)}</Td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+              </TableScroll>
+            </>
+          ) : (
+            <Hint>
+              <FiCheckCircle /> Nenhum contrato cadastrado no período selecionado.
+            </Hint>
+          )}
+        </Card>
 
         <Card>
           <CardTitle style={{ marginBottom: 10 }}>Top categorias no período</CardTitle>

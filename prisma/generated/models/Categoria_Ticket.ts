@@ -224,6 +224,7 @@ export type Categoria_TicketWhereInput = {
   deleted_at?: Prisma.DateTimeNullableFilter<"Categoria_Ticket"> | Date | string | null
   tipo_ticket?: Prisma.XOR<Prisma.Tipo_TicketScalarRelationFilter, Prisma.Tipo_TicketWhereInput>
   tickets?: Prisma.TicketListRelationFilter
+  termosSla?: Prisma.ContratoSlaTermoListRelationFilter
 }
 
 export type Categoria_TicketOrderByWithRelationInput = {
@@ -239,6 +240,7 @@ export type Categoria_TicketOrderByWithRelationInput = {
   deleted_at?: Prisma.SortOrderInput | Prisma.SortOrder
   tipo_ticket?: Prisma.Tipo_TicketOrderByWithRelationInput
   tickets?: Prisma.TicketOrderByRelationAggregateInput
+  termosSla?: Prisma.ContratoSlaTermoOrderByRelationAggregateInput
 }
 
 export type Categoria_TicketWhereUniqueInput = Prisma.AtLeast<{
@@ -258,6 +260,7 @@ export type Categoria_TicketWhereUniqueInput = Prisma.AtLeast<{
   deleted_at?: Prisma.DateTimeNullableFilter<"Categoria_Ticket"> | Date | string | null
   tipo_ticket?: Prisma.XOR<Prisma.Tipo_TicketScalarRelationFilter, Prisma.Tipo_TicketWhereInput>
   tickets?: Prisma.TicketListRelationFilter
+  termosSla?: Prisma.ContratoSlaTermoListRelationFilter
 }, "id" | "tipo_ticket_id_nome">
 
 export type Categoria_TicketOrderByWithAggregationInput = {
@@ -304,6 +307,7 @@ export type Categoria_TicketCreateInput = {
   deleted_at?: Date | string | null
   tipo_ticket: Prisma.Tipo_TicketCreateNestedOneWithoutCategoriasInput
   tickets?: Prisma.TicketCreateNestedManyWithoutCategoriaInput
+  termosSla?: Prisma.ContratoSlaTermoCreateNestedManyWithoutCategoriaInput
 }
 
 export type Categoria_TicketUncheckedCreateInput = {
@@ -318,6 +322,7 @@ export type Categoria_TicketUncheckedCreateInput = {
   updated_by?: string | null
   deleted_at?: Date | string | null
   tickets?: Prisma.TicketUncheckedCreateNestedManyWithoutCategoriaInput
+  termosSla?: Prisma.ContratoSlaTermoUncheckedCreateNestedManyWithoutCategoriaInput
 }
 
 export type Categoria_TicketUpdateInput = {
@@ -332,6 +337,7 @@ export type Categoria_TicketUpdateInput = {
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tipo_ticket?: Prisma.Tipo_TicketUpdateOneRequiredWithoutCategoriasNestedInput
   tickets?: Prisma.TicketUpdateManyWithoutCategoriaNestedInput
+  termosSla?: Prisma.ContratoSlaTermoUpdateManyWithoutCategoriaNestedInput
 }
 
 export type Categoria_TicketUncheckedUpdateInput = {
@@ -346,6 +352,7 @@ export type Categoria_TicketUncheckedUpdateInput = {
   updated_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tickets?: Prisma.TicketUncheckedUpdateManyWithoutCategoriaNestedInput
+  termosSla?: Prisma.ContratoSlaTermoUncheckedUpdateManyWithoutCategoriaNestedInput
 }
 
 export type Categoria_TicketCreateManyInput = {
@@ -503,6 +510,22 @@ export type Categoria_TicketUpdateOneWithoutTicketsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.Categoria_TicketUpdateToOneWithWhereWithoutTicketsInput, Prisma.Categoria_TicketUpdateWithoutTicketsInput>, Prisma.Categoria_TicketUncheckedUpdateWithoutTicketsInput>
 }
 
+export type Categoria_TicketCreateNestedOneWithoutTermosSlaInput = {
+  create?: Prisma.XOR<Prisma.Categoria_TicketCreateWithoutTermosSlaInput, Prisma.Categoria_TicketUncheckedCreateWithoutTermosSlaInput>
+  connectOrCreate?: Prisma.Categoria_TicketCreateOrConnectWithoutTermosSlaInput
+  connect?: Prisma.Categoria_TicketWhereUniqueInput
+}
+
+export type Categoria_TicketUpdateOneWithoutTermosSlaNestedInput = {
+  create?: Prisma.XOR<Prisma.Categoria_TicketCreateWithoutTermosSlaInput, Prisma.Categoria_TicketUncheckedCreateWithoutTermosSlaInput>
+  connectOrCreate?: Prisma.Categoria_TicketCreateOrConnectWithoutTermosSlaInput
+  upsert?: Prisma.Categoria_TicketUpsertWithoutTermosSlaInput
+  disconnect?: Prisma.Categoria_TicketWhereInput | boolean
+  delete?: Prisma.Categoria_TicketWhereInput | boolean
+  connect?: Prisma.Categoria_TicketWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.Categoria_TicketUpdateToOneWithWhereWithoutTermosSlaInput, Prisma.Categoria_TicketUpdateWithoutTermosSlaInput>, Prisma.Categoria_TicketUncheckedUpdateWithoutTermosSlaInput>
+}
+
 export type Categoria_TicketCreateWithoutTipo_ticketInput = {
   id?: string
   nome: string
@@ -514,6 +537,7 @@ export type Categoria_TicketCreateWithoutTipo_ticketInput = {
   updated_by?: string | null
   deleted_at?: Date | string | null
   tickets?: Prisma.TicketCreateNestedManyWithoutCategoriaInput
+  termosSla?: Prisma.ContratoSlaTermoCreateNestedManyWithoutCategoriaInput
 }
 
 export type Categoria_TicketUncheckedCreateWithoutTipo_ticketInput = {
@@ -527,6 +551,7 @@ export type Categoria_TicketUncheckedCreateWithoutTipo_ticketInput = {
   updated_by?: string | null
   deleted_at?: Date | string | null
   tickets?: Prisma.TicketUncheckedCreateNestedManyWithoutCategoriaInput
+  termosSla?: Prisma.ContratoSlaTermoUncheckedCreateNestedManyWithoutCategoriaInput
 }
 
 export type Categoria_TicketCreateOrConnectWithoutTipo_ticketInput = {
@@ -582,6 +607,7 @@ export type Categoria_TicketCreateWithoutTicketsInput = {
   updated_by?: string | null
   deleted_at?: Date | string | null
   tipo_ticket: Prisma.Tipo_TicketCreateNestedOneWithoutCategoriasInput
+  termosSla?: Prisma.ContratoSlaTermoCreateNestedManyWithoutCategoriaInput
 }
 
 export type Categoria_TicketUncheckedCreateWithoutTicketsInput = {
@@ -595,6 +621,7 @@ export type Categoria_TicketUncheckedCreateWithoutTicketsInput = {
   created_by?: string | null
   updated_by?: string | null
   deleted_at?: Date | string | null
+  termosSla?: Prisma.ContratoSlaTermoUncheckedCreateNestedManyWithoutCategoriaInput
 }
 
 export type Categoria_TicketCreateOrConnectWithoutTicketsInput = {
@@ -624,6 +651,7 @@ export type Categoria_TicketUpdateWithoutTicketsInput = {
   updated_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tipo_ticket?: Prisma.Tipo_TicketUpdateOneRequiredWithoutCategoriasNestedInput
+  termosSla?: Prisma.ContratoSlaTermoUpdateManyWithoutCategoriaNestedInput
 }
 
 export type Categoria_TicketUncheckedUpdateWithoutTicketsInput = {
@@ -637,6 +665,79 @@ export type Categoria_TicketUncheckedUpdateWithoutTicketsInput = {
   created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   updated_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  termosSla?: Prisma.ContratoSlaTermoUncheckedUpdateManyWithoutCategoriaNestedInput
+}
+
+export type Categoria_TicketCreateWithoutTermosSlaInput = {
+  id?: string
+  nome: string
+  descricao: string
+  status?: boolean
+  created_at?: Date | string
+  updated_at?: Date | string
+  created_by?: string | null
+  updated_by?: string | null
+  deleted_at?: Date | string | null
+  tipo_ticket: Prisma.Tipo_TicketCreateNestedOneWithoutCategoriasInput
+  tickets?: Prisma.TicketCreateNestedManyWithoutCategoriaInput
+}
+
+export type Categoria_TicketUncheckedCreateWithoutTermosSlaInput = {
+  id?: string
+  tipo_ticket_id: string
+  nome: string
+  descricao: string
+  status?: boolean
+  created_at?: Date | string
+  updated_at?: Date | string
+  created_by?: string | null
+  updated_by?: string | null
+  deleted_at?: Date | string | null
+  tickets?: Prisma.TicketUncheckedCreateNestedManyWithoutCategoriaInput
+}
+
+export type Categoria_TicketCreateOrConnectWithoutTermosSlaInput = {
+  where: Prisma.Categoria_TicketWhereUniqueInput
+  create: Prisma.XOR<Prisma.Categoria_TicketCreateWithoutTermosSlaInput, Prisma.Categoria_TicketUncheckedCreateWithoutTermosSlaInput>
+}
+
+export type Categoria_TicketUpsertWithoutTermosSlaInput = {
+  update: Prisma.XOR<Prisma.Categoria_TicketUpdateWithoutTermosSlaInput, Prisma.Categoria_TicketUncheckedUpdateWithoutTermosSlaInput>
+  create: Prisma.XOR<Prisma.Categoria_TicketCreateWithoutTermosSlaInput, Prisma.Categoria_TicketUncheckedCreateWithoutTermosSlaInput>
+  where?: Prisma.Categoria_TicketWhereInput
+}
+
+export type Categoria_TicketUpdateToOneWithWhereWithoutTermosSlaInput = {
+  where?: Prisma.Categoria_TicketWhereInput
+  data: Prisma.XOR<Prisma.Categoria_TicketUpdateWithoutTermosSlaInput, Prisma.Categoria_TicketUncheckedUpdateWithoutTermosSlaInput>
+}
+
+export type Categoria_TicketUpdateWithoutTermosSlaInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nome?: Prisma.StringFieldUpdateOperationsInput | string
+  descricao?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  updated_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tipo_ticket?: Prisma.Tipo_TicketUpdateOneRequiredWithoutCategoriasNestedInput
+  tickets?: Prisma.TicketUpdateManyWithoutCategoriaNestedInput
+}
+
+export type Categoria_TicketUncheckedUpdateWithoutTermosSlaInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tipo_ticket_id?: Prisma.StringFieldUpdateOperationsInput | string
+  nome?: Prisma.StringFieldUpdateOperationsInput | string
+  descricao?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  updated_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tickets?: Prisma.TicketUncheckedUpdateManyWithoutCategoriaNestedInput
 }
 
 export type Categoria_TicketCreateManyTipo_ticketInput = {
@@ -662,6 +763,7 @@ export type Categoria_TicketUpdateWithoutTipo_ticketInput = {
   updated_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tickets?: Prisma.TicketUpdateManyWithoutCategoriaNestedInput
+  termosSla?: Prisma.ContratoSlaTermoUpdateManyWithoutCategoriaNestedInput
 }
 
 export type Categoria_TicketUncheckedUpdateWithoutTipo_ticketInput = {
@@ -675,6 +777,7 @@ export type Categoria_TicketUncheckedUpdateWithoutTipo_ticketInput = {
   updated_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tickets?: Prisma.TicketUncheckedUpdateManyWithoutCategoriaNestedInput
+  termosSla?: Prisma.ContratoSlaTermoUncheckedUpdateManyWithoutCategoriaNestedInput
 }
 
 export type Categoria_TicketUncheckedUpdateManyWithoutTipo_ticketInput = {
@@ -696,10 +799,12 @@ export type Categoria_TicketUncheckedUpdateManyWithoutTipo_ticketInput = {
 
 export type Categoria_TicketCountOutputType = {
   tickets: number
+  termosSla: number
 }
 
 export type Categoria_TicketCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tickets?: boolean | Categoria_TicketCountOutputTypeCountTicketsArgs
+  termosSla?: boolean | Categoria_TicketCountOutputTypeCountTermosSlaArgs
 }
 
 /**
@@ -719,6 +824,13 @@ export type Categoria_TicketCountOutputTypeCountTicketsArgs<ExtArgs extends runt
   where?: Prisma.TicketWhereInput
 }
 
+/**
+ * Categoria_TicketCountOutputType without action
+ */
+export type Categoria_TicketCountOutputTypeCountTermosSlaArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ContratoSlaTermoWhereInput
+}
+
 
 export type Categoria_TicketSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -733,6 +845,7 @@ export type Categoria_TicketSelect<ExtArgs extends runtime.Types.Extensions.Inte
   deleted_at?: boolean
   tipo_ticket?: boolean | Prisma.Tipo_TicketDefaultArgs<ExtArgs>
   tickets?: boolean | Prisma.Categoria_Ticket$ticketsArgs<ExtArgs>
+  termosSla?: boolean | Prisma.Categoria_Ticket$termosSlaArgs<ExtArgs>
   _count?: boolean | Prisma.Categoria_TicketCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["categoria_Ticket"]>
 
@@ -781,6 +894,7 @@ export type Categoria_TicketOmit<ExtArgs extends runtime.Types.Extensions.Intern
 export type Categoria_TicketInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tipo_ticket?: boolean | Prisma.Tipo_TicketDefaultArgs<ExtArgs>
   tickets?: boolean | Prisma.Categoria_Ticket$ticketsArgs<ExtArgs>
+  termosSla?: boolean | Prisma.Categoria_Ticket$termosSlaArgs<ExtArgs>
   _count?: boolean | Prisma.Categoria_TicketCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type Categoria_TicketIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -795,6 +909,7 @@ export type $Categoria_TicketPayload<ExtArgs extends runtime.Types.Extensions.In
   objects: {
     tipo_ticket: Prisma.$Tipo_TicketPayload<ExtArgs>
     tickets: Prisma.$TicketPayload<ExtArgs>[]
+    termosSla: Prisma.$ContratoSlaTermoPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1203,6 +1318,7 @@ export interface Prisma__Categoria_TicketClient<T, Null = never, ExtArgs extends
   readonly [Symbol.toStringTag]: "PrismaPromise"
   tipo_ticket<T extends Prisma.Tipo_TicketDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tipo_TicketDefaultArgs<ExtArgs>>): Prisma.Prisma__Tipo_TicketClient<runtime.Types.Result.GetResult<Prisma.$Tipo_TicketPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   tickets<T extends Prisma.Categoria_Ticket$ticketsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Categoria_Ticket$ticketsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TicketPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  termosSla<T extends Prisma.Categoria_Ticket$termosSlaArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Categoria_Ticket$termosSlaArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ContratoSlaTermoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1664,6 +1780,30 @@ export type Categoria_Ticket$ticketsArgs<ExtArgs extends runtime.Types.Extension
   take?: number
   skip?: number
   distinct?: Prisma.TicketScalarFieldEnum | Prisma.TicketScalarFieldEnum[]
+}
+
+/**
+ * Categoria_Ticket.termosSla
+ */
+export type Categoria_Ticket$termosSlaArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ContratoSlaTermo
+   */
+  select?: Prisma.ContratoSlaTermoSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ContratoSlaTermo
+   */
+  omit?: Prisma.ContratoSlaTermoOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ContratoSlaTermoInclude<ExtArgs> | null
+  where?: Prisma.ContratoSlaTermoWhereInput
+  orderBy?: Prisma.ContratoSlaTermoOrderByWithRelationInput | Prisma.ContratoSlaTermoOrderByWithRelationInput[]
+  cursor?: Prisma.ContratoSlaTermoWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ContratoSlaTermoScalarFieldEnum | Prisma.ContratoSlaTermoScalarFieldEnum[]
 }
 
 /**

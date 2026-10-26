@@ -11,6 +11,7 @@ import {
 } from "@/server/ticket-mappers";
 import type { TicketPriority, TicketStatus } from "../../../prisma/generated/enums";
 import { assertTransition, resolveSlaDeadline } from "./ticket-status-policy";
+import { resolveSlaDoTicket } from "./contract-service";
 import { notifyTicketAssigned, notifyTicketComment, notifyTicketStatusChanged } from "./notifications";
 
 const LEGACY_MISSING_COLUMNS = ["pauseSla", "pausedStartedAt", "pausedTotalSeconds"];
@@ -137,13 +138,17 @@ async function findTicketByIdWithCompatibility(id: string) {
 }
 
 function resolveSlaDeadlineForTicket(ticket: any): Date {
-  // A empresa/solicitante agora vem da relação, não mais do campo legado
-  const nomeSolicitante = ticket.solicitante?.nome_fantasia || ticket.solicitante?.razao_social || null;
+  // Snapshot gravado na criação tem precedência (preserva o prazo histórico)
+  if (ticket.solutionSlaAt) return ticket.solutionSlaAt;
+
+  if (typeof ticket.slaHorasAplicadas === "number" && ticket.slaHorasAplicadas > 0) {
+    return new Date(ticket.createdAt.getTime() + ticket.slaHorasAplicadas * 60 * 60 * 1000);
+  }
+
   return resolveSlaDeadline({
     createdAt: ticket.createdAt,
     solutionSlaAt: ticket.solutionSlaAt,
-    tipoTicketSlaHours: ticket.tipo_ticket?.sla_horas ?? null,
-    company: nomeSolicitante
+    tipoTicketSlaHours: ticket.tipo_ticket?.sla_horas ?? null
   });
 }
 
@@ -204,14 +209,16 @@ function mapTicket(ticket: any) {
         day: "2-digit", month: "2-digit", year: "numeric", 
         hour: "2-digit", minute: "2-digit" 
     }),
-    progressoSla: calculateSlaProgress(
-      ticket.createdAt,
-      resolveSlaDeadlineForTicket(ticket),
-      ticket.pausedTotalSeconds ?? 0,
-      ticket.pauseSla,
-      ticket.pausedStartedAt,
-      ticket.status
-    ),
+    progressoSla: ticket.foraDeContrato
+      ? 0
+      : calculateSlaProgress(
+          ticket.createdAt,
+          resolveSlaDeadlineForTicket(ticket),
+          ticket.pausedTotalSeconds ?? 0,
+          ticket.pauseSla,
+          ticket.pausedStartedAt,
+          ticket.status
+        ),
     progressoTarefa: 0, // Campo não existe no banco, retornando 0 por padrão
     operador: ticket.operador_rel?.nome ?? null,
     contato: ticket.contact,
@@ -228,6 +235,13 @@ function mapTicket(ticket: any) {
     slaSolucao: ticket.solutionSlaAt,
     pauseReason: ticket.pausedReason,
     pauseSla: ticket.pauseSla,
+    pausedStartedAt: ticket.pausedStartedAt ?? null,
+    pausedTotalSeconds: ticket.pausedTotalSeconds ?? 0,
+    // Snapshot do SLA resolvido no momento da criação
+    contratoId: ticket.contrato_id ?? null,
+    slaFonte: ticket.slaFonte ?? null,
+    slaHorasAplicadas: ticket.slaHorasAplicadas ?? null,
+    foraDeContrato: Boolean(ticket.foraDeContrato),
     interacoes: (ticket.events ?? [])
       .filter((e: any) => e.type === "COMMENT" || e.type === "NOTE")
       .map((e: any) => ({
@@ -374,6 +388,21 @@ export async function createTicket(input: CreateTicketInput) {
   const mesaTrabalhoId = await resolveMesaTrabalhoId(input);
   const operadorId = await resolveOperadorId(input);
 
+  // Snapshot do SLA: resolve a hierarquia (tipo de ticket → contrato → política → padrão)
+  // e congela o resultado no ticket para que mudanças contratuais não afetem prazos antigos.
+  const tipoTicketSla = tipoTicketId
+    ? await prisma.tipo_Ticket.findUnique({ where: { id: tipoTicketId }, select: { sla_horas: true } })
+    : null;
+  const createdAt = new Date();
+  const sla = await resolveSlaDoTicket({
+    createdAt,
+    tipoTicketSlaHours: tipoTicketSla?.sla_horas ?? null,
+    tipoTicketId,
+    categoriaId,
+    priority: priority ?? null,
+    solicitanteId
+  });
+
   const ticket = await prisma.ticket.create({
     data: {
       subject: input.assunto,
@@ -381,11 +410,17 @@ export async function createTicket(input: CreateTicketInput) {
       status,
       priority,
       contact: input.contato,
+      createdAt,
       ...(solicitanteId ? { solicitante_id: solicitanteId } : {}),
       ...(tipoTicketId ? { tipo_ticket_id: tipoTicketId } : {}),
       ...(categoriaId ? { categoria_id: categoriaId } : {}),
       ...(mesaTrabalhoId ? { mesa_trabalho_id: mesaTrabalhoId } : {}),
       ...(operadorId ? { operador_id: operadorId } : {}),
+      ...(sla.contratoId ? { contrato_id: sla.contratoId } : {}),
+      slaFonte: sla.fonte,
+      foraDeContrato: sla.foraDeContrato,
+      // Ticket fora de contrato não consome SLA
+      ...(sla.foraDeContrato ? {} : { slaHorasAplicadas: sla.horas, solutionSlaAt: sla.deadline }),
       events: {
         create: {
           type: "CREATED",

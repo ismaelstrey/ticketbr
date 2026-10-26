@@ -1,20 +1,13 @@
 import type { DbStatus } from "@/server/ticket-mappers";
+import { resolveSla, type SlaContratoRef, type SlaTicketRef } from "./sla-resolver";
 
 /**
  * Regras de negócio de status e SLA do ticket.
- * Centraliza a máquina de estados e o cálculo do prazo de SLA para
- * evitar valores mágicos espalhados pelo serviço e pelas rotas.
+ * Centraliza a máquina de estados e delega o cálculo do prazo de SLA ao
+ * `sla-resolver`, evitando valores mágicos espalhados pelo serviço e pelas rotas.
  */
 
-/** SLA padrão (em horas) quando não há configuração específica. */
-export const DEFAULT_SLA_HOURS = 8;
-
-/** SLA por empresa (contrato). Usado quando o tipo de ticket não define sla_horas. */
-export const COMPANY_SLA_HOURS: Record<string, number> = {
-  "ACEM PRIME SERVIÇOS DE INTERNET LTDA": 6,
-  NETMITT: 4,
-  "LP INTERNET": 8
-};
+export { DEFAULT_SLA_HOURS } from "./sla-resolver";
 
 /**
  * Máquina de estados do ticket.
@@ -72,29 +65,23 @@ export interface SlaDeadlineInput {
   solutionSlaAt?: Date | null;
   /** SLA configurado no tipo de ticket (sla_horas), quando disponível. */
   tipoTicketSlaHours?: number | null;
-  /** Empresa/solicitante, usada para resolver SLA por contrato. */
-  company?: string | null;
+  /** Contexto do ticket para casar termos de SLA do contrato. */
+  ticket?: SlaTicketRef | null;
+  /** Contrato vigente da empresa (SLA diferenciado, termos e política herdada). */
+  contrato?: SlaContratoRef | null;
 }
 
 /**
- * Resolve o prazo de SLA do ticket seguindo a prioridade:
- * 1) solutionSlaAt explícito; 2) sla_horas do tipo de ticket;
- * 3) SLA por empresa; 4) SLA padrão.
+ * Resolve o prazo de SLA do ticket delegando ao `sla-resolver`.
+ * Mantido por compatibilidade com os pontos de criação de ticket.
  */
 export function resolveSlaDeadline(input: SlaDeadlineInput): Date {
-  if (input.solutionSlaAt) {
-    return input.solutionSlaAt;
-  }
-
-  const tipoHours =
-    typeof input.tipoTicketSlaHours === "number" && input.tipoTicketSlaHours > 0
-      ? input.tipoTicketSlaHours
-      : undefined;
-
-  const hours =
-    tipoHours ??
-    COMPANY_SLA_HOURS[String(input.company ?? "")] ??
-    DEFAULT_SLA_HOURS;
-
-  return new Date(input.createdAt.getTime() + hours * 60 * 60 * 1000);
+  return resolveSla({
+    createdAt: input.createdAt,
+    solutionSlaAt: input.solutionSlaAt,
+    tipoTicketSlaHours: input.tipoTicketSlaHours,
+    ticket: input.ticket,
+    contrato: input.contrato
+  }).deadline;
 }
+

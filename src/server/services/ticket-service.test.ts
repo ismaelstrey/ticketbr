@@ -1,7 +1,9 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 
 const findFirstSolicitanteMock = vi.fn();
+const findUniqueSolicitanteMock = vi.fn();
 const findFirstTipoTicketMock = vi.fn();
+const findUniqueTipoTicketMock = vi.fn();
 const findFirstCategoriaMock = vi.fn();
 const findFirstMesaMock = vi.fn();
 const findFirstOperadorMock = vi.fn();
@@ -24,10 +26,12 @@ vi.mock("@/lib/prisma", () => ({
   },
   prisma: {
     solicitante: {
-      findFirst: findFirstSolicitanteMock
+      findFirst: findFirstSolicitanteMock,
+      findUnique: findUniqueSolicitanteMock
     },
     tipo_Ticket: {
-      findFirst: findFirstTipoTicketMock
+      findFirst: findFirstTipoTicketMock,
+      findUnique: findUniqueTipoTicketMock
     },
     categoria_Ticket: {
       findFirst: findFirstCategoriaMock
@@ -53,7 +57,9 @@ describe("ticket-service.createTicket", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     findFirstSolicitanteMock.mockResolvedValue(null);
+    findUniqueSolicitanteMock.mockResolvedValue(null);
     findFirstTipoTicketMock.mockResolvedValue(null);
+    findUniqueTipoTicketMock.mockResolvedValue(null);
     findFirstCategoriaMock.mockResolvedValue(null);
     findFirstMesaMock.mockResolvedValue(null);
     findFirstOperadorMock.mockResolvedValue(null);

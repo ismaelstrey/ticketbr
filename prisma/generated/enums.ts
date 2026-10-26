@@ -83,7 +83,10 @@ export const NotificationType = {
   TICKET_COMMENT: 'TICKET_COMMENT',
   TICKET_ASSIGNED: 'TICKET_ASSIGNED',
   SLA_WARNING: 'SLA_WARNING',
-  SLA_BREACHED: 'SLA_BREACHED'
+  SLA_BREACHED: 'SLA_BREACHED',
+  CONTRACT_EXPIRING: 'CONTRACT_EXPIRING',
+  CONTRACT_EXPIRED: 'CONTRACT_EXPIRED',
+  CONTRACT_CANCELLED: 'CONTRACT_CANCELLED'
 } as const
 
 export type NotificationType = (typeof NotificationType)[keyof typeof NotificationType]
@@ -178,3 +181,46 @@ export const AccessSubjectType = {
 } as const
 
 export type AccessSubjectType = (typeof AccessSubjectType)[keyof typeof AccessSubjectType]
+
+
+export const ContractStatus = {
+  DRAFT: 'DRAFT',
+  ACTIVE: 'ACTIVE',
+  SUSPENDED: 'SUSPENDED',
+  EXPIRED: 'EXPIRED',
+  CANCELLED: 'CANCELLED'
+} as const
+
+export type ContractStatus = (typeof ContractStatus)[keyof typeof ContractStatus]
+
+
+export const SlaTermScope = {
+  TIPO_TICKET: 'TIPO_TICKET',
+  CATEGORIA: 'CATEGORIA',
+  PRIORIDADE: 'PRIORIDADE',
+  GLOBAL: 'GLOBAL'
+} as const
+
+export type SlaTermScope = (typeof SlaTermScope)[keyof typeof SlaTermScope]
+
+
+export const SlaSource = {
+  MANUAL: 'MANUAL',
+  CONTRACT_TERM: 'CONTRACT_TERM',
+  CONTRACT: 'CONTRACT',
+  GLOBAL_POLICY: 'GLOBAL_POLICY',
+  TICKET_TYPE: 'TICKET_TYPE',
+  FALLBACK: 'FALLBACK'
+} as const
+
+export type SlaSource = (typeof SlaSource)[keyof typeof SlaSource]
+
+
+export const ServiceBlockReason = {
+  CONTRATO_CANCELADO: 'CONTRATO_CANCELADO',
+  CONTRATO_VENCIDO: 'CONTRATO_VENCIDO',
+  CONTRATO_SUSPENSO: 'CONTRATO_SUSPENSO',
+  MANUAL: 'MANUAL'
+} as const
+
+export type ServiceBlockReason = (typeof ServiceBlockReason)[keyof typeof ServiceBlockReason]

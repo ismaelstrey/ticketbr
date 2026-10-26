@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 import {
   assertTransition,
   canTransition,
-  COMPANY_SLA_HOURS,
   DEFAULT_SLA_HOURS,
   InvalidStatusTransitionError,
   requiresPauseReason,
@@ -57,13 +56,13 @@ describe("ticket-status-policy.resolveSlaDeadline", () => {
     expect(deadline.getTime()).toBe(createdAt.getTime() + 2 * 60 * 60 * 1000);
   });
 
-  it("usa o SLA por empresa quando o tipo não define horas", () => {
-    const deadline = resolveSlaDeadline({ createdAt, company: "NETMITT" });
-    expect(deadline.getTime()).toBe(createdAt.getTime() + COMPANY_SLA_HOURS.NETMITT * 60 * 60 * 1000);
+  it("usa o SLA diferenciado do contrato quando o tipo não define horas", () => {
+    const deadline = resolveSlaDeadline({ createdAt, contrato: { slaSolucaoHoras: 4 } });
+    expect(deadline.getTime()).toBe(createdAt.getTime() + 4 * 60 * 60 * 1000);
   });
 
-  it("cai no SLA padrão para empresa desconhecida", () => {
-    const deadline = resolveSlaDeadline({ createdAt, company: "Empresa Desconhecida" });
+  it("cai no SLA padrão quando não há tipo nem contrato", () => {
+    const deadline = resolveSlaDeadline({ createdAt });
     expect(deadline.getTime()).toBe(createdAt.getTime() + DEFAULT_SLA_HOURS * 60 * 60 * 1000);
   });
 });

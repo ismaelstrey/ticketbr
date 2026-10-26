@@ -8,6 +8,18 @@ export function getSlaToneFromProgress(progress: number): SlaChipTone {
   return "safe";
 }
 
+const SLA_TONE_COLORS: Record<SlaChipTone, string> = {
+  safe: "#22c55e",
+  warning: "#f59e0b",
+  danger: "#ef4444",
+  breach: "#dc2626"
+};
+
+/** Cor padronizada para cada tom de SLA, reutilizada por chips e contadores. */
+export function getSlaToneColor(tone: SlaChipTone): string {
+  return SLA_TONE_COLORS[tone] ?? SLA_TONE_COLORS.safe;
+}
+
 export function getSlaChipLabel(tone: SlaChipTone): string {
   if (tone === "breach") return "SLA rompido";
   if (tone === "danger") return "SLA crítico";

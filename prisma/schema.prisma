@@ -61,6 +61,9 @@ enum NotificationType {
   TICKET_ASSIGNED
   SLA_WARNING
   SLA_BREACHED
+  CONTRACT_EXPIRING
+  CONTRACT_EXPIRED
+  CONTRACT_CANCELLED
 }
 
 // Inventário de equipamentos e cofre de credenciais
@@ -138,6 +141,41 @@ enum AccessSubjectType {
   ROLE
 }
 
+// Situação do contrato ao longo do ciclo de vida
+enum ContractStatus {
+  DRAFT
+  ACTIVE
+  SUSPENDED
+  EXPIRED
+  CANCELLED
+}
+
+// Escopo de um termo de SLA dentro do contrato
+enum SlaTermScope {
+  TIPO_TICKET
+  CATEGORIA
+  PRIORIDADE
+  GLOBAL
+}
+
+// Origem do SLA aplicado ao ticket (auditoria e relatórios)
+enum SlaSource {
+  MANUAL
+  CONTRACT_TERM
+  CONTRACT
+  GLOBAL_POLICY
+  TICKET_TYPE
+  FALLBACK
+}
+
+// Motivo do bloqueio de serviço do solicitante
+enum ServiceBlockReason {
+  CONTRATO_CANCELADO
+  CONTRATO_VENCIDO
+  CONTRATO_SUSPENSO
+  MANUAL
+}
+
 // Existing User model - keeping for backward compatibility or future migration
 model User {
   id        String   @id @default(cuid())
@@ -196,7 +234,16 @@ model Solicitante {
   endereco_completo String   @db.Text
   data_cadastro    DateTime @default(now())
   status           Boolean  @default(true)
-  
+
+  // Bloqueio de serviço (contrato cancelado/vencido/suspenso) — mantém o acesso do cliente
+  servico_bloqueado        Boolean             @default(false) @map("servico_bloqueado")
+  servico_bloqueado_em     DateTime?           @map("servico_bloqueado_em")
+  servico_bloqueado_motivo ServiceBlockReason? @map("servico_bloqueado_motivo")
+
+  // Contrato vigente (garante no banco no máximo 1 por empresa)
+  contratoVigenteId String?   @unique @map("contrato_vigente_id")
+  contratoVigente   Contrato? @relation("SolicitanteContratoVigente", fields: [contratoVigenteId], references: [id], onDelete: SetNull)
+
   // Audit fields
   created_at       DateTime @default(now())
   updated_at       DateTime @updatedAt
@@ -208,10 +255,12 @@ model Solicitante {
   tickets          Ticket[]
   equipment        Equipment[]
   sharedSecrets    ClientSharedSecret[]
+  contratos        Contrato[]  @relation("SolicitanteContratos")
 
   @@index([cnpj])
   @@index([email])
   @@index([telefone])
+  @@index([servico_bloqueado])
 }
 
 model Funcionario {
@@ -265,7 +314,8 @@ model Tipo_Ticket {
   id                String   @id @default(cuid())
   nome              String   @unique @db.VarChar(100)
   descricao         String   @db.Text
-  sla_horas         Int
+  // SLA do tipo de ticket tem prioridade máxima; nulo = herda do contrato/política global
+  sla_horas         Int?
   prioridade_default String   @db.VarChar(20)
   status            Boolean  @default(true)
   
@@ -278,6 +328,7 @@ model Tipo_Ticket {
 
   categorias        Categoria_Ticket[]
   tickets           Ticket[]
+  termosSla         ContratoSlaTermo[]
 }
 
 model Categoria_Ticket {
@@ -296,6 +347,7 @@ model Categoria_Ticket {
   deleted_at     DateTime?
 
   tickets        Ticket[]
+  termosSla      ContratoSlaTermo[]
 
   @@unique([tipo_ticket_id, nome])
 }
@@ -381,6 +433,15 @@ model Ticket {
   pauseSla      Boolean        @default(false)
   pausedStartedAt DateTime?
   pausedTotalSeconds Int       @default(0)
+
+  // Snapshot do SLA resolvido na criação (contrato/política vigentes no momento)
+  contrato_id        String?
+  contrato           Contrato?  @relation(fields: [contrato_id], references: [id], onDelete: SetNull)
+  slaHorasAplicadas  Int?       @map("sla_horas_aplicadas")
+  slaFonte           SlaSource? @map("sla_fonte")
+  // Ticket aberto para solicitante com contrato bloqueado: não conta SLA
+  foraDeContrato     Boolean    @default(false) @map("fora_de_contrato")
+
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   
@@ -398,6 +459,8 @@ model Ticket {
   @@index([createdAt])
   @@index([solicitante_id])
   @@index([createdByUserId])
+  @@index([contrato_id])
+  @@index([foraDeContrato])
 }
 
 model TicketEvent {
@@ -875,4 +938,114 @@ model UserGroupMember {
   @@unique([groupId, userId])
   @@index([userId])
   @@map("user_group_members")
+}
+
+// Política de SLA global (valor padrão do sistema, herdado pelos contratos)
+model SlaPolicy {
+  id                 String   @id @default(cuid())
+  nome               String   @db.VarChar(120)
+  descricao          String?  @db.Text
+  isDefault          Boolean  @default(false) @map("is_default")
+  slaRespostaHoras   Int?     @map("sla_resposta_horas")
+  slaSolucaoHoras    Int      @map("sla_solucao_horas")
+  alertaAtencaoPct   Int      @default(70) @map("alerta_atencao_pct")
+  alertaCriticoPct   Int      @default(85) @map("alerta_critico_pct")
+  ativo              Boolean  @default(true)
+
+  // Cálculo em horas úteis (opt-in): janela comercial + feriados.
+  horarioComercialAtivo Boolean @default(false) @map("horario_comercial_ativo")
+  horarioComercial      Json?   @map("horario_comercial")
+  feriados              Json?   @map("feriados")
+
+  created_at         DateTime @default(now())
+  updated_at         DateTime @updatedAt
+  created_by         String?
+  updated_by         String?
+
+  contratos          Contrato[]
+
+  @@index([isDefault, ativo])
+  @@map("sla_policies")
+}
+
+// Contrato de uma empresa: vigência, valor, SLA e ciclo de vida
+model Contrato {
+  id                 String         @id @default(cuid())
+  numero             String         @unique @db.VarChar(60)
+  titulo             String         @db.VarChar(200)
+  descricao          String?        @db.Text
+
+  // Nulo enquanto DRAFT: permite criar o contrato e vincular a empresa depois
+  solicitante_id     String?        @map("solicitante_id")
+  solicitante        Solicitante?   @relation("SolicitanteContratos", fields: [solicitante_id], references: [id], onDelete: Restrict)
+
+  slaPolicyId        String?        @map("sla_policy_id")
+  slaPolicy          SlaPolicy?     @relation(fields: [slaPolicyId], references: [id], onDelete: SetNull)
+
+  // SLA diferenciado da empresa (perde para o SLA do tipo de ticket)
+  slaRespostaHoras   Int?           @map("sla_resposta_horas")
+  slaSolucaoHoras    Int?           @map("sla_solucao_horas")
+
+  status             ContractStatus @default(DRAFT)
+  inicioVigencia     DateTime       @map("inicio_vigencia")
+  fimVigencia        DateTime?      @map("fim_vigencia")
+  renovacaoAutomatica Boolean       @default(false) @map("renovacao_automatica")
+  diasAvisoVencimento Int[]         @default([30, 15, 7]) @map("dias_aviso_vencimento")
+
+  // Comercial
+  valorMensal        Decimal?       @db.Decimal(12, 2) @map("valor_mensal")
+  penalidadeDescricao String?       @map("penalidade_descricao") @db.Text
+  documentoUrl       String?        @map("documento_url") @db.Text
+  observacoes        String?        @db.Text
+
+  // Cancelamento
+  canceladoEm        DateTime?      @map("cancelado_em")
+  canceladoPor       String?        @map("cancelado_por")
+  motivoCancelamento String?        @map("motivo_cancelamento") @db.Text
+
+  // Cadeia de renovação
+  renovadoDeId       String?        @unique @map("renovado_de_id")
+  renovadoDe         Contrato?      @relation("ContratoRenovacao", fields: [renovadoDeId], references: [id], onDelete: SetNull)
+  renovacoes         Contrato[]     @relation("ContratoRenovacao")
+
+  created_at         DateTime       @default(now())
+  updated_at         DateTime       @updatedAt
+  created_by         String?
+  updated_by         String?
+  deleted_at         DateTime?
+
+  termos             ContratoSlaTermo[]
+  tickets            Ticket[]
+  solicitanteVigente Solicitante?   @relation("SolicitanteContratoVigente")
+
+  @@index([solicitante_id, status])
+  @@index([status, fimVigencia])
+  @@map("contratos")
+}
+
+// Termo de SLA específico dentro de um contrato (sobrepõe o valor geral do contrato)
+model ContratoSlaTermo {
+  id               String            @id @default(cuid())
+  contratoId       String            @map("contrato_id")
+  contrato         Contrato          @relation(fields: [contratoId], references: [id], onDelete: Cascade)
+
+  escopo           SlaTermScope
+  tipoTicketId     String?           @map("tipo_ticket_id")
+  tipoTicket       Tipo_Ticket?      @relation(fields: [tipoTicketId], references: [id], onDelete: SetNull)
+  categoriaId      String?           @map("categoria_id")
+  categoria        Categoria_Ticket? @relation(fields: [categoriaId], references: [id], onDelete: SetNull)
+  prioridade       TicketPriority?
+
+  slaRespostaHoras Int?              @map("sla_resposta_horas")
+  slaSolucaoHoras  Int               @map("sla_solucao_horas")
+  ativo            Boolean           @default(true)
+
+  created_at       DateTime          @default(now())
+  updated_at       DateTime          @updatedAt
+  created_by       String?
+  updated_by       String?
+
+  @@index([contratoId, ativo])
+  @@index([tipoTicketId])
+  @@map("contrato_sla_termos")
 }

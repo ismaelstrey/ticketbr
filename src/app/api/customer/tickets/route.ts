@@ -7,6 +7,7 @@ import { requireCustomerContext } from "@/server/services/customer-context";
 import { writeAuditLog } from "@/server/services/audit-log";
 import { notifyTicketCreated } from "@/server/services/customer-notifications";
 import { computeCustomerSla } from "@/lib/customerPortal";
+import { resolveSlaDoTicket } from "@/server/services/contract-service";
 import { trackRouteResponse } from "@/server/services/route-metrics-observability";
 
 const ROUTE = "/api/customer/tickets";
@@ -177,6 +178,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const tipoTicketSla = categoria.tipo_ticket_id
+      ? await prisma.tipo_Ticket.findUnique({
+          where: { id: categoria.tipo_ticket_id },
+          select: { sla_horas: true }
+        })
+      : null;
+
+    // Snapshot do SLA resolvido (tipo de ticket → contrato → política → padrão)
+    const createdAt = new Date();
+    const sla = await resolveSlaDoTicket({
+      createdAt,
+      tipoTicketSlaHours: tipoTicketSla?.sla_horas ?? null,
+      tipoTicketId: categoria.tipo_ticket_id,
+      categoriaId: categoria.id,
+      priority: input.priority,
+      solicitanteId: ctx.solicitante.id
+    });
+
     const ticket = await prisma.ticket.create({
       data: {
         solicitante_id: ctx.solicitante.id,
@@ -187,6 +206,11 @@ export async function POST(request: NextRequest) {
         status: "TODO",
         priority: input.priority,
         createdByUserId: ctx.user.id,
+        createdAt,
+        ...(sla.contratoId ? { contrato_id: sla.contratoId } : {}),
+        slaFonte: sla.fonte,
+        foraDeContrato: sla.foraDeContrato,
+        ...(sla.foraDeContrato ? {} : { slaHorasAplicadas: sla.horas, solutionSlaAt: sla.deadline }),
         events: {
           create: {
             type: "CREATED",

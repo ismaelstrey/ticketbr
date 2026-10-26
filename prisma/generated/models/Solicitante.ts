@@ -34,6 +34,10 @@ export type SolicitanteMinAggregateOutputType = {
   endereco_completo: string | null
   data_cadastro: Date | null
   status: boolean | null
+  servico_bloqueado: boolean | null
+  servico_bloqueado_em: Date | null
+  servico_bloqueado_motivo: $Enums.ServiceBlockReason | null
+  contratoVigenteId: string | null
   created_at: Date | null
   updated_at: Date | null
   created_by: string | null
@@ -51,6 +55,10 @@ export type SolicitanteMaxAggregateOutputType = {
   endereco_completo: string | null
   data_cadastro: Date | null
   status: boolean | null
+  servico_bloqueado: boolean | null
+  servico_bloqueado_em: Date | null
+  servico_bloqueado_motivo: $Enums.ServiceBlockReason | null
+  contratoVigenteId: string | null
   created_at: Date | null
   updated_at: Date | null
   created_by: string | null
@@ -68,6 +76,10 @@ export type SolicitanteCountAggregateOutputType = {
   endereco_completo: number
   data_cadastro: number
   status: number
+  servico_bloqueado: number
+  servico_bloqueado_em: number
+  servico_bloqueado_motivo: number
+  contratoVigenteId: number
   created_at: number
   updated_at: number
   created_by: number
@@ -87,6 +99,10 @@ export type SolicitanteMinAggregateInputType = {
   endereco_completo?: true
   data_cadastro?: true
   status?: true
+  servico_bloqueado?: true
+  servico_bloqueado_em?: true
+  servico_bloqueado_motivo?: true
+  contratoVigenteId?: true
   created_at?: true
   updated_at?: true
   created_by?: true
@@ -104,6 +120,10 @@ export type SolicitanteMaxAggregateInputType = {
   endereco_completo?: true
   data_cadastro?: true
   status?: true
+  servico_bloqueado?: true
+  servico_bloqueado_em?: true
+  servico_bloqueado_motivo?: true
+  contratoVigenteId?: true
   created_at?: true
   updated_at?: true
   created_by?: true
@@ -121,6 +141,10 @@ export type SolicitanteCountAggregateInputType = {
   endereco_completo?: true
   data_cadastro?: true
   status?: true
+  servico_bloqueado?: true
+  servico_bloqueado_em?: true
+  servico_bloqueado_motivo?: true
+  contratoVigenteId?: true
   created_at?: true
   updated_at?: true
   created_by?: true
@@ -211,6 +235,10 @@ export type SolicitanteGroupByOutputType = {
   endereco_completo: string
   data_cadastro: Date
   status: boolean
+  servico_bloqueado: boolean
+  servico_bloqueado_em: Date | null
+  servico_bloqueado_motivo: $Enums.ServiceBlockReason | null
+  contratoVigenteId: string | null
   created_at: Date
   updated_at: Date
   created_by: string | null
@@ -249,15 +277,21 @@ export type SolicitanteWhereInput = {
   endereco_completo?: Prisma.StringFilter<"Solicitante"> | string
   data_cadastro?: Prisma.DateTimeFilter<"Solicitante"> | Date | string
   status?: Prisma.BoolFilter<"Solicitante"> | boolean
+  servico_bloqueado?: Prisma.BoolFilter<"Solicitante"> | boolean
+  servico_bloqueado_em?: Prisma.DateTimeNullableFilter<"Solicitante"> | Date | string | null
+  servico_bloqueado_motivo?: Prisma.EnumServiceBlockReasonNullableFilter<"Solicitante"> | $Enums.ServiceBlockReason | null
+  contratoVigenteId?: Prisma.StringNullableFilter<"Solicitante"> | string | null
   created_at?: Prisma.DateTimeFilter<"Solicitante"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"Solicitante"> | Date | string
   created_by?: Prisma.StringNullableFilter<"Solicitante"> | string | null
   updated_by?: Prisma.StringNullableFilter<"Solicitante"> | string | null
   deleted_at?: Prisma.DateTimeNullableFilter<"Solicitante"> | Date | string | null
+  contratoVigente?: Prisma.XOR<Prisma.ContratoNullableScalarRelationFilter, Prisma.ContratoWhereInput> | null
   funcionarios?: Prisma.FuncionarioListRelationFilter
   tickets?: Prisma.TicketListRelationFilter
   equipment?: Prisma.EquipmentListRelationFilter
   sharedSecrets?: Prisma.ClientSharedSecretListRelationFilter
+  contratos?: Prisma.ContratoListRelationFilter
 }
 
 export type SolicitanteOrderByWithRelationInput = {
@@ -270,20 +304,27 @@ export type SolicitanteOrderByWithRelationInput = {
   endereco_completo?: Prisma.SortOrder
   data_cadastro?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  servico_bloqueado?: Prisma.SortOrder
+  servico_bloqueado_em?: Prisma.SortOrderInput | Prisma.SortOrder
+  servico_bloqueado_motivo?: Prisma.SortOrderInput | Prisma.SortOrder
+  contratoVigenteId?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   created_by?: Prisma.SortOrderInput | Prisma.SortOrder
   updated_by?: Prisma.SortOrderInput | Prisma.SortOrder
   deleted_at?: Prisma.SortOrderInput | Prisma.SortOrder
+  contratoVigente?: Prisma.ContratoOrderByWithRelationInput
   funcionarios?: Prisma.FuncionarioOrderByRelationAggregateInput
   tickets?: Prisma.TicketOrderByRelationAggregateInput
   equipment?: Prisma.EquipmentOrderByRelationAggregateInput
   sharedSecrets?: Prisma.ClientSharedSecretOrderByRelationAggregateInput
+  contratos?: Prisma.ContratoOrderByRelationAggregateInput
 }
 
 export type SolicitanteWhereUniqueInput = Prisma.AtLeast<{
   id?: string
   cnpj?: string
+  contratoVigenteId?: string
   AND?: Prisma.SolicitanteWhereInput | Prisma.SolicitanteWhereInput[]
   OR?: Prisma.SolicitanteWhereInput[]
   NOT?: Prisma.SolicitanteWhereInput | Prisma.SolicitanteWhereInput[]
@@ -294,16 +335,21 @@ export type SolicitanteWhereUniqueInput = Prisma.AtLeast<{
   endereco_completo?: Prisma.StringFilter<"Solicitante"> | string
   data_cadastro?: Prisma.DateTimeFilter<"Solicitante"> | Date | string
   status?: Prisma.BoolFilter<"Solicitante"> | boolean
+  servico_bloqueado?: Prisma.BoolFilter<"Solicitante"> | boolean
+  servico_bloqueado_em?: Prisma.DateTimeNullableFilter<"Solicitante"> | Date | string | null
+  servico_bloqueado_motivo?: Prisma.EnumServiceBlockReasonNullableFilter<"Solicitante"> | $Enums.ServiceBlockReason | null
   created_at?: Prisma.DateTimeFilter<"Solicitante"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"Solicitante"> | Date | string
   created_by?: Prisma.StringNullableFilter<"Solicitante"> | string | null
   updated_by?: Prisma.StringNullableFilter<"Solicitante"> | string | null
   deleted_at?: Prisma.DateTimeNullableFilter<"Solicitante"> | Date | string | null
+  contratoVigente?: Prisma.XOR<Prisma.ContratoNullableScalarRelationFilter, Prisma.ContratoWhereInput> | null
   funcionarios?: Prisma.FuncionarioListRelationFilter
   tickets?: Prisma.TicketListRelationFilter
   equipment?: Prisma.EquipmentListRelationFilter
   sharedSecrets?: Prisma.ClientSharedSecretListRelationFilter
-}, "id" | "cnpj">
+  contratos?: Prisma.ContratoListRelationFilter
+}, "id" | "cnpj" | "contratoVigenteId">
 
 export type SolicitanteOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -315,6 +361,10 @@ export type SolicitanteOrderByWithAggregationInput = {
   endereco_completo?: Prisma.SortOrder
   data_cadastro?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  servico_bloqueado?: Prisma.SortOrder
+  servico_bloqueado_em?: Prisma.SortOrderInput | Prisma.SortOrder
+  servico_bloqueado_motivo?: Prisma.SortOrderInput | Prisma.SortOrder
+  contratoVigenteId?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   created_by?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -338,6 +388,10 @@ export type SolicitanteScalarWhereWithAggregatesInput = {
   endereco_completo?: Prisma.StringWithAggregatesFilter<"Solicitante"> | string
   data_cadastro?: Prisma.DateTimeWithAggregatesFilter<"Solicitante"> | Date | string
   status?: Prisma.BoolWithAggregatesFilter<"Solicitante"> | boolean
+  servico_bloqueado?: Prisma.BoolWithAggregatesFilter<"Solicitante"> | boolean
+  servico_bloqueado_em?: Prisma.DateTimeNullableWithAggregatesFilter<"Solicitante"> | Date | string | null
+  servico_bloqueado_motivo?: Prisma.EnumServiceBlockReasonNullableWithAggregatesFilter<"Solicitante"> | $Enums.ServiceBlockReason | null
+  contratoVigenteId?: Prisma.StringNullableWithAggregatesFilter<"Solicitante"> | string | null
   created_at?: Prisma.DateTimeWithAggregatesFilter<"Solicitante"> | Date | string
   updated_at?: Prisma.DateTimeWithAggregatesFilter<"Solicitante"> | Date | string
   created_by?: Prisma.StringNullableWithAggregatesFilter<"Solicitante"> | string | null
@@ -355,15 +409,20 @@ export type SolicitanteCreateInput = {
   endereco_completo: string
   data_cadastro?: Date | string
   status?: boolean
+  servico_bloqueado?: boolean
+  servico_bloqueado_em?: Date | string | null
+  servico_bloqueado_motivo?: $Enums.ServiceBlockReason | null
   created_at?: Date | string
   updated_at?: Date | string
   created_by?: string | null
   updated_by?: string | null
   deleted_at?: Date | string | null
+  contratoVigente?: Prisma.ContratoCreateNestedOneWithoutSolicitanteVigenteInput
   funcionarios?: Prisma.FuncionarioCreateNestedManyWithoutSolicitanteInput
   tickets?: Prisma.TicketCreateNestedManyWithoutSolicitanteInput
   equipment?: Prisma.EquipmentCreateNestedManyWithoutSolicitanteInput
   sharedSecrets?: Prisma.ClientSharedSecretCreateNestedManyWithoutSolicitanteInput
+  contratos?: Prisma.ContratoCreateNestedManyWithoutSolicitanteInput
 }
 
 export type SolicitanteUncheckedCreateInput = {
@@ -376,6 +435,10 @@ export type SolicitanteUncheckedCreateInput = {
   endereco_completo: string
   data_cadastro?: Date | string
   status?: boolean
+  servico_bloqueado?: boolean
+  servico_bloqueado_em?: Date | string | null
+  servico_bloqueado_motivo?: $Enums.ServiceBlockReason | null
+  contratoVigenteId?: string | null
   created_at?: Date | string
   updated_at?: Date | string
   created_by?: string | null
@@ -385,6 +448,7 @@ export type SolicitanteUncheckedCreateInput = {
   tickets?: Prisma.TicketUncheckedCreateNestedManyWithoutSolicitanteInput
   equipment?: Prisma.EquipmentUncheckedCreateNestedManyWithoutSolicitanteInput
   sharedSecrets?: Prisma.ClientSharedSecretUncheckedCreateNestedManyWithoutSolicitanteInput
+  contratos?: Prisma.ContratoUncheckedCreateNestedManyWithoutSolicitanteInput
 }
 
 export type SolicitanteUpdateInput = {
@@ -397,15 +461,20 @@ export type SolicitanteUpdateInput = {
   endereco_completo?: Prisma.StringFieldUpdateOperationsInput | string
   data_cadastro?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  servico_bloqueado?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  servico_bloqueado_em?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  servico_bloqueado_motivo?: Prisma.NullableEnumServiceBlockReasonFieldUpdateOperationsInput | $Enums.ServiceBlockReason | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   updated_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  contratoVigente?: Prisma.ContratoUpdateOneWithoutSolicitanteVigenteNestedInput
   funcionarios?: Prisma.FuncionarioUpdateManyWithoutSolicitanteNestedInput
   tickets?: Prisma.TicketUpdateManyWithoutSolicitanteNestedInput
   equipment?: Prisma.EquipmentUpdateManyWithoutSolicitanteNestedInput
   sharedSecrets?: Prisma.ClientSharedSecretUpdateManyWithoutSolicitanteNestedInput
+  contratos?: Prisma.ContratoUpdateManyWithoutSolicitanteNestedInput
 }
 
 export type SolicitanteUncheckedUpdateInput = {
@@ -418,6 +487,10 @@ export type SolicitanteUncheckedUpdateInput = {
   endereco_completo?: Prisma.StringFieldUpdateOperationsInput | string
   data_cadastro?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  servico_bloqueado?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  servico_bloqueado_em?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  servico_bloqueado_motivo?: Prisma.NullableEnumServiceBlockReasonFieldUpdateOperationsInput | $Enums.ServiceBlockReason | null
+  contratoVigenteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -427,6 +500,7 @@ export type SolicitanteUncheckedUpdateInput = {
   tickets?: Prisma.TicketUncheckedUpdateManyWithoutSolicitanteNestedInput
   equipment?: Prisma.EquipmentUncheckedUpdateManyWithoutSolicitanteNestedInput
   sharedSecrets?: Prisma.ClientSharedSecretUncheckedUpdateManyWithoutSolicitanteNestedInput
+  contratos?: Prisma.ContratoUncheckedUpdateManyWithoutSolicitanteNestedInput
 }
 
 export type SolicitanteCreateManyInput = {
@@ -439,6 +513,10 @@ export type SolicitanteCreateManyInput = {
   endereco_completo: string
   data_cadastro?: Date | string
   status?: boolean
+  servico_bloqueado?: boolean
+  servico_bloqueado_em?: Date | string | null
+  servico_bloqueado_motivo?: $Enums.ServiceBlockReason | null
+  contratoVigenteId?: string | null
   created_at?: Date | string
   updated_at?: Date | string
   created_by?: string | null
@@ -456,6 +534,9 @@ export type SolicitanteUpdateManyMutationInput = {
   endereco_completo?: Prisma.StringFieldUpdateOperationsInput | string
   data_cadastro?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  servico_bloqueado?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  servico_bloqueado_em?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  servico_bloqueado_motivo?: Prisma.NullableEnumServiceBlockReasonFieldUpdateOperationsInput | $Enums.ServiceBlockReason | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -473,6 +554,10 @@ export type SolicitanteUncheckedUpdateManyInput = {
   endereco_completo?: Prisma.StringFieldUpdateOperationsInput | string
   data_cadastro?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  servico_bloqueado?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  servico_bloqueado_em?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  servico_bloqueado_motivo?: Prisma.NullableEnumServiceBlockReasonFieldUpdateOperationsInput | $Enums.ServiceBlockReason | null
+  contratoVigenteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -490,6 +575,10 @@ export type SolicitanteCountOrderByAggregateInput = {
   endereco_completo?: Prisma.SortOrder
   data_cadastro?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  servico_bloqueado?: Prisma.SortOrder
+  servico_bloqueado_em?: Prisma.SortOrder
+  servico_bloqueado_motivo?: Prisma.SortOrder
+  contratoVigenteId?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   created_by?: Prisma.SortOrder
@@ -507,6 +596,10 @@ export type SolicitanteMaxOrderByAggregateInput = {
   endereco_completo?: Prisma.SortOrder
   data_cadastro?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  servico_bloqueado?: Prisma.SortOrder
+  servico_bloqueado_em?: Prisma.SortOrder
+  servico_bloqueado_motivo?: Prisma.SortOrder
+  contratoVigenteId?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   created_by?: Prisma.SortOrder
@@ -524,6 +617,10 @@ export type SolicitanteMinOrderByAggregateInput = {
   endereco_completo?: Prisma.SortOrder
   data_cadastro?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  servico_bloqueado?: Prisma.SortOrder
+  servico_bloqueado_em?: Prisma.SortOrder
+  servico_bloqueado_motivo?: Prisma.SortOrder
+  contratoVigenteId?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   created_by?: Prisma.SortOrder
@@ -547,6 +644,10 @@ export type BoolFieldUpdateOperationsInput = {
 
 export type NullableDateTimeFieldUpdateOperationsInput = {
   set?: Date | string | null
+}
+
+export type NullableEnumServiceBlockReasonFieldUpdateOperationsInput = {
+  set?: $Enums.ServiceBlockReason | null
 }
 
 export type SolicitanteCreateNestedOneWithoutFuncionariosInput = {
@@ -609,6 +710,54 @@ export type SolicitanteUpdateOneRequiredWithoutSharedSecretsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.SolicitanteUpdateToOneWithWhereWithoutSharedSecretsInput, Prisma.SolicitanteUpdateWithoutSharedSecretsInput>, Prisma.SolicitanteUncheckedUpdateWithoutSharedSecretsInput>
 }
 
+export type SolicitanteCreateNestedOneWithoutContratosInput = {
+  create?: Prisma.XOR<Prisma.SolicitanteCreateWithoutContratosInput, Prisma.SolicitanteUncheckedCreateWithoutContratosInput>
+  connectOrCreate?: Prisma.SolicitanteCreateOrConnectWithoutContratosInput
+  connect?: Prisma.SolicitanteWhereUniqueInput
+}
+
+export type SolicitanteCreateNestedOneWithoutContratoVigenteInput = {
+  create?: Prisma.XOR<Prisma.SolicitanteCreateWithoutContratoVigenteInput, Prisma.SolicitanteUncheckedCreateWithoutContratoVigenteInput>
+  connectOrCreate?: Prisma.SolicitanteCreateOrConnectWithoutContratoVigenteInput
+  connect?: Prisma.SolicitanteWhereUniqueInput
+}
+
+export type SolicitanteUncheckedCreateNestedOneWithoutContratoVigenteInput = {
+  create?: Prisma.XOR<Prisma.SolicitanteCreateWithoutContratoVigenteInput, Prisma.SolicitanteUncheckedCreateWithoutContratoVigenteInput>
+  connectOrCreate?: Prisma.SolicitanteCreateOrConnectWithoutContratoVigenteInput
+  connect?: Prisma.SolicitanteWhereUniqueInput
+}
+
+export type SolicitanteUpdateOneWithoutContratosNestedInput = {
+  create?: Prisma.XOR<Prisma.SolicitanteCreateWithoutContratosInput, Prisma.SolicitanteUncheckedCreateWithoutContratosInput>
+  connectOrCreate?: Prisma.SolicitanteCreateOrConnectWithoutContratosInput
+  upsert?: Prisma.SolicitanteUpsertWithoutContratosInput
+  disconnect?: Prisma.SolicitanteWhereInput | boolean
+  delete?: Prisma.SolicitanteWhereInput | boolean
+  connect?: Prisma.SolicitanteWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.SolicitanteUpdateToOneWithWhereWithoutContratosInput, Prisma.SolicitanteUpdateWithoutContratosInput>, Prisma.SolicitanteUncheckedUpdateWithoutContratosInput>
+}
+
+export type SolicitanteUpdateOneWithoutContratoVigenteNestedInput = {
+  create?: Prisma.XOR<Prisma.SolicitanteCreateWithoutContratoVigenteInput, Prisma.SolicitanteUncheckedCreateWithoutContratoVigenteInput>
+  connectOrCreate?: Prisma.SolicitanteCreateOrConnectWithoutContratoVigenteInput
+  upsert?: Prisma.SolicitanteUpsertWithoutContratoVigenteInput
+  disconnect?: Prisma.SolicitanteWhereInput | boolean
+  delete?: Prisma.SolicitanteWhereInput | boolean
+  connect?: Prisma.SolicitanteWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.SolicitanteUpdateToOneWithWhereWithoutContratoVigenteInput, Prisma.SolicitanteUpdateWithoutContratoVigenteInput>, Prisma.SolicitanteUncheckedUpdateWithoutContratoVigenteInput>
+}
+
+export type SolicitanteUncheckedUpdateOneWithoutContratoVigenteNestedInput = {
+  create?: Prisma.XOR<Prisma.SolicitanteCreateWithoutContratoVigenteInput, Prisma.SolicitanteUncheckedCreateWithoutContratoVigenteInput>
+  connectOrCreate?: Prisma.SolicitanteCreateOrConnectWithoutContratoVigenteInput
+  upsert?: Prisma.SolicitanteUpsertWithoutContratoVigenteInput
+  disconnect?: Prisma.SolicitanteWhereInput | boolean
+  delete?: Prisma.SolicitanteWhereInput | boolean
+  connect?: Prisma.SolicitanteWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.SolicitanteUpdateToOneWithWhereWithoutContratoVigenteInput, Prisma.SolicitanteUpdateWithoutContratoVigenteInput>, Prisma.SolicitanteUncheckedUpdateWithoutContratoVigenteInput>
+}
+
 export type SolicitanteCreateWithoutFuncionariosInput = {
   id?: string
   razao_social: string
@@ -619,14 +768,19 @@ export type SolicitanteCreateWithoutFuncionariosInput = {
   endereco_completo: string
   data_cadastro?: Date | string
   status?: boolean
+  servico_bloqueado?: boolean
+  servico_bloqueado_em?: Date | string | null
+  servico_bloqueado_motivo?: $Enums.ServiceBlockReason | null
   created_at?: Date | string
   updated_at?: Date | string
   created_by?: string | null
   updated_by?: string | null
   deleted_at?: Date | string | null
+  contratoVigente?: Prisma.ContratoCreateNestedOneWithoutSolicitanteVigenteInput
   tickets?: Prisma.TicketCreateNestedManyWithoutSolicitanteInput
   equipment?: Prisma.EquipmentCreateNestedManyWithoutSolicitanteInput
   sharedSecrets?: Prisma.ClientSharedSecretCreateNestedManyWithoutSolicitanteInput
+  contratos?: Prisma.ContratoCreateNestedManyWithoutSolicitanteInput
 }
 
 export type SolicitanteUncheckedCreateWithoutFuncionariosInput = {
@@ -639,6 +793,10 @@ export type SolicitanteUncheckedCreateWithoutFuncionariosInput = {
   endereco_completo: string
   data_cadastro?: Date | string
   status?: boolean
+  servico_bloqueado?: boolean
+  servico_bloqueado_em?: Date | string | null
+  servico_bloqueado_motivo?: $Enums.ServiceBlockReason | null
+  contratoVigenteId?: string | null
   created_at?: Date | string
   updated_at?: Date | string
   created_by?: string | null
@@ -647,6 +805,7 @@ export type SolicitanteUncheckedCreateWithoutFuncionariosInput = {
   tickets?: Prisma.TicketUncheckedCreateNestedManyWithoutSolicitanteInput
   equipment?: Prisma.EquipmentUncheckedCreateNestedManyWithoutSolicitanteInput
   sharedSecrets?: Prisma.ClientSharedSecretUncheckedCreateNestedManyWithoutSolicitanteInput
+  contratos?: Prisma.ContratoUncheckedCreateNestedManyWithoutSolicitanteInput
 }
 
 export type SolicitanteCreateOrConnectWithoutFuncionariosInput = {
@@ -675,14 +834,19 @@ export type SolicitanteUpdateWithoutFuncionariosInput = {
   endereco_completo?: Prisma.StringFieldUpdateOperationsInput | string
   data_cadastro?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  servico_bloqueado?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  servico_bloqueado_em?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  servico_bloqueado_motivo?: Prisma.NullableEnumServiceBlockReasonFieldUpdateOperationsInput | $Enums.ServiceBlockReason | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   updated_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  contratoVigente?: Prisma.ContratoUpdateOneWithoutSolicitanteVigenteNestedInput
   tickets?: Prisma.TicketUpdateManyWithoutSolicitanteNestedInput
   equipment?: Prisma.EquipmentUpdateManyWithoutSolicitanteNestedInput
   sharedSecrets?: Prisma.ClientSharedSecretUpdateManyWithoutSolicitanteNestedInput
+  contratos?: Prisma.ContratoUpdateManyWithoutSolicitanteNestedInput
 }
 
 export type SolicitanteUncheckedUpdateWithoutFuncionariosInput = {
@@ -695,6 +859,10 @@ export type SolicitanteUncheckedUpdateWithoutFuncionariosInput = {
   endereco_completo?: Prisma.StringFieldUpdateOperationsInput | string
   data_cadastro?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  servico_bloqueado?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  servico_bloqueado_em?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  servico_bloqueado_motivo?: Prisma.NullableEnumServiceBlockReasonFieldUpdateOperationsInput | $Enums.ServiceBlockReason | null
+  contratoVigenteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -703,6 +871,7 @@ export type SolicitanteUncheckedUpdateWithoutFuncionariosInput = {
   tickets?: Prisma.TicketUncheckedUpdateManyWithoutSolicitanteNestedInput
   equipment?: Prisma.EquipmentUncheckedUpdateManyWithoutSolicitanteNestedInput
   sharedSecrets?: Prisma.ClientSharedSecretUncheckedUpdateManyWithoutSolicitanteNestedInput
+  contratos?: Prisma.ContratoUncheckedUpdateManyWithoutSolicitanteNestedInput
 }
 
 export type SolicitanteCreateWithoutTicketsInput = {
@@ -715,14 +884,19 @@ export type SolicitanteCreateWithoutTicketsInput = {
   endereco_completo: string
   data_cadastro?: Date | string
   status?: boolean
+  servico_bloqueado?: boolean
+  servico_bloqueado_em?: Date | string | null
+  servico_bloqueado_motivo?: $Enums.ServiceBlockReason | null
   created_at?: Date | string
   updated_at?: Date | string
   created_by?: string | null
   updated_by?: string | null
   deleted_at?: Date | string | null
+  contratoVigente?: Prisma.ContratoCreateNestedOneWithoutSolicitanteVigenteInput
   funcionarios?: Prisma.FuncionarioCreateNestedManyWithoutSolicitanteInput
   equipment?: Prisma.EquipmentCreateNestedManyWithoutSolicitanteInput
   sharedSecrets?: Prisma.ClientSharedSecretCreateNestedManyWithoutSolicitanteInput
+  contratos?: Prisma.ContratoCreateNestedManyWithoutSolicitanteInput
 }
 
 export type SolicitanteUncheckedCreateWithoutTicketsInput = {
@@ -735,6 +909,10 @@ export type SolicitanteUncheckedCreateWithoutTicketsInput = {
   endereco_completo: string
   data_cadastro?: Date | string
   status?: boolean
+  servico_bloqueado?: boolean
+  servico_bloqueado_em?: Date | string | null
+  servico_bloqueado_motivo?: $Enums.ServiceBlockReason | null
+  contratoVigenteId?: string | null
   created_at?: Date | string
   updated_at?: Date | string
   created_by?: string | null
@@ -743,6 +921,7 @@ export type SolicitanteUncheckedCreateWithoutTicketsInput = {
   funcionarios?: Prisma.FuncionarioUncheckedCreateNestedManyWithoutSolicitanteInput
   equipment?: Prisma.EquipmentUncheckedCreateNestedManyWithoutSolicitanteInput
   sharedSecrets?: Prisma.ClientSharedSecretUncheckedCreateNestedManyWithoutSolicitanteInput
+  contratos?: Prisma.ContratoUncheckedCreateNestedManyWithoutSolicitanteInput
 }
 
 export type SolicitanteCreateOrConnectWithoutTicketsInput = {
@@ -771,14 +950,19 @@ export type SolicitanteUpdateWithoutTicketsInput = {
   endereco_completo?: Prisma.StringFieldUpdateOperationsInput | string
   data_cadastro?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  servico_bloqueado?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  servico_bloqueado_em?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  servico_bloqueado_motivo?: Prisma.NullableEnumServiceBlockReasonFieldUpdateOperationsInput | $Enums.ServiceBlockReason | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   updated_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  contratoVigente?: Prisma.ContratoUpdateOneWithoutSolicitanteVigenteNestedInput
   funcionarios?: Prisma.FuncionarioUpdateManyWithoutSolicitanteNestedInput
   equipment?: Prisma.EquipmentUpdateManyWithoutSolicitanteNestedInput
   sharedSecrets?: Prisma.ClientSharedSecretUpdateManyWithoutSolicitanteNestedInput
+  contratos?: Prisma.ContratoUpdateManyWithoutSolicitanteNestedInput
 }
 
 export type SolicitanteUncheckedUpdateWithoutTicketsInput = {
@@ -791,6 +975,10 @@ export type SolicitanteUncheckedUpdateWithoutTicketsInput = {
   endereco_completo?: Prisma.StringFieldUpdateOperationsInput | string
   data_cadastro?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  servico_bloqueado?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  servico_bloqueado_em?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  servico_bloqueado_motivo?: Prisma.NullableEnumServiceBlockReasonFieldUpdateOperationsInput | $Enums.ServiceBlockReason | null
+  contratoVigenteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -799,6 +987,7 @@ export type SolicitanteUncheckedUpdateWithoutTicketsInput = {
   funcionarios?: Prisma.FuncionarioUncheckedUpdateManyWithoutSolicitanteNestedInput
   equipment?: Prisma.EquipmentUncheckedUpdateManyWithoutSolicitanteNestedInput
   sharedSecrets?: Prisma.ClientSharedSecretUncheckedUpdateManyWithoutSolicitanteNestedInput
+  contratos?: Prisma.ContratoUncheckedUpdateManyWithoutSolicitanteNestedInput
 }
 
 export type SolicitanteCreateWithoutEquipmentInput = {
@@ -811,14 +1000,19 @@ export type SolicitanteCreateWithoutEquipmentInput = {
   endereco_completo: string
   data_cadastro?: Date | string
   status?: boolean
+  servico_bloqueado?: boolean
+  servico_bloqueado_em?: Date | string | null
+  servico_bloqueado_motivo?: $Enums.ServiceBlockReason | null
   created_at?: Date | string
   updated_at?: Date | string
   created_by?: string | null
   updated_by?: string | null
   deleted_at?: Date | string | null
+  contratoVigente?: Prisma.ContratoCreateNestedOneWithoutSolicitanteVigenteInput
   funcionarios?: Prisma.FuncionarioCreateNestedManyWithoutSolicitanteInput
   tickets?: Prisma.TicketCreateNestedManyWithoutSolicitanteInput
   sharedSecrets?: Prisma.ClientSharedSecretCreateNestedManyWithoutSolicitanteInput
+  contratos?: Prisma.ContratoCreateNestedManyWithoutSolicitanteInput
 }
 
 export type SolicitanteUncheckedCreateWithoutEquipmentInput = {
@@ -831,6 +1025,10 @@ export type SolicitanteUncheckedCreateWithoutEquipmentInput = {
   endereco_completo: string
   data_cadastro?: Date | string
   status?: boolean
+  servico_bloqueado?: boolean
+  servico_bloqueado_em?: Date | string | null
+  servico_bloqueado_motivo?: $Enums.ServiceBlockReason | null
+  contratoVigenteId?: string | null
   created_at?: Date | string
   updated_at?: Date | string
   created_by?: string | null
@@ -839,6 +1037,7 @@ export type SolicitanteUncheckedCreateWithoutEquipmentInput = {
   funcionarios?: Prisma.FuncionarioUncheckedCreateNestedManyWithoutSolicitanteInput
   tickets?: Prisma.TicketUncheckedCreateNestedManyWithoutSolicitanteInput
   sharedSecrets?: Prisma.ClientSharedSecretUncheckedCreateNestedManyWithoutSolicitanteInput
+  contratos?: Prisma.ContratoUncheckedCreateNestedManyWithoutSolicitanteInput
 }
 
 export type SolicitanteCreateOrConnectWithoutEquipmentInput = {
@@ -867,14 +1066,19 @@ export type SolicitanteUpdateWithoutEquipmentInput = {
   endereco_completo?: Prisma.StringFieldUpdateOperationsInput | string
   data_cadastro?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  servico_bloqueado?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  servico_bloqueado_em?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  servico_bloqueado_motivo?: Prisma.NullableEnumServiceBlockReasonFieldUpdateOperationsInput | $Enums.ServiceBlockReason | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   updated_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  contratoVigente?: Prisma.ContratoUpdateOneWithoutSolicitanteVigenteNestedInput
   funcionarios?: Prisma.FuncionarioUpdateManyWithoutSolicitanteNestedInput
   tickets?: Prisma.TicketUpdateManyWithoutSolicitanteNestedInput
   sharedSecrets?: Prisma.ClientSharedSecretUpdateManyWithoutSolicitanteNestedInput
+  contratos?: Prisma.ContratoUpdateManyWithoutSolicitanteNestedInput
 }
 
 export type SolicitanteUncheckedUpdateWithoutEquipmentInput = {
@@ -887,6 +1091,10 @@ export type SolicitanteUncheckedUpdateWithoutEquipmentInput = {
   endereco_completo?: Prisma.StringFieldUpdateOperationsInput | string
   data_cadastro?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  servico_bloqueado?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  servico_bloqueado_em?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  servico_bloqueado_motivo?: Prisma.NullableEnumServiceBlockReasonFieldUpdateOperationsInput | $Enums.ServiceBlockReason | null
+  contratoVigenteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -895,6 +1103,7 @@ export type SolicitanteUncheckedUpdateWithoutEquipmentInput = {
   funcionarios?: Prisma.FuncionarioUncheckedUpdateManyWithoutSolicitanteNestedInput
   tickets?: Prisma.TicketUncheckedUpdateManyWithoutSolicitanteNestedInput
   sharedSecrets?: Prisma.ClientSharedSecretUncheckedUpdateManyWithoutSolicitanteNestedInput
+  contratos?: Prisma.ContratoUncheckedUpdateManyWithoutSolicitanteNestedInput
 }
 
 export type SolicitanteCreateWithoutSharedSecretsInput = {
@@ -907,14 +1116,19 @@ export type SolicitanteCreateWithoutSharedSecretsInput = {
   endereco_completo: string
   data_cadastro?: Date | string
   status?: boolean
+  servico_bloqueado?: boolean
+  servico_bloqueado_em?: Date | string | null
+  servico_bloqueado_motivo?: $Enums.ServiceBlockReason | null
   created_at?: Date | string
   updated_at?: Date | string
   created_by?: string | null
   updated_by?: string | null
   deleted_at?: Date | string | null
+  contratoVigente?: Prisma.ContratoCreateNestedOneWithoutSolicitanteVigenteInput
   funcionarios?: Prisma.FuncionarioCreateNestedManyWithoutSolicitanteInput
   tickets?: Prisma.TicketCreateNestedManyWithoutSolicitanteInput
   equipment?: Prisma.EquipmentCreateNestedManyWithoutSolicitanteInput
+  contratos?: Prisma.ContratoCreateNestedManyWithoutSolicitanteInput
 }
 
 export type SolicitanteUncheckedCreateWithoutSharedSecretsInput = {
@@ -927,6 +1141,10 @@ export type SolicitanteUncheckedCreateWithoutSharedSecretsInput = {
   endereco_completo: string
   data_cadastro?: Date | string
   status?: boolean
+  servico_bloqueado?: boolean
+  servico_bloqueado_em?: Date | string | null
+  servico_bloqueado_motivo?: $Enums.ServiceBlockReason | null
+  contratoVigenteId?: string | null
   created_at?: Date | string
   updated_at?: Date | string
   created_by?: string | null
@@ -935,6 +1153,7 @@ export type SolicitanteUncheckedCreateWithoutSharedSecretsInput = {
   funcionarios?: Prisma.FuncionarioUncheckedCreateNestedManyWithoutSolicitanteInput
   tickets?: Prisma.TicketUncheckedCreateNestedManyWithoutSolicitanteInput
   equipment?: Prisma.EquipmentUncheckedCreateNestedManyWithoutSolicitanteInput
+  contratos?: Prisma.ContratoUncheckedCreateNestedManyWithoutSolicitanteInput
 }
 
 export type SolicitanteCreateOrConnectWithoutSharedSecretsInput = {
@@ -963,14 +1182,19 @@ export type SolicitanteUpdateWithoutSharedSecretsInput = {
   endereco_completo?: Prisma.StringFieldUpdateOperationsInput | string
   data_cadastro?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  servico_bloqueado?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  servico_bloqueado_em?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  servico_bloqueado_motivo?: Prisma.NullableEnumServiceBlockReasonFieldUpdateOperationsInput | $Enums.ServiceBlockReason | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   updated_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  contratoVigente?: Prisma.ContratoUpdateOneWithoutSolicitanteVigenteNestedInput
   funcionarios?: Prisma.FuncionarioUpdateManyWithoutSolicitanteNestedInput
   tickets?: Prisma.TicketUpdateManyWithoutSolicitanteNestedInput
   equipment?: Prisma.EquipmentUpdateManyWithoutSolicitanteNestedInput
+  contratos?: Prisma.ContratoUpdateManyWithoutSolicitanteNestedInput
 }
 
 export type SolicitanteUncheckedUpdateWithoutSharedSecretsInput = {
@@ -983,6 +1207,10 @@ export type SolicitanteUncheckedUpdateWithoutSharedSecretsInput = {
   endereco_completo?: Prisma.StringFieldUpdateOperationsInput | string
   data_cadastro?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  servico_bloqueado?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  servico_bloqueado_em?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  servico_bloqueado_motivo?: Prisma.NullableEnumServiceBlockReasonFieldUpdateOperationsInput | $Enums.ServiceBlockReason | null
+  contratoVigenteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -991,6 +1219,239 @@ export type SolicitanteUncheckedUpdateWithoutSharedSecretsInput = {
   funcionarios?: Prisma.FuncionarioUncheckedUpdateManyWithoutSolicitanteNestedInput
   tickets?: Prisma.TicketUncheckedUpdateManyWithoutSolicitanteNestedInput
   equipment?: Prisma.EquipmentUncheckedUpdateManyWithoutSolicitanteNestedInput
+  contratos?: Prisma.ContratoUncheckedUpdateManyWithoutSolicitanteNestedInput
+}
+
+export type SolicitanteCreateWithoutContratosInput = {
+  id?: string
+  razao_social: string
+  nome_fantasia: string
+  cnpj: string
+  email: string
+  telefone: string
+  endereco_completo: string
+  data_cadastro?: Date | string
+  status?: boolean
+  servico_bloqueado?: boolean
+  servico_bloqueado_em?: Date | string | null
+  servico_bloqueado_motivo?: $Enums.ServiceBlockReason | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  created_by?: string | null
+  updated_by?: string | null
+  deleted_at?: Date | string | null
+  contratoVigente?: Prisma.ContratoCreateNestedOneWithoutSolicitanteVigenteInput
+  funcionarios?: Prisma.FuncionarioCreateNestedManyWithoutSolicitanteInput
+  tickets?: Prisma.TicketCreateNestedManyWithoutSolicitanteInput
+  equipment?: Prisma.EquipmentCreateNestedManyWithoutSolicitanteInput
+  sharedSecrets?: Prisma.ClientSharedSecretCreateNestedManyWithoutSolicitanteInput
+}
+
+export type SolicitanteUncheckedCreateWithoutContratosInput = {
+  id?: string
+  razao_social: string
+  nome_fantasia: string
+  cnpj: string
+  email: string
+  telefone: string
+  endereco_completo: string
+  data_cadastro?: Date | string
+  status?: boolean
+  servico_bloqueado?: boolean
+  servico_bloqueado_em?: Date | string | null
+  servico_bloqueado_motivo?: $Enums.ServiceBlockReason | null
+  contratoVigenteId?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  created_by?: string | null
+  updated_by?: string | null
+  deleted_at?: Date | string | null
+  funcionarios?: Prisma.FuncionarioUncheckedCreateNestedManyWithoutSolicitanteInput
+  tickets?: Prisma.TicketUncheckedCreateNestedManyWithoutSolicitanteInput
+  equipment?: Prisma.EquipmentUncheckedCreateNestedManyWithoutSolicitanteInput
+  sharedSecrets?: Prisma.ClientSharedSecretUncheckedCreateNestedManyWithoutSolicitanteInput
+}
+
+export type SolicitanteCreateOrConnectWithoutContratosInput = {
+  where: Prisma.SolicitanteWhereUniqueInput
+  create: Prisma.XOR<Prisma.SolicitanteCreateWithoutContratosInput, Prisma.SolicitanteUncheckedCreateWithoutContratosInput>
+}
+
+export type SolicitanteCreateWithoutContratoVigenteInput = {
+  id?: string
+  razao_social: string
+  nome_fantasia: string
+  cnpj: string
+  email: string
+  telefone: string
+  endereco_completo: string
+  data_cadastro?: Date | string
+  status?: boolean
+  servico_bloqueado?: boolean
+  servico_bloqueado_em?: Date | string | null
+  servico_bloqueado_motivo?: $Enums.ServiceBlockReason | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  created_by?: string | null
+  updated_by?: string | null
+  deleted_at?: Date | string | null
+  funcionarios?: Prisma.FuncionarioCreateNestedManyWithoutSolicitanteInput
+  tickets?: Prisma.TicketCreateNestedManyWithoutSolicitanteInput
+  equipment?: Prisma.EquipmentCreateNestedManyWithoutSolicitanteInput
+  sharedSecrets?: Prisma.ClientSharedSecretCreateNestedManyWithoutSolicitanteInput
+  contratos?: Prisma.ContratoCreateNestedManyWithoutSolicitanteInput
+}
+
+export type SolicitanteUncheckedCreateWithoutContratoVigenteInput = {
+  id?: string
+  razao_social: string
+  nome_fantasia: string
+  cnpj: string
+  email: string
+  telefone: string
+  endereco_completo: string
+  data_cadastro?: Date | string
+  status?: boolean
+  servico_bloqueado?: boolean
+  servico_bloqueado_em?: Date | string | null
+  servico_bloqueado_motivo?: $Enums.ServiceBlockReason | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  created_by?: string | null
+  updated_by?: string | null
+  deleted_at?: Date | string | null
+  funcionarios?: Prisma.FuncionarioUncheckedCreateNestedManyWithoutSolicitanteInput
+  tickets?: Prisma.TicketUncheckedCreateNestedManyWithoutSolicitanteInput
+  equipment?: Prisma.EquipmentUncheckedCreateNestedManyWithoutSolicitanteInput
+  sharedSecrets?: Prisma.ClientSharedSecretUncheckedCreateNestedManyWithoutSolicitanteInput
+  contratos?: Prisma.ContratoUncheckedCreateNestedManyWithoutSolicitanteInput
+}
+
+export type SolicitanteCreateOrConnectWithoutContratoVigenteInput = {
+  where: Prisma.SolicitanteWhereUniqueInput
+  create: Prisma.XOR<Prisma.SolicitanteCreateWithoutContratoVigenteInput, Prisma.SolicitanteUncheckedCreateWithoutContratoVigenteInput>
+}
+
+export type SolicitanteUpsertWithoutContratosInput = {
+  update: Prisma.XOR<Prisma.SolicitanteUpdateWithoutContratosInput, Prisma.SolicitanteUncheckedUpdateWithoutContratosInput>
+  create: Prisma.XOR<Prisma.SolicitanteCreateWithoutContratosInput, Prisma.SolicitanteUncheckedCreateWithoutContratosInput>
+  where?: Prisma.SolicitanteWhereInput
+}
+
+export type SolicitanteUpdateToOneWithWhereWithoutContratosInput = {
+  where?: Prisma.SolicitanteWhereInput
+  data: Prisma.XOR<Prisma.SolicitanteUpdateWithoutContratosInput, Prisma.SolicitanteUncheckedUpdateWithoutContratosInput>
+}
+
+export type SolicitanteUpdateWithoutContratosInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  razao_social?: Prisma.StringFieldUpdateOperationsInput | string
+  nome_fantasia?: Prisma.StringFieldUpdateOperationsInput | string
+  cnpj?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  telefone?: Prisma.StringFieldUpdateOperationsInput | string
+  endereco_completo?: Prisma.StringFieldUpdateOperationsInput | string
+  data_cadastro?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  servico_bloqueado?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  servico_bloqueado_em?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  servico_bloqueado_motivo?: Prisma.NullableEnumServiceBlockReasonFieldUpdateOperationsInput | $Enums.ServiceBlockReason | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  updated_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  contratoVigente?: Prisma.ContratoUpdateOneWithoutSolicitanteVigenteNestedInput
+  funcionarios?: Prisma.FuncionarioUpdateManyWithoutSolicitanteNestedInput
+  tickets?: Prisma.TicketUpdateManyWithoutSolicitanteNestedInput
+  equipment?: Prisma.EquipmentUpdateManyWithoutSolicitanteNestedInput
+  sharedSecrets?: Prisma.ClientSharedSecretUpdateManyWithoutSolicitanteNestedInput
+}
+
+export type SolicitanteUncheckedUpdateWithoutContratosInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  razao_social?: Prisma.StringFieldUpdateOperationsInput | string
+  nome_fantasia?: Prisma.StringFieldUpdateOperationsInput | string
+  cnpj?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  telefone?: Prisma.StringFieldUpdateOperationsInput | string
+  endereco_completo?: Prisma.StringFieldUpdateOperationsInput | string
+  data_cadastro?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  servico_bloqueado?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  servico_bloqueado_em?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  servico_bloqueado_motivo?: Prisma.NullableEnumServiceBlockReasonFieldUpdateOperationsInput | $Enums.ServiceBlockReason | null
+  contratoVigenteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  updated_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  funcionarios?: Prisma.FuncionarioUncheckedUpdateManyWithoutSolicitanteNestedInput
+  tickets?: Prisma.TicketUncheckedUpdateManyWithoutSolicitanteNestedInput
+  equipment?: Prisma.EquipmentUncheckedUpdateManyWithoutSolicitanteNestedInput
+  sharedSecrets?: Prisma.ClientSharedSecretUncheckedUpdateManyWithoutSolicitanteNestedInput
+}
+
+export type SolicitanteUpsertWithoutContratoVigenteInput = {
+  update: Prisma.XOR<Prisma.SolicitanteUpdateWithoutContratoVigenteInput, Prisma.SolicitanteUncheckedUpdateWithoutContratoVigenteInput>
+  create: Prisma.XOR<Prisma.SolicitanteCreateWithoutContratoVigenteInput, Prisma.SolicitanteUncheckedCreateWithoutContratoVigenteInput>
+  where?: Prisma.SolicitanteWhereInput
+}
+
+export type SolicitanteUpdateToOneWithWhereWithoutContratoVigenteInput = {
+  where?: Prisma.SolicitanteWhereInput
+  data: Prisma.XOR<Prisma.SolicitanteUpdateWithoutContratoVigenteInput, Prisma.SolicitanteUncheckedUpdateWithoutContratoVigenteInput>
+}
+
+export type SolicitanteUpdateWithoutContratoVigenteInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  razao_social?: Prisma.StringFieldUpdateOperationsInput | string
+  nome_fantasia?: Prisma.StringFieldUpdateOperationsInput | string
+  cnpj?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  telefone?: Prisma.StringFieldUpdateOperationsInput | string
+  endereco_completo?: Prisma.StringFieldUpdateOperationsInput | string
+  data_cadastro?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  servico_bloqueado?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  servico_bloqueado_em?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  servico_bloqueado_motivo?: Prisma.NullableEnumServiceBlockReasonFieldUpdateOperationsInput | $Enums.ServiceBlockReason | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  updated_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  funcionarios?: Prisma.FuncionarioUpdateManyWithoutSolicitanteNestedInput
+  tickets?: Prisma.TicketUpdateManyWithoutSolicitanteNestedInput
+  equipment?: Prisma.EquipmentUpdateManyWithoutSolicitanteNestedInput
+  sharedSecrets?: Prisma.ClientSharedSecretUpdateManyWithoutSolicitanteNestedInput
+  contratos?: Prisma.ContratoUpdateManyWithoutSolicitanteNestedInput
+}
+
+export type SolicitanteUncheckedUpdateWithoutContratoVigenteInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  razao_social?: Prisma.StringFieldUpdateOperationsInput | string
+  nome_fantasia?: Prisma.StringFieldUpdateOperationsInput | string
+  cnpj?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  telefone?: Prisma.StringFieldUpdateOperationsInput | string
+  endereco_completo?: Prisma.StringFieldUpdateOperationsInput | string
+  data_cadastro?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  servico_bloqueado?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  servico_bloqueado_em?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  servico_bloqueado_motivo?: Prisma.NullableEnumServiceBlockReasonFieldUpdateOperationsInput | $Enums.ServiceBlockReason | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  created_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  updated_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  funcionarios?: Prisma.FuncionarioUncheckedUpdateManyWithoutSolicitanteNestedInput
+  tickets?: Prisma.TicketUncheckedUpdateManyWithoutSolicitanteNestedInput
+  equipment?: Prisma.EquipmentUncheckedUpdateManyWithoutSolicitanteNestedInput
+  sharedSecrets?: Prisma.ClientSharedSecretUncheckedUpdateManyWithoutSolicitanteNestedInput
+  contratos?: Prisma.ContratoUncheckedUpdateManyWithoutSolicitanteNestedInput
 }
 
 
@@ -1003,6 +1464,7 @@ export type SolicitanteCountOutputType = {
   tickets: number
   equipment: number
   sharedSecrets: number
+  contratos: number
 }
 
 export type SolicitanteCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1010,6 +1472,7 @@ export type SolicitanteCountOutputTypeSelect<ExtArgs extends runtime.Types.Exten
   tickets?: boolean | SolicitanteCountOutputTypeCountTicketsArgs
   equipment?: boolean | SolicitanteCountOutputTypeCountEquipmentArgs
   sharedSecrets?: boolean | SolicitanteCountOutputTypeCountSharedSecretsArgs
+  contratos?: boolean | SolicitanteCountOutputTypeCountContratosArgs
 }
 
 /**
@@ -1050,6 +1513,13 @@ export type SolicitanteCountOutputTypeCountSharedSecretsArgs<ExtArgs extends run
   where?: Prisma.ClientSharedSecretWhereInput
 }
 
+/**
+ * SolicitanteCountOutputType without action
+ */
+export type SolicitanteCountOutputTypeCountContratosArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ContratoWhereInput
+}
+
 
 export type SolicitanteSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1061,15 +1531,21 @@ export type SolicitanteSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   endereco_completo?: boolean
   data_cadastro?: boolean
   status?: boolean
+  servico_bloqueado?: boolean
+  servico_bloqueado_em?: boolean
+  servico_bloqueado_motivo?: boolean
+  contratoVigenteId?: boolean
   created_at?: boolean
   updated_at?: boolean
   created_by?: boolean
   updated_by?: boolean
   deleted_at?: boolean
+  contratoVigente?: boolean | Prisma.Solicitante$contratoVigenteArgs<ExtArgs>
   funcionarios?: boolean | Prisma.Solicitante$funcionariosArgs<ExtArgs>
   tickets?: boolean | Prisma.Solicitante$ticketsArgs<ExtArgs>
   equipment?: boolean | Prisma.Solicitante$equipmentArgs<ExtArgs>
   sharedSecrets?: boolean | Prisma.Solicitante$sharedSecretsArgs<ExtArgs>
+  contratos?: boolean | Prisma.Solicitante$contratosArgs<ExtArgs>
   _count?: boolean | Prisma.SolicitanteCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["solicitante"]>
 
@@ -1083,11 +1559,16 @@ export type SolicitanteSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   endereco_completo?: boolean
   data_cadastro?: boolean
   status?: boolean
+  servico_bloqueado?: boolean
+  servico_bloqueado_em?: boolean
+  servico_bloqueado_motivo?: boolean
+  contratoVigenteId?: boolean
   created_at?: boolean
   updated_at?: boolean
   created_by?: boolean
   updated_by?: boolean
   deleted_at?: boolean
+  contratoVigente?: boolean | Prisma.Solicitante$contratoVigenteArgs<ExtArgs>
 }, ExtArgs["result"]["solicitante"]>
 
 export type SolicitanteSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1100,11 +1581,16 @@ export type SolicitanteSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   endereco_completo?: boolean
   data_cadastro?: boolean
   status?: boolean
+  servico_bloqueado?: boolean
+  servico_bloqueado_em?: boolean
+  servico_bloqueado_motivo?: boolean
+  contratoVigenteId?: boolean
   created_at?: boolean
   updated_at?: boolean
   created_by?: boolean
   updated_by?: boolean
   deleted_at?: boolean
+  contratoVigente?: boolean | Prisma.Solicitante$contratoVigenteArgs<ExtArgs>
 }, ExtArgs["result"]["solicitante"]>
 
 export type SolicitanteSelectScalar = {
@@ -1117,6 +1603,10 @@ export type SolicitanteSelectScalar = {
   endereco_completo?: boolean
   data_cadastro?: boolean
   status?: boolean
+  servico_bloqueado?: boolean
+  servico_bloqueado_em?: boolean
+  servico_bloqueado_motivo?: boolean
+  contratoVigenteId?: boolean
   created_at?: boolean
   updated_at?: boolean
   created_by?: boolean
@@ -1124,24 +1614,32 @@ export type SolicitanteSelectScalar = {
   deleted_at?: boolean
 }
 
-export type SolicitanteOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "razao_social" | "nome_fantasia" | "cnpj" | "email" | "telefone" | "endereco_completo" | "data_cadastro" | "status" | "created_at" | "updated_at" | "created_by" | "updated_by" | "deleted_at", ExtArgs["result"]["solicitante"]>
+export type SolicitanteOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "razao_social" | "nome_fantasia" | "cnpj" | "email" | "telefone" | "endereco_completo" | "data_cadastro" | "status" | "servico_bloqueado" | "servico_bloqueado_em" | "servico_bloqueado_motivo" | "contratoVigenteId" | "created_at" | "updated_at" | "created_by" | "updated_by" | "deleted_at", ExtArgs["result"]["solicitante"]>
 export type SolicitanteInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  contratoVigente?: boolean | Prisma.Solicitante$contratoVigenteArgs<ExtArgs>
   funcionarios?: boolean | Prisma.Solicitante$funcionariosArgs<ExtArgs>
   tickets?: boolean | Prisma.Solicitante$ticketsArgs<ExtArgs>
   equipment?: boolean | Prisma.Solicitante$equipmentArgs<ExtArgs>
   sharedSecrets?: boolean | Prisma.Solicitante$sharedSecretsArgs<ExtArgs>
+  contratos?: boolean | Prisma.Solicitante$contratosArgs<ExtArgs>
   _count?: boolean | Prisma.SolicitanteCountOutputTypeDefaultArgs<ExtArgs>
 }
-export type SolicitanteIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
-export type SolicitanteIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type SolicitanteIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  contratoVigente?: boolean | Prisma.Solicitante$contratoVigenteArgs<ExtArgs>
+}
+export type SolicitanteIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  contratoVigente?: boolean | Prisma.Solicitante$contratoVigenteArgs<ExtArgs>
+}
 
 export type $SolicitantePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Solicitante"
   objects: {
+    contratoVigente: Prisma.$ContratoPayload<ExtArgs> | null
     funcionarios: Prisma.$FuncionarioPayload<ExtArgs>[]
     tickets: Prisma.$TicketPayload<ExtArgs>[]
     equipment: Prisma.$EquipmentPayload<ExtArgs>[]
     sharedSecrets: Prisma.$ClientSharedSecretPayload<ExtArgs>[]
+    contratos: Prisma.$ContratoPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1153,6 +1651,10 @@ export type $SolicitantePayload<ExtArgs extends runtime.Types.Extensions.Interna
     endereco_completo: string
     data_cadastro: Date
     status: boolean
+    servico_bloqueado: boolean
+    servico_bloqueado_em: Date | null
+    servico_bloqueado_motivo: $Enums.ServiceBlockReason | null
+    contratoVigenteId: string | null
     created_at: Date
     updated_at: Date
     created_by: string | null
@@ -1552,10 +2054,12 @@ readonly fields: SolicitanteFieldRefs;
  */
 export interface Prisma__SolicitanteClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  contratoVigente<T extends Prisma.Solicitante$contratoVigenteArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Solicitante$contratoVigenteArgs<ExtArgs>>): Prisma.Prisma__ContratoClient<runtime.Types.Result.GetResult<Prisma.$ContratoPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   funcionarios<T extends Prisma.Solicitante$funcionariosArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Solicitante$funcionariosArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FuncionarioPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   tickets<T extends Prisma.Solicitante$ticketsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Solicitante$ticketsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TicketPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   equipment<T extends Prisma.Solicitante$equipmentArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Solicitante$equipmentArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EquipmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   sharedSecrets<T extends Prisma.Solicitante$sharedSecretsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Solicitante$sharedSecretsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ClientSharedSecretPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  contratos<T extends Prisma.Solicitante$contratosArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Solicitante$contratosArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ContratoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1594,6 +2098,10 @@ export interface SolicitanteFieldRefs {
   readonly endereco_completo: Prisma.FieldRef<"Solicitante", 'String'>
   readonly data_cadastro: Prisma.FieldRef<"Solicitante", 'DateTime'>
   readonly status: Prisma.FieldRef<"Solicitante", 'Boolean'>
+  readonly servico_bloqueado: Prisma.FieldRef<"Solicitante", 'Boolean'>
+  readonly servico_bloqueado_em: Prisma.FieldRef<"Solicitante", 'DateTime'>
+  readonly servico_bloqueado_motivo: Prisma.FieldRef<"Solicitante", 'ServiceBlockReason'>
+  readonly contratoVigenteId: Prisma.FieldRef<"Solicitante", 'String'>
   readonly created_at: Prisma.FieldRef<"Solicitante", 'DateTime'>
   readonly updated_at: Prisma.FieldRef<"Solicitante", 'DateTime'>
   readonly created_by: Prisma.FieldRef<"Solicitante", 'String'>
@@ -1853,6 +2361,10 @@ export type SolicitanteCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Ext
    */
   data: Prisma.SolicitanteCreateManyInput | Prisma.SolicitanteCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SolicitanteIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1923,6 +2435,10 @@ export type SolicitanteUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Ext
    * Limit how many Solicitantes to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SolicitanteIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1989,6 +2505,25 @@ export type SolicitanteDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.I
    * Limit how many Solicitantes to delete.
    */
   limit?: number
+}
+
+/**
+ * Solicitante.contratoVigente
+ */
+export type Solicitante$contratoVigenteArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Contrato
+   */
+  select?: Prisma.ContratoSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Contrato
+   */
+  omit?: Prisma.ContratoOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ContratoInclude<ExtArgs> | null
+  where?: Prisma.ContratoWhereInput
 }
 
 /**
@@ -2085,6 +2620,30 @@ export type Solicitante$sharedSecretsArgs<ExtArgs extends runtime.Types.Extensio
   take?: number
   skip?: number
   distinct?: Prisma.ClientSharedSecretScalarFieldEnum | Prisma.ClientSharedSecretScalarFieldEnum[]
+}
+
+/**
+ * Solicitante.contratos
+ */
+export type Solicitante$contratosArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Contrato
+   */
+  select?: Prisma.ContratoSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Contrato
+   */
+  omit?: Prisma.ContratoOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ContratoInclude<ExtArgs> | null
+  where?: Prisma.ContratoWhereInput
+  orderBy?: Prisma.ContratoOrderByWithRelationInput | Prisma.ContratoOrderByWithRelationInput[]
+  cursor?: Prisma.ContratoWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ContratoScalarFieldEnum | Prisma.ContratoScalarFieldEnum[]
 }
 
 /**

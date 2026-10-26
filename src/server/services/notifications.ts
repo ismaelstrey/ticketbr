@@ -282,6 +282,176 @@ function buildAbsoluteUrl(path: string): string {
   return `${base}${path}`;
 }
 
+/* ------------------------------ Contratos ------------------------------ */
+
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+const DEFAULT_DIAS_AVISO = [30, 15, 7];
+
+/** Contrato no formato mínimo consumido pelas notificações do ciclo de vida. */
+export interface ContratoNotificacaoRef {
+  id: string;
+  numero: string;
+  titulo: string;
+  solicitante_id: string | null;
+  solicitanteNome?: string | null;
+}
+
+/**
+ * Audiência de um evento de contrato: staff (in-app + email) e, quando houver,
+ * os emails do cliente. O cliente não recebe in-app aqui porque o link aponta
+ * para uma tela interna de contratos.
+ */
+async function resolveContractRecipients(solicitanteId: string | null): Promise<NotificationRecipient[]> {
+  const [staff, customer] = await Promise.all([
+    resolveStaffAudience(),
+    resolveCustomerAudience(solicitanteId)
+  ]);
+
+  const audience: Audience = {
+    userIds: staff.userIds,
+    emails: normalizeEmails([...staff.emails, ...customer.emails])
+  };
+
+  return mergeEmailRecipients(audience);
+}
+
+/** Nome exibível do cliente do contrato (fantasia > razão social). */
+function nomeCliente(ref: ContratoNotificacaoRef): string {
+  return String(ref.solicitanteNome || "").trim();
+}
+
+/** Avisa staff e cliente que o contrato se aproxima do vencimento (`marco` em dias). */
+export async function notifyContractExpiring(input: {
+  contrato: ContratoNotificacaoRef;
+  diasRestantes: number;
+  marco: number;
+}) {
+  const destinatarios = await resolveContractRecipients(input.contrato.solicitante_id);
+  if (!destinatarios.length) return { created: 0, emailed: 0 };
+
+  const link = `/contratos/${encodeURIComponent(input.contrato.id)}`;
+  const cliente = nomeCliente(input.contrato);
+  const dias = Math.max(input.diasRestantes, 0);
+  const titulo = `Contrato ${input.contrato.numero} vence em ${dias} dia(s)`;
+  const corpo = `O contrato "${input.contrato.titulo}"${cliente ? ` de ${cliente}` : ""} vence em ${dias} dia(s). Renove para não interromper o serviço.`;
+
+  return dispatchNotification({
+    tipo: "CONTRACT_EXPIRING",
+    title: titulo,
+    body: corpo,
+    link,
+    solicitanteId: input.contrato.solicitante_id,
+    metadata: { contratoId: input.contrato.id, numero: input.contrato.numero, diasRestantes: dias, marco: input.marco },
+    dedupeKey: `contract_expiring:${input.contrato.id}:${input.marco}`,
+    recipients: destinatarios,
+    email: {
+      subject: `[TicketBR] ${titulo}`,
+      text: `${corpo}\n\nContrato: ${input.contrato.numero}\nVencimento: ${dias} dia(s)\n\nAbrir: ${buildAbsoluteUrl(link)}`
+    }
+  });
+}
+
+/** Avisa que o contrato venceu sem renovação e o serviço foi interrompido. */
+export async function notifyContractExpired(input: { contrato: ContratoNotificacaoRef }) {
+  const destinatarios = await resolveContractRecipients(input.contrato.solicitante_id);
+  if (!destinatarios.length) return { created: 0, emailed: 0 };
+
+  const link = `/contratos/${encodeURIComponent(input.contrato.id)}`;
+  const cliente = nomeCliente(input.contrato);
+  const titulo = `Contrato ${input.contrato.numero} vencido`;
+  const corpo = `O contrato "${input.contrato.titulo}"${cliente ? ` de ${cliente}` : ""} venceu sem renovação. O serviço do cliente está interrompido até a renovação ou um novo contrato.`;
+
+  return dispatchNotification({
+    tipo: "CONTRACT_EXPIRED",
+    title: titulo,
+    body: corpo,
+    link,
+    solicitanteId: input.contrato.solicitante_id,
+    metadata: { contratoId: input.contrato.id, numero: input.contrato.numero },
+    dedupeKey: `contract_expired:${input.contrato.id}`,
+    recipients: destinatarios,
+    email: {
+      subject: `[TicketBR] ${titulo}`,
+      text: `${corpo}\n\nContrato: ${input.contrato.numero}\n\nAbrir: ${buildAbsoluteUrl(link)}`
+    }
+  });
+}
+
+/** Confirma o cancelamento do contrato e a interrupção do serviço. */
+export async function notifyContractCancelled(input: { contrato: ContratoNotificacaoRef; motivo?: string | null }) {
+  const destinatarios = await resolveContractRecipients(input.contrato.solicitante_id);
+  if (!destinatarios.length) return { created: 0, emailed: 0 };
+
+  const link = `/contratos/${encodeURIComponent(input.contrato.id)}`;
+  const cliente = nomeCliente(input.contrato);
+  const motivo = String(input.motivo || "").trim();
+  const titulo = `Contrato ${input.contrato.numero} cancelado`;
+  const corpo = `O contrato "${input.contrato.titulo}"${cliente ? ` de ${cliente}` : ""} foi cancelado. O serviço do cliente está interrompido até a renovação ou um novo contrato.`;
+
+  return dispatchNotification({
+    tipo: "CONTRACT_CANCELLED",
+    title: titulo,
+    body: motivo ? `${corpo} Motivo: ${motivo}` : corpo,
+    link,
+    solicitanteId: input.contrato.solicitante_id,
+    metadata: { contratoId: input.contrato.id, numero: input.contrato.numero, motivo: motivo || null },
+    dedupeKey: `contract_cancelled:${input.contrato.id}`,
+    recipients: destinatarios,
+    email: {
+      subject: `[TicketBR] ${titulo}`,
+      text: `${corpo}${motivo ? `\nMotivo: ${motivo}` : ""}\n\nAbrir: ${buildAbsoluteUrl(link)}`
+    }
+  });
+}
+
+/**
+ * Varre contratos ativos que se aproximam do vencimento e dispara o aviso do
+ * marco já cruzado (30/15/7 dias por padrão). Idempotente via dedupeKey.
+ */
+export async function runContractExpiryScan(now: Date = new Date()) {
+  const contratos = await prisma.contrato.findMany({
+    where: { status: "ACTIVE", deleted_at: null, fimVigencia: { not: null, gt: now } },
+    select: {
+      id: true,
+      numero: true,
+      titulo: true,
+      solicitante_id: true,
+      fimVigencia: true,
+      diasAvisoVencimento: true,
+      solicitante: { select: { nome_fantasia: true, razao_social: true } }
+    }
+  });
+
+  let avisos = 0;
+
+  for (const contrato of contratos) {
+    if (!contrato.fimVigencia) continue;
+
+    const diasRestantes = Math.ceil((contrato.fimVigencia.getTime() - now.getTime()) / MS_PER_DAY);
+    const marcos = (contrato.diasAvisoVencimento?.length ? contrato.diasAvisoVencimento : DEFAULT_DIAS_AVISO)
+      .slice()
+      .sort((a, b) => a - b);
+    const marco = marcos.find((valor) => diasRestantes <= valor);
+    if (!marco) continue;
+
+    const result = await notifyContractExpiring({
+      contrato: {
+        id: contrato.id,
+        numero: contrato.numero,
+        titulo: contrato.titulo,
+        solicitante_id: contrato.solicitante_id,
+        solicitanteNome: contrato.solicitante?.nome_fantasia || contrato.solicitante?.razao_social || null
+      },
+      diasRestantes,
+      marco
+    });
+
+    if (result.created > 0 || result.emailed > 0) avisos += 1;
+  }
+
+  return { scanned: contratos.length, avisos };
+}
+
 /**
  * Varre tickets com SLA de resposta/solução próximos ou estourados e cria
  * notificações para o staff. Idempotente via dedupeKey (pode rodar em cron).

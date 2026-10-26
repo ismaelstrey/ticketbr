@@ -82,7 +82,10 @@ export const ModelName = {
   ClientSharedSecret: 'ClientSharedSecret',
   CredentialAccessGrant: 'CredentialAccessGrant',
   UserGroup: 'UserGroup',
-  UserGroupMember: 'UserGroupMember'
+  UserGroupMember: 'UserGroupMember',
+  SlaPolicy: 'SlaPolicy',
+  Contrato: 'Contrato',
+  ContratoSlaTermo: 'ContratoSlaTermo'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -143,6 +146,10 @@ export const SolicitanteScalarFieldEnum = {
   endereco_completo: 'endereco_completo',
   data_cadastro: 'data_cadastro',
   status: 'status',
+  servico_bloqueado: 'servico_bloqueado',
+  servico_bloqueado_em: 'servico_bloqueado_em',
+  servico_bloqueado_motivo: 'servico_bloqueado_motivo',
+  contratoVigenteId: 'contratoVigenteId',
   created_at: 'created_at',
   updated_at: 'updated_at',
   created_by: 'created_by',
@@ -281,6 +288,10 @@ export const TicketScalarFieldEnum = {
   pauseSla: 'pauseSla',
   pausedStartedAt: 'pausedStartedAt',
   pausedTotalSeconds: 'pausedTotalSeconds',
+  contrato_id: 'contrato_id',
+  slaHorasAplicadas: 'slaHorasAplicadas',
+  slaFonte: 'slaFonte',
+  foraDeContrato: 'foraDeContrato',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   created_by: 'created_by',
@@ -644,6 +655,79 @@ export const UserGroupMemberScalarFieldEnum = {
 } as const
 
 export type UserGroupMemberScalarFieldEnum = (typeof UserGroupMemberScalarFieldEnum)[keyof typeof UserGroupMemberScalarFieldEnum]
+
+
+export const SlaPolicyScalarFieldEnum = {
+  id: 'id',
+  nome: 'nome',
+  descricao: 'descricao',
+  isDefault: 'isDefault',
+  slaRespostaHoras: 'slaRespostaHoras',
+  slaSolucaoHoras: 'slaSolucaoHoras',
+  alertaAtencaoPct: 'alertaAtencaoPct',
+  alertaCriticoPct: 'alertaCriticoPct',
+  ativo: 'ativo',
+  horarioComercialAtivo: 'horarioComercialAtivo',
+  horarioComercial: 'horarioComercial',
+  feriados: 'feriados',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  created_by: 'created_by',
+  updated_by: 'updated_by'
+} as const
+
+export type SlaPolicyScalarFieldEnum = (typeof SlaPolicyScalarFieldEnum)[keyof typeof SlaPolicyScalarFieldEnum]
+
+
+export const ContratoScalarFieldEnum = {
+  id: 'id',
+  numero: 'numero',
+  titulo: 'titulo',
+  descricao: 'descricao',
+  solicitante_id: 'solicitante_id',
+  slaPolicyId: 'slaPolicyId',
+  slaRespostaHoras: 'slaRespostaHoras',
+  slaSolucaoHoras: 'slaSolucaoHoras',
+  status: 'status',
+  inicioVigencia: 'inicioVigencia',
+  fimVigencia: 'fimVigencia',
+  renovacaoAutomatica: 'renovacaoAutomatica',
+  diasAvisoVencimento: 'diasAvisoVencimento',
+  valorMensal: 'valorMensal',
+  penalidadeDescricao: 'penalidadeDescricao',
+  documentoUrl: 'documentoUrl',
+  observacoes: 'observacoes',
+  canceladoEm: 'canceladoEm',
+  canceladoPor: 'canceladoPor',
+  motivoCancelamento: 'motivoCancelamento',
+  renovadoDeId: 'renovadoDeId',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  created_by: 'created_by',
+  updated_by: 'updated_by',
+  deleted_at: 'deleted_at'
+} as const
+
+export type ContratoScalarFieldEnum = (typeof ContratoScalarFieldEnum)[keyof typeof ContratoScalarFieldEnum]
+
+
+export const ContratoSlaTermoScalarFieldEnum = {
+  id: 'id',
+  contratoId: 'contratoId',
+  escopo: 'escopo',
+  tipoTicketId: 'tipoTicketId',
+  categoriaId: 'categoriaId',
+  prioridade: 'prioridade',
+  slaRespostaHoras: 'slaRespostaHoras',
+  slaSolucaoHoras: 'slaSolucaoHoras',
+  ativo: 'ativo',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  created_by: 'created_by',
+  updated_by: 'updated_by'
+} as const
+
+export type ContratoSlaTermoScalarFieldEnum = (typeof ContratoSlaTermoScalarFieldEnum)[keyof typeof ContratoSlaTermoScalarFieldEnum]
 
 
 export const SortOrder = {

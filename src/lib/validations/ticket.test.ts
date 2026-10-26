@@ -66,6 +66,19 @@ describe("UpdateTicketSchema", () => {
     expect(result.success).toBe(true);
   });
 
+  it("aceita campos derivados nulos vindos da leitura do ticket", () => {
+    const result = UpdateTicketSchema.safeParse({
+      operador: null,
+      contato: null,
+      descricao: null,
+      tipoTicket: null,
+      categoria: null,
+      mesaTrabalho: null,
+      pauseReason: null
+    });
+    expect(result.success).toBe(true);
+  });
+
   it("aceita os campos de pausa do SLA", () => {
     const result = UpdateTicketSchema.safeParse({ status: "paused", pauseSla: true, pauseReason: "Aguardando cliente" });
     expect(result.success).toBe(true);

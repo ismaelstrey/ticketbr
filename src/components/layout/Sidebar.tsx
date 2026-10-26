@@ -19,7 +19,8 @@ import {
   FiEdit,
   FiLayers,
   FiClock,
-  FiServer
+  FiServer,
+  FiFileText
 } from "@/components/icons";
 
 const EXPANDED_WIDTH = "288px";
@@ -285,6 +286,7 @@ const menuItems: MenuItemType[] = [
   { label: "Inventário", icon: FiWifi, path: "/inventory" },
   { label: "Infraestrutura", icon: FiServer, path: "/infraestrutura" },
   { label: "Relatórios", icon: FiZap, path: "/reports" },
+  { label: "Contratos", icon: FiFileText, path: "/contratos" },
   {
     label: "Cadastros",
     icon: FiEdit,

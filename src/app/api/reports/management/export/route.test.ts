@@ -62,6 +62,33 @@ function reportFixture() {
           firstContactResolutionRate: 0.8
         }
       ],
+      contracts: {
+        summary: {
+          contratosAtivos: 2,
+          contratosVencendo30d: 1,
+          contratosCancelados: 0,
+          valorMensalTotal: 3500,
+          ticketsForaDeContrato: 1,
+          cumprimentoMedioPct: 80
+        },
+        items: [
+          {
+            contratoId: "c1",
+            numero: "CT-001",
+            titulo: "Suporte 24x7",
+            cliente: "ACME",
+            status: "ACTIVE",
+            valorMensal: 3500,
+            slaSolucaoHoras: 4,
+            vigencia: { inicio: "2026-01-01T00:00:00.000Z", fim: "2026-12-31T00:00:00.000Z" },
+            ticketsTotal: 5,
+            ticketsForaDeContrato: 1,
+            ticketsResolvidos: 5,
+            ticketsDentroSla: 4,
+            cumprimentoPct: 80
+          }
+        ]
+      },
       latestSnapshotAt: "2026-05-01T00:00:00.000Z"
     }
   };

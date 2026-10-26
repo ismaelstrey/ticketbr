@@ -534,6 +534,14 @@ export type Mesa_TrabalhoOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
+export type IntFieldUpdateOperationsInput = {
+  set?: number
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
+}
+
 export type Mesa_TrabalhoCreateNestedOneWithoutOperadoresInput = {
   create?: Prisma.XOR<Prisma.Mesa_TrabalhoCreateWithoutOperadoresInput, Prisma.Mesa_TrabalhoUncheckedCreateWithoutOperadoresInput>
   connectOrCreate?: Prisma.Mesa_TrabalhoCreateOrConnectWithoutOperadoresInput

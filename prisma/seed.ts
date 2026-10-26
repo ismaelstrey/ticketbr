@@ -275,25 +275,25 @@ export async function seedDatabase(prisma: PrismaClient, options?: SeedOptions):
     {
       nome: "Incidente",
       descricao: "Interrupção não planejada de um serviço ou redução na qualidade do serviço.",
-      sla_horas: 24,
+      sla_horas: null,
       prioridade_default: "Alta"
     },
     {
       nome: "Solicitação de Serviço",
       descricao: "Pedido de um usuário para informações, conselhos, uma mudança padrão ou acesso a um serviço.",
-      sla_horas: 48,
+      sla_horas: null,
       prioridade_default: "Média"
     },
     {
       nome: "Problema",
       descricao: "Causa raiz de um ou mais incidentes.",
-      sla_horas: 72,
+      sla_horas: null,
       prioridade_default: "Média"
     },
     {
       nome: "Mudança",
       descricao: "Adição, modificação ou remoção de qualquer coisa que possa ter efeito nos serviços de TI.",
-      sla_horas: 120,
+      sla_horas: null,
       prioridade_default: "Baixa"
     }
   ] as const;
@@ -338,6 +338,23 @@ export async function seedDatabase(prisma: PrismaClient, options?: SeedOptions):
     async (tx) => {
     if (resolved.reset) {
       await cleanupSeedData(tx as any, resolved.verbose);
+    }
+
+    // Política global de SLA: último recurso quando tipo de ticket e contrato não definem horas
+    const politicaGlobalExistente = await tx.slaPolicy.findFirst({ where: { isDefault: true } });
+    const politicaGlobalData = {
+      nome: "Política Global de SLA",
+      descricao: "Aplicada quando o tipo de ticket e o contrato do solicitante não definem horas.",
+      slaRespostaHoras: 4,
+      slaSolucaoHoras: 48,
+      alertaAtencaoPct: 70,
+      alertaCriticoPct: 85,
+      ativo: true
+    };
+    if (politicaGlobalExistente) {
+      await tx.slaPolicy.update({ where: { id: politicaGlobalExistente.id }, data: politicaGlobalData });
+    } else {
+      await tx.slaPolicy.create({ data: { ...politicaGlobalData, isDefault: true } });
     }
 
     for (const t of ticketTypes) {

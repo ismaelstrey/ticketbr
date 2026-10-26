@@ -1,10 +1,15 @@
 "use client";
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import styled from "styled-components";
 import { useRouter } from "next/navigation";
 import { FiBell, FiCheck } from "@/components/icons";
 import { useNotifications, type NotificationItem } from "@/hooks/useNotifications";
+
+const PANEL_WIDTH = 340;
+const PANEL_MAX_HEIGHT = 420;
+const VIEWPORT_MARGIN = 8;
 
 const BellButton = styled.button`
   position: relative;
@@ -43,12 +48,12 @@ const Badge = styled.span`
   justify-content: center;
 `;
 
-const Panel = styled.div<{ $top: number; $left: number }>`
+const Panel = styled.div<{ $top: number; $left: number; $maxHeight: number }>`
   position: fixed;
   top: ${({ $top }) => `${$top}px`};
   left: ${({ $left }) => `${$left}px`};
-  width: 340px;
-  max-height: 420px;
+  width: ${PANEL_WIDTH}px;
+  max-height: ${({ $maxHeight }) => `${$maxHeight}px`};
   display: flex;
   flex-direction: column;
   background: ${({ theme }) => theme.colors.surface};
@@ -155,14 +160,29 @@ export function NotificationBell() {
   const router = useRouter();
   const { items, unreadCount, markRead, markAllRead } = useNotifications();
   const [isOpen, setIsOpen] = useState(false);
-  const [coords, setCoords] = useState({ top: 0, left: 0 });
+  const [mounted, setMounted] = useState(false);
+  const [coords, setCoords] = useState({ top: 0, left: 0, maxHeight: PANEL_MAX_HEIGHT });
   const buttonRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const togglePanel = useCallback(() => {
     if (!isOpen && buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect();
-      setCoords({ top: rect.bottom + 8, left: rect.right + 8 });
+      // Mantém o painel dentro da viewport (o sino fica no topo, à esquerda)
+      const left = Math.max(
+        VIEWPORT_MARGIN,
+        Math.min(rect.right + VIEWPORT_MARGIN, window.innerWidth - PANEL_WIDTH - VIEWPORT_MARGIN)
+      );
+      const top = Math.max(
+        VIEWPORT_MARGIN,
+        Math.min(rect.bottom + VIEWPORT_MARGIN, window.innerHeight - 120)
+      );
+      const maxHeight = Math.min(PANEL_MAX_HEIGHT, window.innerHeight - top - VIEWPORT_MARGIN);
+      setCoords({ top, left, maxHeight: Math.max(maxHeight, 160) });
     }
     setIsOpen((prev) => !prev);
   }, [isOpen]);
@@ -202,37 +222,39 @@ export function NotificationBell() {
         {unreadCount > 0 && <Badge>{unreadCount > 99 ? "99+" : unreadCount}</Badge>}
       </BellButton>
 
-      {isOpen && (
-        <Panel ref={panelRef} $top={coords.top} $left={coords.left}>
-          <PanelHeader>
-            <PanelTitle>Notificações</PanelTitle>
-            {unreadCount > 0 && (
-              <MarkAllButton type="button" onClick={() => void markAllRead()}>
-                <FiCheck /> Marcar todas como lidas
-              </MarkAllButton>
-            )}
-          </PanelHeader>
+      {mounted && isOpen &&
+        createPortal(
+          <Panel ref={panelRef} $top={coords.top} $left={coords.left} $maxHeight={coords.maxHeight}>
+            <PanelHeader>
+              <PanelTitle>Notificações</PanelTitle>
+              {unreadCount > 0 && (
+                <MarkAllButton type="button" onClick={() => void markAllRead()}>
+                  <FiCheck /> Marcar todas como lidas
+                </MarkAllButton>
+              )}
+            </PanelHeader>
 
-          <List>
-            {items.length === 0 ? (
-              <EmptyState>Nenhuma notificação por aqui.</EmptyState>
-            ) : (
-              items.map((item) => (
-                <ListItem
-                  key={item.id}
-                  $unread={!item.readAt}
-                  type="button"
-                  onClick={() => void handleSelect(item)}
-                >
-                  <ItemTitle>{item.title}</ItemTitle>
-                  {item.body && <ItemBody>{item.body}</ItemBody>}
-                  <ItemDate>{formatDate(item.createdAt)}</ItemDate>
-                </ListItem>
-              ))
-            )}
-          </List>
-        </Panel>
-      )}
+            <List>
+              {items.length === 0 ? (
+                <EmptyState>Nenhuma notificação por aqui.</EmptyState>
+              ) : (
+                items.map((item) => (
+                  <ListItem
+                    key={item.id}
+                    $unread={!item.readAt}
+                    type="button"
+                    onClick={() => void handleSelect(item)}
+                  >
+                    <ItemTitle>{item.title}</ItemTitle>
+                    {item.body && <ItemBody>{item.body}</ItemBody>}
+                    <ItemDate>{formatDate(item.createdAt)}</ItemDate>
+                  </ListItem>
+                ))
+              )}
+            </List>
+          </Panel>,
+          document.body
+        )}
     </>
   );
 }

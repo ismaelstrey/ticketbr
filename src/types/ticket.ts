@@ -44,10 +44,13 @@ export interface Ticket {
   operador?: string;
   operadorId?: string | null;
   dataCriacao?: string;
+  dataAtualizacao?: string;
   slaResposta?: string;
   slaSolucao?: string;
   pauseReason?: string;
   pauseSla?: boolean;
+  pausedStartedAt?: string | null;
+  pausedTotalSeconds?: number;
   interacoes?: TicketInteraction[];
   roadmap?: TicketRoadmapEvent[];
 }

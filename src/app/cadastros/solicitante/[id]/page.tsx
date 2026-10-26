@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
 import { Input } from "@/components/ui/Input";
 import { useToast } from "@/context/ToastContext";
+import { SolicitanteContratoPanel } from "@/components/contracts/SolicitanteContratoPanel";
 import { FiEdit2 } from "react-icons/fi";
 
 type Solicitante = {
@@ -21,6 +22,8 @@ type Solicitante = {
   endereco_completo: string;
   data_cadastro: string;
   status: boolean;
+  servico_bloqueado?: boolean;
+  servico_bloqueado_motivo?: string | null;
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
@@ -341,6 +344,12 @@ export default function SolicitanteDetalhesPage() {
               </tbody>
             </FuncionarioTable>
           </Card>
+
+          <SolicitanteContratoPanel
+            solicitanteId={params.id}
+            servicoBloqueado={data?.servico_bloqueado}
+            servicoBloqueadoMotivo={data?.servico_bloqueado_motivo}
+          />
 
           <Modal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); setEditingFuncionario(null); }} title={editingFuncionario ? "Editar funcionário" : "Adicionar funcionário ao solicitante"}>
             <ModalForm>
