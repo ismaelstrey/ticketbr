@@ -3,8 +3,43 @@ import { prisma } from "@/lib/prisma";
 import { createRequestContext, jsonWithRequestId, logRouteEvent } from "@/lib/observability";
 import { trackRouteResponse } from "@/server/services/route-metrics-observability";
 import { guardStaff } from "@/server/services/staff-context";
+import { isMissingPauseColumnsError, mapChatTicketSummary } from "@/server/services/ticket-service";
 
 const ROUTE = "/api/chat/tickets";
+
+// Campos usados para derivar prioridade e progresso de SLA no chat.
+const chatTicketSelect = {
+  id: true,
+  number: true,
+  subject: true,
+  solicitante_id: true,
+  priority: true,
+  status: true,
+  createdAt: true,
+  foraDeContrato: true,
+  slaHorasAplicadas: true,
+  solutionSlaAt: true,
+  pausedTotalSeconds: true,
+  pauseSla: true,
+  pausedStartedAt: true,
+  solicitante: { select: { id: true, nome_fantasia: true, razao_social: true } },
+  tipo_ticket: { select: { sla_horas: true } }
+} as const;
+
+// Projeção alternativa quando a base ainda não possui as colunas de pausa de SLA.
+const chatTicketCompatSelect = {
+  id: true,
+  number: true,
+  subject: true,
+  solicitante_id: true,
+  priority: true,
+  status: true,
+  createdAt: true,
+  solutionSlaAt: true,
+  solicitante: { select: { id: true, nome_fantasia: true, razao_social: true } },
+  tipo_ticket: { select: { sla_horas: true } }
+} as const;
+
 
 export async function GET(request: NextRequest) {
   // Garante que apenas staff (ADMIN/AGENT) acesse os tickets usados no chat
@@ -55,24 +90,22 @@ export async function GET(request: NextRequest) {
 
     const where = orConditions.length ? { OR: orConditions } : undefined;
 
-    const tickets = await prisma.ticket.findMany({
-      where,
-      orderBy: { createdAt: "desc" },
-      take: 200,
-      select: {
-        id: true,
-        number: true,
-        subject: true,
-        solicitante_id: true,
-        solicitante: {
-          select: {
-            id: true,
-            nome_fantasia: true,
-            razao_social: true
-          }
-        }
-      }
-    });
+    const query = (select: typeof chatTicketSelect | typeof chatTicketCompatSelect) =>
+      prisma.ticket.findMany({
+        where,
+        orderBy: { createdAt: "desc" },
+        take: 200,
+        select: select as any
+      });
+
+    let tickets: any[];
+    try {
+      tickets = await query(chatTicketSelect);
+    } catch (error) {
+      if (!isMissingPauseColumnsError(error)) throw error;
+      logRouteEvent("[chat.tickets] compat fallback", "warn", context, { reason: "missing_pause_columns" });
+      tickets = await query(chatTicketCompatSelect);
+    }
 
     logRouteEvent("[chat.tickets] ok", "info", context, { count: tickets.length });
     return trackRouteResponse(
@@ -81,13 +114,7 @@ export async function GET(request: NextRequest) {
       context,
       jsonWithRequestId(
         {
-          data: tickets.map((ticket) => ({
-            id: ticket.id,
-            number: ticket.number,
-            subject: ticket.subject,
-            companyId: ticket.solicitante?.id ?? ticket.solicitante_id ?? null,
-            companyName: ticket.solicitante?.nome_fantasia || ticket.solicitante?.razao_social || null
-          }))
+          data: tickets.map(mapChatTicketSummary)
         },
         context
       )

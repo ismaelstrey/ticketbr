@@ -446,7 +446,7 @@ export function useSettings() {
   const loadSyncedContacts = useCallback(async () => {
     try {
       setLoadingContacts(true);
-      const res = await fetch("/api/settings/contacts?limit=500");
+      const res = await fetch("/api/settings/contacts?limit=5000");
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error || "Erro ao carregar contatos sincronizados");
       setContacts(Array.isArray(json?.data) ? json.data : []);

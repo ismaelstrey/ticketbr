@@ -86,4 +86,23 @@ describe("/api/chat/messages canal portal", () => {
     }));
     expect(body.data.direction).toBe("out");
   });
+
+  it("POST portal nao bloqueia com 409 quando a conversa existe sem atendente", async () => {
+    conversationFindUniqueMock.mockResolvedValueOnce({
+      id: "conv0",
+      waChatId: "portal:f1",
+      assignedTo: null
+    });
+
+    const { POST } = await import("./route");
+    const req = {
+      json: async () => ({ channel: "portal", contactId: "portal:f1", text: "Primeira resposta" })
+    } as any;
+
+    const res = await POST(req);
+    const body = await res.json();
+
+    expect(res.status).toBe(201);
+    expect(body.data.direction).toBe("out");
+  });
 });

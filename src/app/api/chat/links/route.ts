@@ -4,6 +4,7 @@ import { getSession } from "@/lib/auth";
 import { createChatTicketLinkedEvent } from "@/server/contracts/ticket-chat-events";
 import { emitChatEventToN8n } from "@/server/services/n8n-adapter";
 import { resolveWhatsAppConfig } from "@/server/services/whatsapp-settings";
+import { ensureChatConversationFinalizedColumn } from "@/server/services/chat-conversation-schema";
 import { guardStaff } from "@/server/services/staff-context";
 
 export async function GET(request: NextRequest) {
@@ -68,35 +69,51 @@ export async function POST(request: NextRequest) {
 
     const config = await resolveWhatsAppConfig(request);
 
+    const channel = String(body.channel ?? "whatsapp");
+    const contactId = String(body.contactId);
+    const ticketId = String(body.ticketId);
+
     const event = await prisma.ticketEvent.create({
       data: {
-        ticketId: body.ticketId,
+        ticketId,
         type: "NOTE",
         title: "Chat vinculado ao ticket",
         description: `Conversa ${body.conversationId} vinculada ao ticket`,
         author: (session?.name as string | undefined) ?? "Sistema",
         metadata: {
-          channel: body.channel ?? "whatsapp",
-          contactId: body.contactId,
+          channel,
+          contactId,
           conversationId: body.conversationId
         }
       }
     });
 
-    await emitChatEventToN8n(
-      createChatTicketLinkedEvent({
-        ticketId: body.ticketId,
-        contactId: body.contactId,
-        channel: body.channel ?? "whatsapp",
-        conversationId: body.conversationId,
-        actor: {
-          type: session?.id ? "user" : "system",
-          id: session?.id ? String(session.id) : undefined,
-          name: session?.name ? String(session.name) : "Sistema",
-        },
-      }),
-      config,
-    );
+    // Persiste o vínculo na conversa aberta (ChatConversation) para que o histórico
+    // exiba o ticket e a integração de inbound não crie um ticket duplicado.
+    await ensureChatConversationFinalizedColumn();
+    await prisma.chatConversation.updateMany({
+      where: { contactId, channel, finalized: false },
+      data: { ticketId }
+    });
+
+    // O evento canônico só cobre canais externos (whatsapp/email); o canal Portal
+    // é interno e não deve ser emitido ao n8n.
+    if (channel === "whatsapp" || channel === "email") {
+      await emitChatEventToN8n(
+        createChatTicketLinkedEvent({
+          ticketId,
+          contactId,
+          channel,
+          conversationId: body.conversationId,
+          actor: {
+            type: session?.id ? "user" : "system",
+            id: session?.id ? String(session.id) : undefined,
+            name: session?.name ? String(session.name) : "Sistema",
+          },
+        }),
+        config,
+      );
+    }
 
     return NextResponse.json({ data: event }, { status: 201 });
   } catch (error) {

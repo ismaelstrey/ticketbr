@@ -188,7 +188,7 @@ export async function POST(request: NextRequest) {
       }, { status: 403 });
     }
 
-    if (currentConversation && !currentConversation.assignedTo) {
+    if (channel !== "portal" && currentConversation && !currentConversation.assignedTo) {
       return NextResponse.json({ error: "Inicie o atendimento antes de responder esta conversa" }, { status: 409 });
     }
 
