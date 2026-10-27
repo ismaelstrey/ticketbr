@@ -22,6 +22,15 @@ function resolveN8nBase(config?: WhatsAppRuntimeConfig | null) {
   return config?.n8nBaseUrl || process.env.N8N_CHAT_BASE_URL || "";
 }
 
+// A UI do n8n responde 200 (HTML) em qualquer rota desconhecida, o que mascara
+// os paths expostos por webhook. O base real desses paths e "<origem>/webhook".
+function resolveWebhookBase(config?: WhatsAppRuntimeConfig | null) {
+  const url = resolveWebhook(config);
+  const match = url.match(/^(.*?)\/(webhook-test|webhook)(?:\/|$)/);
+  if (!match) return "";
+  return `${match[1]}/${match[2]}`;
+}
+
 export function resolvePath(config: WhatsAppRuntimeConfig | null | undefined, key: "conversations" | "messages" | "send" | "contacts") {
   if (key === "conversations") return config?.n8nConversationsPath || "/conversations";
   if (key === "messages") return config?.n8nMessagesPath || "/messages";
@@ -109,10 +118,14 @@ export async function requestN8nChatPath(path: string, config: WhatsAppRuntimeCo
 
   const base = resolveN8nBase(config);
   const webhook = resolveWebhook(config);
+  const webhookBase = resolveWebhookBase(config);
   const candidates = [
-    ...(base ? [path] : []),
-    ...(webhook ? [buildUrl(webhook, path)] : [])
-  ].filter((value, index, list) => list.indexOf(value) === index);
+    ...(webhookBase ? [webhookBase] : []),
+    ...(base ? [base] : []),
+    ...(webhook ? [webhook] : [])
+  ]
+    .map((prefix) => buildUrl(prefix, path))
+    .filter((value, index, list) => list.indexOf(value) === index);
 
   if (!candidates.length) {
     throw new Error("n8n não configurado. Defina n8nBaseUrl ou n8nWebhookUrl nas configurações.");

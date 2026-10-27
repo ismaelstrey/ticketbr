@@ -171,10 +171,10 @@ export async function listSyncedWhatsAppContacts(limit = 300): Promise<WhatsAppC
     `
       SELECT id, remote_jid, push_name, profile_pic_url, created_at, updated_at, instance_id
       FROM whatsapp_contacts
-      ORDER BY updated_at DESC
+      ORDER BY lower(push_name) ASC NULLS LAST, remote_jid ASC
       LIMIT $1
     `,
-    Math.max(1, Math.min(limit, 2000))
+    Math.max(1, Math.min(limit, 5000))
   );
 
   return rows.map((row) => ({
