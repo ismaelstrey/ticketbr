@@ -60,7 +60,17 @@ describe("GET /api/chat/tickets", () => {
         number: 1,
         subject: "Teste",
         solicitante_id: "s1",
-        solicitante: { id: "s1", nome_fantasia: "Tech Sol", razao_social: "Tech Sol LTDA" }
+        priority: "HIGH",
+        status: "TODO",
+        createdAt: new Date("2026-03-20T10:00:00.000Z"),
+        foraDeContrato: false,
+        slaHorasAplicadas: 24,
+        solutionSlaAt: null,
+        pausedTotalSeconds: 0,
+        pauseSla: false,
+        pausedStartedAt: null,
+        solicitante: { id: "s1", nome_fantasia: "Tech Sol", razao_social: "Tech Sol LTDA" },
+        tipo_ticket: null
       }
     ]);
 
@@ -78,13 +88,16 @@ describe("GET /api/chat/tickets", () => {
     expect(where?.OR?.some((c: any) => c?.solicitante?.is?.nome_fantasia?.equals === "Tech Sol")).toBe(true);
     expect(where?.OR?.some((c: any) => c?.solicitante?.is?.razao_social?.equals === "Tech Sol LTDA")).toBe(true);
 
-    expect(body.data[0]).toEqual({
+    expect(body.data[0]).toMatchObject({
       id: "t1",
       number: 1,
       subject: "Teste",
       companyId: "s1",
-      companyName: "Tech Sol"
+      companyName: "Tech Sol",
+      priorityLabel: "Alta"
     });
+    expect(typeof body.data[0].slaProgress).toBe("number");
+    expect(typeof body.data[0].slaLabel).toBe("string");
   });
 });
 

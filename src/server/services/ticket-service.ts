@@ -10,6 +10,7 @@ import {
   UiStatus
 } from "@/server/ticket-mappers";
 import type { TicketPriority, TicketStatus } from "../../../prisma/generated/enums";
+import { getSlaLabel } from "@/lib/sla";
 import { assertTransition, resolveSlaDeadline } from "./ticket-status-policy";
 import { resolveSlaDoTicket } from "./contract-service";
 import { notifyTicketAssigned, notifyTicketComment, notifyTicketStatusChanged } from "./notifications";
@@ -31,7 +32,7 @@ async function notifyBestEffort(label: string, task: () => Promise<unknown>): Pr
   }
 }
 
-function isMissingPauseColumnsError(error: unknown): boolean {
+export function isMissingPauseColumnsError(error: unknown): boolean {
   const plainError = (error && typeof error === "object" ? error : {}) as Record<string, unknown>;
   const message = [
     error instanceof Error ? error.message : "",
@@ -281,6 +282,35 @@ function mapTicket(ticket: any) {
         author: event.author,
         createdAt: event.createdAt
       }))
+  };
+}
+
+/**
+ * Projeção resumida do ticket usada pela tela de chat (footer de recursos).
+ * Reutiliza o mesmo cálculo de SLA/progresso do restante do sistema para que a
+ * prioridade e o status de SLA exibidos no chat não divirjam do ticket real.
+ */
+export function mapChatTicketSummary(ticket: any) {
+  const slaProgress = ticket.foraDeContrato
+    ? 0
+    : calculateSlaProgress(
+        ticket.createdAt,
+        resolveSlaDeadlineForTicket(ticket),
+        ticket.pausedTotalSeconds ?? 0,
+        ticket.pauseSla,
+        ticket.pausedStartedAt,
+        ticket.status
+      );
+
+  return {
+    id: ticket.id,
+    number: ticket.number,
+    subject: ticket.subject,
+    companyId: ticket.solicitante?.id ?? ticket.solicitante_id ?? null,
+    companyName: ticket.solicitante?.nome_fantasia || ticket.solicitante?.razao_social || null,
+    priorityLabel: fromPrismaPriority(ticket.priority as any),
+    slaProgress,
+    slaLabel: ticket.foraDeContrato ? "Fora de contrato" : getSlaLabel(slaProgress)
   };
 }
 

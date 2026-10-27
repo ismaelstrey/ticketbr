@@ -105,8 +105,7 @@ export async function syncConversationMessageStatus(waMessageId: string, status:
     await prisma.chatConversation.update({
       where: { id: conversation.id },
       data: {
-        messages: toJsonMessages(updatedMessages),
-        closedAt: new Date()
+        messages: toJsonMessages(updatedMessages)
       }
     });
     return true;
