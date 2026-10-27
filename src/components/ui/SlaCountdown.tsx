@@ -80,8 +80,11 @@ export function SlaCountdown({
     return () => window.clearInterval(id);
   }, [ticking]);
 
-  if (!deadlineDate || now === null) return <Value $tone="safe">-</Value>;
+  // Sem prazo definido o contador não renderiza nada (evita o placeholder "-")
+  if (!deadlineDate) return null;
   if (done) return <Value $tone="safe">{doneLabel}</Value>;
+  // Aguarda a hidratação para não divergir entre SSR e client
+  if (now === null) return null;
 
   // Enquanto pausado, o relógio congela no início da pausa atual.
   const reference = paused ? (toDate(pausedSince)?.getTime() ?? now) : now;

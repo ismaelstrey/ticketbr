@@ -1,5 +1,9 @@
 import type { SlaSource, SlaTermScope, TicketPriority } from "../../../prisma/generated/enums";
-import { addBusinessHours, parseHorarioComercial } from "./business-hours";
+import {
+  addBusinessHours,
+  parseHorarioComercial,
+  type HorarioComercialConfig
+} from "./business-hours";
 
 /**
  * Resolução do prazo de SLA do ticket.
@@ -14,6 +18,10 @@ import { addBusinessHours, parseHorarioComercial } from "./business-hours";
  * 4. `contrato.slaSolucaoHoras` — SLA diferenciado da empresa.
  * 5. `contrato.policy.slaSolucaoHoras` — política global herdada pelo contrato.
  * 6. `DEFAULT_SLA_HOURS` — último recurso.
+ *
+ * O prazo de resposta (`resolveResponseSla`) usa a mesma hierarquia de termos,
+ * contrato e política, porém sem prazo padrão: sem configuração de resposta o
+ * ticket fica sem prazo de resposta.
  */
 
 /** SLA padrão (em horas) quando nenhuma outra fonte define o prazo. */
@@ -28,6 +36,8 @@ export interface SlaContratoTermo {
   categoriaId?: string | null;
   prioridade?: TicketPriority | null;
   slaSolucaoHoras: number;
+  /** SLA de resposta (h) específico do termo. */
+  slaRespostaHoras?: number | null;
   ativo: boolean;
 }
 
@@ -113,10 +123,11 @@ function termoMatchesTicket(
   }
 }
 
-/** Seleciona o termo ativo mais específico que casa com o ticket. */
+/** Seleciona o termo ativo mais específico que casa com o ticket e define o prazo buscado. */
 function selectTermo(
   termos: SlaContratoTermo[] | null | undefined,
-  ticket: SlaTicketRef | null | undefined
+  ticket: SlaTicketRef | null | undefined,
+  getHours: (termo: SlaContratoTermo) => number | undefined
 ): SlaContratoTermo | undefined {
   if (!termos?.length) return undefined;
 
@@ -125,13 +136,31 @@ function selectTermo(
       (termo) =>
         termo.ativo &&
         termo.escopo === escopo &&
-        positiveHours(termo.slaSolucaoHoras) !== undefined &&
+        getHours(termo) !== undefined &&
         termoMatchesTicket(termo, escopo, ticket)
     );
     if (encontrado) return encontrado;
   }
 
   return undefined;
+}
+
+/** Janela comercial efetiva da política herdada pelo contrato (opt-in). */
+function resolveHorarioComercial(policy: SlaPolicyRef | null | undefined): HorarioComercialConfig | null {
+  return policy?.horarioComercialAtivo === true
+    ? parseHorarioComercial(policy.horarioComercial ?? null, policy.feriados ?? null)
+    : null;
+}
+
+/** Aplica o prazo (horas úteis quando há janela comercial, senão horas corridas). */
+function buildDeadline(
+  createdAt: Date,
+  horas: number,
+  horarioComercial: HorarioComercialConfig | null
+): Date {
+  return horarioComercial
+    ? addBusinessHours(createdAt, horas, horarioComercial)
+    : new Date(createdAt.getTime() + horas * MS_PER_HOUR);
 }
 
 /**
@@ -141,20 +170,12 @@ function selectTermo(
  */
 export function resolveSla(ctx: SlaResolutionContext): SlaResolution {
   const { createdAt } = ctx;
-
-  // Horário comercial é opt-in na política global herdada pelo contrato.
-  const politica = ctx.contrato?.policy ?? null;
-  const horarioComercial =
-    politica?.horarioComercialAtivo === true
-      ? parseHorarioComercial(politica.horarioComercial ?? null, politica.feriados ?? null)
-      : null;
+  const horarioComercial = resolveHorarioComercial(ctx.contrato?.policy ?? null);
 
   const build = (horas: number, fonte: SlaSource): SlaResolution => ({
     horas,
     fonte,
-    deadline: horarioComercial
-      ? addBusinessHours(createdAt, horas, horarioComercial)
-      : new Date(createdAt.getTime() + horas * MS_PER_HOUR)
+    deadline: buildDeadline(createdAt, horas, horarioComercial)
   });
 
   if (ctx.solutionSlaAt) {
@@ -172,7 +193,7 @@ export function resolveSla(ctx: SlaResolutionContext): SlaResolution {
 
   const contrato = ctx.contrato ?? null;
   if (contrato) {
-    const termo = selectTermo(contrato.termos, ctx.ticket);
+    const termo = selectTermo(contrato.termos, ctx.ticket, (t) => positiveHours(t.slaSolucaoHoras));
     const termoHours = positiveHours(termo?.slaSolucaoHoras);
     if (termoHours !== undefined) {
       return build(termoHours, "CONTRACT_TERM");
@@ -190,4 +211,43 @@ export function resolveSla(ctx: SlaResolutionContext): SlaResolution {
   }
 
   return build(DEFAULT_SLA_HOURS, "FALLBACK");
+}
+
+/**
+ * Resolve o prazo de resposta do ticket com a mesma hierarquia do prazo de solução
+ * (termo do contrato → contrato → política global).
+ *
+ * Diferente da solução, não há prazo de resposta padrão: quando nenhuma fonte
+ * define horas de resposta, retorna `null` em vez de inventar um prazo.
+ */
+export function resolveResponseSla(ctx: SlaResolutionContext): SlaResolution | null {
+  const contrato = ctx.contrato ?? null;
+  if (!contrato) return null;
+
+  const horarioComercial = resolveHorarioComercial(contrato.policy ?? null);
+  const { createdAt } = ctx;
+
+  const build = (horas: number, fonte: SlaSource): SlaResolution => ({
+    horas,
+    fonte,
+    deadline: buildDeadline(createdAt, horas, horarioComercial)
+  });
+
+  const termo = selectTermo(contrato.termos, ctx.ticket, (t) => positiveHours(t.slaRespostaHoras));
+  const termoHours = positiveHours(termo?.slaRespostaHoras);
+  if (termoHours !== undefined) {
+    return build(termoHours, "CONTRACT_TERM");
+  }
+
+  const contratoHours = positiveHours(contrato.slaRespostaHoras);
+  if (contratoHours !== undefined) {
+    return build(contratoHours, "CONTRACT");
+  }
+
+  const policyHours = positiveHours(contrato.policy?.slaRespostaHoras);
+  if (policyHours !== undefined) {
+    return build(policyHours, "GLOBAL_POLICY");
+  }
+
+  return null;
 }

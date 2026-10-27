@@ -260,8 +260,11 @@ const SidebarForm = styled(Card)`
 `;
 
 const Metric = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
   border-bottom: 1px solid ${({ theme }) => theme.colors.border};
-  padding-bottom: 0.35rem;
+  padding-bottom: 0.45rem;
 
   p {
     margin: 0;
@@ -274,13 +277,21 @@ const Metric = styled.div`
   }
 `;
 
-const CountdownLine = styled.div`
-  margin-top: 0.2rem;
+// Linha auxiliar do SLA (contagem regressiva ou confirmação de resposta).
+// `$tone="success"` destaca a primeira interação, que já cumpre o prazo de resposta.
+const CountdownLine = styled.div<{ $tone?: "muted" | "success" }>`
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
+  gap: 0.5rem;
   font-size: 0.85rem;
-  color: ${({ theme }) => theme.colors.text.secondary};
+  line-height: 1.3;
+  color: ${({ theme, $tone }) =>
+    $tone === "success" ? theme.tokens.color.status.success : theme.colors.text.secondary};
+  font-weight: ${({ $tone }) => ($tone === "success" ? 600 : 400)};
+
+  svg {
+    flex-shrink: 0;
+  }
 `;
 
 const SummaryChips = styled.div`
@@ -328,6 +339,7 @@ function getRoadmapColor(eventType: string) {
   if (eventType === "STATUS_CHANGED") return "#3b82f6";
   if (eventType === "COMMENT") return "#6366f1";
   if (eventType === "UPDATED") return "#a855f7";
+  if (eventType === "CHAT_MESSAGE") return "#25d366";
   return "#6b7280";
 }
 
@@ -337,6 +349,7 @@ function getRoadmapTypeLabel(eventType: string) {
   if (eventType === "STATUS_CHANGED") return "Status";
   if (eventType === "COMMENT") return "Comentário";
   if (eventType === "UPDATED") return "Atualização";
+  if (eventType === "CHAT_MESSAGE") return "WhatsApp";
   return eventType;
 }
 
@@ -489,24 +502,45 @@ export default function TicketDetails({
 
           <Metric>
             <p>SLA Resposta</p>
-            <strong>{formatDateTime(ticket.slaResposta)}</strong>
+            {ticket.slaResposta ? <strong>{formatDateTime(ticket.slaResposta)}</strong> : null}
+            {ticket.respondidoEm ? (
+              <CountdownLine $tone="success">
+                <FiCheckCircle aria-hidden="true" />
+                Respondido em {formatDateTime(ticket.respondidoEm)}
+              </CountdownLine>
+            ) : ticket.slaResposta ? (
+              <CountdownLine>
+                <FiClock aria-hidden="true" />
+                <SlaCountdown
+                  deadline={ticket.slaResposta}
+                  start={ticket.dataCriacao}
+                  paused={ticket.status === "paused" && Boolean(ticket.pauseSla)}
+                  pausedSince={ticket.pausedStartedAt}
+                  pausedTotalMs={(ticket.pausedTotalSeconds ?? 0) * 1000}
+                  done={ticket.status === "done"}
+                  doneLabel="Finalizado"
+                />
+              </CountdownLine>
+            ) : null}
           </Metric>
 
           <Metric>
             <p>SLA Solução</p>
-            <strong>{formatDateTime(ticket.slaSolucao)}</strong>
-            <CountdownLine>
-              <FiClock aria-hidden="true" />
-              <SlaCountdown
-                deadline={ticket.slaSolucao}
-                start={ticket.dataCriacao}
-                paused={ticket.status === "paused" && Boolean(ticket.pauseSla)}
-                pausedSince={ticket.pausedStartedAt}
-                pausedTotalMs={(ticket.pausedTotalSeconds ?? 0) * 1000}
-                done={ticket.status === "done"}
-                doneLabel="Finalizado"
-              />
-            </CountdownLine>
+            {ticket.slaSolucao ? <strong>{formatDateTime(ticket.slaSolucao)}</strong> : null}
+            {ticket.slaSolucao ? (
+              <CountdownLine>
+                <FiClock aria-hidden="true" />
+                <SlaCountdown
+                  deadline={ticket.slaSolucao}
+                  start={ticket.dataCriacao}
+                  paused={ticket.status === "paused" && Boolean(ticket.pauseSla)}
+                  pausedSince={ticket.pausedStartedAt}
+                  pausedTotalMs={(ticket.pausedTotalSeconds ?? 0) * 1000}
+                  done={ticket.status === "done"}
+                  doneLabel="Finalizado"
+                />
+              </CountdownLine>
+            ) : null}
           </Metric>
 
           <SummaryChips>

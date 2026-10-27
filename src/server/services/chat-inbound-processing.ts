@@ -4,6 +4,7 @@ import { chatService } from "@/server/services/chat-service";
 import type { NormalizedInboundResult } from "@/server/services/chat-inbound-normalizer";
 import { emitChatEventToN8n } from "@/server/services/n8n-adapter";
 import { syncConversationMessageStatus, upsertInboundConversation } from "@/server/services/chat-conversation-store";
+import { ensureTicketForInboundConversation } from "@/server/services/chat-ticket-integration";
 
 function buildAttachment(payload: Extract<NormalizedInboundResult, { kind: "message" }>['payload']) {
   if (!payload.message.media?.url) return undefined;
@@ -42,6 +43,15 @@ export async function processNormalizedInboundEvent(normalized: NormalizedInboun
       text: normalized.payload.message.text || normalized.payload.message.caption || "Mensagem recebida",
       createdAt: new Date().toISOString(),
       attachment: buildAttachment(normalized.payload)
+    });
+
+    // Integra o inbound ao sistema de tickets (cria/vincula ticket da conversa).
+    // Best-effort: uma falha aqui nunca deve interromper o recebimento da mensagem.
+    await ensureTicketForInboundConversation(normalized).catch((error) => {
+      console.warn("[chat] falha ao integrar inbound ao ticket", {
+        waChatId: normalized.payload.wa_chat_id,
+        error: error instanceof Error ? error.message : "unknown"
+      });
     });
   }
 

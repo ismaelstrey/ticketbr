@@ -11,6 +11,7 @@ export const TicketEventTypeSchema = z.enum([
   "ASSIGNED",
   "SLA_UPDATED",
   "UPDATED",
+  "CHAT_MESSAGE",
 ]);
 
 export const CreateTicketSchema = z.object({
