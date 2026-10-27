@@ -36,7 +36,8 @@ export const TicketEventType = {
   NOTE: 'NOTE',
   ASSIGNED: 'ASSIGNED',
   SLA_UPDATED: 'SLA_UPDATED',
-  UPDATED: 'UPDATED'
+  UPDATED: 'UPDATED',
+  CHAT_MESSAGE: 'CHAT_MESSAGE'
 } as const
 
 export type TicketEventType = (typeof TicketEventType)[keyof typeof TicketEventType]

@@ -29,6 +29,7 @@ enum TicketEventType {
   ASSIGNED
   SLA_UPDATED
   UPDATED
+  CHAT_MESSAGE
 }
 
 enum TaskStatus {

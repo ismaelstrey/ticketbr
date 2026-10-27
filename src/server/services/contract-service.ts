@@ -7,6 +7,7 @@ import type {
   TicketPriority
 } from "../../../prisma/generated/enums";
 import {
+  resolveResponseSla,
   resolveSla,
   type SlaContratoRef,
   type SlaContratoTermo,
@@ -117,6 +118,7 @@ function toSlaTermo(termo: {
   categoriaId: string | null;
   prioridade: TicketPriority | null;
   slaSolucaoHoras: number;
+  slaRespostaHoras: number | null;
   ativo: boolean;
 }): SlaContratoTermo {
   return {
@@ -125,6 +127,7 @@ function toSlaTermo(termo: {
     categoriaId: termo.categoriaId,
     prioridade: termo.prioridade,
     slaSolucaoHoras: termo.slaSolucaoHoras,
+    slaRespostaHoras: termo.slaRespostaHoras,
     ativo: termo.ativo
   };
 }
@@ -1028,6 +1031,8 @@ export interface SlaDoTicketInput extends SlaTicketRef {
 
 export interface SlaDoTicketResult extends SlaResolution {
   contratoId: string | null;
+  /** Prazo de resposta (primeira interação), quando alguma fonte define horas de resposta. */
+  responseDeadline: Date | null;
   /** Ticket nasce fora de contrato (serviço do solicitante interrompido) — não conta SLA. */
   foraDeContrato: boolean;
   /** Dias restantes até o fim da vigência do contrato aplicado. */
@@ -1091,7 +1096,7 @@ export async function resolveSlaDoTicket(input: SlaDoTicketInput, db: Db = prism
     }
   }
 
-  const resolution = resolveSla({
+  const slaContext = {
     createdAt: input.createdAt,
     solutionSlaAt: input.solutionSlaAt,
     tipoTicketSlaHours: input.tipoTicketSlaHours,
@@ -1101,9 +1106,12 @@ export async function resolveSlaDoTicket(input: SlaDoTicketInput, db: Db = prism
       priority: input.priority ?? null
     },
     contrato: contratoRef
-  });
+  };
 
-  return { ...resolution, contratoId, foraDeContrato, diasParaVencer };
+  const resolution = resolveSla(slaContext);
+  const response = resolveResponseSla(slaContext);
+
+  return { ...resolution, contratoId, responseDeadline: response?.deadline ?? null, foraDeContrato, diasParaVencer };
 }
 
 /** Simula a resolução do SLA para um contexto, sem persistir nada. */
@@ -1126,7 +1134,7 @@ export async function previewSla(contratoId: string, input: Partial<SlaDoTicketI
   if (!contrato) throw new ContratoError("Contrato não encontrado.", 404);
 
   const createdAt = input.createdAt ?? new Date();
-  const resolution = resolveSla({
+  const slaContext = {
     createdAt,
     solutionSlaAt: input.solutionSlaAt ?? null,
     tipoTicketSlaHours: input.tipoTicketSlaHours ?? null,
@@ -1149,9 +1157,18 @@ export async function previewSla(contratoId: string, input: Partial<SlaDoTicketI
         : null,
       termos: contrato.termos.map(toSlaTermo)
     }
-  });
+  };
 
-  return { ...resolution, createdAt, contratoId };
+  const resolution = resolveSla(slaContext);
+  const response = resolveResponseSla(slaContext);
+
+  return {
+    ...resolution,
+    createdAt,
+    contratoId,
+    responseDeadline: response?.deadline ?? null,
+    responseHoras: response?.horas ?? null
+  };
 }
 
 /* ------------------------------ Política global ------------------------------ */

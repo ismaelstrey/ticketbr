@@ -47,6 +47,8 @@ export interface Ticket {
   dataAtualizacao?: string;
   slaResposta?: string;
   slaSolucao?: string;
+  /** Momento da primeira interação — a partir dela o ticket conta como respondido. */
+  respondidoEm?: string | null;
   pauseReason?: string;
   pauseSla?: boolean;
   pausedStartedAt?: string | null;

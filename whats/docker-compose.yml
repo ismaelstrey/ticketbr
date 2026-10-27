@@ -39,7 +39,7 @@ services:
     image: devlikeapro/waha:latest
     platform: linux/amd64
     environment:
-      WHATSAPP_HOOK_URL: http://host.docker.internal:5678/webhook/webhook
+      WHATSAPP_HOOK_URL: https://n8n.strey.com.br/webhook/wa/inbound
       WHATSAPP_DEFAULT_ENGINE: GOWS
       WHATSAPP_HOOK_EVENTS: message
       WAHA_API_KEY: 10203040      
@@ -57,8 +57,8 @@ services:
     image: n8nio/n8n:latest
     platform: linux/amd64
     environment:
-      WEBHOOK_URL: http://host.docker.internal:5678
-      N8N_HOST: host.docker.internal
+      WEBHOOK_URL: https://n8n.strey.com.br
+      N8N_HOST: n8n.strey.com.br
       GENERIC_TIMEZONE: America/Sao_Paulo
       N8N_LOG_LEVEL: debug
       N8N_SECURE_COOKIE: false

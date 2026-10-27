@@ -210,7 +210,13 @@ export async function POST(request: NextRequest) {
         ...(sla.contratoId ? { contrato_id: sla.contratoId } : {}),
         slaFonte: sla.fonte,
         foraDeContrato: sla.foraDeContrato,
-        ...(sla.foraDeContrato ? {} : { slaHorasAplicadas: sla.horas, solutionSlaAt: sla.deadline }),
+        ...(sla.foraDeContrato
+          ? {}
+          : {
+              slaHorasAplicadas: sla.horas,
+              solutionSlaAt: sla.deadline,
+              ...(sla.responseDeadline ? { responseSlaAt: sla.responseDeadline } : {})
+            }),
         events: {
           create: {
             type: "CREATED",

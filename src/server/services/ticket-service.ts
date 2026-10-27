@@ -192,6 +192,20 @@ function calculateSlaProgress(
   return Math.min(Math.max(progress, 0), 100);
 }
 
+/**
+ * Momento da primeira interação registrada no ticket (comentário ou nota interna).
+ * A partir dela o ticket já conta como respondido para o SLA de resposta.
+ */
+function firstInteractionAt(events: any[] | null | undefined): Date | null {
+  const interacoes = (events ?? []).filter((event) => event.type === "COMMENT" || event.type === "NOTE");
+  if (!interacoes.length) return null;
+
+  return interacoes.reduce(
+    (maisAntiga, event) => (event.createdAt < maisAntiga ? event.createdAt : maisAntiga),
+    interacoes[0].createdAt
+  );
+}
+
 function mapTicket(ticket: any) {
   // Nome do cliente resolvido pela relação (fonte de verdade)
   const nomeSolicitante = ticket.solicitante?.nome_fantasia || ticket.solicitante?.razao_social || null;
@@ -233,6 +247,7 @@ function mapTicket(ticket: any) {
     dataAtualizacao: ticket.updatedAt,
     slaResposta: ticket.responseSlaAt,
     slaSolucao: ticket.solutionSlaAt,
+    respondidoEm: firstInteractionAt(ticket.events),
     pauseReason: ticket.pausedReason,
     pauseSla: ticket.pauseSla,
     pausedStartedAt: ticket.pausedStartedAt ?? null,
@@ -243,13 +258,13 @@ function mapTicket(ticket: any) {
     slaHorasAplicadas: ticket.slaHorasAplicadas ?? null,
     foraDeContrato: Boolean(ticket.foraDeContrato),
     interacoes: (ticket.events ?? [])
-      .filter((e: any) => e.type === "COMMENT" || e.type === "NOTE")
+      .filter((e: any) => e.type === "COMMENT" || e.type === "NOTE" || e.type === "CHAT_MESSAGE")
       .map((e: any) => ({
         id: e.id,
         autor: e.author,
         tempo: e.createdAt.toLocaleString("pt-BR"),
         mensagem: e.description,
-        corBorda: e.type === "NOTE" ? "vermelho" : "azul"
+        corBorda: e.type === "NOTE" ? "vermelho" : e.type === "CHAT_MESSAGE" ? "verde" : "azul"
       })),
     roadmap: (ticket.events ?? [])
       .sort((a: any, b: any) => b.createdAt.getTime() - a.createdAt.getTime())
@@ -420,7 +435,13 @@ export async function createTicket(input: CreateTicketInput) {
       slaFonte: sla.fonte,
       foraDeContrato: sla.foraDeContrato,
       // Ticket fora de contrato não consome SLA
-      ...(sla.foraDeContrato ? {} : { slaHorasAplicadas: sla.horas, solutionSlaAt: sla.deadline }),
+      ...(sla.foraDeContrato
+        ? {}
+        : {
+            slaHorasAplicadas: sla.horas,
+            solutionSlaAt: sla.deadline,
+            ...(sla.responseDeadline ? { responseSlaAt: sla.responseDeadline } : {})
+          }),
       events: {
         create: {
           type: "CREATED",

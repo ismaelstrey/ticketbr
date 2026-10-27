@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { DEFAULT_SLA_HOURS, resolveSla, type SlaResolutionContext } from "./sla-resolver";
+import {
+  DEFAULT_SLA_HOURS,
+  resolveResponseSla,
+  resolveSla,
+  type SlaResolutionContext
+} from "./sla-resolver";
 
 const createdAt = new Date("2026-03-22T00:00:00.000Z");
 const hoursFrom = (hours: number) => createdAt.getTime() + hours * 60 * 60 * 1000;
@@ -201,5 +206,76 @@ describe("sla-resolver.resolveSla", () => {
     });
 
     expect(result.deadline.toISOString()).toBe("2026-06-01T17:00:00.000Z");
+  });
+});
+
+describe("sla-resolver.resolveResponseSla", () => {
+  it("usa as horas de resposta do contrato", () => {
+    const result = resolveResponseSla({
+      createdAt,
+      contrato: { slaRespostaHoras: 2, slaSolucaoHoras: 6 }
+    });
+
+    expect(result?.fonte).toBe("CONTRACT");
+    expect(result?.horas).toBe(2);
+    expect(result?.deadline.getTime()).toBe(hoursFrom(2));
+  });
+
+  it("prioriza o termo que casa com o ticket sobre o contrato", () => {
+    const result = resolveResponseSla({
+      createdAt,
+      ticket: { tipoTicketId: "tipo-1" },
+      contrato: {
+        slaRespostaHoras: 8,
+        termos: [
+          { escopo: "GLOBAL", slaSolucaoHoras: 10, slaRespostaHoras: 5, ativo: true },
+          { escopo: "TIPO_TICKET", tipoTicketId: "tipo-1", slaSolucaoHoras: 3, slaRespostaHoras: 1, ativo: true }
+        ]
+      }
+    });
+
+    expect(result?.fonte).toBe("CONTRACT_TERM");
+    expect(result?.horas).toBe(1);
+  });
+
+  it("ignora termo sem horas de resposta e usa a política global herdada", () => {
+    const result = resolveResponseSla({
+      createdAt,
+      contrato: {
+        slaRespostaHoras: null,
+        termos: [{ escopo: "GLOBAL", slaSolucaoHoras: 10, slaRespostaHoras: null, ativo: true }],
+        policy: { slaSolucaoHoras: 12, slaRespostaHoras: 3 }
+      }
+    });
+
+    expect(result?.fonte).toBe("GLOBAL_POLICY");
+    expect(result?.horas).toBe(3);
+  });
+
+  it("não inventa prazo de resposta quando nada está configurado", () => {
+    expect(resolveResponseSla({ createdAt, contrato: { slaSolucaoHoras: 6 } })).toBeNull();
+    expect(resolveResponseSla({ createdAt })).toBeNull();
+    expect(
+      resolveResponseSla({ createdAt, contrato: { slaRespostaHoras: 0, policy: { slaSolucaoHoras: 8 } } })
+    ).toBeNull();
+  });
+
+  it("conta o prazo de resposta em horas úteis quando o horário comercial está habilitado", () => {
+    // Sexta 17:00 local (20:00Z) + 2h úteis = 1h sexta + 1h segunda (10:00 local)
+    const sexta = new Date("2026-06-05T20:00:00.000Z");
+    const result = resolveResponseSla({
+      createdAt: sexta,
+      contrato: {
+        slaRespostaHoras: 2,
+        policy: {
+          slaSolucaoHoras: 8,
+          horarioComercialAtivo: true,
+          horarioComercial: { timezone: "America/Sao_Paulo", diasUteis: [1, 2, 3, 4, 5], inicio: "09:00", fim: "18:00" },
+          feriados: []
+        }
+      }
+    });
+
+    expect(result?.deadline.toISOString()).toBe("2026-06-08T13:00:00.000Z");
   });
 });
